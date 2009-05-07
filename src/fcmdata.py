@@ -1,6 +1,8 @@
 """
 A python object representing flow cytomoetry data
 """
+from numpy import array
+from fcmexceptions import BadFCMPointDataTypeError
 
 class FCMdata(object):
     """
@@ -22,6 +24,8 @@ class FCMdata(object):
         scatters: a list of which indexes in channels are scatters
         
         """
+        if type(pnts) != type(array([])):
+            raise BadFCMPointDataTypeError(pnts, "pnts isn't a numpy.array")
         self.pnts = pnts
         self.channels = channels
         #TODO add some default intelegence for determining scatters if None
@@ -43,5 +47,16 @@ class FCMdata(object):
         """return the data associated with all the markers"""
         
         return self.pnts[:, self.markers]
+    
+    def __getitem__(self, item):
+        if type(item) == type(''):
+            return self.get_channel_by_name(item)
+        elif type(item) == tuple:
+            if type(item[0]) == type(''):
+                return self.get_channel_by_name(list(item))
+            else:
+                return self.pnts[item]
+        else:
+            return self.pnts[item]
         
         
