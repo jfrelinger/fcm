@@ -5,6 +5,7 @@ Unit test framework
 import unittest
 from numpy import array
 from fcmdata import FCMdata
+from fcm_annotation import Annotation
 from random import randint
 
 
@@ -32,9 +33,28 @@ class FCMdataTestCase(unittest.TestCase):
         assert self.fcm[a,b] == self.pnts[a,b], '__getitem__ returned wrong value'
         assert self.fcm['fsc','ssc'][a,0] == self.pnts[a,0], '__getitem__ with multiple strings failed'
                     
+                    
+class FCMannotationTestCase(unittest.TestCase):
+    def setUp(self):
+        self.test = {'foo': 'bar'}
+        self.ann = Annotation(self.test)
+    
+    def testFlatName(self):
+        assert self.ann.foo == 'bar', 'flat name lookup failed'
+        assert self.ann['foo'] == 'bar', 'index lookup failed'
+        assert self.ann.foo == self.ann['foo'], 'flat lookup isnt index lookup'
+    
+    def testFlatAssign(self):
+        self.ann.spam = 'eggs'
+        assert self.ann['spam'] == 'eggs', 'assignment lookup by index failed'
+        assert self.ann.spam == 'eggs', 'assignment lookup by flat failed'
+    
+    def testAnnDeleg(self):
+        assert self.ann.keys()[0] == self.test.keys()[0], 'delegation of keys() failed'
 if __name__ == "__main__":
     suite1 = unittest.makeSuite(FCMdataTestCase,'test')
-    alltests = unittest.TestSuite((suite1))
+    suite2 = unittest.makeSuite(FCMannotationTestCase,'test')
+    alltests = unittest.TestSuite((suite1, suite2))
 
     unittest.main()
 
