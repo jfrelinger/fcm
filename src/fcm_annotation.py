@@ -31,6 +31,10 @@ class Annotation(object):
         #return setattr(self._mydict, name, value)
         self._mydict[name] = value
         self.__dict__[name] = self._mydict[name]
+        
+    def __setitem__(self, name, value):
+        self._mydict[name] = value
+        self.__dict__[name] = self._mydict[name]
 
     def __getitem__(self, name):
         """

@@ -48,6 +48,11 @@ class FCMannotationTestCase(unittest.TestCase):
         self.ann.spam = 'eggs'
         assert self.ann['spam'] == 'eggs', 'assignment lookup by index failed'
         assert self.ann.spam == 'eggs', 'assignment lookup by flat failed'
+        
+    def testIndexAssign(self):
+        self.ann['spam'] = 'eggs'
+        assert self.ann['spam'] == 'eggs', 'assignment lookup by index failed'
+        assert self.ann.spam == 'eggs', 'assignment lookup by flat failed'
     
     def testAnnDeleg(self):
         assert self.ann.keys()[0] == self.test.keys()[0], 'delegation of keys() failed'
