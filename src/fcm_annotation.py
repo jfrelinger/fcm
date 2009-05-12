@@ -2,6 +2,9 @@
 """
 
 class Annotation(object):
+    """
+    Annotation object for storing metadata about FCM data
+    """
     def __init__(self, annotations=None):
         """
         Annotation([annotations = {}])
@@ -33,6 +36,10 @@ class Annotation(object):
         self.__dict__[name] = self._mydict[name]
         
     def __setitem__(self, name, value):
+        """
+        allow usage of annotation.foo  = x or annotation[foo] =x to set the
+        intendede value
+        """
         self._mydict[name] = value
         self.__dict__[name] = self._mydict[name]
 

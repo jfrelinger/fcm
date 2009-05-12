@@ -56,6 +56,7 @@ class FCMannotationTestCase(unittest.TestCase):
     
     def testAnnDeleg(self):
         assert self.ann.keys()[0] == self.test.keys()[0], 'delegation of keys() failed'
+
 if __name__ == "__main__":
     suite1 = unittest.makeSuite(FCMdataTestCase,'test')
     suite2 = unittest.makeSuite(FCMannotationTestCase,'test')
