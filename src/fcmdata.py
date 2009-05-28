@@ -2,6 +2,7 @@
 A python object representing flow cytomoetry data
 """
 from numpy import array
+from fcmannotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
 
 class FCMdata(object):
@@ -15,7 +16,7 @@ class FCMdata(object):
     """
     
     
-    def __init__(self, pnts, channels, scatters=None):
+    def __init__(self, pnts, channels, scatters=None, annotations=None):
         """
         fcmdata(pnts, channels, scatters=None)
         pnts: array of data points
@@ -34,7 +35,9 @@ class FCMdata(object):
         for chan in range(len(channels)):
             if chan not in self.scatters:
                 self.markers.append(chan)
-
+        if annotations == None:
+            annotations = Annotation()
+        self.annotation = annotations
         
     def get_channel_by_name(self, channels):
         """Return the data associated with specific channel names"""
