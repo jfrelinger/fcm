@@ -50,4 +50,6 @@ class Annotation(object):
         """
         return self._mydict[name]
     
+    def __repr__(self):
+        return 'Annotation('+self._mydict.__repr__()+')'
     
