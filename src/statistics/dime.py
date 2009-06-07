@@ -4,7 +4,7 @@ for the clusters
 
 """
 
-from numpy import zeros, sum, log
+from numpy import zeros, sum, log, array
 from distributions import mvnormpdf, mixnormpdf
 
 class DiME(object):
@@ -58,7 +58,7 @@ class DiME(object):
                     ids.append(i)
         
         x = self.data[:,ids]
-        ids = numpy.array(ids)
+        ids = array(ids)
         mus = [m[ids] for m in self.mu]
         sigmas = [sig[ids,:][:,ids] for sig in self.sigma]
         
