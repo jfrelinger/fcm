@@ -13,14 +13,15 @@ class DiME(object):
     
     """
     
-    def __init__(self, x, pi, mu, sigma):
+    def __init__(self, x, pi, mu, sigma, cmap=None):
         """
-        DiME(pi, mu, sigma):
+        DiME(pi, mu, sigma, cmap=None):
         x: data points
         pi: mixing proportions
         mu: means of distributions
         sigma: covariances
-        
+        cmap: a dictionary of modal cluster to component clusters, defaults to
+            None. If none perform analysis on component cluster level.
         """
         
         self.pi = pi
@@ -29,7 +30,13 @@ class DiME(object):
         self.data = x
         self.k = x.shape[1] # dimension
         self.n = x.shape[0] # number of points
-        self.c = len(pi) # number of clusters
+        if cmap == None:
+            self.c = len(pi) # number of clusters
+        else:
+            self.c = len(cmap.keys())
+        self.cmap = cmap
+        
+        self.dc0 = self.run([])
         
     def run(self, drop):
         """
@@ -56,8 +63,16 @@ class DiME(object):
         sigmas = [sig[ids,:][:,ids] for sig in self.sigma]
         
         f = []
-        for pi, mu, sig in zip(self.pi, mus, sigmas):
-            f.append(mvnormpdf(x.T , mu, sig))
+        if self.cmap == None:
+            for pi, mu, sig in zip(self.pi, mus, sigmas):
+                f.append(mvnormpdf(x.T , mu, sig))
+        else:
+            for mclust in self.cmap.keys():
+                clsts = self.cmap[mclust]
+                mu = [ mus[i] for i in clsts]
+                sigma = [ sigmas[i] for i in clsts]
+                pi = [ self.pi[i] for i in clsts]
+                f.append(mixnormpdf(x.T, pi, mu, sigma))
 
         F = {}
         for i in range(self.c):
@@ -81,38 +96,7 @@ class DiME(object):
 
         return d
     
-if __name__ == '__main__':
-    import numpy
-    from numpy import random
-    n = 1000
-
-    pi1 = 0.2
-    pi2 = 0.6
-    pi3 = 0.2
-
-    mu1_ = numpy.array([0,0,0])
-    mu2_ = numpy.array([0,5,0])
-    mu3_ = numpy.array([5,0,0])
-
-    sigma1_ = numpy.identity(3)
-    sigma2_ = numpy.identity(3)
-    sigma3_ = numpy.identity(3)
-    n1 = int(pi1*n)
-    n2 = int(pi2*n)
-    n3 = int(pi3*n)
-
-    x1 = random.multivariate_normal(mu1_, sigma1_, n1)
-    x2 = random.multivariate_normal(mu2_, sigma2_, n2)
-    x3 = random.multivariate_normal(mu3_, sigma3_, n3)
-    y = numpy.concatenate([x1, x2, x3])
-    
-    pi = numpy.array([pi1, pi2, pi3])
-    mu = numpy.array([mu1_, mu2_, mu3_])
-    sigma = numpy.array([sigma1_, sigma2_, sigma3_])
-    
-    foo = DiME(y, pi, mu, sigma)
-    print foo.run([])
-    print foo.run(0)
-    print foo.run(1)
-    print foo.run(2)
-        
+    def dc(self, drop):
+        tmp = self.run(drop)
+        return [ 100*tmp[i]/self.dc0[i] for i in range(len(self.dc0))]
+                                       
