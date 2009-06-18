@@ -7,4 +7,5 @@ from fcmexceptions import BadFCMPointDataTypeError
 __all__ == [
             'FCMdata',
             'BadFCMPointDataTypeError',
+            'FCSreader',
             ]
