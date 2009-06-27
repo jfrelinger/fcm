@@ -1,4 +1,4 @@
-from statistics.distributions import mvnormpdf, mixnormpdf
+from distributions import mvnormpdf, mixnormpdf
 from numpy import array, dot, log2, zeros, sum
 class DiME(object):
     """
