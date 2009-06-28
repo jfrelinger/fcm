@@ -25,7 +25,12 @@ class FCSreader(object):
         self._header['analysis_end'] = int(self.read_bytes(50, 57))
         
         #parse text segment
-        text = self.read_bytes(self._header['text_start'],self._header['text_end'])
+        self.read_text(self._header['text_start'], self._header['text_end'])
+        
+        
+        
+    def read_text(self, start, stop):
+        text = self.read_bytes(start, stop)
         self.delim = text[0]
         if text[-1] != self.delim:
             warn('Text segment truncated!')
@@ -41,6 +46,23 @@ class FCSreader(object):
         """Read in bytes from start to stop inclusive."""
         self._fh.seek(start)
         return self._fh.read(stop-start+1)
+    
+    def parse_data(self):
+        """Extract binary or other values from DATA section."""
+        mode = self.MODE
+        first = self._header['data_first']
+        last = self._header['data_last']
+        if first == 0 and last == 0:
+            first = int(self.text['BEGINDATA'])
+            last = int(self.text['ENDDATA'])
+
+        if mode == 'L':
+            data = self.parse_list_data(first, last)
+        elif mode == 'C':
+            data = self.parse_correlated_data(first, last)
+        elif mode == 'U':
+            data = self.parse_uncorrelated_data(first, last)
+        return data
     
 if __name__ == '__main__':
     foo = FCSreader('/home/jolly/Projects/flow/data/3FITC_4PE_004.fcs')
