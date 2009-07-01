@@ -226,12 +226,4 @@ def log_factory(base):
 log2 = log_factory(2)
 
 if __name__ == '__main__':
-    foo = FCSreader('/home/jolly/Projects/flow/data/3FITC_4PE_004.fcs')
-    foo = FCSreader('/home/jolly/Projects/flow/data/old_cmv1.fcs')
-    bar = foo.parse_header(0)
-    text = foo.parse_text(0,bar['text_start'], bar['text_stop'])
-    baz = foo.parse_data(0,bar['data_start'], bar['data_end'], text)
-    print baz[0]
-    zort = foo.get_FCMdata()
-    print zort[0]
-    
+    pass
