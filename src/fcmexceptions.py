@@ -15,3 +15,13 @@ class BadFCMPointDataTypeError(Exception):
         self.data = data
         self.message = message
         
+class UnimplementedFcsDataMode(Exception):
+    """Exception raised on unimplemented data modes in fcs files
+    
+    mode: mode
+    """
+    
+    def __init__(self, mode):
+        self.mode = mode
+        self.message = "Currently fcs data stored as type \'%s\' is unsupported" % mode
+        

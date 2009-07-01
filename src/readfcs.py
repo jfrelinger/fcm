@@ -2,7 +2,12 @@
 from warnings import warn
 from fcmdata import FCMdata
 from fcmannotation import Annotation
+from fcmexceptions import UnimplementedFcsDataMode
+from operator import and_
+from math import log
+from struct import calcsize, unpack
 import re
+import numpy
 
 
 class FCSreader(object):
@@ -36,20 +41,36 @@ class FCSreader(object):
         analysis = self.parse_analysis(self.cur_offset, astart, astop)
         # parse data
         try:
-            dstart = text['beginadata']
+            dstart = int(text['beginadata'])
         except KeyError:
             dstart = header['data_start']
         try:
-            dstop = text['enddata']
+            dstop = int(text['enddata'])
         except KeyError:
             dstop = header['data_end']
         
         data = self.parse_data(self.cur_offset, dstart, dstop, text)
         # build fcmdata object
         channels = []
-        scatters = []
-        tmpfcm = FCMdata(data, channels, scatters,
-            Annotation({'text': text, 'header': header, 'analysis': analysis}))
+        display = []
+        scchannels = []
+        for i in range(1,int(text['par'])+1):
+            name= text['p%dn' %i]
+            channels.append(name)
+            try:
+                display.append(text['p%ds' %i])
+            except KeyError:
+                display.append(name)
+            if not name.lower().startswith('fl'):
+                scchannels.append(name)
+            
+                
+        
+        tmpfcm = FCMdata(data, channels, scchannels,
+            Annotation({'text': text,
+                        'header': header,
+                        'analysis': analysis,
+                        'display': display}))
         # update cur_offset for multidata files
         # return fcm object
         return tmpfcm
@@ -80,34 +101,137 @@ class FCSreader(object):
         """return parsed text segment of fcs file"""
         text = self.read_bytes(offset, start, stop)
         #TODO: add support for suplement text segment
-        return self.parse_pairs(text)
+        return parse_pairs(text)
     
     def parse_analysis(self, offset, start, stop):
+        """return parsed analysis segment of fcs file"""
         if start == stop:
             return {}
         else:
             text = self.read_bytes(offset, start, stop)
-            return self.parse_pairs(text)
+            return parse_pairs(text)
     
     def parse_data(self, offset, start, stop, text):
-        print text['datatype']
-        print text['mode']
-        pass
+        """return numpy.array of data segment of fcs file"""
+        dtype = text['datatype']
+        mode = text['mode']
+        tot = int(text['tot'])
+        if mode == 'c' or mode == 'u':
+            raise UnimplementedFcsDataMode(mode)
+        
+        if text['byteord'] == '1,2,3,4':
+            order = '<'
+        elif text['byteord'] == '4,3,2,1':
+            order = '>'
+        else:
+            warn("unsupported byte order, using default @")
+            order = '@'
+        # from here on out we assume mode l (list)
+        
+        bitwidth = []
+        drange = []
+        for i in range(1,int(text['par'])+1):
+            bitwidth.append(int(text['p%db' %i]))
+            drange.append(int(text['p%dr' %i]))
+        
+        if dtype.lower() == 'i':
+            data = self.parse_int_data(offset, start, stop, bitwidth, drange, tot, order)
+        elif dtype.lower() == 'f' or dtype.lower() == 'd':
+            data = self.parse_float_data(offset, start, stop, dtype.lower(), tot, order)
+        else: # ascii
+            data = self.parse_ascii_data(offset, start, stop, bitwidth, dtype, tot, order)
+        return data
     
-    def parse_pairs(self, text):
-        delim = text[0]
-        if delim != text[-1]:
-            warn("text in segment does not start and end with delimiter")
-        tmp = text[1:-1].replace('$','')
-        # match the delimited character unless it's doubled
-        regex = re.compile('(?<=[^%s])%s(?!%s)' % (delim, delim, delim))
-        tmp = regex.split(tmp)
-        return dict(zip([ x.lower() for x in tmp[::2]], tmp[1::2]))
+    def parse_int_data(self, offset, start, stop, bitwidth, drange, tot, order):
+        """Parse out and return integer list data from fcs file"""
+        if reduce(and_, [item in [8, 16, 32] for item in bitwidth]):
+            if len(set(bitwidth)) == 1: # uniform size for all parameters
+                # calculate how much data to read in.
+                num_items = (stop-start+1)/calcsize(fmt_integer(bitwidth[0]))
+                #unpack into a list
+                tmp = unpack('%s%d%s' % (order, num_items, fmt_integer(bitwidth[0])), 
+                                    self.read_bytes(offset, start, stop))
+                
+
+            else: # parameter sizes are different e.g. 8, 8, 16,8, 32 ... do one at a time
+                unused_bitwidths = map(int, map(log2, drange))
+                tmp = []
+                cur = start
+                while cur < stop:
+                    for i, curwidth in enumerate(bitwidth):
+                        bitmask = mask_integer(curwidth, unused_bitwidths[i])
+                        nbytes = curwidth/8
+                        bin_string = self.read_bytes(offset, cur, cur+nbytes-1)
+                        cur += nbytes
+                        val = bitmask & unpack('%s%s' % (order, fmt_integer(curwidth)), bin_string)[0]
+                        tmp.append(val)
+        else: #non starndard bitwiths...  Does this happen?
+            warn('Non-standard bitwidths for data segments')
+            return None
+        return numpy.array(tmp).reshape((tot, len(bitwidth)))
     
+    def parse_float_data(self, offset, start, stop, dtype, tot, order):
+        """Parse out and return float list data from fcs file"""
+        #count up how many to read in
+        num_items = (stop-start+1)/calcsize(dtype) 
+        # unpack binary data
+        tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
+        return numpy.array(tmp).reshape((tot, len(tmp)/tot))
+    
+    def parse_ascii_data(self, offset, start, stop, bitwidth, dtype, tot, order):
+        """Parse out ascii encoded data from fcs file"""
+        num_items = (stop-start+1)/calcsize(dtype) 
+        tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
+        return numpy.array(tmp).reshape((tot, len(tmp)/tot))
+            
+        
+def parse_pairs(text):
+    """return key/value pairs from a delimited string"""
+    delim = text[0]
+    if delim != text[-1]:
+        warn("text in segment does not start and end with delimiter")
+    tmp = text[1:-1].replace('$','')
+    # match the delimited character unless it's doubled
+    regex = re.compile('(?<=[^%s])%s(?!%s)' % (delim, delim, delim))
+    tmp = regex.split(tmp)
+    return dict(zip([ x.lower() for x in tmp[::2]], tmp[1::2]))
+    
+def fmt_integer(b):
+    if b == 8:
+        return 'B'
+    elif b == 16:
+        return 'H'
+    elif b == 32:
+        return 'I'
+    else:
+        print "Cannot handle integers of bit size %d" % b
+        return None
+
+def mask_integer(b, ub):
+    if b == 8:
+        return (0xFF >> (b-ub))
+    elif b == 16:
+        return (0xFFFF >> (b-ub))
+    elif b == 32:
+        return (0xFFFFFFFF >> (b-ub))
+    else:
+        print "Cannot handle integers of bit size %d" % b
+        return None
+
+def log_factory(base):
+    def f(x):
+        return log(x, base)
+    return f
+
+log2 = log_factory(2)
+
 if __name__ == '__main__':
     foo = FCSreader('/home/jolly/Projects/flow/data/3FITC_4PE_004.fcs')
-    print foo.parse_header(0)
-    bar = foo.parse_text(0,58,1376)
-    print bar.keys()
-    baz = foo.parse_data(0,1337, 757928, bar)
+    foo = FCSreader('/home/jolly/Projects/flow/data/old_cmv1.fcs')
+    bar = foo.parse_header(0)
+    text = foo.parse_text(0,bar['text_start'], bar['text_stop'])
+    baz = foo.parse_data(0,bar['data_start'], bar['data_end'], text)
+    print baz[0]
+    zort = foo.get_FCMdata()
+    print zort[0]
     
