@@ -1,0 +1,73 @@
+* Goals
+  1. Create a Python library for flow cytometry data analysis, data
+     management and visualization.
+  2. Requirements
+     1. [ ] Consistent API
+     2. [ ] Libraries
+     3. [ ] Fast
+	1. [ ] Use optimal data structures and alogrithms
+	2. [ ] Use numpy vector calculations
+	3. [ ] Foreign language interface (e.g. Cython)
+	4. [ ] Multi-core
+	5. [ ] Multi-processor
+	6. [ ] Exploit GPU
+* Data structures [0/5]
+  1. [ ] FCM class [0/5]
+     1. [ ] Components include FCM data, annotations
+     2. [ ] Behaves like numpy array
+     3. [ ] Operations can be chained
+     4. [ ] Maintains audit trail
+     5. [ ] QA measures
+  2. [ ] FCM collection class [0/4]
+     1. [ ] Experimental annotations
+     2. [ ] Common gating strategy
+     3. [ ] Controls
+     4. [ ] QA measures
+  3. [ ] FCM Analysis classes [0/1]
+     1. [ ] Tree structure of "clusters"
+  4. [ ] FCM collection analysis class [0/0] (?)
+     1. [ ] For comparisons of data sets in collection
+* Modules [/]
+  1. [ ] IO [/]
+     1. [ ] FCS read and write
+     2. [ ] Bioconductor read and write
+     3. [ ] XML read and write
+  2. [ ] Compensate [/]
+     1. [ ] Automated
+     2. [ ] Manual
+  3. [ ] Transform [/]
+     1. [ ] Log
+     2. [ ] Logicle
+     3. [ ] Hyperlog
+  4. [ ] Project [/]
+     1. [ ] PCA
+     2. [ ] ICA
+  5. [ ] Gate [/]
+     1. [ ] Polygonal
+     2. [ ] Ellipse
+     3. [ ] Quadrant
+  6. [ ] Statistics [/]
+     1. [ ] Exploratory [/]
+	1. [ ] Targeted sampling
+	2. [ ] Clustering - Bayesian EM, DP family, variational
+	   family, search family
+	3. [ ] Classification - mode hunting
+	4. [ ] Marker analysis - DiME
+    2. [ ] Inference [/]
+	1. [ ] Data comparisons
+	2. [ ] Time series analysis
+	3. [ ] Stochastic shotgun search
+  7. [ ] Graphics [/]
+     1. [ ] Gating
+     2. [ ] Statistical graphics
+  8. [ ] GUI [/]
+     1. [ ] Web
+     2. [ ] Application
+  9. [ ] Data management [/]
+      1. [ ] Database interface
+      2. [ ] Network interface
+  10. [ ] Parallel [/]
+      1. [ ] Multiprocessing
+      2. [ ] MPI
+      3. [ ] Map-reduce with Hadoop/Dumbo
+
