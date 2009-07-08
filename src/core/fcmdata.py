@@ -41,6 +41,7 @@ class FCMdata(object):
         
     def get_channel_by_name(self, channels):
         """Return the data associated with specific channel names"""
+        
         if type(channels) == type(''):
             channels = [channels]
         to_return = [ self.channels.index(i) for i in channels]
@@ -52,6 +53,8 @@ class FCMdata(object):
         return self.pnts[:, self.markers]
     
     def __getitem__(self, item):
+        """return FCMdata.pnts[i] by name or by index"""
+        
         if type(item) == type(''):
             return self.get_channel_by_name(item)
         elif type(item) == tuple:
