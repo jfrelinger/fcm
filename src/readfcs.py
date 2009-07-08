@@ -226,6 +226,7 @@ log2 = log_factory(2)
 
 # convience wrapper for loading the first data element of a FCS file
 def loadFCS(file):
+    """Load a FCS file into a FCMdata object"""
     tmp = FCSreader(file)
     return tmp.get_FCMdata()
 
