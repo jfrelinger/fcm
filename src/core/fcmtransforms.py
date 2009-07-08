@@ -1,3 +1,6 @@
+"""Base functions for various transforms to be used on FCM data
+"""
+
 from scipy.optimize import fsolve, brentq
 from scipy import interpolate
 from numpy import arange, exp, log, min, max, sign, concatenate, zeros, vectorize

@@ -39,13 +39,18 @@ class FCMdata(object):
             annotations = Annotation()
         self.annotation = annotations
         
-    def get_channel_by_name(self, channels):
-        """Return the data associated with specific channel names"""
+    def name_to_index(self, channels):
+        """Return the channel indexes for the named channels"""
         
         if type(channels) == type(''):
             channels = [channels]
         to_return = [ self.channels.index(i) for i in channels]
-        return self.pnts[:, to_return]
+        return to_return
+    
+    def get_channel_by_name(self, channels):
+        """Return the data associated with specific channel names"""
+        
+        return self.pnts[:, self.name_to_index(channels)]
     
     def get_markers(self):
         """return the data associated with all the markers"""
