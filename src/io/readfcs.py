@@ -1,3 +1,5 @@
+"""Provide access to data stored in FCS files"""
+
 from warnings import warn
 from core import FCMdata
 from core import Annotation
@@ -24,6 +26,7 @@ class FCSreader(object):
         
    
     def get_FCMdata(self):
+        """Return the next FCM data set stored in a FCS file"""
         # parse headers
         header = self.parse_header(self.cur_offset)
         # parse text 
@@ -85,6 +88,7 @@ class FCSreader(object):
         Parse the FCM data in fcs file at the offset (supporting multiple 
         data segments in a file
         """
+        
         header = {}
         header['text_start'] = int(self.read_bytes(offset, 10, 17))
         header['text_stop'] = int(self.read_bytes(offset, 18, 25))
@@ -98,12 +102,14 @@ class FCSreader(object):
     
     def parse_text(self, offset, start, stop):
         """return parsed text segment of fcs file"""
+        
         text = self.read_bytes(offset, start, stop)
         #TODO: add support for suplement text segment
         return parse_pairs(text)
     
     def parse_analysis(self, offset, start, stop):
         """return parsed analysis segment of fcs file"""
+        
         if start == stop:
             return {}
         else:
@@ -112,6 +118,7 @@ class FCSreader(object):
     
     def parse_data(self, offset, start, stop, text):
         """return numpy.array of data segment of fcs file"""
+        
         dtype = text['datatype']
         mode = text['mode']
         tot = int(text['tot'])
@@ -143,6 +150,7 @@ class FCSreader(object):
     
     def parse_int_data(self, offset, start, stop, bitwidth, drange, tot, order):
         """Parse out and return integer list data from fcs file"""
+        
         if reduce(and_, [item in [8, 16, 32] for item in bitwidth]):
             if len(set(bitwidth)) == 1: # uniform size for all parameters
                 # calculate how much data to read in.
@@ -171,6 +179,7 @@ class FCSreader(object):
     
     def parse_float_data(self, offset, start, stop, dtype, tot, order):
         """Parse out and return float list data from fcs file"""
+        
         #count up how many to read in
         num_items = (stop-start+1)/calcsize(dtype) 
         # unpack binary data
@@ -179,6 +188,7 @@ class FCSreader(object):
     
     def parse_ascii_data(self, offset, start, stop, bitwidth, dtype, tot, order):
         """Parse out ascii encoded data from fcs file"""
+        
         num_items = (stop-start+1)/calcsize(dtype) 
         tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
         return numpy.array(tmp).reshape((tot, len(tmp)/tot))
@@ -186,6 +196,7 @@ class FCSreader(object):
         
 def parse_pairs(text):
     """return key/value pairs from a delimited string"""
+    
     delim = text[0]
     if delim != text[-1]:
         warn("text in segment does not start and end with delimiter")
@@ -196,6 +207,8 @@ def parse_pairs(text):
     return dict(zip([ x.lower() for x in tmp[::2]], tmp[1::2]))
     
 def fmt_integer(b):
+    """return binary format of an integer"""
+    
     if b == 8:
         return 'B'
     elif b == 16:
@@ -207,6 +220,8 @@ def fmt_integer(b):
         return None
 
 def mask_integer(b, ub):
+    """return bitmask of an integer and a bitwitdh"""
+    
     if b == 8:
         return (0xFF >> (b-ub))
     elif b == 16:
@@ -218,15 +233,18 @@ def mask_integer(b, ub):
         return None
 
 def log_factory(base):
+    """constructor of various log based functions"""
+    
     def f(x):
         return log(x, base)
     return f
 
 log2 = log_factory(2)
 
-def loadFCS(file):
-    """Load and readturn a FCM data object from an FCS file"""
-    tmp = FCSreader(file)
+def loadFCS(filename):
+    """Load and return a FCM data object from an FCS file"""
+    
+    tmp = FCSreader(filename)
     return tmp.get_FCMdata()
 
 if __name__ == '__main__':
