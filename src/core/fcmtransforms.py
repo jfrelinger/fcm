@@ -1,9 +1,6 @@
 from scipy.optimize import fsolve, brentq
-from scipy import interpolate, weave
+from scipy import interpolate
 from numpy import arange, exp, log, min, max, sign, concatenate, zeros, vectorize
-from numpy.random import normal, lognormal, shuffle
-import pylab
-import time
 
 def quantile(x, n):
     try:
@@ -42,7 +39,28 @@ def logicle(y, T, m, r, order=2, intervals=1000.0):
     t = interpolate.splrep(xx, yy, k=order)
     return interpolate.splev(y, t)
 
+def EH(x, y, b, d, r):
+    e = float(d)/r
+    sgn = sign(x)
+    return sgn*10**(sgn*e*x) + b*e*x - sgn - y
+
+def hyperlog0(y, b, d, r):
+    return brentq(EH, -10**6, 10**6, (y, b, d, r))
+hyperlog0 = vectorize(hyperlog0)
+
+def hyperlog(y, b, d, r, order=2, intervals=1000.0):
+    ub = log(max(y)+1-min(y))
+    xx = exp(arange(0, ub, ub/intervals))-1+min(y)
+    yy = hyperlog0(xx, b, d, r)
+    t = interpolate.splrep(xx, yy, k=order)
+    return interpolate.splev(y, t)
+
+
 if __name__ == '__main__':
+    from numpy.random import normal, lognormal, shuffle
+    import pylab
+    import time
+
     d1 = normal(0, 50, (50000))
     d2 = lognormal(8, 1, (50000))
     d3 = concatenate([d1, d2])
