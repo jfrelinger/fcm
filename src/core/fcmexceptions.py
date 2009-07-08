@@ -3,6 +3,15 @@ classes for exceptions in FCM module
 """
 #from exceptions import Exception
 
+class CompensationError(Exception):
+    """Exception raised on problems with compensation
+    
+    message: explanation of the error
+    """
+    
+    def __init__(self, message):
+        self.message = message
+
 class BadFCMPointDataTypeError(Exception):
     """Exception raised on bad FCM data type
     
