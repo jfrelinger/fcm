@@ -6,13 +6,3 @@
 .*~
 .*Store
 .*\.h5
-treg/*
-dime-matlab/.*
-fcs_reader/.*
-dime-matlab
-fcs_reader
-# test/.*
-# test
-
-syntax: regexp
-# ^test$
