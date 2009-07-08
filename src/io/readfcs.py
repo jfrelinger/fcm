@@ -1,8 +1,7 @@
-
 from warnings import warn
-from fcmdata import FCMdata
-from fcmannotation import Annotation
-from fcmexceptions import UnimplementedFcsDataMode
+from core import FCMdata
+from core import Annotation
+from core import UnimplementedFcsDataMode
 from operator import and_
 from math import log
 from struct import calcsize, unpack
