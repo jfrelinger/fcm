@@ -1,7 +1,5 @@
 import unittest
-import sys
-sys.path.append('../src')
-from readfcs import FCSreader
+from io import FCSreader
 
 class FCSreaderTestCase(unittest.TestCase):
     def setUp(self):

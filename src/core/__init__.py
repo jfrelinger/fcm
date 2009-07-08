@@ -1,3 +1,3 @@
-from fcmdata import *
-from fcmannotation import *
-from fcmexceptions import *
+from fcmdata import FCMdata
+from fcmannotation import Annotation
+from fcmexceptions import BadFCMPointDataTypeError, UnimplementedFcsDataMode

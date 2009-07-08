@@ -1,11 +1,13 @@
 """setup all things exported from FCM
 """
 
-from fcmdata import FCMdata
-from fcmexceptions import BadFCMPointDataTypeError
-
+from core import FCMdata
+from core import BadFCMPointDataTypeError,UnimplementedFcsDataMode 
+from io import FCSreader, loadFCS
 __all__ == [
             'FCMdata',
             'BadFCMPointDataTypeError',
+            'UnimplementedFcsDataMode',
             'FCSreader',
+            'loadFCS'
             ]

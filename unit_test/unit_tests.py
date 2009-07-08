@@ -4,8 +4,8 @@ Unit test framework
 
 import unittest
 from numpy import array
-from fcmdata import FCMdata
-from fcm_annotation import Annotation
+from core import FCMdata
+from core import Annotation
 from random import randint
 
 

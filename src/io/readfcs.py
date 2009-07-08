@@ -224,5 +224,10 @@ def log_factory(base):
 
 log2 = log_factory(2)
 
+def loadFCS(file):
+    """Load and readturn a FCM data object from an FCS file"""
+    tmp = FCSreader(file)
+    return tmp.get_FCMdata()
+
 if __name__ == '__main__':
     pass
