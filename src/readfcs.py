@@ -1,4 +1,3 @@
-
 from warnings import warn
 from fcmdata import FCMdata
 from fcmannotation import Annotation
@@ -224,6 +223,11 @@ def log_factory(base):
     return f
 
 log2 = log_factory(2)
+
+# convience wrapper for loading the first data element of a FCS file
+def loadFCS(file):
+    tmp = FCSreader(file)
+    return tmp.get_FCMdata()
 
 if __name__ == '__main__':
     pass
