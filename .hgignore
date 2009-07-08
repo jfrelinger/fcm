@@ -1,3 +1,4 @@
+.*\.swp
 .*\.so
 .*\.o
 .*\.os
@@ -6,3 +7,5 @@
 .*~
 .*Store
 .*\.h5
+src/statistics/treg/*
+.*\.orig
