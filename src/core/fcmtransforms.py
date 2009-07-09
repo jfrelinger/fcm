@@ -5,13 +5,19 @@ from scipy.optimize import fsolve, brentq
 from scipy import interpolate
 from numpy import arange, exp, log, min, max, sign, concatenate, zeros, vectorize
 
-def quantile(x, n):
+def _quantile(x, n):
+    """return the lower nth quantile"""
     try:
         return sorted(x)[int(n*len(x))]
     except IndexError:
         return 0
 
-def productlog(x, prec=1e-12):
+def quantile(fcm, n):
+    """return the nth lower quantile of a fcm data set"""
+    tmp = _quantile(fcm.pnts.copy(), x)
+    return fcm.copy(npnts=tmp)
+
+def _productlog(x, prec=1e-12):
     """Productlog or LambertW function computes principal solution for w in f(w)
  = w*exp(w).""" 
     #  fast estimate with closed-form approximation
@@ -35,7 +41,7 @@ def logicle0(y, T, m, r):
         return brentq(S, -100, 100, (y, T, m, w))
 logicle0 = vectorize(logicle0)
 
-def logicle(y, T, m, r, order=2, intervals=1000.0):
+def _logicle(y, T, m, r, order=2, intervals=1000.0):
     ub = log(max(y)+1-min(y))
     xx = exp(arange(0, ub, ub/intervals))-1+min(y)
     yy = logicle0(xx, T, m, r)
@@ -51,7 +57,7 @@ def hyperlog0(y, b, d, r):
     return brentq(EH, -10**6, 10**6, (y, b, d, r))
 hyperlog0 = vectorize(hyperlog0)
 
-def hyperlog(y, b, d, r, order=2, intervals=1000.0):
+def _hyperlog(y, b, d, r, order=2, intervals=1000.0):
     ub = log(max(y)+1-min(y))
     xx = exp(arange(0, ub, ub/intervals))-1+min(y)
     yy = hyperlog0(xx, b, d, r)
@@ -102,3 +108,4 @@ if __name__ == '__main__':
 
     # pylab.savefig('logicle.png')
     pylab.show()
+

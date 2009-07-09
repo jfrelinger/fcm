@@ -46,10 +46,13 @@ class Annotation(object):
     def __getitem__(self, name):
         """
         allow usage of annotation.foo or annotation[foo] to return the
-        intendede value
+        intended value
         """
         return self._mydict[name]
     
     def __repr__(self):
         return 'Annotation('+self._mydict.__repr__()+')'
+    
+    def copy(self):
+        return Annotation(self._mydict.copy())
     

@@ -32,9 +32,10 @@ class FCMdata(object):
         #TODO add some default intelegence for determining scatters if None
         self.scatters = scatters
         self.markers = []
-        for chan in range(len(channels)):
-            if chan not in self.scatters:
-                self.markers.append(chan)
+        if scatters is not None:
+            for chan in range(len(channels)):
+                if chan not in self.scatters:
+                    self.markers.append(chan)
         if annotations == None:
             annotations = Annotation()
         self.annotation = annotations
@@ -69,5 +70,16 @@ class FCMdata(object):
                 return self.pnts[item]
         else:
             return self.pnts[item]
+        
+    def copy(self, npnts=None):
+        if npnts is None:
+            tpnts = self.pnts.copy()
+        else:
+            tpnts = npnts
+        tanno = self.annotation.copy()
+        tchannels = self.channels[:]
+        tmarkers = self.markers[:]
+        return FCMdata(tpnts, tchannels, tmarkers, tanno)
+        
         
         
