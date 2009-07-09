@@ -1,5 +1,6 @@
 from __future__ import division
 import numpy
+# from scipy.interpolate import interp2d
 
 def bilinear_interpolate(x, y, bins=None):
     """Returns interpolated density values on points (x, y).
@@ -24,6 +25,7 @@ def bilinear_interpolate(x, y, bins=None):
     z1 = numpy.zeros(numpy.array(z.shape)+1)
     z1[:-1,:-1] = z
 
+    # values at corners of square for interpolation
     q11 = z1[yint, xint]
     q12 = z1[yint, xint+1]
     q21 = z1[yint+1, xint]
