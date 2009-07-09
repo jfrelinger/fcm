@@ -42,8 +42,10 @@ if __name__ == '__main__':
     x = fcm[:,0]
     y = fcm[:,1]
 
-    bins = 100
-
+    import time
+    start = time.clock()
     z = bilinear_interpolate(x, y)
+    print time.clock() - start
+
     pylab.scatter(x, y, s=1, c=z, edgecolors='none')
     pylab.show()
