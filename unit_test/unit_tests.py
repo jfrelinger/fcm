@@ -7,6 +7,7 @@ from numpy import array
 from core import FCMdata
 from core import Annotation
 from random import randint
+from math import log
 
 
 class FCMdataTestCase(unittest.TestCase):
@@ -32,6 +33,24 @@ class FCMdataTestCase(unittest.TestCase):
         assert type(self.fcm[a]) == type(self.pnts[a]), "__getitem__ failed to return array"
         assert self.fcm[a,b] == self.pnts[a,b], '__getitem__ returned wrong value'
         assert self.fcm['fsc','ssc'][a,0] == self.pnts[a,0], '__getitem__ with multiple strings failed'
+        
+    def testlogicle(self):
+        from numpy.random import normal, lognormal, shuffle
+        from numpy import concatenate
+        from core.fcmtransforms import quantile
+        from pylab import hist, show
+    
+        d1 = normal(0, 50, (50000))
+        d2 = lognormal(8, 1, (50000))
+        d3 = array([concatenate([d1, d2])]).T
+ 
+        T = 262144
+        d = 4
+        m = d*log(10)
+        r = quantile(d3[d3<0], 0.05)
+        self.fcm = FCMdata(d3, ['a'])
+        hist(self.fcm.logicle([0], T, m, r).pnts[:,0], 1250)
+        show()
                     
                     
 class FCMannotationTestCase(unittest.TestCase):

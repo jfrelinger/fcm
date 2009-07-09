@@ -4,6 +4,7 @@ A python object representing flow cytomoetry data
 from numpy import array
 from fcmannotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
+from fcmtransforms import logicle as _logicle
 
 class FCMdata(object):
     """
@@ -80,6 +81,8 @@ class FCMdata(object):
         tchannels = self.channels[:]
         tmarkers = self.markers[:]
         return FCMdata(tpnts, tchannels, tmarkers, tanno)
-        
+    
+    def logicle(self, channels, T, m, r, order=2, intervals=1000.0):
+        return _logicle(self, channels, T, m, r, order=2, intervals=1000.0)
         
         

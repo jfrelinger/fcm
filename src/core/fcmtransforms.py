@@ -5,19 +5,15 @@ from scipy.optimize import fsolve, brentq
 from scipy import interpolate
 from numpy import arange, exp, log, min, max, sign, concatenate, zeros, vectorize
 
-def _quantile(x, n):
+def quantile(x, n):
     """return the lower nth quantile"""
     try:
         return sorted(x)[int(n*len(x))]
     except IndexError:
         return 0
 
-def quantile(fcm, n):
-    """return the nth lower quantile of a fcm data set"""
-    tmp = _quantile(fcm.pnts.copy(), x)
-    return fcm.copy(npnts=tmp)
 
-def _productlog(x, prec=1e-12):
+def productlog(x, prec=1e-12):
     """Productlog or LambertW function computes principal solution for w in f(w)
  = w*exp(w).""" 
     #  fast estimate with closed-form approximation
@@ -48,6 +44,13 @@ def _logicle(y, T, m, r, order=2, intervals=1000.0):
     t = interpolate.splrep(xx, yy, k=order)
     return interpolate.splev(y, t)
 
+def logicle(fcm, channels, T, m, r, order=2, intervals=1000.0):
+    """return logicle transformed points in fcm data for channels listed"""
+    npnts = fcm.pnts.copy()
+    for i in channels:
+        npnts.T[i] = _logicle(npnts[:,i].T, T, m, r, order, intervals)
+    return fcm.copy(npnts)
+    
 def EH(x, y, b, d, r):
     e = float(d)/r
     sgn = sign(x)
@@ -100,7 +103,7 @@ if __name__ == '__main__':
     pylab.ylabel('Raw data')
 
     pylab.subplot(3,1,3)
-    pylab.hist(logicle(d3, T, m, r), 1250)
+    pylab.hist(_logicle(d3, T, m, r), 1250)
     locs, labs = pylab.xticks()
     pylab.xticks([])
     pylab.yticks([])
