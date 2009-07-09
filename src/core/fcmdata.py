@@ -5,6 +5,8 @@ from numpy import array
 from fcmannotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
 from fcmtransforms import logicle as _logicle
+from fcmtransforms import hyperlog as _hyperlog
+from fcmgate import Gate
 
 class FCMdata(object):
     """
@@ -73,6 +75,7 @@ class FCMdata(object):
             return self.pnts[item]
         
     def copy(self, npnts=None):
+        """return a copy of fcm data object"""
         if npnts is None:
             tpnts = self.pnts.copy()
         else:
@@ -83,6 +86,14 @@ class FCMdata(object):
         return FCMdata(tpnts, tchannels, tmarkers, tanno)
     
     def logicle(self, channels, T, m, r, order=2, intervals=1000.0):
+        """return logicle transformed channels"""
         return _logicle(self, channels, T, m, r, order=2, intervals=1000.0)
         
+    def hyperlog(self, channels, b, d, r, order=2, intervals=1000.0):
+        """return hyperlog transformed channels"""
+        return _hyperlog(self, channels, b, d, r, order=2, intervals=1000.0)
+    
+    def gate(self, g, chan=None):
+        """return gated region of fcm data"""
+        return g.gate(self, chan)
         

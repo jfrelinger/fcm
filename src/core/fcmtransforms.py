@@ -48,9 +48,9 @@ def logicle(fcm, channels, T, m, r, order=2, intervals=1000.0):
     """return logicle transformed points in fcm data for channels listed"""
     npnts = fcm.pnts.copy()
     for i in channels:
-        npnts.T[i] = _logicle(npnts[:,i].T, T, m, r, order, intervals)
+        npnts.T[i] = _logicle(npnts[:, i].T, T, m, r, order, intervals)
     return fcm.copy(npnts)
-    
+ 
 def EH(x, y, b, d, r):
     e = float(d)/r
     sgn = sign(x)
@@ -67,6 +67,11 @@ def _hyperlog(y, b, d, r, order=2, intervals=1000.0):
     t = interpolate.splrep(xx, yy, k=order)
     return interpolate.splev(y, t)
 
+def hyperlog(fcm, channels, b, d, r, order=2, intervals=1000.0):
+    npnts = fcm.pnts.copy()
+    for i in channels:
+        npnts.T[i] = _hyperlog(npnts[:,i].T, b, d, r, order=2, intervals=1000.0)
+    return fcm.copy(npnts)
 
 if __name__ == '__main__':
     from numpy.random import normal, lognormal, shuffle
