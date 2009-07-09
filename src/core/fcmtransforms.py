@@ -6,10 +6,12 @@ from scipy import interpolate
 from numpy import arange, exp, log, min, max, sign, concatenate, zeros, vectorize
 
 def quantile(x, n):
+    """return the lower nth quantile"""
     try:
         return sorted(x)[int(n*len(x))]
     except IndexError:
         return 0
+
 
 def productlog(x, prec=1e-12):
     """Productlog or LambertW function computes principal solution for w in f(w)
@@ -35,13 +37,20 @@ def logicle0(y, T, m, r):
         return brentq(S, -100, 100, (y, T, m, w))
 logicle0 = vectorize(logicle0)
 
-def logicle(y, T, m, r, order=2, intervals=1000.0):
+def _logicle(y, T, m, r, order=2, intervals=1000.0):
     ub = log(max(y)+1-min(y))
     xx = exp(arange(0, ub, ub/intervals))-1+min(y)
     yy = logicle0(xx, T, m, r)
     t = interpolate.splrep(xx, yy, k=order)
     return interpolate.splev(y, t)
 
+def logicle(fcm, channels, T, m, r, order=2, intervals=1000.0):
+    """return logicle transformed points in fcm data for channels listed"""
+    npnts = fcm.pnts.copy()
+    for i in channels:
+        npnts.T[i] = _logicle(npnts[:, i].T, T, m, r, order, intervals)
+    return fcm.copy(npnts)
+ 
 def EH(x, y, b, d, r):
     e = float(d)/r
     sgn = sign(x)
@@ -51,13 +60,18 @@ def hyperlog0(y, b, d, r):
     return brentq(EH, -10**6, 10**6, (y, b, d, r))
 hyperlog0 = vectorize(hyperlog0)
 
-def hyperlog(y, b, d, r, order=2, intervals=1000.0):
+def _hyperlog(y, b, d, r, order=2, intervals=1000.0):
     ub = log(max(y)+1-min(y))
     xx = exp(arange(0, ub, ub/intervals))-1+min(y)
     yy = hyperlog0(xx, b, d, r)
     t = interpolate.splrep(xx, yy, k=order)
     return interpolate.splev(y, t)
 
+def hyperlog(fcm, channels, b, d, r, order=2, intervals=1000.0):
+    npnts = fcm.pnts.copy()
+    for i in channels:
+        npnts.T[i] = _hyperlog(npnts[:,i].T, b, d, r, order=2, intervals=1000.0)
+    return fcm.copy(npnts)
 
 if __name__ == '__main__':
     from numpy.random import normal, lognormal, shuffle
@@ -94,7 +108,7 @@ if __name__ == '__main__':
     pylab.ylabel('Raw data')
 
     pylab.subplot(3,1,3)
-    pylab.hist(logicle(d3, T, m, r), 1250)
+    pylab.hist(_logicle(d3, T, m, r), 1250)
     locs, labs = pylab.xticks()
     pylab.xticks([])
     pylab.yticks([])
@@ -102,3 +116,4 @@ if __name__ == '__main__':
 
     # pylab.savefig('logicle.png')
     pylab.show()
+
