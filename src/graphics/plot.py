@@ -44,7 +44,7 @@ def heatmap(fcm, indices, nrows=1, ncols=1, savefile=None, display=True,
 
 def heatmaps(fcm, savefile=None, display=True, **kwargs):
     """PLot scatter matrix of all heatmaps."""
-    n = fcm.pnts.shape[1]
+    n = fcm.shape[1]
     indices = [(i,j) for i in range(n) for j in range(n)]
     heatmap(fcm, indices, nrows=n, ncols=n, savefile=savefile,
             display=display, **kwargs)
@@ -58,4 +58,4 @@ if __name__ == '__main__':
     fcm = FCSreader('../../sample_data/3FITC_4PE_004.fcs').get_FCMdata()
     # heatmap(fcm, [(0,1),(2,3)], nrows=1, ncols=2, s=1, edgecolors='none')
     heatmaps(fcm, s=1, edgecolors='none', display=False,
-             savefile='3FITC_4PE_004.png')
+             savefile='3FITC_4PE_004.png', cmap=pylab.cm.hsv)
