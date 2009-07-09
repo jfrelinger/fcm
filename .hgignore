@@ -9,3 +9,11 @@
 .*\.h5
 src/statistics/treg/*
 .*\.orig
+.*\.png
+.*\.jpg
+.*\.jpeg
+.*\.tif
+.*\.tiff
+.*\.gif
+.*\.avi
+.*\.mov

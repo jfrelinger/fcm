@@ -47,5 +47,5 @@ if __name__ == '__main__':
     z = bilinear_interpolate(x, y)
     print time.clock() - start
 
-    pylab.scatter(x, y, s=1, c=z, edgecolors='none')
+    pylab.scatter(x, y, s=1, c=z, edgecolors='none', cmap=pylab.cm.get_cmap())
     pylab.show()
