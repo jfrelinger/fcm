@@ -49,7 +49,6 @@ def heatmaps(fcm, savefile=None, display=True, **kwargs):
     heatmap(fcm, indices, nrows=n, ncols=n, savefile=savefile,
             display=display, **kwargs)
 
-
 if __name__ == '__main__':
     import sys
     sys.path.append('../')
