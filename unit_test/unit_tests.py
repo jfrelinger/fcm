@@ -55,6 +55,9 @@ class FCMdataTestCase(unittest.TestCase):
         g = Gate(array([[-.1,-.1],[-.1,1.1],[1.1,1.1], [1.1,-.1]]), (0,1))
         n = self.fcm.gate(g)
         assert n.pnts.all() == array([[0,1,2]]).all(), 'gate excluded wrong points'
+        
+    def testGetAttr(self):
+        assert self.fcm.shape == (2,3), '__gettattr__ failed to deligate'
                     
                     
 class FCMannotationTestCase(unittest.TestCase):

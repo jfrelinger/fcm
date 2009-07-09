@@ -96,4 +96,8 @@ class FCMdata(object):
     def gate(self, g, chan=None):
         """return gated region of fcm data"""
         return g.gate(self, chan)
+    
+    def __getattr__(self, name):
+        return self.pnts.__getattribute__(name)
+
         

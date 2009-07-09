@@ -17,7 +17,7 @@ class Annotation(object):
     def __getattr__(self, name):
         """
         allow usage of annotation.foo or annotation[foo] to return the
-        intendede value
+        intended value
         """
         if name in self._mydict.keys():
             self.__dict__[name] = self._mydict[name]
