@@ -52,7 +52,9 @@ class FCMdataTestCase(unittest.TestCase):
 #        self.fcm = FCMdata(d3, ['a'])
 
     def testGate(self):
-        g = Gate(array([[-.1,-.1],[-.1,1.1],[1.1,1.1], [1.1,-.1]]), (0,1))
+        verts =  array([[-.1,-.1],[-.1,1.1],[1.1,1.1], [1.1,-.1]])
+        cols = (0,1)
+        g = Gate(verts, cols)
         n = self.fcm.gate(g)
         assert n.pnts.all() == array([[0,1,2]]).all(), 'gate excluded wrong points'
         

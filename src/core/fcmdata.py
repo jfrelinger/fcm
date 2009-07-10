@@ -2,11 +2,11 @@
 A python object representing flow cytomoetry data
 """
 from numpy import array
-from fcmannotation import Annotation
+from annotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
-from fcmtransforms import logicle as _logicle
-from fcmtransforms import hyperlog as _hyperlog
-from fcmgate import Gate
+from transforms import logicle as _logicle
+from transforms import hyperlog as _hyperlog
+from gate import Gate
 
 class FCMdata(object):
     """

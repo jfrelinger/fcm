@@ -1,6 +1,6 @@
 from numpy import array, reshape
 from numpy.linalg import solve
-from core.fcmexceptions import CompensationError
+from fcmexceptions import CompensationError
 
 def get_spill(text):
     """Extracts spillover matrix from FCS text entry.
