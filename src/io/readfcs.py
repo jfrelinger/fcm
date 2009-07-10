@@ -22,9 +22,6 @@ class FCSreader(object):
         self._fh = open(filename, 'rb')
         self.cur_offset = 0
         
-        
-        
-   
     def get_FCMdata(self):
         """Return the next FCM data set stored in a FCS file"""
         # parse headers

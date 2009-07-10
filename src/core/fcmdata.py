@@ -19,7 +19,7 @@ class FCMdata(object):
     """
     
     
-    def __init__(self, pnts, channels, scatters=None, annotations=None):
+    def __init__(self, pnts, channels, scatters=None, notes=None):
         """
         fcmdata(pnts, channels, scatters=None)
         pnts: array of data points
@@ -39,9 +39,9 @@ class FCMdata(object):
             for chan in range(len(channels)):
                 if chan not in self.scatters:
                     self.markers.append(chan)
-        if annotations == None:
-            annotations = Annotation()
-        self.annotation = annotations
+        if notes == None:
+            notes = Annotation()
+        self.note = notes
         
     def name_to_index(self, channels):
         """Return the channel indexes for the named channels"""
@@ -80,10 +80,10 @@ class FCMdata(object):
             tpnts = self.pnts.copy()
         else:
             tpnts = npnts
-        tanno = self.annotation.copy()
+        tnote = self.note.copy()
         tchannels = self.channels[:]
         tmarkers = self.markers[:]
-        return FCMdata(tpnts, tchannels, tmarkers, tanno)
+        return FCMdata(tpnts, tchannels, tmarkers, tnote)
     
     def logicle(self, channels, T, m, r, order=2, intervals=1000.0):
         """return logicle transformed channels"""
