@@ -1,5 +1,11 @@
-# draggable rectangle with the animation blit techniques; see
-# http://www.scipy.org/Cookbook/Matplotlib/Animations
+"""Gate class implements gating using Matplotlib animation and events.
+
+Right click to add vertex.
+Left click and drag vertex to move.
+When vertices >= 3, polygonal gate will display.
+Double click within gate to extract gated events - for now these will be stored in fcm.note['gate_%d_%d' % idxs]
+"""
+
 import numpy
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Polygon
