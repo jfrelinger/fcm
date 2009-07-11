@@ -3,7 +3,7 @@
 Right click to add vertex.
 Left click and drag vertex to move.
 When vertices >= 3, polygonal gate will display.
-Double click within gate to extract gated events - for now these will be stored in fcm.note['gate_%d_%d' % idxs]
+Double click within gate to extract gated events and zoom to gated region.
 """
 
 import numpy
