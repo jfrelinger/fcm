@@ -1,11 +1,3 @@
-"""Gate class implements gating using Matplotlib animation and events.
-
-Right click to add vertex.
-Left click and drag vertex to move.
-When vertices >= 3, polygonal gate will display.
-Double click within gate to extract gated events and zoom to gated region.
-"""
-
 import numpy
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Polygon
@@ -16,6 +8,10 @@ from matplotlib.nxutils import points_inside_poly
 import time
 
 class DraggableVertex(object):
+    """
+    Draggable vertex of gating polygon.
+    """
+
     lock = None  # only one can be animated at a time
     def __init__(self, circle, parent):
         self.parent = parent
@@ -72,6 +68,14 @@ class DraggableVertex(object):
         self.canvas.mpl_disconnect(self.cid_motion)
 
 class Gate(object):
+    """Gate class implements gating using Matplotlib animation and events.
+
+    Right click to add vertex.
+    Left click and drag vertex to move.
+    When vertices >= 3, polygonal gate will display.
+    Double click within gate to extract gated events and zoom to gated region.
+    """
+
     def __init__(self, fcm, idxs, ax):
         self.fcm = fcm
         self.idxs = idxs
