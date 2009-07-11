@@ -66,11 +66,14 @@ class DraggableVertex(object):
         self.canvas.mpl_disconnect(self.cid_motion)
 
 class Gate(object):
-    def __init__(self, fcm, ax, points):
+    def __init__(self, fcm, idxs, ax):
         self.fcm = fcm
+        self.idxs = idxs
+        ax.scatter(fcm[:,idxs[0]], fcm[:,idxs[1]], 
+                   s=1, c= 'b', edgecolors='none')
+
         self.canvas = ax.figure.canvas
         self.ax = ax
-        self.points = points
         self.vertices = []
         self.poly = None
         self.background = None
@@ -132,14 +135,16 @@ class Gate(object):
             if (event.button == 1 and 
                 points_inside_poly(xypoints, xy)):
                 if (time.time() - self.t < self.double_click_t):
-                    data = fcm.pnts[:,[2,3]]
+                    data = self.fcm.pnts[:,[self.idxs[0],self.idxs[1]]]
                     idx = points_in_poly(xy, data)
-                    self.fcm.note['gate'] = idx
+                    args = (self.idxs[0], self.idxs[1])
+                    self.fcm.note['gate_%d_%d' % args] = idx
                     self.vertices = []
                     self.poly = None
                     self.update()
 
-                    print self.fcm.note['gate'], numpy.sum(self.fcm.note['gate'])
+                    print self.fcm.note['gate_%d_%d' % args], \
+                        numpy.sum(self.fcm.note['gate_%d_%d' % args])
 
                 self.t = time.time()
 
@@ -158,8 +163,7 @@ if __name__ == '__main__':
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    points = ax.scatter(fcm[:,2], fcm[:,3], s=1, c= 'b', edgecolors='none')
-
-    gate = Gate(fcm, ax, points)
+    idxs = [2,3]
+    gate = Gate(fcm, idxs, ax)
 
     plt.show()
