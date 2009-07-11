@@ -103,6 +103,8 @@ class Gate(object):
         self.background = self.canvas.copy_from_bbox(self.ax.bbox)
 
     def update(self):
+        print "updating"
+
         if len(self.vertices) >= 3:
             xy = numpy.array([v.circle.center for v in self.vertices])
             # bug in matplotlib? patch is not closed without this
@@ -120,6 +122,9 @@ class Gate(object):
             self.ax.draw_artist(self.poly)
         for vertex in self.vertices:
             self.ax.draw_artist(vertex.circle)
+
+        print ">>>", self.ax.bbox
+            
         self.canvas.blit(self.ax.bbox)
 
     def onclick(self, event):
@@ -133,27 +138,35 @@ class Gate(object):
 
         # double left click triggers gating
         xy = numpy.array([v.circle.center for v in self.vertices])
-        print xy.shape
         xypoints = numpy.array([[event.xdata, event.ydata]])
-        print xypoints, xypoints.shape
 
         if self.poly:
             if (event.button == 1 and 
                 points_inside_poly(xypoints, xy)):
                 if (time.time() - self.t < self.double_click_t):
-                    data = self.fcm.pnts[:,[self.idxs[0],self.idxs[1]]]
-                    idx = points_in_poly(xy, data)
-                    args = (self.idxs[0], self.idxs[1])
-                    self.fcm.note['gate_%d_%d' % args] = idx
-                    self.vertices = []
-                    self.poly = None
-                    self.update()
-
-                    print self.fcm.note['gate_%d_%d' % args], \
-                        numpy.sum(self.fcm.note['gate_%d_%d' % args])
-
+                    self.zoom_to_gate(event)
                 self.t = time.time()
 
+    def zoom_to_gate(self, event):
+        xy = numpy.array([v.circle.center for v in self.vertices])
+        data = self.fcm.pnts[:,[self.idxs[0],self.idxs[1]]]
+        idx = points_in_poly(xy, data)
+        args = (self.idxs[0], self.idxs[1])
+        self.fcm.note['gate_%d_%d' % args] = idx
+        self.vertices = []
+        self.poly = None
+        self.ax.patches = []
+
+        # get rid of old points and plot new
+        del self.ax.collections[0]
+        points = ax.scatter(fcm[idx,idxs[0]], fcm[idx,idxs[1]], 
+                            s=1, c= 'b', edgecolors='none')
+
+        xmin, ymin = numpy.min(xy, 0)
+        xmax, ymax = numpy.max(xy, 0)
+        self.ax.axis([xmin, xmax, ymin, ymax])
+        self.update_background(event)
+        self.canvas.draw()
 
     def disconnect(self):
         'disconnect all the stored connection ids'
