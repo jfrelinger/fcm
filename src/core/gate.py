@@ -1,4 +1,5 @@
 import numpy
+from matplotlib.nxutils import points_inside_poly
 
 class Gate(object):
     """An object representing a gatable region"""
@@ -19,6 +20,10 @@ class Gate(object):
         if chan is None:
             chan = self.chan
         idxs = points_in_poly(self.vert, fcm.pnts[:, chan])
+
+        # matplotlib has points in poly routine in C
+        # no faster than our numpy version
+        # idxs = points_inside_poly(fcm.pnts[:, chan], self.vert)
         return fcm.copy(fcm.pnts[idxs])
         
     
@@ -32,12 +37,12 @@ def points_in_poly(vs, ps):
 
     # optimization to check only events within bounding box
     # for polygonal gate - useful if gating region is small
-    area_ratio_threshold = 0.5
-    area_gate_bb = numpy.prod(numpy.max(vs, 0) - numpy.min(vs, 0))
-    area_gate_ps = numpy.prod(numpy.max(ps, 0) - numpy.min(ps, 0))
-    if area_gate_bb/area_gate_ps < area_ratio_threshold:
-        idx = numpy.prod((ps > numpy.min(vs, 0)) & (ps < numpy.max(vs, 0)),1)
-        ps = ps[idx.astype('bool'), :]
+    # area_ratio_threshold = 0.5
+    # area_gate_bb = numpy.prod(numpy.max(vs, 0) - numpy.min(vs, 0))
+    # area_gate_ps = numpy.prod(numpy.max(ps, 0) - numpy.min(ps, 0))
+    # if area_gate_bb/area_gate_ps < area_ratio_threshold:
+    #     idx = numpy.prod((ps > numpy.min(vs, 0)) & (ps < numpy.max(vs, 0)),1)
+    #     ps = ps[idx.astype('bool'), :]
 
     j = len(vs) - 1
     inPoly = numpy.zeros((len(vs), len(ps)), 'bool')
