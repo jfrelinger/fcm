@@ -6,7 +6,7 @@ from annotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
 from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
-from gate import Gate
+from util import Tree, RootNode
 
 class FCMdata(object):
     """
@@ -30,7 +30,8 @@ class FCMdata(object):
         """
         if type(pnts) != type(array([])):
             raise BadFCMPointDataTypeError(pnts, "pnts isn't a numpy.array")
-        self.pnts = pnts
+        self.tree = Tree(pnts)
+        #self.pnts = pnts
         self.channels = channels
         #TODO add some default intelegence for determining scatters if None
         self.scatters = scatters
@@ -54,7 +55,7 @@ class FCMdata(object):
     def get_channel_by_name(self, channels):
         """Return the data associated with specific channel names"""
         
-        return self.pnts[:, self.name_to_index(channels)]
+        return self.tree.view()[:, self.name_to_index(channels)]
     
     def get_markers(self):
         """return the data associated with all the markers"""
@@ -70,14 +71,15 @@ class FCMdata(object):
             if type(item[0]) == type(''):
                 return self.get_channel_by_name(list(item))
             else:
-                return self.pnts[item]
+                return self.tree.view()[item]
         else:
-            return self.pnts[item]
+            return self.tree.view()[item]
         
     def copy(self, npnts=None):
+        #TODO rewrite
         """return a copy of fcm data object"""
         if npnts is None:
-            tpnts = self.pnts.copy()
+            tpnts = self.view().copy()
         else:
             tpnts = npnts
         tnote = self.note.copy()
@@ -98,6 +100,6 @@ class FCMdata(object):
         return g.gate(self, chan)
     
     def __getattr__(self, name):
-        return self.pnts.__getattribute__(name)
+        return self.tree.view().__getattribute__(name)
 
         

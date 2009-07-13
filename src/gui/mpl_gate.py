@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Polygon
 import sys
 sys.path.append('../core/')
-from gate import points_in_poly
+from core import points_in_poly
 from matplotlib.nxutils import points_inside_poly
 import time
 

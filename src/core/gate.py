@@ -19,12 +19,12 @@ class Gate(object):
         """
         if chan is None:
             chan = self.chan
-        idxs = points_in_poly(self.vert, fcm.pnts[:, chan])
+        idxs = points_in_poly(self.vert, fcm.view()[:, chan])
 
         # matplotlib has points in poly routine in C
         # no faster than our numpy version
         # idxs = points_inside_poly(fcm.pnts[:, chan], self.vert)
-        return fcm.copy(fcm.pnts[idxs])
+        return fcm.copy(fcm.view()[idxs])
         
     
 

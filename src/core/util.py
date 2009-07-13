@@ -1,9 +1,10 @@
 import networkx
 
 class Tree(object):
-    def __init__(self):
+    def __init__(self, pnts):
         self.g = networkx.LabeledDiGraph()
-        self.g.add_node('root')
+        self.root = RootNode('root', pnts)
+        self.g.add_node('root', self.root)
         self.current = 'root'
 
     def parent(self):
@@ -17,14 +18,60 @@ class Tree(object):
 
     def get(self):
         return self.g.get_node(self.current)
+    
+    def view(self):
+        return self.g.get_node(self.current).view()
 
-    def add_child(self, name, data):
-        self.g.add_node(name, data)
+    def add_child(self, name, node):
+        self.g.add_node(name, node)
         self.g.add_edge(self.current, name)
         self.current = name
 
+
+class Node(object):
+    """
+    base node object
+    """
+    
+    def __init__(self, name, parent, data):
+        self.name = name
+        self.parent = parent
+        self.data = data
+    
+    def view(self):
+        """
+        return the view of the data associated with this node
+        """
+        
+        return self.data
+    
+class RootNode(Node):
+    """
+    Root Node
+    """
+    
+    def __init__(self, name, data):
+        self.name = name
+        self.parent = None
+        self.data = data
+        
+class GatingNode(Node):
+    """
+    Node of gated data
+    """
+    
+    def __init___(self, name, parent, data):
+        self.name = name
+        self.parent = parent
+        self.data = data
+        
+    def view(self):
+        return self.parent.view() & self.data
+        
+        
 if __name__ == '__main__':
-    t = Tree()
+    import matplotlib.pyplot as plt
+    t = Tree([0,0,0])
     t.add_child('gate1', [1,2,3])
     t.add_child('gate11', [4,5,6])
     t.visit('root')
@@ -44,5 +91,7 @@ if __name__ == '__main__':
     print t.get()
     t.visit('gate2')
     print t.get()
+    networkx.draw(t.g)
+    plt.show()
     
     
