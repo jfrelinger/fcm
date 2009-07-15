@@ -5,6 +5,8 @@ from scipy.optimize import fsolve, brentq
 from scipy import interpolate
 from numpy import arange, exp, log, min, max, sign, concatenate, zeros, vectorize
 
+from util import TransformNode
+
 def quantile(x, n):
     """return the lower nth quantile"""
     try:
@@ -46,10 +48,11 @@ def _logicle(y, T, m, r, order=2, intervals=1000.0):
 
 def logicle(fcm, channels, T, m, r, order=2, intervals=1000.0):
     """return logicle transformed points in fcm data for channels listed"""
-    npnts = fcm.pnts.copy()
+    npnts = fcm.view().copy()
     for i in channels:
         npnts.T[i] = _logicle(npnts[:, i].T, T, m, r, order, intervals)
-    return fcm.copy(npnts)
+    node = TransformNode('Logicle transformed', fcm.get_current_node(), npnts)
+    return fcm.add_view(node)
  
 def EH(x, y, b, d, r):
     e = float(d)/r
@@ -68,10 +71,11 @@ def _hyperlog(y, b, d, r, order=2, intervals=1000.0):
     return interpolate.splev(y, t)
 
 def hyperlog(fcm, channels, b, d, r, order=2, intervals=1000.0):
-    npnts = fcm.pnts.copy()
+    npnts = fcm.view().copy()
     for i in channels:
         npnts.T[i] = _hyperlog(npnts[:,i].T, b, d, r, order=2, intervals=1000.0)
-    return fcm.copy(npnts)
+    node = TransformNode('Hyperlog transformed', fcm.get_current_node(), npnts)
+    return fcm.add_view(node)
 
 if __name__ == '__main__':
     from numpy.random import normal, lognormal, shuffle

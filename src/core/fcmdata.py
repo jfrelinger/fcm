@@ -75,6 +75,9 @@ class FCMdata(object):
         else:
             return self.tree.view()[item]
         
+    def view(self):
+        return self.tree.view()
+    
     def copy(self, npnts=None):
         #TODO rewrite so the tree is copied...
         """return a copy of fcm data object"""
@@ -105,6 +108,7 @@ class FCMdata(object):
     def add_view(self, node):
         """add a new node to the view tree"""
         self.tree.add_child(node.name, node)
+        return self
     
     def __getattr__(self, name):
         return self.tree.view().__getattribute__(name)

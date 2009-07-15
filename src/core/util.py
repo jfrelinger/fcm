@@ -55,6 +55,16 @@ class RootNode(Node):
         self.parent = None
         self.data = data
         
+class TransformNode(Node):
+    """
+    Transformed Data Node
+    """
+    
+    def __init__(self, name, parent,  data):
+        self.name = name
+        self.parent = parent
+        self.data = data
+        
 class GatingNode(Node):
     """
     Node of gated data
