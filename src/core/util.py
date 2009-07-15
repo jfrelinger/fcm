@@ -66,7 +66,7 @@ class GatingNode(Node):
         self.data = data
         
     def view(self):
-        return self.parent.view() & self.data
+        return self.parent.view()[self.data]
         
         
 if __name__ == '__main__':

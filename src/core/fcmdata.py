@@ -76,7 +76,7 @@ class FCMdata(object):
             return self.tree.view()[item]
         
     def copy(self, npnts=None):
-        #TODO rewrite
+        #TODO rewrite so the tree is copied...
         """return a copy of fcm data object"""
         if npnts is None:
             tpnts = self.view().copy()
@@ -89,15 +89,22 @@ class FCMdata(object):
     
     def logicle(self, channels, T, m, r, order=2, intervals=1000.0):
         """return logicle transformed channels"""
-        return _logicle(self, channels, T, m, r, order=2, intervals=1000.0)
+        return _logicle(self, channels, T, m, r, order, intervals)
         
     def hyperlog(self, channels, b, d, r, order=2, intervals=1000.0):
         """return hyperlog transformed channels"""
-        return _hyperlog(self, channels, b, d, r, order=2, intervals=1000.0)
+        return _hyperlog(self, channels, b, d, r, order, intervals)
     
     def gate(self, g, chan=None):
         """return gated region of fcm data"""
         return g.gate(self, chan)
+    
+    def get_cur_node(self):
+        return self.tree.get()
+    
+    def add_view(self, node):
+        """add a new node to the view tree"""
+        self.tree.add_child(node.name, node)
     
     def __getattr__(self, name):
         return self.tree.view().__getattribute__(name)

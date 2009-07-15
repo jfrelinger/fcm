@@ -1,5 +1,6 @@
 import numpy
 from matplotlib.nxutils import points_inside_poly
+from util import GatingNode
 
 class Gate(object):
     """An object representing a gatable region"""
@@ -24,7 +25,10 @@ class Gate(object):
         # matplotlib has points in poly routine in C
         # no faster than our numpy version
         # idxs = points_inside_poly(fcm.pnts[:, chan], self.vert)
-        return fcm.copy(fcm.view()[idxs])
+        
+        node = GatingNode("gated region", fcm.get_cur_node(), idxs)
+        fcm.add_view(node)
+        return fcm.view()
         
     
 
