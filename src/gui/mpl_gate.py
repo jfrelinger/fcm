@@ -4,6 +4,7 @@ from matplotlib.patches import Circle, Polygon
 import sys
 sys.path.append('../core/')
 from core import points_in_poly
+from core import Gate as g
 from matplotlib.nxutils import points_inside_poly
 import time
 
@@ -143,7 +144,7 @@ class Gate(object):
         # double left click triggers gating
         xy = numpy.array([v.circle.center for v in self.vertices])
         xypoints = numpy.array([[event.xdata, event.ydata]])
-
+        
         if self.poly:
             if (event.button == 1 and 
                 points_inside_poly(xypoints, xy)):
@@ -153,17 +154,19 @@ class Gate(object):
 
     def zoom_to_gate(self, event):
         xy = numpy.array([v.circle.center for v in self.vertices])
-        data = self.fcm.pnts[:,[self.idxs[0],self.idxs[1]]]
+        data = self.fcm.view()[:,[self.idxs[0],self.idxs[1]]]
         idx = points_in_poly(xy, data)
         args = (self.idxs[0], self.idxs[1])
-        self.fcm.note['gate_%d_%d' % args] = idx
+        gate = g(xy, self.idxs)
+        gate.gate(self.fcm)
+        #self.fcm.note['gate_%d_%d' % args] = idx
         self.vertices = []
         self.poly = None
         self.ax.patches = []
 
         # get rid of old points and plot new
         del self.ax.collections[0]
-        points = ax.scatter(fcm[idx,idxs[0]], fcm[idx,idxs[1]], 
+        points = ax.scatter(fcm[:,idxs[0]], fcm[:,idxs[1]], 
                             s=1, c= 'b', edgecolors='none')
 
         xmin, ymin = numpy.min(xy, 0)
