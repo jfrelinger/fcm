@@ -11,21 +11,24 @@ class FCMdict(dict):
     tree = tree of operations
     """
 
-    def __init__(self, fcms=None):
+    def __init__(self, fcms=None, notes=None):
+        """
+        Initialize with fcm collection and notes.
+        Tree of operations not implemented yet - how is this done in fcmdata?
+        """
         if fcms is not None:
             for fcm in fcms:
                 self[fcm.name] = fcm
-
-class FCM(object):
-    def __init__(self, name):
-        self.name = name
+        if notes is not None:
+            self.notes =Annotation()
+        else:
+            self.notes = notes
 
 if __name__ == '__main__':
-    f1 = FCM('f1')
-    f2 = FCM('f2')
-    fs = FCMdict([f1, f2])
+    from io import loadFCS
+    f1 = loadFCS('../../sample_data/3FITC_4PE_004.fcs')
+    fs = FCMdict([f1])
 
-    print fs['f1']
     print fs.keys()
     print fs.values()
 
