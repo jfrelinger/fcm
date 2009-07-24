@@ -19,15 +19,17 @@ class FCMdata(object):
     """
     
     
-    def __init__(self, pnts, channels, scatters=None, notes=None):
+    def __init__(self, name, pnts, channels, scatters=None, notes=None):
         """
-        fcmdata(pnts, channels, scatters=None)
+        fcmdata(name, pnts, channels, scatters=None)
+        name: name of corresponding FCS file minus extension
         pnts: array of data points
         channels: a list of which markers/scatters are on which column of
                     the array.
         scatters: a list of which indexes in channels are scatters
         
         """
+        self.name = name
         if type(pnts) != type(array([])):
             raise BadFCMPointDataTypeError(pnts, "pnts isn't a numpy.array")
         self.tree = Tree(pnts)
@@ -42,7 +44,7 @@ class FCMdata(object):
                     self.markers.append(chan)
         if notes == None:
             notes = Annotation()
-        self.note = notes
+        self.notes = notes
         
     def name_to_index(self, channels):
         """Return the channel indexes for the named channels"""
@@ -85,10 +87,10 @@ class FCMdata(object):
             tpnts = self.view().copy()
         else:
             tpnts = npnts
-        tnote = self.note.copy()
+        tnotes = self.notes.copy()
         tchannels = self.channels[:]
         tmarkers = self.markers[:]
-        return FCMdata(tpnts, tchannels, tmarkers, tnote)
+        return FCMdata(tpnts, tchannels, tmarkers, tnotes)
     
     def logicle(self, channels, T, m, r, order=2, intervals=1000.0):
         """return logicle transformed channels"""

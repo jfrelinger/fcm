@@ -128,7 +128,7 @@ class Gate(object):
         for vertex in self.vertices:
             self.ax.draw_artist(vertex.circle)
 
-        print ">>>", self.ax.bbox
+        # print ">>>", self.ax.bbox
             
         self.canvas.blit(self.ax.bbox)
 
@@ -166,8 +166,9 @@ class Gate(object):
 
         # get rid of old points and plot new
         del self.ax.collections[0]
-        points = ax.scatter(fcm[:,idxs[0]], fcm[:,idxs[1]], 
-                            s=1, c= 'b', edgecolors='none')
+        points = self.ax.scatter(self.fcm[:,self.idxs[0]], 
+                                 self.fcm[:,self.idxs[1]], 
+                                 s=1, c= 'b', edgecolors='none')
 
         xmin, ymin = numpy.min(xy, 0)
         xmax, ymax = numpy.max(xy, 0)

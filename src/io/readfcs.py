@@ -9,7 +9,7 @@ from math import log
 from struct import calcsize, unpack
 import re
 import numpy
-
+import os
 
 class FCSreader(object):
     """
@@ -63,9 +63,9 @@ class FCSreader(object):
             if not name.lower().startswith('fl'):
                 scchannels.append(name)
             
-                
-        
-        tmpfcm = FCMdata(data, channels, scchannels,
+        path, name = os.path.split(self.filename)
+        name, ext = os.path.splitext(name)
+        tmpfcm = FCMdata(name, data, channels, scchannels,
             Annotation({'text': text,
                         'header': header,
                         'analysis': analysis,
