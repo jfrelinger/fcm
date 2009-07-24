@@ -30,7 +30,34 @@ class Gate(object):
         fcm.add_view(node)
         return fcm.view()
         
-    
+class QuadGate(Gate):
+    """
+    An object to divide a region to four quadrants
+    """
+    def __init__(self, vert, channels):
+        self.vert = vert
+        self.chan = channels
+        
+    def gate(self, fcm, chan = None):
+        """
+        return gated region
+        """
+        if chan is None:
+            chan = self.chan
+        # I (+,+), II (-,+), III (-,-), and IV (+,-)
+        x = fcm.view()[:,chan[0]]
+        y = fcm.view()[:,chan[1]]
+        quad = {}
+        quad[1] = (x>self.vert[0]) & (y>self.vert[1]) # (+,+)
+        quad[2] = (x<self.vert[0]) & (y>self.vert[1]) # (-,+)
+        quad[3] = (x<self.vert[0]) & (y<self.vert[1]) # (-,-)
+        quad[4] = (x>self.vert[0]) & (y<self.vert[1]) # (+,-)
+        root = fcm.get_cur_node()
+        for i in quad.keys():
+            if True in quad[i]:
+                node = GatingNode("Quadrant %d" % i, root, quad[i])
+                fcm.add_view(node)
+        
 
 def points_in_poly(vs, ps):
     """Return boolean index of events from ps that are inside polygon with vertices vs.
