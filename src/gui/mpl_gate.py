@@ -155,8 +155,8 @@ class Gate(object):
     def zoom_to_gate(self, event):
         xy = numpy.array([v.circle.center for v in self.vertices])
         data = self.fcm.view()[:,[self.idxs[0],self.idxs[1]]]
-        idx = points_in_poly(xy, data)
-        args = (self.idxs[0], self.idxs[1])
+        #idx = points_in_poly(xy, data)
+        #args = (self.idxs[0], self.idxs[1])
         gate = g(xy, self.idxs)
         gate.gate(self.fcm)
         #self.fcm.note['gate_%d_%d' % args] = idx
