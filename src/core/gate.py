@@ -53,8 +53,10 @@ class QuadGate(Gate):
         quad[3] = (x<self.vert[0]) & (y<self.vert[1]) # (-,-)
         quad[4] = (x>self.vert[0]) & (y<self.vert[1]) # (+,-)
         root = fcm.get_cur_node()
+        name = root.name
         for i in quad.keys():
             if True in quad[i]:
+                fcm.tree.visit(name)
                 node = GatingNode("Quadrant %d" % i, root, quad[i])
                 fcm.add_view(node)
         
