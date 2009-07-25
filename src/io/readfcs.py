@@ -27,6 +27,7 @@ class FCSreader(object):
         # parse headers
         header = self.parse_header(self.cur_offset)
         # parse text 
+        print self.read_bytes(0,header['text_start'], header['text_stop'])
         text = self.parse_text(self.cur_offset, header['text_start'], header['text_stop'])
         # parse annalysis
         try:
@@ -91,8 +92,14 @@ class FCSreader(object):
         header['text_stop'] = int(self.read_bytes(offset, 18, 25))
         header['data_start'] = int(self.read_bytes(offset, 26, 33))
         header['data_end'] = int(self.read_bytes(offset, 34, 41))
-        header['analysis_start'] = int(self.read_bytes(offset, 42, 49))
-        header['analysis_end'] = int(self.read_bytes(offset, 50, 57))
+        try:
+            header['analysis_start'] = int(self.read_bytes(offset, 42, 49))
+        except ValueError:
+            header['analysis_start'] = -1
+        try:
+            header['analysis_end'] = int(self.read_bytes(offset, 50, 57))
+        except ValueError:
+            header['analysis_end'] = -1
         
         return header
         
@@ -193,8 +200,9 @@ class FCSreader(object):
         
 def parse_pairs(text):
     """return key/value pairs from a delimited string"""
-    
     delim = text[0]
+    if delim == r'\a'[0]: # test for delimiter being \
+        delim = '\\\\' # regex will require it to be \\
     if delim != text[-1]:
         warn("text in segment does not start and end with delimiter")
     tmp = text[1:-1].replace('$','')
