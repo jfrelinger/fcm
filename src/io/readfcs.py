@@ -27,7 +27,6 @@ class FCSreader(object):
         # parse headers
         header = self.parse_header(self.cur_offset)
         # parse text 
-        print self.read_bytes(0,header['text_start'], header['text_stop'])
         text = self.parse_text(self.cur_offset, header['text_start'], header['text_stop'])
         # parse annalysis
         try:
@@ -129,12 +128,12 @@ class FCSreader(object):
         if mode == 'c' or mode == 'u':
             raise UnimplementedFcsDataMode(mode)
         
-        if text['byteord'] == '1,2,3,4':
+        if text['byteord'] == '1,2,3,4' or text['byteord'] == '1,2':
             order = '<'
-        elif text['byteord'] == '4,3,2,1':
+        elif text['byteord'] == '4,3,2,1' or text['byteord'] == '2,1':
             order = '>'
         else:
-            warn("unsupported byte order, using default @")
+            warn("unsupported byte order %s , using default @" % text['byteord'] )
             order = '@'
         # from here on out we assume mode l (list)
         
