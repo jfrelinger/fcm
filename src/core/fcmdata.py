@@ -30,8 +30,8 @@ class FCMdata(object):
         
         """
         self.name = name
-        if type(pnts) != type(array([])):
-            raise BadFCMPointDataTypeError(pnts, "pnts isn't a numpy.array")
+#        if type(pnts) != type(array([])):
+#            raise BadFCMPointDataTypeError(pnts, "pnts isn't a numpy.array")
         self.tree = Tree(pnts)
         #self.pnts = pnts
         self.channels = channels

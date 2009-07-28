@@ -88,7 +88,7 @@ class DiME(object):
         Dc = zeros(self.c)
         sum_ex = 0 # use this later to caculate complete sum in \Gamma_c
         for mclust in self.cmap.keys():
-            normalizing = self.cpi[mclust]/(1-self.cpi[mclust])
+            normalizing = 1.0/(1-self.cpi[mclust])
             tmp = []
             for i in self.cmap.keys():
                 if i == mclust:
@@ -97,7 +97,7 @@ class DiME(object):
                     tmp.append(i)
             sum_ex = sum([self.cpi[i]*F[mclust,i] for i in tmp])
             dc[mclust] = normalizing*sum_ex
-            Dc[mclust] = self.cpi[mclust]*(sum_ex+(self.cpi[mclust]*F[mclust,mclust]))
+            Dc[mclust] = 1*(sum_ex+(self.cpi[mclust]*F[mclust,mclust]))
         return -1*log2(dc/Dc)
     
     def rdrop(self, drop):

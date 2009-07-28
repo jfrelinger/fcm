@@ -153,14 +153,13 @@ class FCSreader(object):
     
     def parse_int_data(self, offset, start, stop, bitwidth, drange, tot, order):
         """Parse out and return integer list data from fcs file"""
-        
         if reduce(and_, [item in [8, 16, 32] for item in bitwidth]):
             if len(set(bitwidth)) == 1: # uniform size for all parameters
                 # calculate how much data to read in.
                 num_items = (stop-start+1)/calcsize(fmt_integer(bitwidth[0]))
                 #unpack into a list
                 tmp = unpack('%s%d%s' % (order, num_items, fmt_integer(bitwidth[0])), 
-                                    self.read_bytes(offset, start, stop))
+                                    self.read_bytes(offset, start, stop-1))
                 
 
             else: # parameter sizes are different e.g. 8, 8, 16,8, 32 ... do one at a time
