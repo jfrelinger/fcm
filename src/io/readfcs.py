@@ -159,7 +159,7 @@ class FCSreader(object):
                 num_items = (stop-start+1)/calcsize(fmt_integer(bitwidth[0]))
                 #unpack into a list
                 tmp = unpack('%s%d%s' % (order, num_items, fmt_integer(bitwidth[0])), 
-                                    self.read_bytes(offset, start, stop-1))
+                                    self.read_bytes(offset, start, stop))
                 
 
             else: # parameter sizes are different e.g. 8, 8, 16,8, 32 ... do one at a time

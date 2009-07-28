@@ -38,7 +38,7 @@ class FCMdata(object):
         #TODO add some default intelegence for determining scatters if None
         self.scatters = scatters
         self.markers = []
-        if scatters is not None:
+        if self.scatters is not None:
             for chan in range(len(channels)):
                 if chan not in self.scatters:
                     self.markers.append(chan)

@@ -9,7 +9,7 @@ from core import Gate
 class FCMdataTestCase(unittest.TestCase):
     def setUp(self):
         self.pnts = array([[0,1,2],[3,4,5]])
-        self.fcm = FCMdata(self.pnts, ['fsc','ssc','cd3'], [0,1])
+        self.fcm = FCMdata('test_fcm', self.pnts, ['fsc','ssc','cd3'], [0,1])
         
     def testGetPnts(self):
         a = randint(0,1)
@@ -21,6 +21,7 @@ class FCMdataTestCase(unittest.TestCase):
         assert self.fcm.get_channel_by_name(['fsc'])[1] == 3, 'incorrect first column'
         
     def testGetMarkers(self):
+        print self.fcm.markers
         assert self.fcm.markers == [2], 'Marker CD3 not picked up'
     
     def testGetItem(self):
