@@ -1,6 +1,6 @@
 from __future__ import division
 from statistics.distributions import mvnormpdf, mixnormpdf
-from numpy import array, dot, log2, zeros, sum
+from numpy import array, dot, log2, zeros, sum, diag, ones, identity
 
 class DiME(object):
     """
@@ -67,20 +67,22 @@ class DiME(object):
         # TODO: parallelize here
         
         size = len(self.pi)
-        f = zeros((size, size), dtype='float64')
+        f = zeros((size, size), dtype='float32')
         #zero = zeros(x.shape[1])
         for i in range(size):
             for j in range(i,size):
-                f[i, j] = f[j, i] = mvnormpdf(mus[i], mus[j], sigmas[i]+sigmas[j])
+               f[j, i] = mvnormpdf(mus[i], mus[j], sigmas[i]+sigmas[j])
+               f[i,j] = f[j,i]
                 
-        F = zeros((self.c, self.c), dtype='float64')
+        F = zeros((self.c, self.c), dtype='float32')
         for i in range(self.c):
             for j in range(i, self.c):
                 tmp = 0
                 for fclust in self.cmap[i]:
                     for tclust in self.cmap[j]:
                         tmp += (self.pi[fclust]/self.cpi[i])*(self.pi[tclust]/self.cpi[j])*f[fclust,tclust]
-                F[i,j] = F[j,i] = tmp
+                F[j,i] = tmp
+                F[i,j] = F[j,i]
         
 
         #calculate \delta_c and \Delta_c
@@ -98,6 +100,10 @@ class DiME(object):
             sum_ex = sum([self.cpi[i]*F[mclust,i] for i in tmp])
             dc[mclust] = normalizing*sum_ex
             Dc[mclust] = 1*(sum_ex+(self.cpi[mclust]*F[mclust,mclust]))
+        #dc = F - diag(diag(F))
+        #Dc = (identity(self.c)/(identity(self.c)-self.cpi))*(dot(dc,self.cpi)/(dot(F,self.cpi)))
+        #print f
+        #print dc
         return -1*log2(dc/Dc)
     
     def rdrop(self, drop):

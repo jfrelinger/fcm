@@ -2,17 +2,26 @@
 Distributions used in FCS analysis
 """
 
-from numpy import transpose, shape, pi, exp, dot, kron, ones, diag, reshape, prod
-from numpy.linalg import cholesky, inv
+from numpy import pi, exp, dot, ones, array, sqrt, fabs
+from numpy.linalg import inv, det
 
-def mvnormpdf(x, mu, Sigma):
-    """Multivariate normal density."""
-    if len(x.shape) == 1:
-        x = reshape(x, (len(x), 1))
-    p, n = shape(x)
-    c = cholesky(Sigma)
-    e = dot(inv(c).T, x - transpose(kron(ones((n, 1)), mu)))
-    return exp(-sum(e*e, 0)/2.0)/(prod(diag(c))*(2.0*pi)**(p/2.0))
+
+def mvnormpdf(x, mu, va):
+    """
+    multi variate normal pdf, derived from David Cournapeau's em package
+    for mixture models
+    http://www.ar.media.kyoto-u.ac.jp/members/david/softwares/em/index.html
+    """
+    d       = mu.size
+    inva    = inv(va)
+    fac     = 1 /sqrt( (2*pi) ** d * fabs(det(va)))
+
+    y   = -0.5 * dot(dot((x-mu), inva) * (x-mu), 
+                       ones((mu.size, 1), x.dtype))
+
+    y   = fac * exp(y)
+    return y
+
 
 def mixnormpdf(x, prop, mu, Sigma):
     """Mixture of multivariate normal pdfs for maximization"""
@@ -22,3 +31,17 @@ def mixnormpdf(x, prop, mu, Sigma):
         # print i,
         tmp += prop[i]*mvnormpdf(x, mu[i], Sigma[i])
     return tmp
+
+
+if __name__ == '__main__':
+    x = array([1,0])
+    mu = array([0,0])
+    sig = array([[1,0],[0, 1]])
+
+    print 'new:', mvnormpdf(x,mu,sig)
+    x = array([1,0])
+    mu = array([0,0])
+    sig = array([[1,.75],[.75, 1]])
+
+    print 'new:', mvnormpdf(x,mu,sig)
+    print 'array:', mvnormpdf(array([x,x]), mu, sig)
