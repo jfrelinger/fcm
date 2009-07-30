@@ -2,7 +2,7 @@
 """
 
 from core import FCMdata
-from core import Gate, points_in_poly
+from core import Gate, points_in_poly, QuadGate
 from core import BadFCMPointDataTypeError, UnimplementedFcsDataMode
 from core import CompensationError
 from io import FCSreader, loadFCS
@@ -12,6 +12,7 @@ __all__ == [
             #Objects
             'FCMdata',
             'Gate',
+            'QuadGate',
             'FCSreader',
             #Exceptions
             'BadFCMPointDataTypeError',
