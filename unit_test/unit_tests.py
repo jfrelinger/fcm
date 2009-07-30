@@ -8,6 +8,7 @@ from test_FCM_data import FCMdataTestCase
 from test_load_lmd import FCSreaderLMDTestCase
 from test_transforms import FCMtransformTestCase
 from test_load_fcs import FCSreaderTestCase
+from test_tree  import TreeTestCase
 
 
 if __name__ == "__main__":
@@ -16,7 +17,8 @@ if __name__ == "__main__":
     suite3 = unittest.makeSuite(FCSreaderLMDTestCase, 'test')
     suite4 = unittest.makeSuite(FCMtransformTestCase, 'test')
     suite5 = unittest.makeSuite(FCSreaderTestCase,'test')
-    alltests = unittest.TestSuite((suite1, suite2, suite3, suite4, suite5))
+    suite6 = unittest.makeSuite(TreeTestCase, 'test')
+    alltests = unittest.TestSuite((suite1, suite2, suite3, suite4, suite5, suite6))
 
     unittest.main()
 

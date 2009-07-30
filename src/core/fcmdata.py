@@ -78,7 +78,16 @@ class FCMdata(object):
             return self.tree.view()[item]
         
     def view(self):
+        """return the current view of the data"""
         return self.tree.view()
+    
+    def visit(self, name):
+        """Switch current view of the data"""
+        self.tree.visit(name)
+        
+    def current_node(self):
+        """return the current node"""
+        return self.tree.current
     
     def copy(self, npnts=None):
         #TODO rewrite so the tree is copied...
