@@ -17,3 +17,5 @@ src/statistics/treg/*
 .*\.gif
 .*\.avi
 .*\.mov
+scratch/*
+build/*
