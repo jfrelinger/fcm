@@ -1,6 +1,6 @@
 import unittest
 import numpy
-from core import productlog
+from fcm.core import productlog
 
 class FCMtransformTestCase(unittest.TestCase):
     def setUp(self):

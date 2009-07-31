@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Circle
 import time
-from core import QuadGate
+from fcm import QuadGate
 
 class Gate(object):
     """Gate class implements gating using Matplotlib animation and events.

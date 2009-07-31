@@ -1,9 +1,9 @@
 """Provide access to data stored in FCS files"""
 
 from warnings import warn
-from core import FCMdata
-from core import Annotation
-from core import UnimplementedFcsDataMode
+from fcm import FCMdata
+from fcm.core import Annotation
+from fcm import UnimplementedFcsDataMode
 from operator import and_
 from math import log
 from struct import calcsize, unpack

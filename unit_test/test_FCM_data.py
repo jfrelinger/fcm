@@ -2,8 +2,8 @@ import unittest
 from numpy import array
 from random import randint
 
-from core import FCMdata
-from core import Gate
+from fcm import FCMdata
+from fcm import Gate
 
 
 class FCMdataTestCase(unittest.TestCase):

@@ -1,5 +1,5 @@
 import unittest
-from core import Annotation
+from fcm import Annotation
 
 class FCMAnnotationTestCase(unittest.TestCase):
     def setUp(self):

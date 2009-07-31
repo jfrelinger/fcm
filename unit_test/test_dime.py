@@ -3,7 +3,7 @@
 from __future__ import division
 import numpy
 import pylab
-import dime
+from fcm.statistics import dime
 
 if __name__ == '__main__':
     mu0 = [0,0,0]

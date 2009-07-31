@@ -1,10 +1,7 @@
 import numpy
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Polygon
-import sys
-sys.path.append('../core/')
-from core import points_in_poly
-from core import Gate as g
+from fcm import Gate as g
 from matplotlib.nxutils import points_inside_poly
 import time
 
