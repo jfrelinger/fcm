@@ -7,7 +7,7 @@
 .*~
 .*Store
 .*\.h5
-src/statistics/treg/*
+sample_data/treg/*
 .*\.orig
 .*\.png
 .*\.jpg
