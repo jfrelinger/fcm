@@ -8,10 +8,9 @@ class DiME(object):
     
     """
     
-    def __init__(self, x, pi, mu, sigma, cmap=None):
+    def __init__(self, pi, mu, sigma, cmap=None):
         """
         DiME(pi, mu, sigma, cmap=None):
-        x: data points
         pi: mixing proportions
         mu: means of distributions
         sigma: covariances
@@ -22,9 +21,7 @@ class DiME(object):
         self.pi = pi
         self.mu = mu
         self.sigma = sigma
-        self.data = x
-        self.k = x.shape[1] # dimension
-        self.n = x.shape[0] # number of points
+        self.k = self.mu.shape[1]
         if cmap == None:
             self.c = len(pi) # number of clusters
             self.cpi = pi
@@ -50,7 +47,6 @@ class DiME(object):
                 if i not in drop:
                     ids.append(i)
         
-        x = self.data[:,ids]
         ids = array(ids)
         mus = [m[ids] for m in self.mu]
         sigmas = [sig[ids,:][:,ids] for sig in self.sigma]
@@ -67,14 +63,13 @@ class DiME(object):
         # TODO: parallelize here
         
         size = len(self.pi)
-        f = zeros((size, size), dtype='float32')
-        #zero = zeros(x.shape[1])
+        f = zeros((size, size))
         for i in range(size):
             for j in range(i,size):
                f[j, i] = mvnormpdf(mus[i], mus[j], sigmas[i]+sigmas[j])
                f[i,j] = f[j,i]
                 
-        F = zeros((self.c, self.c), dtype='float32')
+        F = zeros((self.c, self.c))
         for i in range(self.c):
             for j in range(i, self.c):
                 tmp = 0
@@ -100,10 +95,7 @@ class DiME(object):
             sum_ex = sum([self.cpi[i]*F[mclust,i] for i in tmp])
             dc[mclust] = normalizing*sum_ex
             Dc[mclust] = 1*(sum_ex+(self.cpi[mclust]*F[mclust,mclust]))
-        #dc = F - diag(diag(F))
-        #Dc = (identity(self.c)/(identity(self.c)-self.cpi))*(dot(dc,self.cpi)/(dot(F,self.cpi)))
-        #print f
-        #print dc
+
         return -1*log2(dc/Dc)
     
     def rdrop(self, drop):
