@@ -19,3 +19,6 @@ sample_data/treg/*
 .*\.mov
 scratch/*
 build/*
+
+syntax: regexp
+^MANIFEST$

@@ -7,5 +7,5 @@ setup(name='fcm',
       description='Python Flow Cytometry (FCM) Tools',
       author='Jacob Frelinger',
       author_email='jacob.frelinger@duke.edu',
-      requires=['numpy (>=1.3.0)'],
+      requires=['numpy (>=1.3.0)'], # figure out the rest of what's a required package.
       )

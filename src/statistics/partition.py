@@ -18,11 +18,14 @@ class Partition(object):
         if p is None and z is None:
             raise(Warning("Neither p nor z arguments specified."))
         self.p = p
-        self.z = self._set_z()
+        if z is not None:
+            self.z = z
+        else:
+            self.z = self._set_z(z)
 
-    def _set_z(self):
+    def _set_z(self, z):
         """Returns array of indicator values."""
-        if self.z is None:
+        if z is None:
             try:
                 self.z = numpy.argmax(self.p, 1) 
             except:
