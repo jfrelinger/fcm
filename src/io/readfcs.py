@@ -10,14 +10,17 @@ from struct import calcsize, unpack
 import re
 import numpy
 import os
+from fcm.core.transforms import _logicle, quantile
+
 
 class FCSreader(object):
     """
     class to hold object to read and parse fcs files.  main usage is to get 
     a FCMdata object out of a fcs file
     """
-    def __init__(self, filename):
+    def __init__(self, filename, auto_logicle = True):
         self.filename = filename
+        self.logicle = auto_logicle
         #self._fh = cStringIO.StringIO(open(filename, 'rb').read())
         self._fh = open(filename, 'rb')
         self.cur_offset = 0
@@ -51,17 +54,32 @@ class FCSreader(object):
         data = self.parse_data(self.cur_offset, dstart, dstop, text)
         # build fcmdata object
         channels = []
-        display = []
         scchannels = []
+        to_logicle = []
         for i in range(1,int(text['par'])+1):
-            name= text['p%dn' %i]
-            channels.append(name)
             try:
-                display.append(text['p%ds' %i])
+                name = text['p%ds' %i]
             except KeyError:
-                display.append(name)
-            if not name.lower().startswith('fl'):
+                name= text['p%dn' %i]
+            channels.append(name)
+            #if not name.lower().startswith('fl'):
+            if not is_fl_channel(name):
                 scchannels.append(name)
+            else: # we're a FL channel
+                try:
+                    if text['p%dr' % i] == '262144':   
+                        to_logicle.append(i)
+                except KeyError:
+                    pass
+        print to_logicle
+        if header['version'] == 3.0 and self.logicle == True:
+            T = 262144
+            m = 4.5 * log(10)
+            for i in to_logicle:
+                dj = data[:,i]
+                r = quantile(dj[dj < 0], 0.05)
+                data[:,i] = _logicle(dj, T, m, r)
+
             
         path, name = os.path.split(self.filename)
         name, ext = os.path.splitext(name)
@@ -69,7 +87,7 @@ class FCSreader(object):
             Annotation({'text': text,
                         'header': header,
                         'analysis': analysis,
-                        'display': display}))
+                        }))
         # update cur_offset for multidata files
         # return fcm object
         return tmpfcm
@@ -87,6 +105,7 @@ class FCSreader(object):
         """
         
         header = {}
+        header['version'] = float(self.read_bytes(offset, 3, 5))
         header['text_start'] = int(self.read_bytes(offset, 10, 17))
         header['text_stop'] = int(self.read_bytes(offset, 18, 25))
         header['data_start'] = int(self.read_bytes(offset, 26, 33))
@@ -244,11 +263,28 @@ def log_factory(base):
 
 log2 = log_factory(2)
 
-def loadFCS(filename):
+def loadFCS(filename, auto_logicle=True):
     """Load and return a FCM data object from an FCS file"""
     
-    tmp = FCSreader(filename)
+    tmp = FCSreader(filename, auto_logicle)
     return tmp.get_FCMdata()
+
+def is_fl_channel(name):
+    name = name.lower()
+    if name.startswith('cs'):
+        return False
+    elif name.startswith('fs'):
+        return False
+    elif name.startswith('ss'):
+        return False
+    elif name.startswith('ae'):
+        return False
+    elif name.startswith('cv'):
+        return False
+    elif name.startswith('time'):
+        return False
+    else:
+        return True
 
 if __name__ == '__main__':
     pass
