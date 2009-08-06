@@ -1,6 +1,7 @@
-from numpy import array, reshape
-from numpy.linalg import solve
+from numpy import array, reshape, max, dot
+from numpy.linalg import solve, inv
 from fcmexceptions import CompensationError
+from util import TransformNode
 
 def get_spill(text):
     """Extracts spillover matrix from FCS text entry.
@@ -15,7 +16,7 @@ def get_spill(text):
     S = reshape(map(float, items), (n, n))        
     return S, markers
 
-def compensate(fcm, S=None, markers=None):
+def compensate(fcm, S=None, markers=None, comp=False, scale=False):
     """Compensate data given spillover matrix S and markers to compensate
     If S, markers is not given, will look for fcm.annotate.text['SPILL']
     """
@@ -26,6 +27,17 @@ def compensate(fcm, S=None, markers=None):
         S, m = get_spill(fcm.annotate.text['SPILL'])
         if markers is None:
             markers = m
+            
+    if scale and not comp:
+        S = S/max(S)
+    if not comp:
+        S = inv(S)
     idx = fcm.name_to_index(markers)
-    return solve(S.T, fcm.pnts[idx])
+    
+    c = dot(fcm.view()[idx], S)
+    new = fcm.view()[:]
+    new[idx] = c
+    node = TransformNode('Compensated', fcm.get_cur_node, new)
+    fcm.add_view(node)
+    return new
 
