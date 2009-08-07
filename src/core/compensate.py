@@ -27,17 +27,19 @@ def compensate(fcm, S=None, markers=None, comp=False, scale=False):
         S, m = get_spill(fcm.annotate.text['SPILL'])
         if markers is None:
             markers = m
-            
-    if scale and not comp:
-        S = S/max(S)
-    if not comp:
-        S = inv(S)
     idx = fcm.name_to_index(markers)
     
-    c = dot(fcm.view()[idx], S)
+    c = _compensate(fcm.view()[idx], S, comp, scale)
     new = fcm.view()[:]
     new[idx] = c
     node = TransformNode('Compensated', fcm.get_cur_node, new)
     fcm.add_view(node)
     return new
 
+def _compensate(data, spill, comp=False, scale=False):
+    if scale and not comp:
+        spill = spill/max(spill)
+    if not comp:
+        spill = inv(spill)
+        
+    return dot(data,spill)
