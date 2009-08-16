@@ -3,14 +3,17 @@
 from warnings import warn
 from fcm import FCMdata
 from fcm.core import Annotation
+from fcm.core.transforms import _logicle, quantile
+from fcm.core.compensate import _compensate, get_spill
 from fcm import UnimplementedFcsDataMode
+
 from operator import and_
 from math import log
 from struct import calcsize, unpack
 import re
 import numpy
 import os
-from fcm.core.transforms import _logicle, quantile
+
 
 
 class FCSreader(object):
@@ -18,14 +21,16 @@ class FCSreader(object):
     class to hold object to read and parse fcs files.  main usage is to get 
     a FCMdata object out of a fcs file
     """
-    def __init__(self, filename, auto_logicle = True):
+    def __init__(self, filename, auto_logicle = True, sidx = None, spill=None):
         self.filename = filename
         self.logicle = auto_logicle
         #self._fh = cStringIO.StringIO(open(filename, 'rb').read())
         self._fh = open(filename, 'rb')
         self.cur_offset = 0
+        self.spill = spill
+        self.sidx = sidx
         
-    def get_FCMdata(self):
+    def get_FCMdata(self, auto_comp=True):
         """Return the next FCM data set stored in a FCS file"""
         # parse headers
         header = self.parse_header(self.cur_offset)
@@ -56,7 +61,9 @@ class FCSreader(object):
         channels = []
         scchannels = []
         to_logicle = []
+        base_chan_name = []
         for i in range(1,int(text['par'])+1):
+            base_chan_name.append( text['p%dn' % i])
             try:
                 name = text['p%ds' %i]
             except KeyError:
@@ -71,14 +78,30 @@ class FCSreader(object):
                         to_logicle.append(i)
                 except KeyError:
                     pass
-        print to_logicle
-        if header['version'] == 3.0 and self.logicle == True:
-            T = 262144
-            m = 4.5 * log(10)
-            for i in to_logicle:
-                dj = data[:,i]
-                r = quantile(dj[dj < 0], 0.05)
-                data[:,i] = _logicle(dj, T, m, r)
+        if auto_comp:
+            if self.spill is None:
+                try:
+                    self.spill, self.sidx = get_spill(text['spill'])
+                except KeyError:
+                    pass
+            if self.spill is not None and self.sidx is not None:
+                idx = []
+                for si in self.sidx:
+                    idx.append(base_chan_name.index(si))
+                print data.shape
+                print data[:,idx].shape, self.spill.shape
+                c = _compensate(data[:,idx], self.spill)
+                data[:,idx] = c
+                
+                
+                    
+            if header['version'] == 3.0 and self.logicle == True:
+                T = 262144
+                m = 4.5 * log(10)
+                for i in to_logicle:
+                    dj = data[:,i]
+                    r = quantile(dj[dj < 0], 0.05)
+                    data[:,i] = _logicle(dj, T, m, r)
 
             
         path, name = os.path.split(self.filename)
@@ -263,11 +286,11 @@ def log_factory(base):
 
 log2 = log_factory(2)
 
-def loadFCS(filename, auto_logicle=True):
+def loadFCS(filename, auto_logicle=True, auto_comp=True):
     """Load and return a FCM data object from an FCS file"""
     
     tmp = FCSreader(filename, auto_logicle)
-    return tmp.get_FCMdata()
+    return tmp.get_FCMdata(auto_comp)
 
 def is_fl_channel(name):
     name = name.lower()
