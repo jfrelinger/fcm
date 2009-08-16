@@ -21,7 +21,7 @@ def heatmap(fcm, indices, nrows=1, ncols=1, savefile=None, display=True,
 
     assert(nrows*ncols >= len(indices))
 
-    pylab.figure(figsize=(ncols*4, nrows*4))
+    figure = pylab.figure(figsize=(ncols*4, nrows*4))
 
     for i, idx in enumerate(indices):
         pylab.subplot(nrows, ncols, i+1)
@@ -41,6 +41,8 @@ def heatmap(fcm, indices, nrows=1, ncols=1, savefile=None, display=True,
         
     if savefile:
         pylab.savefig(savefile)
+
+    return figure
 
 def heatmaps(fcm, savefile=None, display=True, **kwargs):
     """PLot scatter matrix of all heatmaps."""
