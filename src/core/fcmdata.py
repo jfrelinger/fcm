@@ -64,6 +64,12 @@ class FCMdata(object):
         
         return self.pnts[:, self.markers]
     
+    def get_spill(self):
+        try:
+            return self.notes.text['spill']
+        except KeyError:
+            return None
+    
     def __getitem__(self, item):
         """return FCMdata.pnts[i] by name or by index"""
         
