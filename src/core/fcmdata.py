@@ -62,7 +62,7 @@ class FCMdata(object):
     def get_markers(self):
         """return the data associated with all the markers"""
         
-        return self.pnts[:, self.markers]
+        return self.view()[:, self.markers]
     
     def get_spill(self):
         try:
