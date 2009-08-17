@@ -74,7 +74,10 @@ class FCMdata(object):
         """return FCMdata.pnts[i] by name or by index"""
         
         if type(item) == type(''):
-            return self.get_channel_by_name(item)
+            try:
+                return self.get_channel_by_name(item)
+            except:
+                raise ValueError('field named a not found')
         elif type(item) == tuple:
             if type(item[0]) == type(''):
                 return self.get_channel_by_name(list(item))
