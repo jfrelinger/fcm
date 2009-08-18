@@ -1,4 +1,5 @@
 import networkx
+import re
 
 class Tree(object):
     '''Tree of data for FCMdata object.'''
@@ -30,6 +31,13 @@ class Tree(object):
 
     def add_child(self, name, node):
         '''Add a node to the tree at the currently selected node'''
+        if name == '':
+            prefix = node.prefix
+            pat = re.compile(prefix + "(\d+)")
+            matches = [pat.search(i) for i in self.g.nodes()]
+            matches = [i for i in matches if i is not None]
+            n = max([ int(i.group(1)) for i in matches])
+            name = prefix + str(n+1)
         self.g.add_node(name, node)
         self.g.add_edge(self.current, name)
         self.current = name
@@ -57,6 +65,7 @@ class Node(object):
         self.name = name
         self.parent = parent
         self.data = data
+        self.prefix= 'n'
     
     def view(self):
         """
@@ -74,6 +83,7 @@ class RootNode(Node):
         self.name = name
         self.parent = None
         self.data = data
+        self.prefix='root'
         
 class TransformNode(Node):
     """
@@ -84,7 +94,22 @@ class TransformNode(Node):
         self.name = name
         self.parent = parent
         self.data = data
+        self.prefix = 't'
         
+class SubsampleNode(Node):
+    """
+    Node of subsampled data
+    """
+    
+    def __init__(self, name, parent, param):
+        self.name = name
+        self.parent = parent
+        self.param = param
+        self.prefix = 's'
+        
+    def view(self):
+        return self.parent.view().__getitem__(self.param)
+    
 class GatingNode(Node):
     """
     Node of gated data
@@ -94,6 +119,7 @@ class GatingNode(Node):
         self.name = name
         self.parent = parent
         self.data = data
+        self.prefix = 'g'
         
     def view(self):
         return self.parent.view()[self.data]

@@ -30,6 +30,11 @@ class FCMdataTestCase(unittest.TestCase):
         assert type(self.fcm[a]) == type(self.pnts[a]), "__getitem__ failed to return array"
         assert self.fcm[a,b] == self.pnts[a,b], '__getitem__ returned wrong value'
         assert self.fcm['fsc','ssc'][a,0] == self.pnts[a,0], '__getitem__ with multiple strings failed'
+    
+    def testSubSample(self):
+        self.fcm.subsample([2])
+        assert self.fcm.view()[0] == self.pnts[0,2], "subsample failed"
+        assert self.fcm.view()[1] == self.pnts[1,2], "subsample failed"
         
 #    def testlogicle(self):
 #        from numpy.random import normal, lognormal, shuffle

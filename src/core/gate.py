@@ -26,7 +26,7 @@ class Gate(object):
         # no faster than our numpy version
         # idxs = points_inside_poly(fcm.pnts[:, chan], self.vert)
         
-        node = GatingNode("gated region", fcm.get_cur_node(), idxs)
+        node = GatingNode("", fcm.get_cur_node(), idxs)
         fcm.add_view(node)
         return fcm.view()
         
@@ -57,7 +57,7 @@ class QuadGate(Gate):
         for i in quad.keys():
             if True in quad[i]:
                 fcm.tree.visit(name)
-                node = GatingNode("Quadrant %d" % i, root, quad[i])
+                node = GatingNode("q%d" % i, root, quad[i])
                 fcm.add_view(node)
         
 
