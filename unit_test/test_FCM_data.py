@@ -31,10 +31,10 @@ class FCMdataTestCase(unittest.TestCase):
         assert self.fcm[a,b] == self.pnts[a,b], '__getitem__ returned wrong value'
         assert self.fcm['fsc','ssc'][a,0] == self.pnts[a,0], '__getitem__ with multiple strings failed'
     
-    def testSubSample(self):
-        self.fcm.subsample([2])
-        assert self.fcm.view()[0] == self.pnts[0,2], "subsample failed"
-        assert self.fcm.view()[1] == self.pnts[1,2], "subsample failed"
+#    def testSubSample(self):
+#        self.fcm.subsample([2])
+#        assert self.fcm.view()[0] == self.pnts[0,2], "subsample failed"
+#        assert self.fcm.view()[1] == self.pnts[1,2], "subsample failed"
         
 #    def testlogicle(self):
 #        from numpy.random import normal, lognormal, shuffle
@@ -58,6 +58,11 @@ class FCMdataTestCase(unittest.TestCase):
         g = Gate(verts, cols)
         self.fcm.gate(g)
         assert self.fcm.view().all() == array([[0,1,2]]).all(), 'gate excluded wrong points'
+        self.fcm.visit('root')
+        self.fcm.gate(g)
+        nodes = self.fcm.tree.g.nodes()
+        assert 'g2' in nodes, 'gating name mangled'
+        assert 'g1' in nodes, 'gating name mangled'
         
     def testGetAttr(self):
         assert self.fcm.shape == (2,3), '__gettattr__ failed to deligate'

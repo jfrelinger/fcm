@@ -36,8 +36,11 @@ class Tree(object):
             pat = re.compile(prefix + "(\d+)")
             matches = [pat.search(i) for i in self.g.nodes()]
             matches = [i for i in matches if i is not None]
-            n = max([ int(i.group(1)) for i in matches])
-            name = prefix + str(n+1)
+            if len(matches) is not 0:
+                n = max([ int(i.group(1)) for i in matches])
+                name = prefix + str(n+1)
+            else:
+                name = prefix + '1'
         self.g.add_node(name, node)
         self.g.add_edge(self.current, name)
         self.current = name
@@ -115,7 +118,7 @@ class GatingNode(Node):
     Node of gated data
     """
     
-    def __init___(self, name, parent, data):
+    def __init__(self, name, parent, data):
         self.name = name
         self.parent = parent
         self.data = data
