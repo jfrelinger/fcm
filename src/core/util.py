@@ -1,5 +1,6 @@
 import networkx
 import re
+from fcmexceptions import IllegalNodeNameError
 
 class Tree(object):
     '''Tree of data for FCMdata object.'''
@@ -41,23 +42,29 @@ class Tree(object):
                 name = prefix + str(n+1)
             else:
                 name = prefix + '1'
-        self.g.add_node(name, node)
-        self.g.add_edge(self.current, name)
-        self.current = name
+        if name in self.g.nodes():
+            raise IllegalNodeNameError('name, %s, already in use in tree' % name)
+        else:
+            self.g.add_node(name, node)
+            self.g.add_edge(self.current, name)
+            self.current = name
         
     def rename_node(self, old_name, new_name):
         '''Rename a node from old_name to new_name'''
-        node = self.g.get_node(old_name)
-        pred = self.g.predecessors(old_name)
-        children = self.g.successors(old_name)
-        self.g.remove_node(old_name)
-        node.name = new_name
-        self.g.add_node(new_name, node)
-        for i in pred:
-            self.g.add_edge(i, new_name)
-        for i in children:
-            self.g.add_edge(new_name, i)
-            
+        if new_name in self.g.nodes():
+            raise IllegalNodeNameError('name, %s, already in use in tree' % new_name)
+        else:
+            node = self.g.get_node(old_name)
+            pred = self.g.predecessors(old_name)
+            children = self.g.successors(old_name)
+            self.g.remove_node(old_name)
+            node.name = new_name
+            self.g.add_node(new_name, node)
+            for i in pred:
+                self.g.add_edge(i, new_name)
+            for i in children:
+                self.g.add_edge(new_name, i)
+                
         
 class Node(object):
     """
