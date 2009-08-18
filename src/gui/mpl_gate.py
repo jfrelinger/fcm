@@ -34,7 +34,7 @@ class DraggableVertex(object):
         if DraggableVertex.lock is not None: return
         contains, attrd = self.circle.contains(event)
         if not contains: return
-        print 'event contains', self.circle.center
+        # print 'event contains', self.circle.center
         x0, y0 = self.circle.center
         self.press = x0, y0, event.xdata, event.ydata
         DraggableVertex.lock = self
@@ -94,7 +94,7 @@ class Gate(object):
             'draw_event', self.update_background)
 
     def add_vertex(self, vertex):
-        print vertex.center
+        # print vertex.center
         self.ax.add_patch(vertex)
         dv = DraggableVertex(vertex, self)
         dv.connect()
@@ -105,7 +105,7 @@ class Gate(object):
         self.background = self.canvas.copy_from_bbox(self.ax.bbox)
 
     def update(self):
-        print "updating"
+        # print "updating"
 
         if len(self.vertices) >= 3:
             xy = numpy.array([v.circle.center for v in self.vertices])
@@ -177,6 +177,12 @@ class Gate(object):
         'disconnect all the stored connection ids'
         self.canvas.mpl_disconnect(self.cid_press)
         self.canvas.mpl_disconnect(self.cid_draw)
+
+def poly_gate(fcm, idxs):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    gate = Gate(fcm, idxs, ax)
+    plt.show()
 
 if __name__ == '__main__':
     import sys
