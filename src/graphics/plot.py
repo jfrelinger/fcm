@@ -28,8 +28,11 @@ def heatmap(fcm, indices, nrows=1, ncols=1, savefile=None, display=True,
         if (idx[0] != idx[1]):
             x = fcm[:,idx[0]]
             y = fcm[:,idx[1]]
-            z = bilinear_interpolate(x, y)
-            pylab.scatter(x, y, c=z, **kwargs)
+            if not kwargs.has_key('c'):
+                z = bilinear_interpolate(x, y)
+                pylab.scatter(x, y, c=z, **kwargs)
+            else:
+                pylab.scatter(x, y, **kwargs)
             pylab.xlabel(fcm.channels[idx[0]])
             pylab.ylabel(fcm.channels[idx[1]])
         pylab.xticks([])
