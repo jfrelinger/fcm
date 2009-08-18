@@ -21,7 +21,7 @@ class FCMdataTestCase(unittest.TestCase):
         assert self.fcm.get_channel_by_name(['fsc'])[1] == 3, 'incorrect first column'
         
     def testGetMarkers(self):
-        print self.fcm.markers
+        #print self.fcm.markers
         assert self.fcm.markers == [2], 'Marker CD3 not picked up'
     
     def testGetItem(self):

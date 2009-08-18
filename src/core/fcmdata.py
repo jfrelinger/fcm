@@ -62,13 +62,22 @@ class FCMdata(object):
     def get_markers(self):
         """return the data associated with all the markers"""
         
-        return self.pnts[:, self.markers]
+        return self.view()[:, self.markers]
+    
+    def get_spill(self):
+        try:
+            return self.notes.text['spill']
+        except KeyError:
+            return None
     
     def __getitem__(self, item):
         """return FCMdata.pnts[i] by name or by index"""
         
         if type(item) == type(''):
-            return self.get_channel_by_name(item)
+            try:
+                return self.get_channel_by_name(item)
+            except:
+                raise ValueError('field named a not found')
         elif type(item) == tuple:
             if type(item[0]) == type(''):
                 return self.get_channel_by_name(list(item))
