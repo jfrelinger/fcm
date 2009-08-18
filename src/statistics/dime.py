@@ -1,5 +1,5 @@
 from __future__ import division
-from statistics.distributions import mvnormpdf, mixnormpdf
+from distributions import mvnormpdf, mixnormpdf
 from numpy import array, dot, log2, zeros, sum, diag, ones, identity
 
 class DiME(object):

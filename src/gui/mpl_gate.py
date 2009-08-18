@@ -178,6 +178,12 @@ class Gate(object):
         self.canvas.mpl_disconnect(self.cid_press)
         self.canvas.mpl_disconnect(self.cid_draw)
 
+def poly_gate(fcm, idxs):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    gate = Gate(fcm, idxs, ax)
+    plt.show()
+
 if __name__ == '__main__':
     import sys
     sys.path.append('../')
