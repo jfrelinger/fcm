@@ -241,6 +241,8 @@ class FCSreader(object):
 def parse_pairs(text):
     """return key/value pairs from a delimited string"""
     delim = text[0]
+    if delim == r'|':
+        delim = '\|'
     if delim == r'\a'[0]: # test for delimiter being \
         delim = '\\\\' # regex will require it to be \\
     if delim != text[-1]:
