@@ -40,7 +40,11 @@ class FCMdata(object):
         self.markers = []
         if self.scatters is not None:
             for chan in range(len(channels)):
-                if chan not in self.scatters:
+                if chan in self.scatters:
+                    pass
+                elif self.channels[chan] in self.scatters:
+                    pass
+                else:
                     self.markers.append(chan)
         if notes == None:
             notes = Annotation()
