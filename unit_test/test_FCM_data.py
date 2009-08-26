@@ -68,6 +68,6 @@ class FCMdataTestCase(unittest.TestCase):
         assert self.fcm.shape == (2,3), '__gettattr__ failed to deligate'
         
 if __name__ == '__main__':
-    suite1 = unittest.makeSuite(FCSdataTestCase,'test')
+    suite1 = unittest.makeSuite(FCMdataTestCase,'test')
 
     unittest.main()
