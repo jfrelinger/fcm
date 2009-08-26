@@ -33,10 +33,12 @@ class DiME(object):
         self.cmap = cmap
         
         
-    def d(self, drop = []):
+    def d(self, drop = None):
         """
         calculate discriminitory information
         """
+        if drop is None:
+            drop = []
         ids = []
         if type(drop) is type(1): # are we dropping single col?
             for i in range(self.k):
@@ -66,8 +68,8 @@ class DiME(object):
         f = zeros((size, size))
         for i in range(size):
             for j in range(i,size):
-               f[j, i] = mvnormpdf(mus[i], mus[j], sigmas[i]+sigmas[j])
-               f[i,j] = f[j,i]
+                f[j, i] = mvnormpdf(mus[i], mus[j], sigmas[i]+sigmas[j])
+                f[i,j] = f[j,i]
                 
         F = zeros((self.c, self.c))
         for i in range(self.c):
