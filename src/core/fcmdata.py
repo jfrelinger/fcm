@@ -126,6 +126,10 @@ class FCMdata(object):
         """return gated region of fcm data"""
         return g.gate(self, chan)
     
+    def subsample(self, s):
+        """return subsampled/sliced fcm data"""
+        return s.subsample(self)
+    
     def get_cur_node(self):
         return self.tree.get()
     
