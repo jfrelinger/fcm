@@ -87,6 +87,7 @@ class FCSreader(object):
             if self.spill is not None and self.sidx is not None:
                 idx = []
                 for si in self.sidx:
+                    print ">>>", si
                     idx.append(base_chan_name.index(si))
                 print data.shape
                 print data[:,idx].shape, self.spill.shape
