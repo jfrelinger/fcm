@@ -1,7 +1,32 @@
 """Collection of common FCM graphical plots."""
 
 from util import bilinear_interpolate
+from scipy import histogram
 import pylab
+
+def hist(fcms, index, savefile=None, display=True, **kwargs):
+    """Plot overlay histogram.
+
+    fcms is a list of histograms
+    index is channel to plot
+    """
+    figure = pylab.figure()
+    for fcm in fcms:
+        y = fcm[:, index]
+        h, b = histogram(y, bins=200)
+        b = (b[:-1] + b[1:])/2.0
+        x = pylab.linspace(min(y), max(y), 100)
+        pylab.plot(b, h, label=fcm.name)
+        pylab.legend()
+    
+    if display:
+        pylab.show()
+        
+    if savefile:
+        pylab.savefig(savefile)
+
+    return figure
+
 
 def heatmap(fcm, indices, nrows=1, ncols=1, savefile=None, display=True,
             **kwargs):
