@@ -4,7 +4,7 @@ from util import bilinear_interpolate
 from scipy import histogram
 import pylab
 
-def hist(fcms, index, savefile=None, display=True, new=True, **kwargs):
+def hist(fcms, index, savefile=None, display=True, **kwargs):
     """Plot overlay histogram.
 
     fcms is a list of histograms
@@ -13,7 +13,7 @@ def hist(fcms, index, savefile=None, display=True, new=True, **kwargs):
     figure = pylab.figure()
     for fcm in fcms:
         y = fcm[:, index]
-        h, b = histogram(y, bins=200)
+        h, b = histogram(y, bins=200, new=True, **kwargs)
         b = (b[:-1] + b[1:])/2.0
         x = pylab.linspace(min(y), max(y), 100)
         pylab.plot(b, h, label=fcm.name)
