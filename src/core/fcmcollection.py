@@ -4,8 +4,10 @@ All operations will be performed on each FCMData in the collection.
 """
 
 from UserDict import DictMixin
+from annotation import Annotation
+from enthought.traits.api import HasTraits, DictStrAny
 
-class FCMcollection(DictMixin):
+class FCMcollection(DictMixin, HasTraits):
     """
     Represent collection of FCMdata objects.
     Attributes: 
@@ -13,6 +15,7 @@ class FCMcollection(DictMixin):
     tree = tree of operations
     """
 
+    fcmdict = DictStrAny()
     def __init__(self, fcms=None, notes=None):
         """
         Initialize with fcm collection and notes.
