@@ -3,8 +3,8 @@
 ** Coding [2/9]
    1. [ ] Nested fcm collections for trees of data files
    2. [ ]  Create mock fcm object function
-   3. [ ]  Summary data for fcm object
-      1. [ ]  summary stats - mean, sd, #events per channel, median, min, max
+   3. [-]  Summary data for fcm object
+      1. [X]  summary stats - mean, sd, #events per channel, median, min, max
       2. [ ]  % events in 1st and last channels
    4. [ ]  Checks for channel name consistency
    5. [ ]  Interval gate

@@ -1,9 +1,9 @@
 import unittest
-from numpy import array
+from numpy import array, all
 from random import randint
 
 from fcm import FCMdata
-from fcm import Gate
+from fcm import PolyGate, IntervalGate
 
 
 class FCMdataTestCase(unittest.TestCase):
@@ -52,22 +52,34 @@ class FCMdataTestCase(unittest.TestCase):
 #        r = quantile(d3[d3<0], 0.05)
 #        self.fcm = FCMdata(d3, ['a'])
 
-    def testGate(self):
+    def testPolyGate(self):
         verts =  array([[-.1,-.1],[-.1,1.1],[1.1,1.1], [1.1,-.1]])
         cols = [0,1]
-        g = Gate(verts, cols)
+        g = PolyGate(verts, cols)
         self.fcm.gate(g)
-        assert self.fcm.view().all() == array([[0,1,2]]).all(), 'gate excluded wrong points'
+        assert all(self.fcm.view() == array([[0,1,2]])), 'gate excluded wrong points'
         self.fcm.visit('root')
         self.fcm.gate(g)
         nodes = self.fcm.tree.g.nodes()
         assert 'g2' in nodes, 'gating name mangled'
         assert 'g1' in nodes, 'gating name mangled'
         
+    def testIntervalGate(self):
+        verts =  array([1.5,4.5])
+        cols = [0]
+        g = IntervalGate(verts, cols)
+        self.fcm.gate(g)
+        assert all(self.fcm.view() == array([[3,4,5]])), 'gate excluded wrong points'
+        self.fcm.visit('root')
+        self.fcm.gate(g)
+        nodes = self.fcm.tree.g.nodes()
+        assert 'g2' in nodes, 'gating name mangled'
+        assert 'g1' in nodes, 'gating name mangled'
+
     def testChainOp(self):
         verts =  array([[-.1,-.1],[-.1,1.1],[1.1,1.1], [1.1,-.1]])
         cols = [0,1]
-        g = Gate(verts, cols)
+        g = PolyGate(verts, cols)
         self.fcm.gate(g).gate(g)
         assert self.fcm.view().all() == array([[0,1,2]]).all(), 'gate excluded wrong points'
         
