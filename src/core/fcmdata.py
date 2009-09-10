@@ -1,7 +1,7 @@
 """
 A python object representing flow cytomoetry data
 """
-from numpy import array
+from numpy import array, median
 from enthought.traits.api import HasTraits, String, Instance, List
 from annotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
@@ -151,12 +151,18 @@ class FCMdata(HasTraits):
         pnts = self.view()
         means = pnts.mean(0)
         stds = pnts.std(0)
+        mins = pnts.min(0)
+        maxs = pnts.max(0)
+        medians = median(pnts, 0)
         n, dim = pnts.shape
         summary = ''
         for i in range(dim):
             summary = summary + self.channels[i] + ":\n"
-            summary = summary + "  mean: " + str(means[i]) + "\n"
-            summary = summary + "   std: " + str(stds[i]) + "\n"
+            summary = summary + "    max: " + str(maxs[i]) + "\n"
+            summary = summary + "   mean: " + str(means[i]) + "\n"
+            summary = summary + " median: " + str(medians[i]) + "\n"
+            summary = summary + "    min: " + str(mins[i]) + "\n"
+            summary = summary + "    std: " + str(stds[i]) + "\n"
         return summary
             
         
