@@ -2,12 +2,12 @@ import numpy
 from matplotlib.nxutils import points_inside_poly
 from util import GatingNode
 
-from enthought.traits.api import HasTraits, List, ListInt
+from enthought.traits.api import HasTraits, List, ListInt, Array
 
 class Gate(HasTraits):
-    vert = List()
-    chan = ListInt(minlen=2, maxlen=2)
     """An object representing a gatable region"""
+    vert = List(trait=Array())
+    chan = ListInt(minlen=2, maxlen=2)
     def __init__(self, vert, channels):
         """
         An object representing a gatable region
@@ -38,6 +38,7 @@ class QuadGate(Gate):
     """
     An object to divide a region to four quadrants
     """
+    vert = Array()
     def __init__(self, vert, channels):
         self.vert = vert
         self.chan = channels

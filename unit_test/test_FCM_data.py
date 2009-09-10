@@ -53,7 +53,7 @@ class FCMdataTestCase(unittest.TestCase):
 #        self.fcm = FCMdata(d3, ['a'])
 
     def testGate(self):
-        verts =  array([[-.1,-.1],[-.1,1.1],[1.1,1.1], [1.1,-.1]])
+        verts =  [array([[-.1,-.1],[-.1,1.1]]),array([[1.1,1.1], [1.1,-.1]])]
         cols = [0,1]
         g = Gate(verts, cols)
         self.fcm.gate(g)
