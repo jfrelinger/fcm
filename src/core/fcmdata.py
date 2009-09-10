@@ -55,6 +55,25 @@ class FCMdata(HasTraits):
             notes = Annotation()
         self.notes = notes
         
+    def __getitem__(self, item):
+        """return FCMdata.pnts[i] by name or by index"""
+        
+        if type(item) == type(''):
+            try:
+                return self.get_channel_by_name(item)
+            except:
+                raise ValueError('field named a not found')
+        elif type(item) == tuple:
+            if type(item[0]) == type(''):
+                return self.get_channel_by_name(list(item))
+            else:
+                return self.tree.view()[item]
+        else:
+            return self.tree.view()[item]
+
+    def __getattr__(self, name):
+        return self.tree.view().__getattribute__(name)
+                
     def name_to_index(self, channels):
         """Return the channel indexes for the named channels"""
         
@@ -79,22 +98,6 @@ class FCMdata(HasTraits):
         except KeyError:
             return None
     
-    def __getitem__(self, item):
-        """return FCMdata.pnts[i] by name or by index"""
-        
-        if type(item) == type(''):
-            try:
-                return self.get_channel_by_name(item)
-            except:
-                raise ValueError('field named a not found')
-        elif type(item) == tuple:
-            if type(item[0]) == type(''):
-                return self.get_channel_by_name(list(item))
-            else:
-                return self.tree.view()[item]
-        else:
-            return self.tree.view()[item]
-        
     def view(self):
         """return the current view of the data"""
         return self.tree.view()
@@ -143,7 +146,17 @@ class FCMdata(HasTraits):
         self.tree.add_child(node.name, node)
         return self
     
-    def __getattr__(self, name):
-        return self.tree.view().__getattribute__(name)
-
+    def summary(self):
+        """returns summary of current view"""
+        pnts = self.view()
+        means = pnts.mean(0)
+        stds = pnts.std(0)
+        n, dim = pnts.shape
+        summary = ''
+        for i in range(dim):
+            summary = summary + self.channels[i] + ":\n"
+            summary = summary + "  mean: " + str(means[i]) + "\n"
+            summary = summary + "   std: " + str(stds[i]) + "\n"
+        return summary
+            
         

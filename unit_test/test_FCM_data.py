@@ -74,6 +74,10 @@ class FCMdataTestCase(unittest.TestCase):
     def testGetAttr(self):
         assert self.fcm.shape == (2,3), '__gettattr__ failed to deligate'
         
+    def testSummary(self):
+        tmp =  self.fcm.summary()
+        assert tmp.startswith('fsc:') == True, 'Summary failed'
+        
 if __name__ == '__main__':
     suite1 = unittest.makeSuite(FCMdataTestCase,'test')
 
