@@ -52,7 +52,8 @@ def logicle(fcm, channels, T, m, r, order=2, intervals=1000.0):
     for i in channels:
         npnts.T[i] = _logicle(npnts[:, i].T, T, m, r, order, intervals)
     node = TransformNode('Logicle transformed', fcm.get_current_node(), npnts)
-    return fcm.add_view(node)
+    fcm.add_view(node)
+    return fcm
  
 def EH(x, y, b, d, r):
     e = float(d)/r
@@ -75,7 +76,8 @@ def hyperlog(fcm, channels, b, d, r, order=2, intervals=1000.0):
     for i in channels:
         npnts.T[i] = _hyperlog(npnts[:,i].T, b, d, r, order=2, intervals=1000.0)
     node = TransformNode('Hyperlog transformed', fcm.get_current_node(), npnts)
-    return fcm.add_view(node)
+    fcm.add_view(node)
+    return fcm
 
 if __name__ == '__main__':
     from numpy.random import normal, lognormal, shuffle

@@ -32,7 +32,7 @@ class Gate(HasTraits):
         
         node = GatingNode("", fcm.get_cur_node(), idxs)
         fcm.add_view(node)
-        return fcm.view()
+        return fcm
         
 class QuadGate(Gate):
     """

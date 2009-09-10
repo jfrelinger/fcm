@@ -64,6 +64,13 @@ class FCMdataTestCase(unittest.TestCase):
         assert 'g2' in nodes, 'gating name mangled'
         assert 'g1' in nodes, 'gating name mangled'
         
+    def testChainOp(self):
+        verts =  array([[-.1,-.1],[-.1,1.1],[1.1,1.1], [1.1,-.1]])
+        cols = [0,1]
+        g = Gate(verts, cols)
+        self.fcm.gate(g).gate(g)
+        assert self.fcm.view().all() == array([[0,1,2]]).all(), 'gate excluded wrong points'
+        
     def testGetAttr(self):
         assert self.fcm.shape == (2,3), '__gettattr__ failed to deligate'
         
