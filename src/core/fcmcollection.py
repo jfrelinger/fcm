@@ -3,7 +3,11 @@ Data structure for a collection of FCMData objects.
 All operations will be performed on each FCMData in the collection.
 """
 
-class FCMcollection(object):
+from UserDict import DictMixin
+from annotation import Annotation
+from enthought.traits.api import HasTraits
+
+class FCMcollection(DictMixin, HasTraits):
     """
     Represent collection of FCMdata objects.
     Attributes: 
@@ -25,9 +29,6 @@ class FCMcollection(object):
         else:
             self.notes = notes
 
-    def values(self):
-        return self.fcmdict.values()
-
     def keys(self):
         return self.fcmdict.keys()
 
@@ -38,6 +39,10 @@ class FCMcollection(object):
     def __setitem__(self, key, value):
         """set fcmcollection.fcmdict[key] = value."""
         self.fcmdict[key] = value
+
+    def __delitem__(self, key):
+        """delete fcmcollection.fcmdict[key]"""
+        del self.fcmdict[key]
 
     def __getattr__(self, name):
         """Convenience function to access fcm object by name."""

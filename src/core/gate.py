@@ -6,7 +6,7 @@ from enthought.traits.api import HasTraits, List, ListInt, Array
 
 class Gate(HasTraits):
     """An object representing a gatable region"""
-    vert = List(trait=Array())
+    vert = Array()
     chan = ListInt(minlen=2, maxlen=2)
     def __init__(self, vert, channels):
         """
@@ -38,7 +38,6 @@ class QuadGate(Gate):
     """
     An object to divide a region to four quadrants
     """
-    vert = Array()
     def __init__(self, vert, channels):
         self.vert = vert
         self.chan = channels
