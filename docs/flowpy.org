@@ -1,73 +1,122 @@
-* Goals
-  1. Create a Python library for flow cytometry data analysis, data
-     management and visualization.
-  2. Requirements
-     1. [ ] Consistent API
-     2. [ ] Libraries
-     3. [ ] Fast
-	1. [ ] Use optimal data structures and alogrithms
-	2. [ ] Use numpy vector calculations
-	3. [ ] Foreign language interface (e.g. Cython)
-	4. [ ] Multi-core
-	5. [ ] Multi-processor
-	6. [ ] Exploit GPU
-* Data structures [0/5]
-  1. [ ] FCM class [0/5]
-     1. [ ] Components include FCM data, annotations
-     2. [ ] Behaves like numpy array
-     3. [ ] Operations can be chained
-     4. [ ] Maintains audit trail
-     5. [ ] QA measures
-  2. [ ] FCM collection class [0/4]
-     1. [ ] Experimental annotations
-     2. [ ] Common gating strategy
-     3. [ ] Controls
-     4. [ ] QA measures
-  3. [ ] FCM Analysis classes [0/1]
-     1. [ ] Tree structure of "clusters"
-  4. [ ] FCM collection analysis class [0/0] (?)
-     1. [ ] For comparisons of data sets in collection
-* Modules [/]
-  1. [ ] IO [/]
-     1. [ ] FCS read and write
-     2. [ ] Bioconductor read and write
-     3. [ ] XML read and write
-  2. [ ] Compensate [/]
-     1. [ ] Automated
-     2. [ ] Manual
-  3. [ ] Transform [/]
-     1. [ ] Log
-     2. [ ] Logicle
-     3. [ ] Hyperlog
-  4. [ ] Project [/]
-     1. [ ] PCA
-     2. [ ] ICA
-  5. [ ] Gate [/]
-     1. [ ] Polygonal
-     2. [ ] Ellipse
-     3. [ ] Quadrant
-  6. [ ] Statistics [/]
-     1. [ ] Exploratory [/]
-	1. [ ] Targeted sampling
-	2. [ ] Clustering - Bayesian EM, DP family, variational
-	   family, search family
-	3. [ ] Classification - mode hunting
-	4. [ ] Marker analysis - DiME
-    2. [ ] Inference [/]
-	1. [ ] Data comparisons
-	2. [ ] Time series analysis
-	3. [ ] Stochastic shotgun search
-  7. [ ] Graphics [/]
-     1. [ ] Gating
-     2. [ ] Statistical graphics
-  8. [ ] GUI [/]
-     1. [ ] Web
-     2. [ ] Application
-  9. [ ] Data management [/]
-      1. [ ] Database interface
-      2. [ ] Network interface
-  10. [ ] Parallel [/]
-      1. [ ] Multiprocessing
-      2. [ ] MPI
-      3. [ ] Map-reduce with Hadoop/Dumbo
+* Plan
+** fcmpy
+   1. decide on high priority goals for fcmpy
+   2. split goals into separate milestones
+   3. decide on high priority features for each milestone
+   4. break down features into coding work units
+   5. decide who owns what
+   6. fill coding pipelines
+   7. make estimates and prepare schedule for milestones
+** flowlab
+   1. decide on high priority goals for flowlab
+   2. sketch out a few possible designs
+   3. build a prototype of the most promising design (GUI skeleton with stubs)
+   4. repeat steps 1-7 as for fcmpy
+
+* Rules
+  1. bug and issue tracking
+  2. testing
+  3. documentation
+  4. progress measures
+  5. eat our own dogfood - immediate application to our own research data
+
+* Scope
+  Develop a Python library for /automated/ statistical analysis of  multi-parameter flow cytometry data sets to be used by both /programmers and non-programmers/ on /desktop/ machines. 
+
+* Goals/features/work breakdown (a little disorganized - need to separate into fcmpy and flowlab concerns, prioritize items and expand on work items so that implementation path is clear)
+  1. Provide core functionality to /manage/ and /analyze/ flow cytometry data
+     1. read FCS files
+	1. test on FCS 2.0 files
+	2. test on FCS 3.0 files
+     2. manage FCS data
+	1. tree organization
+	2. database integration
+     3. batch processing
+	1. chaining of operations on data
+     4. annotate FCS file and file sets
+	1. auto-discovery of annotations from filename and FCS metadata
+	2. editor for annotations
+	3. use of ontologies
+     5. quality control assessment of FCS files
+	1. time versus scatter
+	2. scatterplot properties
+	3. gross compensation errors
+	4. summary statistics for files in file set
+	5. channel name consistency
+     6. preprocess FCS files
+	1. compensation
+	2. transformations
+	3. filters
+	4. gating
+     7. clustering of FCS files
+	1. choose model specification - priors and likelihood function
+	2. choose model fitting method - Bayesian EM, MCMC
+	3. set model parameters - nit, nmc, nstarts
+     8. summaries of posterior distributions
+	1. modal clusters
+	2. event classification
+	3. DIME
+     9. more statistical analysis
+	1. histogram comparisons - e.g. K-S statistic
+	2. simple comparison of multiple samples
+	3. stochastic shotgun search
+	4. time series analysis
+  2. Fast - 3FITC sample data file should cluster in < 1 minute
+     1. profiling
+     2. threading and multi-processing
+     3. fast algorithms
+	1. Bayesian EM
+	2. Fast modal search
+     4. GPU acceleration
+	1. model fitting
+	2. model summary
+	3. model visualization
+	4. projection pursuit
+  3. Easy to use
+     1. provide bridging features
+	1. manual or automatic compensation
+	2. polygonal, ellipse, quadrant gating
+	3. traditional graphics - histogram, histogram overlays, dot
+           plots, heatmaps, perspective plots
+     2. provide simple installation (binary)
+	1. creating Python applications binaries 
+	   [[http://docs.python.org/library/distutils.html][distutils]]
+	   [[http://code.google.com/p/gui2exe/][gui2exe]]
+           [[http://svn.pythonmac.org/py2app/py2app/trunk/doc/index.html][py2app]]
+           [[http://www.py2exe.org/][py2exe]]
+	   [[http://cx-freeze.sourceforge.net/][cxfreeze]]
+	   [[http://wiki.showmedo.com/index.php/LinuxJensMakingDeb][debs]]
+	   FreeBSD ports
+     3. feedback mechanisms
+	1. progress indicators
+	2. exception handling
+     4. provide learning ramp
+	1. different modes - traditional, wizard, scripting with
+           interactive shell
+     5. provide demos and examples
+	1. example of every documented API function
+	2. full demo of clustering
+     6. provide help and documentation
+	1. provide docstrings for all classes and functions
+	2. hyperlinked help documentation in app
+	3. mouse overlays
+	4. tutorials on data management, statistics, visualization
+	5. user's guide
+	6. developer's guide
+     7. provide a GUI with Traits-enabled classes
+	1. add Traits to every class
+	2. implement GUI
+	3. provide an interactive shell integrated with GUI
+  4. Be trusted
+     1. testing
+	1. unit tests
+	2. functional tests
+     2. validation
+	1. against manually gated data sets
+	2. parameters
+     3. auditing
+	1. history stack
+	2. unlimited undos
+	3. digital signatures
+     4. logging
 
