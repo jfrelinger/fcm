@@ -3,7 +3,7 @@ Data structure for a collection of FCMData objects.
 All operations will be performed on each FCMData in the collection.
 """
 
-class FCMcollection(dict):
+class FCMcollection(object):
     """
     Represent collection of FCMdata objects.
     Attributes: 
@@ -16,13 +16,26 @@ class FCMcollection(dict):
         Initialize with fcm collection and notes.
         Tree of operations not implemented yet - how is this done in fcmdata?
         """
+        self.fcmdict = {}
         if fcms is not None:
             for fcm in fcms:
-                self[fcm.name] = fcm
+                self.fcmdict[fcm.name] = fcm
         if notes is not None:
             self.notes =Annotation()
         else:
             self.notes = notes
+
+    def __getitem__(self, item):
+        """return fcmcollection.fcmdict[item]"""
+        return self.fcmcollection[item]
+
+    def __setitem__(self, key, value):
+        """set fcmcollection.fcmdict[key] = value."""
+        self.fcmcollection[key] = value
+
+    def __getattr__(self, name):
+        """Convenience function to access fcm object by name."""
+        return self.fcmcollection[item]
 
 if __name__ == '__main__':
     from io import loadFCS
