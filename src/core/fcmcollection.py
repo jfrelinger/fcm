@@ -25,17 +25,23 @@ class FCMcollection(object):
         else:
             self.notes = notes
 
+    def values(self):
+        return self.fcmdict.values()
+
+    def keys(self):
+        return self.fcmdict.keys()
+
     def __getitem__(self, item):
         """return fcmcollection.fcmdict[item]"""
-        return self.fcmcollection[item]
+        return self.fcmdict[item]
 
     def __setitem__(self, key, value):
         """set fcmcollection.fcmdict[key] = value."""
-        self.fcmcollection[key] = value
+        self.fcmdict[key] = value
 
     def __getattr__(self, name):
         """Convenience function to access fcm object by name."""
-        return self.fcmcollection[item]
+        return self.fcmdict[name]
 
 if __name__ == '__main__':
     from io import loadFCS
