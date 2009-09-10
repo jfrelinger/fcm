@@ -1,6 +1,6 @@
 * Milestone 1
   Core functionality and single clustering method.
-** Coding [/]
+** Coding [2/9]
    1. [ ] Nested fcm collections for trees of data files
    2. [ ]  Create mock fcm object function
    3. [ ]  Summary data for fcm object
@@ -9,8 +9,8 @@
    4. [ ]  Checks for channel name consistency
    5. [ ]  Interval gate
    6. [ ]  Implement logging for changes to fcm object
-   7. [ ]  Traits implementation
-   8. [ ]  Chaining of operations
+   7. [X]  Traits implementation
+   8. [X]  Chaining of operations
    9. [ ]  Clustering method - single layer TDP
       1. [ ]  random number generators
       2. [ ]  density functions
@@ -36,19 +36,63 @@
    13. [ ]  Test results of clustering
    14. [ ]  Test prior sampling from model
 * Milestone 2
-  Flowlab GUI.
-** Coding [/]
+  Flowlab GUI - need to work on overall design of GUI first - develop prototype to slot features into layout.
+** Coding [0/16]
+   1. [ ] Batch processing - look into use of coroutines for chaining
+   2. [ ] Dispaly quality assurance statistics
+   3. [ ] Auto-compensation
+   4. [ ] Interval gating widget
+   5. [ ] Create custom traits to GUI-related classes
+   6. [ ] Dialog for model specification
+   7. [ ] Dialog for model fitting specification
+   8. [ ] Color by data property lists in 2D and 3D scatter plots
+   9. [ ] Ellipse gating widget
+   10. [ ] Progress indicators
+   11. [ ] Wizard implementation
+   12. [ ] Integrated Python shell
+   13. [ ] Tree controls for fcmcollections and views
+   14. [ ] Annotations editor
+   15. [ ] Help documentation
+   16. [ ] Tooltips
 ** Testing [/]
-   1. Batch processing - look into use of coroutines for chaining
 * Milestone 3
-  Clustering models.
-** Coding [/]
+  Clustering models and statistics - work on clean model class specification, then add useful canned models.
+** Coding [0/3]
+   1. Models
+      1. [ ] Fixed-k
+      2. [ ] TDP
+      3. [ ] CDP
+   2. Fitting
+      1. [ ] MCMC
+      2. [ ] Biased sampling
+      3. [ ] Bayesian EM 
+   3. Summary
+      1. [ ] Fast modal clusters
+      2. [ ] DiME
+   4. Statistics
+      1. [ ] K-S statistic for histograms
+      2. [ ] Comparison of multiple samples
+      3. [ ] Stochastic shotgun search
+      4. [ ] Time series analysis
 ** Testing [/]
 * Milestone 4
   Optimization and CUDA.
-** Coding [/]
+** Coding [0/5]
+   1. [ ] Implement profiling for time-consuming functionality
+   2. [ ] Implement multiple threading or processes for long-running functions
+   3. [ ] GPU accelerated MCMC
+   4. [ ] GPU accelerated BEM
+   5. [ ] GPU accelerated graphics
 ** Testing [/]
 * Milestone 5
-  Packaging.
+  Finishing and polishing.
 ** Coding [/]
+   1. [ ] Packaging for major platforms
+   2. [ ] Provide example of every public function in API
+   3. [ ] User's guide
+   4. [ ] Developer's guide
+   5. [ ] Plugins management
+   6. [ ] Database integration
+   7. [ ] Ontology integration
 ** Testing [/]
+   1. [ ] User sessions with Flow Core people
