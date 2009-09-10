@@ -24,6 +24,11 @@ class SubsampleTestCase(unittest.TestCase):
         assert self.fcm[0] == 1, 'subsample via fcm failed'
         assert self.fcm[1] == 4, 'subsample via fcm failed'
         
+    def testChainSubSample(self):
+        self.fcm.visit('root')
+        sam2 = SubsampleFactory[0]
+        self.fcm.subsample(self.samp).subsample(sam2)
+        assert self.fcm.view() == 1 'subsample chaining failed'
 
 
 if __name__ == "__main__":
