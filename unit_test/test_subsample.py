@@ -5,7 +5,7 @@ Created on Aug 27, 2009
 '''
 import unittest
 from fcm import FCMdata
-from fcm import Gate
+from fcm import PolyGate
 from fcm.core import SubsampleFactory
 from numpy import array
 

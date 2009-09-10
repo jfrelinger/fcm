@@ -3,7 +3,7 @@
 
 from core import FCMdata
 from core import Annotation
-from core import Gate, points_in_poly, QuadGate
+from core import PolyGate, points_in_poly, QuadGate, IntervalGate
 from core import BadFCMPointDataTypeError, UnimplementedFcsDataMode
 from core import CompensationError
 from io import FCSreader, loadFCS

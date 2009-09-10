@@ -7,16 +7,22 @@ from enthought.traits.api import HasTraits, List, ListInt, Array
 class Gate(HasTraits):
     """An object representing a gatable region"""
     vert = Array()
-    chan = ListInt(minlen=2, maxlen=2)
+    chan = ListInt
+
     def __init__(self, vert, channels):
         """
-        An object representing a gatable region
-        
-        vert = numpy.array((k,2)): verticies of gating region
-        channels = touple of indicies of channels to gate on
+        vert = vertices of gating region
+        channels = indices of channels to gate on.
         """
         self.vert = vert
         self.chan = channels
+
+    def gate(self, fcm, chan = None):
+        """do the actual gating here."""
+        pass
+        
+class PolyGate(Gate):
+    """An object representing a polygonal gatable region"""
         
     def gate(self, fcm, chan = None):
         """
@@ -38,10 +44,6 @@ class QuadGate(Gate):
     """
     An object to divide a region to four quadrants
     """
-    def __init__(self, vert, channels):
-        self.vert = vert
-        self.chan = channels
-        
     def gate(self, fcm, chan = None):
         """
         return gated region
@@ -63,7 +65,28 @@ class QuadGate(Gate):
                 fcm.tree.visit(name)
                 node = GatingNode("q%d" % i, root, quad[i])
                 fcm.add_view(node)
-        
+
+class IntervalGate(Gate):
+    """
+    An objeect to return events within an interval in any one channel.
+    """
+    def gate(self, fcm, chan=None):
+        """
+        return interval region.
+        """
+        if chan is None:
+            chan = self.chan
+            
+        assert(len(self.chan)==1)
+        assert(len(self.vert)==2)
+        assert(self.vert[1] >= self.vert[0])
+
+        x = fcm.view()[:,chan[0]]
+        idxs = numpy.logical_and(x>self.vert[0], x<self.vert[1])
+
+        node = GatingNode("", fcm.get_cur_node(), idxs)
+        fcm.add_view(node)
+        return fcm
 
 def points_in_poly(vs, ps):
     """Return boolean index of events from ps that are inside polygon with vertices vs.
