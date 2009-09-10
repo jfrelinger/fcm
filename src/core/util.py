@@ -1,9 +1,87 @@
 import networkx
 import re
 from fcmexceptions import IllegalNodeNameError
+from enthought.traits.api import HasTraits, String, This, Array, Instance
 
-class Tree(object):
+        
+class Node(object):
+    """
+    base node object
+    """
+    
+    name = String
+    parent = This
+    data = Array
+    prefix = String
+
+    def __init__(self, name, parent, data):
+        self.name = name
+        self.parent = parent
+        self.data = data
+        self.prefix= 'n'
+    
+    def view(self):
+        """
+        return the view of the data associated with this node
+        """
+        
+        return self.data
+    
+class RootNode(Node):
+    """
+    Root Node
+    """
+    def __init__(self, name, data):
+        self.name = name
+        self.parent = None
+        self.data = data
+        self.prefix='root'
+        
+class TransformNode(Node):
+    """
+    Transformed Data Node
+    """
+    
+    def __init__(self, name, parent,  data):
+        self.name = name
+        self.parent = parent
+        self.data = data
+        self.prefix = 't'
+        
+class SubsampleNode(Node):
+    """
+    Node of subsampled data
+    """
+    
+    def __init__(self, name, parent, param):
+        self.name = name
+        self.parent = parent
+        self.param = param
+        self.prefix = 's'
+        
+    def view(self):
+        return self.parent.view().__getitem__(self.param)
+    
+class GatingNode(Node):
+    """
+    Node of gated data
+    """
+    
+    def __init__(self, name, parent, data):
+        self.name = name
+        self.parent = parent
+        self.data = data
+        self.prefix = 'g'
+        
+    def view(self):
+        return self.parent.view()[self.data]
+        
+class Tree(HasTraits):
     '''Tree of data for FCMdata object.'''
+    g = Instance(networkx.LabeledDiGraph)
+    root = Instance(RootNode)
+    current = String
+
     def __init__(self, pnts):
         self.g = networkx.LabeledDiGraph()
         self.root = RootNode('root', pnts)
@@ -65,75 +143,7 @@ class Tree(object):
             for i in children:
                 self.g.add_edge(new_name, i)
                 
-        
-class Node(object):
-    """
-    base node object
-    """
-    
-    def __init__(self, name, parent, data):
-        self.name = name
-        self.parent = parent
-        self.data = data
-        self.prefix= 'n'
-    
-    def view(self):
-        """
-        return the view of the data associated with this node
-        """
-        
-        return self.data
-    
-class RootNode(Node):
-    """
-    Root Node
-    """
-    
-    def __init__(self, name, data):
-        self.name = name
-        self.parent = None
-        self.data = data
-        self.prefix='root'
-        
-class TransformNode(Node):
-    """
-    Transformed Data Node
-    """
-    
-    def __init__(self, name, parent,  data):
-        self.name = name
-        self.parent = parent
-        self.data = data
-        self.prefix = 't'
-        
-class SubsampleNode(Node):
-    """
-    Node of subsampled data
-    """
-    
-    def __init__(self, name, parent, param):
-        self.name = name
-        self.parent = parent
-        self.param = param
-        self.prefix = 's'
-        
-    def view(self):
-        return self.parent.view().__getitem__(self.param)
-    
-class GatingNode(Node):
-    """
-    Node of gated data
-    """
-    
-    def __init__(self, name, parent, data):
-        self.name = name
-        self.parent = parent
-        self.data = data
-        self.prefix = 'g'
-        
-    def view(self):
-        return self.parent.view()[self.data]
-        
+
         
 if __name__ == '__main__':
     import matplotlib.pyplot as plt

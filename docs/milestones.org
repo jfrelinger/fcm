@@ -1,0 +1,54 @@
+* Milestone 1
+  Core functionality and single clustering method.
+** Coding [/]
+   1. [ ] Nested fcm collections for trees of data files
+   2. [ ]  Create mock fcm object function
+   3. [ ]  Summary data for fcm object
+      1. [ ]  summary stats - mean, sd, #events per channel, median, min, max
+      2. [ ]  % events in 1st and last channels
+   4. [ ]  Checks for channel name consistency
+   5. [ ]  Interval gate
+   6. [ ]  Implement logging for changes to fcm object
+   7. [ ]  Traits implementation
+   8. [ ]  Chaining of operations
+   9. [ ]  Clustering method - single layer TDP
+      1. [ ]  random number generators
+      2. [ ]  density functions
+      3. [ ]  create model class
+      4. [ ]  MCMC
+      5. [ ]  Modal clustering
+** Testing [0/14]
+   1. [ ]  Audit for API consistency
+   2. [ ]  Audit for docstrings
+   3. [ ]  Thorough test of data loading
+      1. [ ]  loading check
+      2. [ ]  compensation check
+      3. [ ]  transformation check
+   4. [ ]  Test summary statistics
+   5. [ ]  Test mock object creation
+   6. [ ]  Test channel name consistency
+   7. [ ]  Test interval gate
+   8. [ ]  Test logging
+   9. [ ]  Test chaining
+   10. [ ]  Test random number generators
+   11. [ ]  Test density function
+   12. [ ]  Test model specification
+   13. [ ]  Test results of clustering
+   14. [ ]  Test prior sampling from model
+* Milestone 2
+  Flowlab GUI.
+** Coding [/]
+** Testing [/]
+   1. Batch processing - look into use of coroutines for chaining
+* Milestone 3
+  Clustering models.
+** Coding [/]
+** Testing [/]
+* Milestone 4
+  Optimization and CUDA.
+** Coding [/]
+** Testing [/]
+* Milestone 5
+  Packaging.
+** Coding [/]
+** Testing [/]
