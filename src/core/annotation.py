@@ -1,10 +1,14 @@
 """FCM annotation and annotation sets for FCM data and files
 """
 
-class Annotation(object):
+from enthought.traits.api import HasTraits, DictStrAny
+
+class Annotation(HasTraits):
     """
     Annotation object for storing metadata about FCM data
     """
+    annotations = DictStrAny()
+    
     def __init__(self, annotations=None):
         """
         Annotation([annotations = {}])

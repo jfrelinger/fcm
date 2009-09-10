@@ -2,13 +2,14 @@
 A python object representing flow cytomoetry data
 """
 from numpy import array
+from enthought.traits.api import HasTraits, String, Instance, List
 from annotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
 from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
 from util import Tree, RootNode
 
-class FCMdata(object):
+class FCMdata(HasTraits):
     """
     Object representing flow cytometry data
     FCMdata.pnts : a numpy array of data points
@@ -18,7 +19,11 @@ class FCMdata(object):
 
     """
     
-    
+    name = String()
+    tree = Instance(Tree)
+    scatters = List()
+    markers = List()
+    notes = Instance(Annotation)
     def __init__(self, name, pnts, channels, scatters=None, notes=None):
         """
         fcmdata(name, pnts, channels, scatters=None)
