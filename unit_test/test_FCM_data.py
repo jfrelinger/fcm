@@ -76,6 +76,15 @@ class FCMdataTestCase(unittest.TestCase):
         assert 'g2' in nodes, 'gating name mangled'
         assert 'g1' in nodes, 'gating name mangled'
 
+    def testBoundaryEvents(self):
+        pnts = array([[0,1,2],[3,4,5],[0,2,5]])
+        fcm = FCMdata('test_fcm', pnts, ['fsc','ssc','cd3'], [0,1])
+        eps = 1e-10
+        result = fcm.boundary_events()
+        assert result['fsc'] - 1 < eps
+        assert result['ssc'] - 2.0/3.0 < eps
+        assert result['cd3'] - 1 < eps
+
     def testChainOp(self):
         verts =  array([[-.1,-.1],[-.1,1.1],[1.1,1.1], [1.1,-.1]])
         cols = [0,1]

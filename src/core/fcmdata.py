@@ -1,6 +1,7 @@
 """
 A python object representing flow cytomoetry data
 """
+from __future__ import division
 from numpy import array, median
 from enthought.traits.api import HasTraits, String, Instance, List
 from annotation import Annotation
@@ -145,7 +146,7 @@ class FCMdata(HasTraits):
         """add a new node to the view tree"""
         self.tree.add_child(node.name, node)
         return self
-    
+
     def summary(self):
         """returns summary of current view"""
         pnts = self.view()
@@ -165,4 +166,12 @@ class FCMdata(HasTraits):
             summary = summary + "    std: " + str(stds[i]) + "\n"
         return summary
             
-        
+    def boundary_events(self):
+        """returns dictionary of fraction of events in first and last
+        channel for each channel"""
+        boundary_dict = {}
+        for k, chan in enumerate(self.channels):
+            col = self.view()[:,k]
+            boundary_dict[chan] = \
+                sum((col==min(col)) | (col==max(col)))/len(col) 
+        return boundary_dict
