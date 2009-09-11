@@ -2,7 +2,23 @@ import networkx
 import re
 from fcmexceptions import IllegalNodeNameError
 from enthought.traits.api import HasTraits, String, This, Array, Instance
+import logging
+import os
 
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s: %(message)s',
+                    filename=os.path.join(os.path.dirname(__file__), 'fcm.log'),
+                    filemode='a')
+
+def fcmlog(func):
+    """This decorator logs call to methods with full argument list."""
+    def g(*args, **kwargs):
+        argnames = func.func_code.co_varnames[:func.func_code.co_argcount]
+        logging.info(func.func_name + '(' + ', '.join(
+                '%s=%r' % entry
+                for entry in zip(argnames,args) + kwargs.items()) + ')')
+        return func(*args, **kwargs)
+    return g
         
 class Node(object):
     """

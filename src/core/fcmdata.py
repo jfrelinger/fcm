@@ -8,7 +8,7 @@ from annotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
 from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
-from util import Tree, RootNode
+from util import Tree, RootNode, fcmlog
 
 class FCMdata(HasTraits):
     """
@@ -25,6 +25,8 @@ class FCMdata(HasTraits):
     scatters = List()
     markers = List()
     notes = Instance(Annotation)
+
+    @fcmlog
     def __init__(self, name, pnts, channels, scatters=None, notes=None):
         """
         fcmdata(name, pnts, channels, scatters=None)
@@ -55,6 +57,12 @@ class FCMdata(HasTraits):
         if notes == None:
             notes = Annotation()
         self.notes = notes
+
+    def __unicode__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
         
     def __getitem__(self, item):
         """return FCMdata.pnts[i] by name or by index"""
@@ -99,10 +107,12 @@ class FCMdata(HasTraits):
         except KeyError:
             return None
     
+    @fcmlog
     def view(self):
         """return the current view of the data"""
         return self.tree.view()
     
+    @fcmlog
     def visit(self, name):
         """Switch current view of the data"""
         self.tree.visit(name)
@@ -123,18 +133,22 @@ class FCMdata(HasTraits):
         tmarkers = self.markers[:]
         return FCMdata(tpnts, tchannels, tmarkers, tnotes)
     
+    @fcmlog
     def logicle(self, channels, T, m, r, order=2, intervals=1000.0):
         """return logicle transformed channels"""
         return _logicle(self, channels, T, m, r, order, intervals)
         
+    @fcmlog
     def hyperlog(self, channels, b, d, r, order=2, intervals=1000.0):
         """return hyperlog transformed channels"""
         return _hyperlog(self, channels, b, d, r, order, intervals)
     
+    @fcmlog
     def gate(self, g, chan=None):
         """return gated region of fcm data"""
         return g.gate(self, chan)
     
+    @fcmlog
     def subsample(self, s):
         """return subsampled/sliced fcm data"""
         return s.subsample(self)
@@ -143,7 +157,7 @@ class FCMdata(HasTraits):
         return self.tree.get()
     
     def add_view(self, node):
-        """add a new node to the view tree"""
+        """add a new node to the view tree"""        
         self.tree.add_child(node.name, node)
         return self
 

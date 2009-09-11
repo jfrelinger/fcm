@@ -7,6 +7,7 @@ from UserDict import DictMixin
 from annotation import Annotation
 from enthought.traits.api import HasTraits, DictStrAny, Instance
 import numpy
+from util import fcmlog
 
 class FCMcollection(DictMixin, HasTraits):
     """
@@ -18,6 +19,8 @@ class FCMcollection(DictMixin, HasTraits):
 
     fcmdict = DictStrAny()
     notes = Instance(Annotation)
+
+    @fcmlog
     def __init__(self, name, fcms=None, notes=None):
         """
         Initialize with fcm collection and notes.
@@ -40,6 +43,7 @@ class FCMcollection(DictMixin, HasTraits):
         """return fcmcollection.fcmdict[item]"""
         return self.fcmdict[item]
 
+    @fcmlog
     def __setitem__(self, key, value):
         """set fcmcollection.fcmdict[key] = value."""
         self.fcmdict[key] = value

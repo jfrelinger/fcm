@@ -1,7 +1,7 @@
 * Milestone 1
   Core functionality and single clustering method.
-** Coding [6/9]
-   1. [ ] Nested fcm collections for trees of data files
+** Coding [7/9]
+   1. [X] Nested fcm collections for trees of data files
    2. [X]  Create mock fcm object function
 	   Skip for now - using the FCMdata constructor is straightforward
    3. [X]  Summary data for fcm object

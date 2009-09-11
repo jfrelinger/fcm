@@ -17,6 +17,7 @@ sample_data/treg/*
 .*\.gif
 .*\.avi
 .*\.mov
+.*\.log
 scratch/*
 build/*
 
