@@ -6,6 +6,7 @@ All operations will be performed on each FCMData in the collection.
 from UserDict import DictMixin
 from annotation import Annotation
 from enthought.traits.api import HasTraits, DictStrAny, Instance
+import numpy
 
 class FCMcollection(DictMixin, HasTraits):
     """
@@ -17,12 +18,13 @@ class FCMcollection(DictMixin, HasTraits):
 
     fcmdict = DictStrAny()
     notes = Instance(Annotation)
-    def __init__(self, fcms=None, notes=None):
+    def __init__(self, name, fcms=None, notes=None):
         """
         Initialize with fcm collection and notes.
         Tree of operations not implemented yet - how is this done in fcmdata?
         """
         self.fcmdict = {}
+        self.name = name
         if fcms is not None:
             for fcm in fcms:
                 self.fcmdict[fcm.name] = fcm
@@ -53,12 +55,31 @@ class FCMcollection(DictMixin, HasTraits):
     def check_names(self):
         """Checks for channel name consistency. 
 
-        Returns list of booleans where True = all fcm have same name
-        for the channel and False = at least one different name"""
-        channels = zip([f.channels for f in self.fcmdict.values()])
-        return [numpy.reduce(numpy.logical_and, 
-                             numpy.equal(channels, channels[0]))]
-            
+        Returns dictionary of (fcmcollecion.name, [bool] | dictionary) where 
+        True = all fcm have same name
+        for the channel and False = at least one different name.
+        """
+        result_dict = {}
+        results = []
+        channels_list = []
+        for item in self.values():
+            if isinstance(item, self.__class__):
+                results.append(item.check_names())
+            else:
+                channels_list.append(item.channels)
+        name_tuples = zip(*channels_list)
+        for name_tuple in name_tuples[:]:
+            bits = []
+            for name in name_tuple[1:]:
+                if name == name_tuple[0]:
+                    bits.append(True)
+                else:
+                    bits.append(False)
+            results.append(
+                reduce(numpy.logical_and, bits))
+        result_dict[self.name] = results
+        return result_dict
+
 if __name__ == '__main__':
     from io import loadFCS
     f1 = loadFCS('../../sample_data/3FITC_4PE_004.fcs')

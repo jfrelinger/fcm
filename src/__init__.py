@@ -1,7 +1,7 @@
 """setup all things exported from FCM
 """
 
-from core import FCMdata
+from core import FCMdata, FCMcollection
 from core import Annotation
 from core import PolyGate, points_in_poly, QuadGate, IntervalGate
 from core import BadFCMPointDataTypeError, UnimplementedFcsDataMode

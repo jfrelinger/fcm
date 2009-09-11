@@ -1,4 +1,5 @@
 from fcmdata import FCMdata
+from fcmcollection import FCMcollection
 from annotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError, UnimplementedFcsDataMode
 from fcmexceptions import CompensationError, IllegalNodeNameError
