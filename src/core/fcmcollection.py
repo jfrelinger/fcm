@@ -50,6 +50,15 @@ class FCMcollection(DictMixin, HasTraits):
         """Convenience function to access fcm object by name."""
         return self.fcmdict[name]
 
+    def check_names(self):
+        """Checks for channel name consistency. 
+
+        Returns list of booleans where True = all fcm have same name
+        for the channel and False = at least one different name"""
+        channels = zip([f.channels for f in self.fcmdict.values()])
+        return [numpy.reduce(numpy.logical_and, 
+                             numpy.equal(channels, channels[0]))]
+            
 if __name__ == '__main__':
     from io import loadFCS
     f1 = loadFCS('../../sample_data/3FITC_4PE_004.fcs')
