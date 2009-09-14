@@ -7,4 +7,4 @@ eg:
 > cd ~/MyPython
 > ln -s <path to fcm>/src fcm
 
-and then add ~/MyPython/ to the python path and scripts should run fime from the source tree then.
+and then add ~/MyPython/ to the python path and scripts should run fine from the source tree then.
