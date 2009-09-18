@@ -7,7 +7,7 @@ import os
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s: %(message)s',
-                    filename=os.path.join(os.path.dirname(__file__), 'fcm.log'),
+                    filename=os.path.join('.', 'fcm.log'),
                     filemode='a')
 
 def fcmlog(func):
