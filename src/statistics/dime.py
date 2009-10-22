@@ -25,6 +25,9 @@ class DiME(object):
         if cmap == None:
             self.c = len(pi) # number of clusters
             self.cpi = pi
+            cmap = {}
+            for i in range(self.c):
+                cmap[i] = [i]
         else:
             self.c = len(cmap.keys())
             self.cpi = []
