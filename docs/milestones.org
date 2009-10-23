@@ -1,6 +1,6 @@
 * Milestone 1
   Core functionality and single clustering method.
-** Coding [7/9]
+** Coding [8/9]
    1. [X] Nested fcm collections for trees of data files
    2. [X]  Create mock fcm object function
 	   Skip for now - using the FCMdata constructor is straightforward
@@ -9,7 +9,7 @@
       2. [X]  % events in 1st and last channels
    4. [X]  Checks for channel name consistency
    5. [X]  Interval gate
-   6. [ ]  Implement logging for changes to fcm object
+   6. [X]  Implement logging for changes to fcm object
    7. [X]  Traits implementation
    8. [X]  Chaining of operations
    9. [ ]  Clustering method - single layer TDP
