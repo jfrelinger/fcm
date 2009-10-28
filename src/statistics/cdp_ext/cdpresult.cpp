@@ -39,46 +39,46 @@ CDPResult::CDPResult(int nclusters, int ncomponents, int npoints, int dimension)
 	W = new int[N];
 	K = new int[N];
 
-	postmufile.open("postmu.txt");
-	if(postmufile.fail())
-	  {
-	    std::cout << "Failed to create postmu.txt" << endl;
-	    exit(1);
-	  }
-	postpfile.open("postp.txt");
-	if(postpfile.fail())
-	  {
-	    std::cout << "Failed to create postp.txt" << endl;
-	    exit(1);
-	  }
-
-	postSigmafile.open("postSigma.txt");
-	if(postSigmafile.fail())
-	  {
-	    std::cout << "Failed to create postSigma.txt" << endl;
-	    exit(1);
-	  }
-
-	postqfile.open("postq.txt");
-	if(postqfile.fail())
-	  {
-	    std::cout << "Failed to create postq.txt" << endl;
-	    exit(1);
-	  }
-
-	postmfile.open("postm.txt");
-	if(postmfile.fail())
-	  {
-	    std::cout << "Failed to create postm.txt" << endl;
-	    exit(1);
-	  }
-
-	postPhifile.open("postPhi.txt");
-	if(postPhifile.fail())
-	  {
-	    std::cout << "Failed to create postPhi.txt" << endl;
-	    exit(1);
-	  }
+//	postmufile.open("postmu.txt");
+//	if(postmufile.fail())
+//	  {
+//	    std::cout << "Failed to create postmu.txt" << endl;
+//	    exit(1);
+//	  }
+//	postpfile.open("postp.txt");
+//	if(postpfile.fail())
+//	  {
+//	    std::cout << "Failed to create postp.txt" << endl;
+//	    exit(1);
+//	  }
+//
+//	postSigmafile.open("postSigma.txt");
+//	if(postSigmafile.fail())
+//	  {
+//	    std::cout << "Failed to create postSigma.txt" << endl;
+//	    exit(1);
+//	  }
+//
+//	postqfile.open("postq.txt");
+//	if(postqfile.fail())
+//	  {
+//	    std::cout << "Failed to create postq.txt" << endl;
+//	    exit(1);
+//	  }
+//
+//	postmfile.open("postm.txt");
+//	if(postmfile.fail())
+//	  {
+//	    std::cout << "Failed to create postm.txt" << endl;
+//	    exit(1);
+//	  }
+//
+//	postPhifile.open("postPhi.txt");
+//	if(postPhifile.fail())
+//	  {
+//	    std::cout << "Failed to create postPhi.txt" << endl;
+//	    exit(1);
+//	  }
 
 
 }
@@ -87,12 +87,12 @@ CDPResult::~CDPResult(void)
 {
 	delete [] W;
 	delete [] K;
-	postmufile.close();
-	postpfile.close();
-	postSigmafile.close();
-	postmfile.close();
-	postqfile.close();
-	postPhifile.close();
+//	postmufile.close();
+//	postpfile.close();
+//	postSigmafile.close();
+//	postmfile.close();
+//	postqfile.close();
+//	postPhifile.close();
 	
 }
 
@@ -101,13 +101,13 @@ CDPResult::~CDPResult(void)
  ************************************************************************/
 bool CDPResult::SaveDraws(){
 
-  SavePDraw();
-  SaveMuDraw();
-  SavePhiDraw();
-
-  SaveQDraw();
-  SaveMDraw();
-  SaveSigmaDraw();
+//  SavePDraw();
+//  SaveMuDraw();
+//  SavePhiDraw();
+//
+//  SaveQDraw();
+//  SaveMDraw();
+//  SaveSigmaDraw();
   return true;
 }
 
