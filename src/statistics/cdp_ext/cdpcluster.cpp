@@ -4,6 +4,10 @@
 
 #include "cdpcluster.h"
 
+cdpcluster::~cdpcluster(void) {
+	delete param;
+}
+
 //cdpcluster::cdpcluster(int d, int n, double** x, int iter, int burn) {
 cdpcluster::cdpcluster(int n, int d, double* x) {
 //  Model model;
@@ -55,25 +59,25 @@ void cdpcluster::run(){
   cdp.precalculate = cdp.msf.gammaln((cdp.prior.nu + (double)model.mnD)/2) - 
     cdp.msf.gammaln(cdp.prior.nu/2) -0.5 * (double)model.mnD * log(cdp.prior.nu) - 0.5 * (double)model.mnD * 1.144729885849400;
   
-  CDPResult result(cdp.prior.J,cdp.prior.T,cdp.prior.N,cdp.prior.D);
-  
-  cdp.SimulateFromPrior2(result,mt);
+  //CDPResult result(cdp.prior.J,cdp.prior.T,cdp.prior.N,cdp.prior.D);
+  param = new CDPResult(cdp.prior.J,cdp.prior.T,cdp.prior.N,cdp.prior.D);
+
+  cdp.SimulateFromPrior2((*param),mt);
   
   // if any values are to be loaded from file, load them here
-  cdp.LoadInits(model,result, mt);
-  
+  cdp.LoadInits(model,(*param), mt);
   // see if we're dealing with a special case of J==1
-  cdp.CheckSpecialCases(model,result);
+  cdp.CheckSpecialCases(model,(*param));
   // main mcmc loop
   for (int it = 0; it < model.mnBurnin + model.mnIter ; it++) {
   	if(verbose) {
     	std::cout << "it = " << (it+1) << endl;
   	}
-    cdp.iterate(result,mt);
+    cdp.iterate((*param),mt);
     
     if (it >= model.mnBurnin) {
       //result.SaveDraws();
-      result.UpdateMeans();
+      (*param).UpdateMeans();
     }
     
   }
@@ -84,11 +88,22 @@ void cdpcluster::run(){
   //if(model.mnIter>0){
     //result.SaveBar();
   //}
+
+  
   if(verbose) { 
   	std::cout << "Done" << std::endl;
   }
-  param = &result;
 };
+
+void cdpcluster::step(){
+    cdp.iterate((*param),mt);
+    (*param).UpdateMeans();
+}
+
+void cdpcluster::stepburn(){
+	cdp.iterate(*param,mt);
+}
+
 // model getters and setters
 int cdpcluster::getn(){ return model.mnN; };
 int cdpcluster::getd(){ return model.mnD; };
@@ -200,7 +215,7 @@ int cdpcluster::getIter() {
 
 // results
 int cdpcluster::getclustN(){ // is this needed? isn't it just model.mnJ * model.mnT?
-	return (*param).mu.size();
+	return (*param).J*(*param).T;
 };
 
 double cdpcluster::getMu(int idx, int pos){
@@ -208,40 +223,7 @@ double cdpcluster::getMu(int idx, int pos){
 };
 
 double cdpcluster::getSigma(int i, int j, int k){
-	//std::cout << i << j << k << std::endl;
-	//double x;
-	if (j <= k){
-		//std::cout << ((*param).Sigma[i].element(j,k)) << std::endl;
-		return ((*param).Sigma[i].element(j,k));
-	} else {
-		//std::cout << ((*param).Sigma[i].element(k,j)) << std::endl;
-		return ((*param).Sigma[i].element(k,j));
-	};
-
-};
-
-void cdpcluster::printSigma() {
-	for (int i = 0; i < (*param).J*(*param).T; i++) {
-		for (int j = 0; j < (*param).D; j++) {
-			for (int k = 0; k <= j; k++) {
-				//std::cout << "j<k: " << i << j << k << std::endl;
-				std::cout << (*param).Sigma[i].element(j,k) << "\t";
-			}
-			for (int k = j+1; k < (*param).D; k++) {
-				std::cout << (*param).Sigma[i].element(k,j) << "\t";
-			}
-		}
-		std::cout << endl;
-	}
-};
-
-void cdpcluster::printSigma(int i, int j, int k){
-	if (j <= k){
-		std::cout << (*param).Sigma[i].element(j,k);
-	} else {
-		std::cout << (*param).Sigma[i].element(k,j);
-	};
-	std::cout << std::endl;
+		return (((*param).Sigma.at(i)).element(k,j));
 };
 
 double cdpcluster::getp(int idx){ 

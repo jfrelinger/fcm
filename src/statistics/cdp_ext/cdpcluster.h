@@ -9,9 +9,11 @@
 
 class cdpcluster{
 	public:
-	//cdpcluster(int d, int n, double** x, int iter=1000, int burn=100);
+	virtual ~cdpcluster(void); 
 	cdpcluster(int n, int d, double* x);
 	void run();
+	void step();
+	void stepburn();
 	void setT(int t);
 	void setJ(int j);
 	void setBurnin(int t);
@@ -45,12 +47,11 @@ class cdpcluster{
 	double getMu(int idx, int pos);
 	double getSigma(int i, int j, int k);
 	double getp(int idx);
-	void printSigma();
-	void printSigma(int i, int j, int k);
 	
-	CDPResult* param;
+	
 
 	private:
+	CDPResult* param;
 	//CDPResult result;
 	Model model;
 	CDP cdp;
