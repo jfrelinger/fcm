@@ -60,7 +60,15 @@ class cdpcluster:
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, cdpcluster, name)
     __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _cdpfoo.new_cdpcluster(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _cdpfoo.delete_cdpcluster
+    __del__ = lambda self : None;
     def run(self): return _cdpfoo.cdpcluster_run(self)
+    def step(self): return _cdpfoo.cdpcluster_step(self)
+    def stepburn(self): return _cdpfoo.cdpcluster_stepburn(self)
     def setT(self, *args): return _cdpfoo.cdpcluster_setT(self, *args)
     def setJ(self, *args): return _cdpfoo.cdpcluster_setJ(self, *args)
     def setBurnin(self, *args): return _cdpfoo.cdpcluster_setBurnin(self, *args)
@@ -94,15 +102,6 @@ class cdpcluster:
     def getMu(self, *args): return _cdpfoo.cdpcluster_getMu(self, *args)
     def getSigma(self, *args): return _cdpfoo.cdpcluster_getSigma(self, *args)
     def getp(self, *args): return _cdpfoo.cdpcluster_getp(self, *args)
-    def printSigma(self, *args): return _cdpfoo.cdpcluster_printSigma(self, *args)
-    __swig_setmethods__["param"] = _cdpfoo.cdpcluster_param_set
-    __swig_getmethods__["param"] = _cdpfoo.cdpcluster_param_get
-    def __init__(self, *args): 
-        this = _cdpfoo.new_cdpcluster(*args)
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _cdpfoo.delete_cdpcluster
-    __del__ = lambda self : None;
 cdpcluster_swigregister = _cdpfoo.cdpcluster_swigregister
 cdpcluster_swigregister(cdpcluster)
 

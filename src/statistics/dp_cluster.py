@@ -6,10 +6,11 @@ Created on Oct 30, 2009
 
 from distributions import mvnormpdf
 from numpy import array
+from component import Component
 from enthought.traits.api import HasTraits, List, Float, Array
 
 
-class DPCluster(HasTraits):
+class DPCluster(HasTraits, Component):
     '''
     Single component cluster in mixture model
     '''
@@ -41,12 +42,13 @@ class DPMixture(HasTraits):
     collection of compoents that describe a mixture model
     '''
     clusters = List(DPCluster)
-    def __init__(self, clusters):
+    def __init__(self, clusters, cmap=None):
         '''
         DPMixture(clusters)
         cluster = list of DPCluster objects
         '''
         self.clusters = clusters
+        self.cmap = cmap
         
     def prob(self, x):
         '''
@@ -63,3 +65,23 @@ class DPMixture(HasTraits):
         probs = self.prob(x)
         return probs.argmax(1)
     
+    def mus(self):
+        '''
+        DPMixture.mus():
+        returns an array of all cluster means
+        '''
+        return array([i.mu for i in self.clusters])
+    
+    def sigmas(self):
+        '''
+        DPMixture.sigmas():
+        returns an array of all cluster variance/covariances
+        '''
+        return array([i.sigma for i in self.clusters])
+    
+    def pis(self):
+        '''
+        DPMixture.pis()
+        return an array of all cluster weights/proportions
+        '''
+        return array([i.pi for i in self.clusters])
