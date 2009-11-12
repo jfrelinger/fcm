@@ -83,7 +83,7 @@ void cdpcluster::run(){
   }
   
   // save final parameter values
-  //result.SaveFinal();
+  //(*param).SaveFinal();
   // save posterior means for mixture component parameters
   //if(model.mnIter>0){
     //result.SaveBar();

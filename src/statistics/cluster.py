@@ -46,8 +46,8 @@ class DPMixtureModel(HasTraits):
         
     def fit(self, verbose=False):
         self.cdp = cdpcluster(self.data)
-        self.cdp.setT(1)
-        self.cdp.setJ(self.nclusts)
+        self.cdp.setT(self.nclusts)
+        self.cdp.setJ(1)
         self.cdp.setBurnin(self.burnin)
         self.cdp.setIter(self.itter-self.last)
         if verbose:
@@ -59,6 +59,7 @@ class DPMixtureModel(HasTraits):
         idx = 0
         for i in range(self.last):
             for j in range(self.nclusts):
+                print self._getpi(j)
                 self.pi[idx] = self._getpi(j)
                 self.mus[idx,:] = self._getmu(j)
                 self.sigmas[idx,:,:] = self._getsigma(j)
