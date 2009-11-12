@@ -57,6 +57,14 @@ class Annotation(HasTraits):
     def __repr__(self):
         return 'Annotation('+self._mydict.__repr__()+')'
     
+    def __getstate__(self):
+        return self._mydict
+    def __setstate(self, state):
+        self._mydict = state
+        
+    def __getinitargs__(self):
+        return (self._mydict,)
+    
     def copy(self):
         return Annotation(self._mydict.copy())
     
