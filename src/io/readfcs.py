@@ -32,6 +32,7 @@ class FCSreader(object):
         
     def get_FCMdata(self, auto_comp=True):
         """Return the next FCM data set stored in a FCS file"""
+        
         # parse headers
         header = self.parse_header(self.cur_offset)
         # parse text 
@@ -124,6 +125,7 @@ class FCSreader(object):
         """
         Parse the FCM data in fcs file at the offset (supporting multiple 
         data segments in a file
+        
         """
         
         header = {}
@@ -194,6 +196,7 @@ class FCSreader(object):
     
     def parse_int_data(self, offset, start, stop, bitwidth, drange, tot, order):
         """Parse out and return integer list data from fcs file"""
+        
         if reduce(and_, [item in [8, 16, 32] for item in bitwidth]):
             if len(set(bitwidth)) == 1: # uniform size for all parameters
                 # calculate how much data to read in.
