@@ -23,3 +23,5 @@ build/*
 
 syntax: regexp
 ^MANIFEST$
+syntax: regexp
+^dist$

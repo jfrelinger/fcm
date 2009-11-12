@@ -8,7 +8,7 @@ from core import BadFCMPointDataTypeError, UnimplementedFcsDataMode
 from core import CompensationError
 from core import load_compensate_matrix
 from io import FCSreader, loadFCS
-from core import Subsample, SubsampleFactory
+from core import Subsample, SubsampleFactory, DropChannel
 from core  import logicle, hyperlog
 
 __all__ = [

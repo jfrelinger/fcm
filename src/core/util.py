@@ -78,6 +78,21 @@ class SubsampleNode(Node):
     def view(self):
         return self.parent.view().__getitem__(self.param)
     
+class DropChannelNode(Node):
+    """
+    Node of data removing specific channels
+    """
+    
+    def __init__(self, name, parent, param):
+        self.name = name
+        self.parent = parent
+        self.param = param
+        self.prefix = 'd'
+    
+    def view(self):
+        return self.parent.view()[:,self.param]
+    
+    
 class GatingNode(Node):
     """
     Node of gated data
