@@ -58,9 +58,10 @@ class Annotation(HasTraits):
         return 'Annotation('+self._mydict.__repr__()+')'
     
     def __getstate__(self):
-        return self._mydict
+        return self.__dict__
+    
     def __setstate(self, state):
-        self._mydict = state
+        self.__dict__ = state
         
     def __getinitargs__(self):
         return (self._mydict,)

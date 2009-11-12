@@ -63,7 +63,7 @@ class DPMixture(HasTraits):
         returns the classification (which mixture) x is a member of
         '''
         probs = self.prob(x)
-        return probs.argmax(1)
+        return probs.argmax(0)
     
     def mus(self):
         '''
