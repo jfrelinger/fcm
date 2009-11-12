@@ -5,7 +5,7 @@ Created on Oct 30, 2009
 '''
 
 from enthought.traits.api import HasTraits
-from numpy import zeros, outer
+from numpy import zeros, outer, sum
 
 from cdpfoo import cdpcluster
 from dp_cluster import DPCluster, DPMixture
@@ -59,7 +59,6 @@ class DPMixtureModel(HasTraits):
         idx = 0
         for i in range(self.last):
             for j in range(self.nclusts):
-                print self._getpi(j)
                 self.pi[idx] = self._getpi(j)
                 self.mus[idx,:] = self._getmu(j)
                 self.sigmas[idx,:,:] = self._getsigma(j)
@@ -86,6 +85,8 @@ class DPMixtureModel(HasTraits):
         
         
     def get_results(self):
+        
+        self.pi = self.pi/sum(self.pi)
         if self._run:
             rslts = []
             for i in range(self.last * self.nclusts):
