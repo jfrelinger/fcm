@@ -90,7 +90,7 @@ class FCMdataTestCase(unittest.TestCase):
         cols = [0,1]
         g = PolyGate(verts, cols)
         self.fcm.gate(g).gate(g)
-        assert self.fcm.view().all() == array([[0,1,2]]).all(), 'gate excluded wrong points'
+        self.assertTrue( all(self.fcm.view()== array([[0,1,2]])), 'gate excluded wrong points')
         
     def testGetAttr(self):
         assert self.fcm.shape == (2,3), '__gettattr__ failed to deligate'
