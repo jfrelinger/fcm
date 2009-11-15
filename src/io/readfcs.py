@@ -57,6 +57,10 @@ class FCSreader(object):
         except KeyError:
             dstop = header['data_end']
         
+        #account for LMD reporting the wrong values for the size of the data segment
+        lmd = self.fix_lmd(self.cur_offset,header['text_start'], header['text_stop'] )
+        dstop = dstop+lmd
+        
         data = self.parse_data(self.cur_offset, dstart, dstop, text)
         # build fcmdata object
         channels = []
@@ -119,6 +123,7 @@ class FCSreader(object):
     def read_bytes(self, offset, start, stop):
         """Read in bytes from start to stop inclusive."""
         self._fh.seek(offset+start)
+        
         return self._fh.read(stop-start+1)
     
     def parse_header(self, offset):
@@ -146,6 +151,13 @@ class FCSreader(object):
         return header
         
     
+    def fix_lmd(self, offset, start, stop):
+        text = self.read_bytes(offset, start, stop)
+        for j in range(0,-10,-1):
+            if text[0] == text[j-1]:
+                return j
+        return 255 #TODO raise error
+     
     def parse_text(self, offset, start, stop):
         """return parsed text segment of fcs file"""
         

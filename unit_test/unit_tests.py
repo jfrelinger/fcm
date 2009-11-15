@@ -21,7 +21,7 @@ if __name__ == "__main__":
     suite5 = unittest.makeSuite(FCSreaderTestCase,'test')
     suite6 = unittest.makeSuite(TreeTestCase, 'test')
     suite7 = unittest.makeSuite(SubsampleTestCase, 'test')
-    suite8 = unittest.makeSuite(Dp_ClusterTestCase, 'test')
+    suite8 = unittest.makeSuite(Dp_clusterTestCase, 'test')
     alltests = unittest.TestSuite((suite1, suite2, suite4, suite5, suite6, suite7, suite8))
 
     unittest.main()
