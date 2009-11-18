@@ -60,7 +60,6 @@ class FCSreader(object):
         #account for LMD reporting the wrong values for the size of the data segment
         lmd = self.fix_lmd(self.cur_offset,header['text_start'], header['text_stop'] )
         dstop = dstop+lmd
-        
         data = self.parse_data(self.cur_offset, dstart, dstop, text)
         # build fcmdata object
         channels = []
@@ -83,6 +82,7 @@ class FCSreader(object):
                         to_logicle.append(i-1)
                 except KeyError:
                     pass
+        
         if auto_comp:
             if self.spill is None:
                 try:
@@ -242,6 +242,13 @@ class FCSreader(object):
         num_items = (stop-start+1)/calcsize(dtype) 
         # unpack binary data
         tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
+#        print 'ss:', start, stop
+#        print 'num_items', num_items
+#        print 'len tmp:', len(tmp), numpy.array(tmp).shape
+#        print 'tot (passed arg):', tot
+#        print 'len(tmp)/tot (number of markers):', len(tmp)/tot
+#        print 'float(len(tmp)/tot) (number of markers):',float(len(tmp))/float(tot)
+#        print 'number of extra:', len(tmp)%tot
         return numpy.array(tmp).reshape((tot, len(tmp)/tot))
     
     def parse_ascii_data(self, offset, start, stop, bitwidth, dtype, tot, order):

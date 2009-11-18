@@ -51,7 +51,7 @@ def logicle(fcm, channels, T, m, r, order=2, intervals=1000.0):
     npnts = fcm.view().copy()
     for i in channels:
         npnts.T[i] = _logicle(npnts[:, i].T, T, m, r, order, intervals)
-    node = TransformNode('Logicle transformed', fcm.get_current_node(), npnts)
+    node = TransformNode('', fcm.current_node(), npnts)
     fcm.add_view(node)
     return fcm
  
@@ -75,7 +75,7 @@ def hyperlog(fcm, channels, b, d, r, order=2, intervals=1000.0):
     npnts = fcm.view().copy()
     for i in channels:
         npnts.T[i] = _hyperlog(npnts[:,i].T, b, d, r, order=2, intervals=1000.0)
-    node = TransformNode('Hyperlog transformed', fcm.get_current_node(), npnts)
+    node = TransformNode('', fcm.get_current_node(), npnts)
     fcm.add_view(node)
     return fcm
 

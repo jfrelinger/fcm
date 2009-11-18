@@ -29,11 +29,11 @@ def compensate(fcm, S=None, markers=None, comp=False, scale=False):
         if markers is None:
             markers = m
     idx = fcm.name_to_index(markers)
-    
-    c = _compensate(fcm.view()[idx], S, comp, scale)
+
+    c = _compensate(fcm.view()[:,idx], S, comp, scale)
     new = fcm.view()[:]
-    new[idx] = c
-    node = TransformNode('Compensated', fcm.get_cur_node, new)
+    new[:,idx] = c
+    node = TransformNode('', fcm.get_cur_node, new)
     fcm.add_view(node)
     return new
 
@@ -42,8 +42,9 @@ def _compensate(data, spill, comp=False, scale=False):
         spill = spill/max(spill)
     if not comp:
         spill = inv(spill)
-        
-    return dot(data,spill)
+
+    #return dot(data,spill)
+    return solve(spill,data.T).T
 
 def load_compensate_matrix(file_name):
     """
