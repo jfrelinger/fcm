@@ -9,7 +9,7 @@ from fcm import UnimplementedFcsDataMode
 
 from operator import and_
 from math import log
-from struct import calcsize, unpack, error
+from struct import calcsize, unpack
 import re
 import numpy
 import os
@@ -32,6 +32,7 @@ class FCSreader(object):
         
     def get_FCMdata(self, auto_comp=True):
         """Return the next FCM data set stored in a FCS file"""
+        
         # parse headers
         header = self.parse_header(self.cur_offset)
         # parse text 
@@ -124,6 +125,7 @@ class FCSreader(object):
         """
         Parse the FCM data in fcs file at the offset (supporting multiple 
         data segments in a file
+        
         """
         
         header = {}
@@ -140,7 +142,9 @@ class FCSreader(object):
             header['analysis_end'] = int(self.read_bytes(offset, 50, 57))
         except ValueError:
             header['analysis_end'] = -1
+        
         return header
+        
     
     def parse_text(self, offset, start, stop):
         """return parsed text segment of fcs file"""
@@ -190,7 +194,9 @@ class FCSreader(object):
             data = self.parse_ascii_data(offset, start, stop, bitwidth, dtype, tot, order)
         return data
     
-    def _parse_int_data(self, offset, start, stop, bitwidth, drange, tot, order):
+    def parse_int_data(self, offset, start, stop, bitwidth, drange, tot, order):
+        """Parse out and return integer list data from fcs file"""
+        
         if reduce(and_, [item in [8, 16, 32] for item in bitwidth]):
             if len(set(bitwidth)) == 1: # uniform size for all parameters
                 # calculate how much data to read in.
@@ -216,13 +222,6 @@ class FCSreader(object):
             warn('Non-standard bitwidths for data segments')
             return None
         return numpy.array(tmp).reshape((tot, len(bitwidth)))
-
-    def parse_int_data(self, offset, start, stop, bitwidth, drange, tot, order):
-        """Parse out and return integer list data from fcs file"""
-        try:
-            return self._parse_int_data(offset, start, stop, bitwidth, drange, tot, order)
-        except error:
-            return self._parse_int_data(offset, start, stop-1, bitwidth, drange, tot, order)
     
     def parse_float_data(self, offset, start, stop, dtype, tot, order):
         """Parse out and return float list data from fcs file"""
@@ -244,7 +243,6 @@ class FCSreader(object):
 def parse_pairs(text):
     """return key/value pairs from a delimited string"""
     delim = text[0]
-    
     if delim == r'|':
         delim = '\|'
     if delim == r'\a'[0]: # test for delimiter being \
@@ -292,10 +290,10 @@ def log_factory(base):
 
 log2 = log_factory(2)
 
-def loadFCS(filename, auto_logicle=True, auto_comp=True):
+def loadFCS(filename, auto_logicle=True, auto_comp=True, spill=None):
     """Load and return a FCM data object from an FCS file"""
     
-    tmp = FCSreader(filename, auto_logicle)
+    tmp = FCSreader(filename, auto_logicle, spill=spill)
     return tmp.get_FCMdata(auto_comp)
 
 def is_fl_channel(name):

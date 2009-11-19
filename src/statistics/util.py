@@ -15,7 +15,7 @@ def modesearch(pis, mus, sigmas, tol=1e-5):
     precision = int(-1*log10(tol))
     modes = []
     for i in range(n):
-        modes.append(fmin(efunc, mus[i,:], args=(pis,mus,sigmas)))
+        modes.append(fmin(efunc, mus[i,:], args=(pis,mus,sigmas), disp=0))
     modes = around(array(modes), precision)
     tmp = {}
     for i in range(n):
