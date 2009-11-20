@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     print infos
     print infos2
-
+    
     pylab.scatter(x0[:,0], x0[:,1], c='r')
     pylab.scatter(x1[:,0], x1[:,1], c='r')
     pylab.scatter(x2[:,0], x2[:,1], c='b')

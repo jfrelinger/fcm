@@ -122,12 +122,12 @@ class DiME(object):
 
         return (dc/Dc)
     
-    def drop(self, drop):
-        try:
-            return 100*self.d(drop)/self.d_none
-        except AttributeError:
-            self.d_none = self.d()
-            return 100*self.d(drop)/self.d_none
+#    def drop(self, drop):
+#        try:
+#            return 100*self.d(drop)/self.d_none
+#        except AttributeError:
+#            self.d_none = self.d()
+#            return 100*self.d(drop)/self.d_none
     def rdrop(self, drop):
         try:
             return 100*log2(self.d(drop))/log2(self.d_none)
