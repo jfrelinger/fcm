@@ -53,7 +53,7 @@ def load_compensate_matrix(file_name):
     
     """
     
-    file = open(file_name, mode='r')
+    file = open(file_name, mode='Ur')
     name = file.readline()
     file.readline() # skip <\t>\n line
     markers = file.readline().strip('\n').split('\t')
