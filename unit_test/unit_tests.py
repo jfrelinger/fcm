@@ -11,6 +11,7 @@ from test_load_fcs import FCSreaderTestCase
 from test_tree  import TreeTestCase
 from test_subsample import SubsampleTestCase
 from test_dpmixture import Dp_clusterTestCase
+from test_mdpmixture import ModalDp_clusterTestCase
 
 
 if __name__ == "__main__":
@@ -22,6 +23,7 @@ if __name__ == "__main__":
     suite6 = unittest.makeSuite(TreeTestCase, 'test')
     suite7 = unittest.makeSuite(SubsampleTestCase, 'test')
     suite8 = unittest.makeSuite(Dp_clusterTestCase, 'test')
+    suite9 = unittest.makeSuite(ModalDp_clusterTestCase, 'test')
     alltests = unittest.TestSuite((suite1, suite2, suite3, suite4, suite5, suite6, suite7, suite8))
 
     unittest.main()

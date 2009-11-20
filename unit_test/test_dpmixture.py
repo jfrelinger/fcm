@@ -43,7 +43,11 @@ class Dp_clusterTestCase(unittest.TestCase):
         assert self.mix.classify(pnt)[0] == 0, 'classify classifys mu1 as belonging to something else'
         assert self.mix.classify(pnt)[1] == 1, 'classify classifys m21 as belonging to something else'
 
-
+    def testMakeModal(self):
+        modal = self.mix.make_modal()
+        pnt = array([self.mu1, self.mu2])
+        assert self.mix.classify(pnt)[0] == modal.classify(pnt)[0], 'derived modal mixture is wrong'
+        assert self.mix.classify(pnt)[1] == modal.classify(pnt)[1], 'derived modal mixture is wrong'
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

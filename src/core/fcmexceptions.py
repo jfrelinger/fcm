@@ -11,6 +11,7 @@ class CompensationError(Exception):
     
     def __init__(self, message):
         self.message = message
+        self.args = (message,)
 
 class BadFCMPointDataTypeError(Exception):
     """Exception raised on bad FCM data type
@@ -23,6 +24,7 @@ class BadFCMPointDataTypeError(Exception):
         self.type = type(data)
         self.data = data
         self.message = message
+        self.args = (data, message)
         
 class IllegalNodeNameError(Exception):
     """
@@ -31,6 +33,7 @@ class IllegalNodeNameError(Exception):
     
     def __init__(self, message):
         self.message = message
+        self.args = (message,)
 
         
 class UnimplementedFcsDataMode(Exception):
@@ -42,4 +45,5 @@ class UnimplementedFcsDataMode(Exception):
     def __init__(self, mode):
         self.mode = mode
         self.message = "Currently fcs data stored as type \'%s\' is unsupported" % mode
+        self.args = (mode,)
         

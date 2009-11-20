@@ -7,7 +7,8 @@ Created on Oct 30, 2009
 from distributions import mvnormpdf
 from numpy import array
 from component import Component
-from enthought.traits.api import HasTraits, List, Float, Array
+from util import modesearch
+from enthought.traits.api import HasTraits, List, Float, Array, Dict, Int
 
 
 class DPCluster(HasTraits, Component):
@@ -42,13 +43,12 @@ class DPMixture(HasTraits):
     collection of compoents that describe a mixture model
     '''
     clusters = List(DPCluster)
-    def __init__(self, clusters, cmap=None):
+    def __init__(self, clusters):
         '''
         DPMixture(clusters)
         cluster = list of DPCluster objects
         '''
         self.clusters = clusters
-        self.cmap = cmap
         
     def prob(self, x):
         '''
@@ -85,3 +85,35 @@ class DPMixture(HasTraits):
         return an array of all cluster weights/proportions
         '''
         return array([i.pi for i in self.clusters])
+    
+    def make_modal(self, tol=1e-5):
+        cmap = modesearch(self.pis(), self.mus(), self.sigmas(), tol)
+        return ModalDPMixture(self.clusters, cmap)
+        
+        
+    
+
+class ModalDPMixture(DPMixture, HasTraits):
+    '''
+    collection of modal compoents that describe a mixture model
+    '''
+    clusters = List(DPCluster)
+    cmap = Dict(Int, List(Int))
+    def __init__(self, clusters, cmap):
+        '''
+        DPMixture(clusters)
+        cluster = list of DPCluster objects
+        cmap = map of modal clusters to component clusters
+        '''
+        self.clusters = clusters
+        self.cmap = cmap
+        print self.cmap
+
+        
+    def prob(self,x):
+        rslt = []
+        for j in self.cmap.keys():
+            rslt.append(sum([self.clusters[i].prob(x) for i in self.cmap[j]]))
+            
+        return array(rslt)
+
