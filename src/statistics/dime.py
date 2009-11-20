@@ -8,7 +8,7 @@ class DiME(object):
     
     """
     
-    def __init__(self, pi, mu, sigma, cmap=None):
+    def __init__(self,cluster = None, pi = None, mu = None, sigma = None, cmap = None):
         """
         DiME(pi, mu, sigma, cmap=None):
         pi: mixing proportions
@@ -17,10 +17,29 @@ class DiME(object):
         cmap: a dictionary of modal cluster to component clusters, defaults to
             None. If none perform analysis on component cluster level.
         """
+        self.pi = None
+        self.mu = None
+        self.sigma = None
         
-        self.pi = pi
-        self.mu = mu
-        self.sigma = sigma
+        #pull mixture parameters from cluster if passed
+        if cluster is  not None:
+            self.pi = cluster.get_pis()
+            self.mu = cluster.get_mus()
+            self.sigma = cluster.get_sigmas()
+            # TODO add fetching cmap here
+        
+        #if mixture parameters are passed explicitly use them.
+        if pi is not None:
+            self.pi = pi
+        if mu is not None:
+            self.mu = mu
+        if sigma is not None:
+            self.sigma = sigma
+            
+        #check we got all pramters
+        if (self.pi is None or self.mu is None or self.sigma is None):
+            raise TypeError('dime requires a cluster object or pi, mu, and sigma to be explicitly given')
+        
         self.k = self.mu.shape[1]
         if cmap == None:
             self.c = len(pi) # number of clusters
@@ -101,11 +120,17 @@ class DiME(object):
             dc[mclust] = normalizing*sum_ex
             Dc[mclust] = 1*(sum_ex+(self.cpi[mclust]*F[mclust,mclust]))
 
-        return -1*log2(dc/Dc)
+        return (dc/Dc)
     
-    def rdrop(self, drop):
+    def drop(self, drop):
         try:
             return 100*self.d(drop)/self.d_none
         except AttributeError:
             self.d_none = self.d()
             return 100*self.d(drop)/self.d_none
+    def rdrop(self, drop):
+        try:
+            return 100*log2(self.d(drop))/log2(self.d_none)
+        except AttributeError:
+            self.d_none = self.d()
+            return 100*log2(self.d(drop))/log2(self.d_none)

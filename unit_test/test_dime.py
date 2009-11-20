@@ -32,7 +32,7 @@ if __name__ == '__main__':
     sigmas = numpy.array([sigma, sigma, sigma, sigma])
 
     #info = dime.DiME(x, pis, mus, sigmas, cmap=adict)
-    info = dime.DiME(pis, mus, sigmas, cmap=adict)
+    info = dime.DiME(pi=pis, mu=mus, sigma = sigmas, cmap=adict)
     
     infos = [info.rdrop(i) for i in range(p)]
     infos2 = [info.rdrop([0,1]), info.rdrop([0,2]), info.rdrop([1,2])]
