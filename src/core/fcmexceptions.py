@@ -25,15 +25,6 @@ class BadFCMPointDataTypeError(Exception):
         self.data = data
         self.message = message
         self.args = (data, message)
-        
-class IllegalNodeNameError(Exception):
-    """
-    exception raised for bad node names
-    """
-    
-    def __init__(self, message):
-        self.message = message
-        self.args = (message,)
 
         
 class UnimplementedFcsDataMode(Exception):

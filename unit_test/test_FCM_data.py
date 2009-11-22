@@ -60,7 +60,7 @@ class FCMdataTestCase(unittest.TestCase):
         assert all(self.fcm.view() == array([[0,1,2]])), 'gate excluded wrong points'
         self.fcm.visit('root')
         self.fcm.gate(g)
-        nodes = self.fcm.tree.g.nodes()
+        nodes = self.fcm.tree.nodes.keys()
         assert 'g2' in nodes, 'gating name mangled'
         assert 'g1' in nodes, 'gating name mangled'
         
@@ -72,7 +72,7 @@ class FCMdataTestCase(unittest.TestCase):
         assert all(self.fcm.view() == array([[3,4,5]])), 'gate excluded wrong points'
         self.fcm.visit('root')
         self.fcm.gate(g)
-        nodes = self.fcm.tree.g.nodes()
+        nodes = self.fcm.tree.nodes.keys()
         assert 'g2' in nodes, 'gating name mangled'
         assert 'g1' in nodes, 'gating name mangled'
 

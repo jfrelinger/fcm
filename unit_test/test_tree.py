@@ -1,6 +1,6 @@
 import unittest
 from fcm.core.util import Tree, RootNode
-from fcm.core import IllegalNodeNameError
+
 
 class TreeTestCase(unittest.TestCase):
     def setUp(self):
@@ -20,7 +20,7 @@ class TreeTestCase(unittest.TestCase):
         self.t.visit('foo')
         assert self.t.get().name == 'foo', 'rename failed to change node name'
         assert self.t.view() == [1,2,3], 'rename gate1 to foo failed'
-        self.assertRaises(IllegalNodeNameError, self.t.rename_node, 'foo', 'gate2')
+        self.assertRaises(KeyError, self.t.rename_node, 'foo', 'gate2')
         
 if __name__ == '__main__':
     suite1 = unittest.makeSuite(TreeTestCase,'test')

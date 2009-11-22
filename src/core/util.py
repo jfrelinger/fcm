@@ -1,7 +1,5 @@
-import networkx
 import re
-from fcmexceptions import IllegalNodeNameError
-from enthought.traits.api import HasTraits, String, This, Array, Instance
+from enthought.traits.api import HasTraits, String, This, Array, Instance, Dict
 import logging
 import os
 
@@ -109,70 +107,74 @@ class GatingNode(Node):
         
 class Tree(HasTraits):
     '''Tree of data for FCMdata object.'''
-    g = Instance(networkx.LabeledDiGraph)
+    nodes = Dict(key_trait=String, value_trait=Instance(Node))
     root = Instance(RootNode)
-    current = String
+    current = Instance(Node)
 
     def __init__(self, pnts):
-        self.g = networkx.LabeledDiGraph()
+        self.nodes = {}
         self.root = RootNode('root', pnts)
-        self.g.add_node('root', self.root)
-        self.current = 'root'
+        self.nodes['root'] = self.root
+        self.current = self.root
 
     def parent(self):
         '''return the parent of a node'''
-        return self.g.predecessors(self.current)[0]
+        return self.current.parent
 
     def children(self):
         '''return the children of a node'''
-        return self.g.successors(self.current)
+        return [i for i in self.nodes.values() if i.parent == self.current]
 
     def visit(self, name):
         '''visit a node in the tree'''
-        self.current = name
+        if type(name) is type(''):
+            self.current = self.nodes[name]
+        else: 
+            self.current = name
 
-    def get(self):
+    def get(self, name = None):
         '''return the current node object'''
-        return self.g.get_node(self.current)
+        if name is None:
+            return self.current
+        else:
+            if name in self.nodes.keys():
+                return self.nodes[name]
+            else:
+                raise KeyError, 'No node named %s' % name
     
     def view(self):
         '''Return a view of the current data'''
-        return self.g.get_node(self.current).view()
+        return self.current.view()
 
     def add_child(self, name, node):
         '''Add a node to the tree at the currently selected node'''
         if name == '':
             prefix = node.prefix
             pat = re.compile(prefix + "(\d+)")
-            matches = [pat.search(i) for i in self.g.nodes()]
+            matches = [pat.search(i) for i in self.nodes.keys()]
             matches = [i for i in matches if i is not None]
             if len(matches) is not 0:
                 n = max([ int(i.group(1)) for i in matches])
                 name = prefix + str(n+1)
             else:
                 name = prefix + '1'
-        if name in self.g.nodes():
-            raise IllegalNodeNameError('name, %s, already in use in tree' % name)
+        if name in self.nodes.keys():
+            raise KeyError, 'name, %s, already in use in tree' % name
         else:
-            self.g.add_node(name, node)
-            self.g.add_edge(self.current, name)
-            self.current = name
+            self.nodes[name] = node
+            node.parent = self.current
+            self.current = self.nodes[name]
         
     def rename_node(self, old_name, new_name):
-        '''Rename a node from old_name to new_name'''
-        if new_name in self.g.nodes():
-            raise IllegalNodeNameError('name, %s, already in use in tree' % new_name)
+        if not self.nodes.has_key(old_name):
+            # we don't have old_name...
+            raise KeyError, 'No node named %s' % old_name
+        if self.nodes.has_key(new_name):
+            raise KeyError, 'There already is a node name %s' % new_name
         else:
-            node = self.g.get_node(old_name)
-            pred = self.g.predecessors(old_name)
-            children = self.g.successors(old_name)
-            self.g.remove_node(old_name)
-            node.name = new_name
-            self.g.add_node(new_name, node)
-            for i in pred:
-                self.g.add_edge(i, new_name)
-            for i in children:
-                self.g.add_edge(new_name, i)
+            self.nodes[new_name] = self.nodes[old_name] # move node
+            self.nodes[new_name].name = new_name # fix it's name
+            del self.nodes[old_name] # remove old node.
                 
 
         
@@ -198,15 +200,12 @@ if __name__ == '__main__':
     print t.view()
     t.visit('gate2')
     print t.view()
-    networkx.draw(t.g)
-    plt.show()
     
     t.rename_node('gate1', 'foo')
     t.visit('foo')
     print t.current
     print t.view()
-    networkx.draw(t.g)
-    plt.show()
+
     
     
     
