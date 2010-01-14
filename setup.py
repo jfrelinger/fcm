@@ -1,7 +1,7 @@
 from distutils.core import setup, Extension
 from numpy import get_include
 
-cdp_extension = Extension('fcm.statistics._cdpfoo',
+cdp_extension = Extension('fcm.statistics._cdp',
                           sources = [ 'src/statistics/cdp_ext/%s' %i for i in ['Model.cpp',
                                     'SpecialFunctions.cpp',
                                     'bandmat.cpp',

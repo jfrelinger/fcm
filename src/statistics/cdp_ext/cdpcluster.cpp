@@ -231,3 +231,85 @@ double cdpcluster::getp(int idx){
 	int t = idx / (*param).J; // t
 	return (*param).p[j][t]; // j by t for some reason.
 };
+
+
+// turn samplers on/off
+bool cdpcluster::samplem(){
+  return model.samplem;
+}
+
+void cdpcluster::samplem(bool x){
+  model.samplem = x;
+}
+
+bool cdpcluster::samplePhi(){
+  return model.samplePhi;
+}
+
+void cdpcluster::samplePhi(bool x){
+  model.samplePhi = x;
+}
+
+bool cdpcluster::samplew(){
+  return model.samplew;
+}
+
+void cdpcluster::samplew(bool x){
+  model.samplew = x;
+}
+
+bool cdpcluster::sampleq(){
+  return model.sampleq;
+}
+
+void cdpcluster::sampleq(bool x){
+  model.sampleq = x;
+}
+
+bool cdpcluster::samplealpha0(){
+  return model.samplealpha0;
+}
+
+void cdpcluster::samplealpha0(bool x){
+  model.samplealpha0 = x;
+}
+
+bool cdpcluster::samplemu(){
+  return model.samplemu;
+}
+
+void cdpcluster::samplemu(bool x){
+  model.samplemu = x;
+}
+
+bool cdpcluster::sampleSigma(){
+  return model.sampleSigma;
+}
+
+void cdpcluster::sampleSigma(bool x){
+  model.sampleSigma = x;
+}
+
+bool cdpcluster::samplek(){
+  return model.samplek;
+}
+
+void cdpcluster::samplek(bool x){
+  model.samplek = x;
+}
+
+bool cdpcluster::samplep(){
+  return model.samplep;
+}
+
+void cdpcluster::samplep(bool x){
+  model.samplep = x;
+}
+
+bool cdpcluster::samplealpha(){
+  return model.samplealpha;
+}
+
+void cdpcluster::samplealpha(bool x){
+  model.samplealpha = x;
+}

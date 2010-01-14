@@ -48,7 +48,27 @@ class cdpcluster{
 	double getSigma(int i, int j, int k);
 	double getp(int idx);
 	
-	
+	bool samplem();
+	void samplem(bool x);
+	bool samplePhi();
+	void samplePhi(bool x);
+	bool samplew();
+	void samplew(bool x);
+	bool sampleq();
+	void sampleq(bool x);
+	bool samplealpha0();
+	void samplealpha0(bool x);
+	bool samplemu();
+	void samplemu(bool x);
+	bool sampleSigma();
+	void sampleSigma(bool x);
+	bool samplek();
+	void samplek(bool x);
+	bool samplep();
+	void samplep(bool x);
+	bool samplealpha();
+	void samplealpha(bool x);
+
 
 	private:
 	CDPResult* param;

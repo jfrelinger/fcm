@@ -7,7 +7,7 @@ Created on Oct 30, 2009
 from enthought.traits.api import HasTraits
 from numpy import zeros, outer, sum
 
-from cdpfoo import cdpcluster
+from cdp import cdpcluster
 from dp_cluster import DPCluster, DPMixture
 
 class DPMixtureModel(HasTraits):
