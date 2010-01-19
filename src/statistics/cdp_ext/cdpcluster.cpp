@@ -46,13 +46,9 @@ cdpcluster::cdpcluster(int n, int d, double* x) {
   //cdp.mX = &x;
   
   verbose = false;
-};
-
-void cdpcluster::setVerbose(bool verbosity) {
-	verbose = verbosity;
 }
 
-void cdpcluster::run(){
+void cdpcluster::makeResult(){
   cdp.prior.Init(model);
   cdp.InitMCMCSteps(model);
   //purely for optimization
@@ -64,8 +60,24 @@ void cdpcluster::run(){
 
   cdp.SimulateFromPrior2((*param),mt);
   
+  resultInit = true;
+
+};
+
+void cdpcluster::setVerbose(bool verbosity) {
+	verbose = verbosity;
+}
+
+void cdpcluster::run(){
+
+  if (!resultInit) {
+  	makeResult();
+  }
+
+
+  
   // if any values are to be loaded from file, load them here
-  cdp.LoadInits(model,(*param), mt);
+  //cdp.LoadInits(model,(*param), mt);
   // see if we're dealing with a special case of J==1
   cdp.CheckSpecialCases(model,(*param));
   // main mcmc loop
@@ -222,8 +234,16 @@ double cdpcluster::getMu(int idx, int pos){
 	return (*param).mu[idx][pos];
 };
 
+double cdpcluster::getm(int idx, int pos){
+	return (*param).m[idx][pos];
+};
+
 double cdpcluster::getSigma(int i, int j, int k){
 		return (((*param).Sigma.at(i)).element(k,j));
+};
+
+double cdpcluster::getPhi(int i, int j, int k){
+		return (((*param).Phi.at(i)).element(k,j));
 };
 
 double cdpcluster::getp(int idx){ 
@@ -231,7 +251,6 @@ double cdpcluster::getp(int idx){
 	int t = idx / (*param).J; // t
 	return (*param).p[j][t]; // j by t for some reason.
 };
-
 
 // turn samplers on/off
 bool cdpcluster::samplem(){
@@ -313,3 +332,88 @@ bool cdpcluster::samplealpha(){
 void cdpcluster::samplealpha(bool x){
   model.samplealpha = x;
 }
+
+void cdpcluster::loadMu(int n, int d, double* x) {
+	loadRowsCols(x, (*param).mu, n, d);
+};
+
+void cdpcluster::loadm(int n, int d, double* x) {
+	loadRowsCols(x, (*param).m, n, d);
+};
+
+void cdpcluster::loadp(int n, int d, double* x) {
+	loadRowsCols(x, (*param).p, n, d);
+};
+
+void cdpcluster::loadpV(int n, int d, double* x) {
+	loadRowsCols(x, (*param).pV, n, d);
+};
+
+void cdpcluster::loadalpha0(double x) {
+	(*param).alpha0 = x;
+};
+
+void cdpcluster::loadSigma(int i, int j, int k, double* x) {
+	loadRowsCols(x, (*param).Sigma, i, j, k);
+};
+
+void cdpcluster::loadPhi(int i, int j, int k, double* x) {
+	loadRowsCols(x, (*param).Phi, i, j, k);
+};
+
+
+void cdpcluster::loadW(int i, double* x) {
+	loadRows(x, (*param).W, i);
+};
+
+void cdpcluster::loadK(int i, double* x) {
+	loadRows(x, (*param).K, i);
+};
+
+void cdpcluster::loadq(int i, double* x) {
+	loadRows(x, (*param).q, i);
+};
+
+void cdpcluster::loadqV(int i, double* x) {
+	loadRows(x, (*param).qV, i);
+};
+
+void cdpcluster::loadalpha(int i, double* x) {
+	loadRows(x, (*param).alpha, i);
+};
+
+void cdpcluster::loadRowsCols(double* from, vector<SymmetricMatrix>& to, int idx, int rows, int columns) {
+	for(int i=0;i<idx;++i){
+		for(int j=0;j<rows;++j){
+			for(int k=0;k<columns;++k){
+				int pos = (i*rows*columns)+(j*columns)+k;
+				to[i][j][k] = from[pos];
+			};
+		};
+	};
+};
+
+void cdpcluster::loadRows(double* from, int* to, int cols) {
+	for(int i=0; i<cols;++i){
+		to[i] = from[i];
+	};
+};
+
+void cdpcluster::loadRowsCols(double* from, vector<RowVector>& to, int n, int d){
+	for(int i=0;i<n;++i){
+		for(int j=0;j<d;++j){
+			int pos = i*d+j;
+			to[i][j] = from[pos];
+		};
+	}; 
+};
+
+void cdpcluster::loadRows(double* from, RowVector& to, int cols){
+	for(int i=0; i<cols;++i){
+		to[i] = from[i];
+	};
+};
+
+void cdpcluster::printModel(){
+	model.Print();
+};

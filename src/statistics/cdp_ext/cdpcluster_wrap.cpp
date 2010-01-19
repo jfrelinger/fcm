@@ -3465,6 +3465,27 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_cdpcluster_makeResult(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:cdpcluster_makeResult",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_makeResult" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  (arg1)->makeResult();
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_cdpcluster_run(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   cdpcluster *arg1 = (cdpcluster *) 0 ;
@@ -4340,6 +4361,46 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_cdpcluster_getm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:cdpcluster_getm",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_getm" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cdpcluster_getm" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "cdpcluster_getm" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  result = (double)(arg1)->getm(arg2,arg3);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_cdpcluster_getSigma(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   cdpcluster *arg1 = (cdpcluster *) 0 ;
@@ -4382,6 +4443,55 @@ SWIGINTERN PyObject *_wrap_cdpcluster_getSigma(PyObject *SWIGUNUSEDPARM(self), P
   } 
   arg4 = static_cast< int >(val4);
   result = (double)(arg1)->getSigma(arg2,arg3,arg4);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_getPhi(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:cdpcluster_getPhi",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_getPhi" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cdpcluster_getPhi" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "cdpcluster_getPhi" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_int(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "cdpcluster_getPhi" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = static_cast< int >(val4);
+  result = (double)(arg1)->getPhi(arg2,arg3,arg4);
   resultobj = SWIG_From_double(static_cast< double >(result));
   return resultobj;
 fail:
@@ -5380,6 +5490,582 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_cdpcluster_loadMu(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double *arg4 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_loadMu",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_loadMu" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1, NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (int) array_size(array2,1);
+    arg4 = (double*) array_data(array2);
+  }
+  (arg1)->loadMu(arg2,arg3,arg4);
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_loadm(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double *arg4 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_loadm",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_loadm" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1, NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (int) array_size(array2,1);
+    arg4 = (double*) array_data(array2);
+  }
+  (arg1)->loadm(arg2,arg3,arg4);
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_loadp(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double *arg4 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_loadp",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_loadp" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1, NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (int) array_size(array2,1);
+    arg4 = (double*) array_data(array2);
+  }
+  (arg1)->loadp(arg2,arg3,arg4);
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_loadpV(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double *arg4 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_loadpV",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_loadpV" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1, NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (int) array_size(array2,1);
+    arg4 = (double*) array_data(array2);
+  }
+  (arg1)->loadpV(arg2,arg3,arg4);
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_loadSigma(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  double *arg5 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_loadSigma",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_loadSigma" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1, NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 3) ||
+      !require_size(array2, size, 3)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (int) array_size(array2,1);
+    arg4 = (int) array_size(array2,2);
+    arg5 = (double*) array_data(array2);
+  }
+  (arg1)->loadSigma(arg2,arg3,arg4,arg5);
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_loadPhi(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  double *arg5 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_loadPhi",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_loadPhi" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1, NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 3) ||
+      !require_size(array2, size, 3)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (int) array_size(array2,1);
+    arg4 = (int) array_size(array2,2);
+    arg5 = (double*) array_data(array2);
+  }
+  (arg1)->loadPhi(arg2,arg3,arg4,arg5);
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_loadW(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  double *arg3 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_loadW",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_loadW" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp size[1] = {
+      -1
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1, NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 1) ||
+      !require_size(array2, size, 1)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (double*) array_data(array2);
+  }
+  (arg1)->loadW(arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_loadK(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  double *arg3 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_loadK",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_loadK" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp size[1] = {
+      -1
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1, NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 1) ||
+      !require_size(array2, size, 1)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (double*) array_data(array2);
+  }
+  (arg1)->loadK(arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_loadq(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  double *arg3 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_loadq",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_loadq" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp size[1] = {
+      -1
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1, NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 1) ||
+      !require_size(array2, size, 1)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (double*) array_data(array2);
+  }
+  (arg1)->loadq(arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_loadqV(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  double *arg3 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_loadqV",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_loadqV" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp size[1] = {
+      -1
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1, NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 1) ||
+      !require_size(array2, size, 1)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (double*) array_data(array2);
+  }
+  (arg1)->loadqV(arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_loadalpha(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  double *arg3 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_loadalpha",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_loadalpha" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp size[1] = {
+      -1
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1, NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 1) ||
+      !require_size(array2, size, 1)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (double*) array_data(array2);
+  }
+  (arg1)->loadalpha(arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_printModel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:cdpcluster_printModel",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_printModel" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  (arg1)->printModel();
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *cdpcluster_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *obj;
   if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
@@ -5391,6 +6077,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { (char *)"new_cdpcluster", _wrap_new_cdpcluster, METH_VARARGS, NULL},
 	 { (char *)"delete_cdpcluster", _wrap_delete_cdpcluster, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_makeResult", _wrap_cdpcluster_makeResult, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_run", _wrap_cdpcluster_run, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_step", _wrap_cdpcluster_step, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_stepburn", _wrap_cdpcluster_stepburn, METH_VARARGS, NULL},
@@ -5425,7 +6112,9 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cdpcluster_setff", _wrap_cdpcluster_setff, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_getff", _wrap_cdpcluster_getff, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_getMu", _wrap_cdpcluster_getMu, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_getm", _wrap_cdpcluster_getm, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_getSigma", _wrap_cdpcluster_getSigma, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_getPhi", _wrap_cdpcluster_getPhi, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_getp", _wrap_cdpcluster_getp, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_samplem", _wrap_cdpcluster_samplem, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_samplePhi", _wrap_cdpcluster_samplePhi, METH_VARARGS, NULL},
@@ -5437,6 +6126,18 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cdpcluster_samplek", _wrap_cdpcluster_samplek, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_samplep", _wrap_cdpcluster_samplep, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_samplealpha", _wrap_cdpcluster_samplealpha, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_loadMu", _wrap_cdpcluster_loadMu, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_loadm", _wrap_cdpcluster_loadm, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_loadp", _wrap_cdpcluster_loadp, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_loadpV", _wrap_cdpcluster_loadpV, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_loadSigma", _wrap_cdpcluster_loadSigma, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_loadPhi", _wrap_cdpcluster_loadPhi, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_loadW", _wrap_cdpcluster_loadW, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_loadK", _wrap_cdpcluster_loadK, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_loadq", _wrap_cdpcluster_loadq, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_loadqV", _wrap_cdpcluster_loadqV, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_loadalpha", _wrap_cdpcluster_loadalpha, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_printModel", _wrap_cdpcluster_printModel, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_swigregister", cdpcluster_swigregister, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };

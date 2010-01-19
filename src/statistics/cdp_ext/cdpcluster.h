@@ -11,6 +11,7 @@ class cdpcluster{
 	public:
 	virtual ~cdpcluster(void); 
 	cdpcluster(int n, int d, double* x);
+	void makeResult();
 	void run();
 	void step();
 	void stepburn();
@@ -45,7 +46,9 @@ class cdpcluster{
 	void setff( double ff );
 	double getff();	
 	double getMu(int idx, int pos);
+	double getm(int idx, int pos);
 	double getSigma(int i, int j, int k);
+	double getPhi(int i, int j , int k);
 	double getp(int idx);
 	
 	bool samplem();
@@ -69,8 +72,29 @@ class cdpcluster{
 	bool samplealpha();
 	void samplealpha(bool x);
 
+	void loadalpha0(double x);
+	void loadMu(int n, int d, double* x);
+	void loadm(int n, int d, double* x);
+	void loadp(int n, int d, double* x);
+	void loadpV(int n, int d, double* x);
+	void loadSigma(int i, int j, int k , double* x);
+	void loadPhi(int i, int j, int k , double* x);
+	void loadW(int i, double* x);
+	void loadK(int i, double* x);
+	void loadq(int i, double* x);
+	void loadqV(int i, double* x);
+	void loadalpha(int i, double* x);
+	
+	void printModel();
+
+
 
 	private:
+	void loadRows(double* from, int* to, int cols);
+	void loadRowsCols(double* from, vector<RowVector>& to, int rows, int cols);
+	void loadRowsCols(double* from, vector<SymmetricMatrix>& to, int idx, int rows, int columns);
+	void loadRows(double* from, RowVector& A, int cols);
+	bool resultInit;
 	CDPResult* param;
 	//CDPResult result;
 	Model model;
