@@ -2,7 +2,7 @@
 Distributions used in FCS analysis
 """
 
-from numpy import pi, exp, dot, ones, array, sqrt, fabs, tile, sum, prod, diag
+from numpy import pi, exp, dot, ones, array, sqrt, fabs, tile, sum, prod, diag, zeros
 from numpy.linalg import inv, det, cholesky
 
 
@@ -27,16 +27,15 @@ def mvnormpdf(x, mu, sigma):
 def mixnormpdf(x, prop, mu, Sigma):
     """Mixture of multivariate normal pdfs for maximization"""
     # print "in mixnormpdf ..."
-    tmp = 0.0
+    tmp = zeros((x.shape[0]))
     for i in range(len(prop)):
-        # print i,
-        tmp += prop[i]*mvnormpdf(x, mu[i], Sigma[i])
+        tmp += prop[i]*mvnormpdf(x, mu[i,:], Sigma[i,:,:])
     return tmp
 
 
 if __name__ == '__main__':
     x = array([1,0])
-    mu = array([0,0])
+    mu = array([5,5])
     sig = array([[1,0],[0, 1]])
 
     print 'new:', mvnormpdf(x,mu,sig)
@@ -45,4 +44,10 @@ if __name__ == '__main__':
     sig = array([[1,.75],[.75, 1]])
 
     print 'new:', mvnormpdf(x,mu,sig)
-    print 'array:', mvnormpdf(array([x,x]), mu, sig)
+    print 'array:', mvnormpdf(array([x,x-1]), mu, sig)
+    
+    x = array([[1,0],[5,5],[0,0]])
+    mu = array([[0,0],[5,5]])
+    sig = array([[[1,.75],[.75, 1]],[[1,0],[0,1]]])
+    p = array([.5,.5])
+    print 'mix:', mixnormpdf(x,p,mu,sig)
