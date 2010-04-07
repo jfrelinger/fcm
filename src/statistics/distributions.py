@@ -2,26 +2,27 @@
 Distributions used in FCS analysis
 """
 
-from numpy import pi, exp, dot, ones, array, sqrt, fabs
-from numpy.linalg import inv, det
+from numpy import pi, exp, dot, ones, array, sqrt, fabs, tile, sum, prod, diag
+from numpy.linalg import inv, det, cholesky
 
 
-def mvnormpdf(x, mu, va):
+def mvnormpdf(x, mu, sigma):
     """
-    multi variate normal pdf, derived from David Cournapeau's em package
-    for mixture models
-    http://www.ar.media.kyoto-u.ac.jp/members/david/softwares/em/index.html
+    multi variate normal pdf, takes point/array of points, mu, and sigma and calculates pdf.
+    calculates over all points simutaneiously.
     """
-    d       = mu.size
-    inva    = inv(va)
-    fac     = 1 /sqrt( (2*pi) ** d * fabs(det(va)))
-
-    y   = -0.5 * dot(dot((x-mu), inva) * (x-mu), 
-                       ones((mu.size, 1), x.dtype))
-
-    y   = fac * exp(y)
-    return y
-
+    n = x.shape[0]
+    try:
+        p = x.shape[1]
+    except IndexError:
+        p = n
+        n = 1
+    C = cholesky(sigma)
+    fmu = tile(mu,(n,1))
+    e= dot(inv(C).T,(x-fmu).T)
+    num = exp(-sum(e*e, axis=0)/2)
+    denom = ( prod(diag(C))*((2*pi)**(p/2)) )
+    return num/denom
 
 def mixnormpdf(x, prop, mu, Sigma):
     """Mixture of multivariate normal pdfs for maximization"""
