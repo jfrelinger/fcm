@@ -46,6 +46,7 @@ cdpcluster::cdpcluster(int n, int d, double* x) {
   //cdp.mX = &x;
   
   verbose = false;
+  resultInit = false;
 }
 
 void cdpcluster::makeResult(){
