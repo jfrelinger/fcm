@@ -35,8 +35,10 @@ class FCSreader(object):
         
         # parse headers
         header = self.parse_header(self.cur_offset)
+        
         # parse text 
         text = self.parse_text(self.cur_offset, header['text_start'], header['text_stop'])
+        
         # parse annalysis
         try:
             astart = text['beginanalysis']
@@ -49,7 +51,7 @@ class FCSreader(object):
         analysis = self.parse_analysis(self.cur_offset, astart, astop)
         # parse data
         try:
-            dstart = int(text['beginadata'])
+            dstart = int(text['begindata'])
         except KeyError:
             dstart = header['data_start']
         try:
@@ -240,15 +242,8 @@ class FCSreader(object):
         
         #count up how many to read in
         num_items = (stop-start+1)/calcsize(dtype) 
-        # unpack binary data
+
         tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
-#        print 'ss:', start, stop
-#        print 'num_items', num_items
-#        print 'len tmp:', len(tmp), numpy.array(tmp).shape
-#        print 'tot (passed arg):', tot
-#        print 'len(tmp)/tot (number of markers):', len(tmp)/tot
-#        print 'float(len(tmp)/tot) (number of markers):',float(len(tmp))/float(tot)
-#        print 'number of extra:', len(tmp)%tot
         return numpy.array(tmp).reshape((tot, len(tmp)/tot))
     
     def parse_ascii_data(self, offset, start, stop, bitwidth, dtype, tot, order):
