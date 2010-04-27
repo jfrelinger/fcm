@@ -10,7 +10,8 @@ from pylab import scatter, show, subplot
 
 if __name__ == '__main__':
     #load data
-    data = loadFCS('../sample_data/3FITC_4PE_004.fcs')
+    # data = loadFCS('../sample_data/3FITC_4PE_004.fcs')
+    data = loadFCS('../sample_data/coulter.lmd')
     
     # initalize model
     model = DPMixtureModel(data, 10, itter=10, burnin=10)
