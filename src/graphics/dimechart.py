@@ -1,12 +1,8 @@
 import numpy
 import pylab
 
-# nice color scheme but discrete only for 8 values
-# cs = numpy.array([(178,24,43), (214,96,77), (244,165,130), 
-#                   (253,219,199), (209,229,240), (146,197,222), 
-#                   (67,147,195), (33,102,172)], 'd')/256.0
-
-def dimechart(indicators, values, labels, cmap):
+def dimechart(indicators, values, labels,
+              cmap=pylab.cm.gist_rainbow, xlab='', ylab=''):
     indicators = numpy.array(indicators)
     values = numpy.array(values)
     k, p = values.shape
@@ -15,24 +11,48 @@ def dimechart(indicators, values, labels, cmap):
     
     pylab.figure(figsize=(p, 3*k))
 
+    axs = []
     # keys
     pylab.subplot(k+1, 1, 1)
     for _p in range(p):
-        xpts = 10*numpy.array([_p+1,_p+2,_p+2,_p+1])
+        xpts = (2+p)*numpy.array([_p,_p+1,_p+1,_p])
         ypts = 10*numpy.array([0,0,h,h])
-        pylab.fill(xpts, ypts, color=cs[_p], alpha=0.5, closed=True,
+        pylab.fill(xpts, ypts,
+                   color=cs[_p], alpha=0.5, closed=True,
                    ec='k')
-        pylab.text(10*(_p+1.5), 75, labels[_p], va='center', ha='center',
+        pylab.text((2+p)*(_p+w/2.), 10*h/2, labels[_p],
+                   va='center', ha='center',
                    fontsize=16, rotation=90)
+    pylab.xticks([])
+    pylab.yticks([])
 
     # data
+    xtk = range(2+p/2, (2+p)*(p+1), p+2)
     for _k in range(k):
         pylab.subplot(k+1, 1, _k+2)
+        pylab.ylabel(ylab)
+        if _k < (k-1):
+            pylab.xticks([])
+        else:
+            pylab.xticks(xtk, map(str, range(p,0,-1)))
+            pylab.xlabel(xlab)
         for _p in range(p):
             make_spark(indicators[_k, _p],
                        (2+p)*_p,
-                       (2+k)*10*values[_k,_p],
+                       100*values[_k,_p],
                        w, h, cmap)
+        axs.append(pylab.axis())
+
+    axs = numpy.array(axs)
+    xmin = min(axs[:,0])
+    xmax = max(axs[:,1])
+    xr = xmax - xmin
+    ymin = min(axs[:,2])
+    ymax = max(axs[:,3])    
+        
+    for _k in range(k+1):
+        pylab.subplot(k+1, 1, _k+1)
+        pylab.axis([xmin-xr/20., xmax+xr/20., -h-2, 100+h+2])        
 
     pylab.show()
 
@@ -61,7 +81,5 @@ if __name__ == '__main__':
     l = map(str, range(10))
     print d
     dimechart(i, d, l, pylab.cm.gist_rainbow)
-    # xoffset = numpy.zeros(10)
-    # make_spark(i, xoffset, d)
     pylab.show()
     
