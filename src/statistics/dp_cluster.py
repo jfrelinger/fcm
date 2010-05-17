@@ -107,7 +107,6 @@ class ModalDPMixture(DPMixture, HasTraits):
         '''
         self.clusters = clusters
         self.cmap = cmap
-        print self.cmap
 
         
     def prob(self,x):
