@@ -2,7 +2,7 @@ from __future__ import division
 from distributions import mvnormpdf, mixnormpdf
 from numpy import array, dot, log2, zeros, sum, diag, ones, identity
 
-class DiME(object):
+class Dime(object):
     """
     DiME analysis object
     
@@ -27,6 +27,11 @@ class DiME(object):
             self.mu = cluster.get_mus()
             self.sigma = cluster.get_sigmas()
             # TODO add fetching cmap here
+            try:
+                if cmap == None:
+                    cmap = cluster.cmap
+            except AttributeError:
+                pass
         
         #if mixture parameters are passed explicitly use them.
         if pi is not None:
@@ -40,7 +45,10 @@ class DiME(object):
         if (self.pi is None or self.mu is None or self.sigma is None):
             raise TypeError('dime requires a cluster object or pi, mu, and sigma to be explicitly given')
         
-        self.k = self.mu.shape[1]
+        if type(self.pi) == type([]): #not sure if htis is needed but the code expects pi to be a list
+            self.pi = array(self.pi)
+            
+        self.k, self.p= self.mu.shape
         if cmap == None:
             self.c = len(pi) # number of clusters
             self.cpi = pi
@@ -55,82 +63,60 @@ class DiME(object):
         self.cmap = cmap
         
         
-    def d(self, drop = None):
+    def drop(self, target, drop = None):
         """
         calculate discriminitory information
         """
         if drop is None:
             drop = []
-        ids = []
-        if type(drop) is type(1): # are we dropping single col?
+        dim = {}
+        if type(drop) is type(1): # are we calculating single col?
+            dim[0] = [ drop ]
+        else: # drop is a list...
+            if set(map(type,drop)) == set([type(1)]): # we've got a list of numbers
+                dim[0] = drop
+            else: #mostlikly a mixed list of list
+                for c,i in enumerate(drop):
+                    tmp = []
+                    for j in range(self.p):
+                        if j in i:
+                            tmp.append(j)
+                    dim[c] = tmp[:]
+
+        nn = max(dim.keys())+1
+        Dj = zeros((nn,))
+        
+        gpj = self.cmap[target]
+        cpj = 1-sum(self.pi[gpj]);
+        
+        indexj = []
+        for i in range(self.k):
+            if i not in gpj:
+                indexj.append(i)
+        
+        D = zeros((nn,self.k,self.k))
+        
+        for tt in range(nn):
+            deno = 0
+            nume = 0
+            dimm = dim[tt]
             for i in range(self.k):
-                if i != drop:
-                    ids.append(i)
-        else: # we're dropping a list
-            for i in range(self.k):
-                if i not in drop:
-                    ids.append(i)
-        
-        ids = array(ids)
-        mus = [m[ids] for m in self.mu]
-        sigmas = [sig[ids,:][:,ids] for sig in self.sigma]
-        
-        # calculate -1*\log_2(\frac{\delta_c}{\Delta_c})
-        # where \detla_c =  \frac{\gamma_c}\{1-\gamma_c}\Sum_{e != c}\gamma_e F_{c,e}
-        # \Delta_c = \gamma_c \Sum_{e=1:C} \gamma_e F_{c,e}
-        # where F_{c,e} = \int f_c(x)*f_e(x) dx
-        # and  where f_c(x) = \Sum_{J in c} \frac{\pi_j}{\gamma_c}N(x|\mu_j,\Sigma_j)
-        
-        # we calculate F_{c,e} as P(mu_c-mu_e ~ N(0, sigma_c+sigma_e))
-        # since we're going to be calculating with P(x in j) a lot precalculate it all
-        # once in advance, since we'll need it all at least once and in general multiple times
-        # TODO: parallelize here
-        
-        size = len(self.pi)
-        f = zeros((size, size))
-        for i in range(size):
-            for j in range(i,size):
-                f[j, i] = mvnormpdf(mus[i], mus[j], sigmas[i]+sigmas[j])
-                f[i,j] = f[j,i]
+                mi = self.mu[i,:][:,dimm]
+                si = self.sigma[i,:,:][dimm,:][:,dimm]
+                for jj in range(i,self.k):
+                    #print self.sigma[jj,:,:][dimm,:][:,dimm]
+                    D[tt,jj,i] = mvnormpdf(self.mu[jj,:][:,dimm],mi,si+self.sigma[jj,:,:][dimm,:][:,dimm])
+                    D[tt,i,jj] = D[tt,jj,i]
+            #print 'd',D[tt,k-1,k-1]       
+            for ii in gpj:
+                for ppp in indexj:
+                    nume = nume + self.pi[ii]*(self.pi[ppp]/cpj)*D[tt,ppp,ii]
+          
+                for ppp in range(self.k):
+                    deno = deno + self.pi[ii]*self.pi[ppp]*D[tt,ppp,ii]
                 
-        F = zeros((self.c, self.c))
-        for i in range(self.c):
-            for j in range(i, self.c):
-                tmp = 0
-                for fclust in self.cmap[i]:
-                    for tclust in self.cmap[j]:
-                        tmp += (self.pi[fclust]/self.cpi[i])*(self.pi[tclust]/self.cpi[j])*f[fclust,tclust]
-                F[j,i] = tmp
-                F[i,j] = F[j,i]
+            Dj[tt] = nume/deno
         
-
-        #calculate \delta_c and \Delta_c
-        dc = zeros(self.c)
-        Dc = zeros(self.c)
-        sum_ex = 0 # use this later to caculate complete sum in \Gamma_c
-        for mclust in self.cmap.keys():
-            normalizing = 1.0/(1-self.cpi[mclust])
-            tmp = []
-            for i in self.cmap.keys():
-                if i == mclust:
-                    pass
-                else:
-                    tmp.append(i)
-            sum_ex = sum([self.cpi[i]*F[mclust,i] for i in tmp])
-            dc[mclust] = normalizing*sum_ex
-            Dc[mclust] = 1*(sum_ex+(self.cpi[mclust]*F[mclust,mclust]))
-
-        return (dc/Dc)
+        return Dj
     
-#    def drop(self, drop):
-#        try:
-#            return 100*self.d(drop)/self.d_none
-#        except AttributeError:
-#            self.d_none = self.d()
-#            return 100*self.d(drop)/self.d_none
-    def rdrop(self, drop):
-        try:
-            return 100*log2(self.d(drop))/log2(self.d_none)
-        except AttributeError:
-            self.d_none = self.d()
-            return 100*log2(self.d(drop))/log2(self.d_none)
+

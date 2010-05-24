@@ -27,15 +27,15 @@ if __name__ == '__main__':
         1 : [2,3]
         }
 
-    pis = [len(x0)/len(x), len(x1)/len(x), len(x2)/len(x), len(x3)/len(x)]
+    pis = numpy.array([len(x0)/len(x), len(x1)/len(x), len(x2)/len(x), len(x3)/len(x)])
     mus = numpy.array([mu0, mu1, mu2, mu3])
     sigmas = numpy.array([sigma, sigma, sigma, sigma])
 
     #info = dime.DiME(x, pis, mus, sigmas, cmap=adict)
-    info = dime.DiME(pi=pis, mu=mus, sigma = sigmas, cmap=adict)
+    info = dime.Dime(pi=pis, mu=mus, sigma = sigmas, cmap=adict)
     
-    infos = [info.rdrop(i) for i in range(p)]
-    infos2 = [info.rdrop([0,1]), info.rdrop([0,2]), info.rdrop([1,2])]
+    infos = [info.drop(0,i) for i in range(p)]
+    infos2 = [info.drop(0,[0,1]), info.drop(0,[0,2]), info.drop(0,[1,2])]
 
     print infos
     print infos2
