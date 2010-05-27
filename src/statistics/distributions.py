@@ -4,22 +4,37 @@ Distributions used in FCS analysis
 
 from numpy import pi, exp, dot, ones, array, sqrt, fabs, tile, sum, prod, diag, zeros
 from numpy.linalg import inv, det, cholesky
+from cdp import mvnpdf
+#def mvnormpdf(x, mu, va):
+#    """
+#    multi variate normal pdf, derived from David Cournapeau's em package
+#    for mixture models
+#    http://www.ar.media.kyoto-u.ac.jp/members/david/softwares/em/index.html
+#    """
+#    d       = mu.size
+#    inva    = inv(va)
+#    fac     = 1 /sqrt( (2*pi) ** d * fabs(det(va)))
+#
+#    y   = -0.5 * dot(dot((x-mu), inva) * (x-mu), 
+#                       ones((mu.size, 1), x.dtype))
+#
+#    y   = fac * exp(y)
+#    return y
 
 def mvnormpdf(x, mu, va):
-    """
-    multi variate normal pdf, derived from David Cournapeau's em package
-    for mixture models
-    http://www.ar.media.kyoto-u.ac.jp/members/david/softwares/em/index.html
-    """
-    d       = mu.size
-    inva    = inv(va)
-    fac     = 1 /sqrt( (2*pi) ** d * fabs(det(va)))
-
-    y   = -0.5 * dot(dot((x-mu), inva) * (x-mu), 
-                       ones((mu.size, 1), x.dtype))
-
-    y   = fac * exp(y)
-    return y
+    try:
+        n,p = x.shape
+    except ValueError:
+        n = x.shape
+        p = 0
+    if p > 0:
+        results = zeros((n,))
+        for i in range(n):
+            results[i] = mvnpdf(x[i,:],mu,va)
+    else:
+        results = array([mvnpdf(x,mu,va)])
+    
+    return results
 
 def mixnormpdf(x, prop, mu, Sigma):
     """Mixture of multivariate normal pdfs for maximization"""
