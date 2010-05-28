@@ -94,26 +94,27 @@ class Dime(object):
             if i not in gpj:
                 indexj.append(i)
         
-        D = zeros((nn,self.k,self.k))
+       
         
         for tt in range(nn):
             deno = 0
             nume = 0
             dimm = dim[tt]
+            D = zeros((self.k,self.k))
             for i in range(self.k):
                 mi = self.mu[i,:][:,dimm]
                 si = self.sigma[i,:,:][dimm,:][:,dimm]
                 for jj in range(i,self.k):
                     #print self.sigma[jj,:,:][dimm,:][:,dimm]
-                    D[tt,jj,i] = mvnormpdf(self.mu[jj,:][:,dimm],mi,si+self.sigma[jj,:,:][dimm,:][:,dimm])
-                    D[tt,i,jj] = D[tt,jj,i]
+                    D[jj,i] = mvnormpdf(self.mu[jj,:][:,dimm],mi,si+self.sigma[jj,:,:][dimm,:][:,dimm])
+                    D[i,jj] = D[jj,i]
             #print 'd',D[tt,k-1,k-1]       
             for ii in gpj:
                 for ppp in indexj:
-                    nume = nume + self.pi[ii]*(self.pi[ppp]/cpj)*D[tt,ppp,ii]
+                    nume = nume + self.pi[ii]*(self.pi[ppp]/cpj)*D[ppp,ii]
           
                 for ppp in range(self.k):
-                    deno = deno + self.pi[ii]*self.pi[ppp]*D[tt,ppp,ii]
+                    deno = deno + self.pi[ii]*self.pi[ppp]*D[ppp,ii]
                 
             Dj[tt] = nume/deno
         
