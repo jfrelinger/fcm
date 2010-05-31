@@ -17,7 +17,7 @@ class DPMixtureModel(HasTraits):
     '''
 
 
-    def __init__(self,fcmdata, nclusts, itter=1000, burnin= 100, last= 5):
+    def __init__(self,fcmdata, nclusts, iter=1000, burnin= 100, last= 5):
         '''
         DPMixtureModel(fcmdata, nclusts, itter=1000, burnin= 100, last= 5)
         fcmdata = a fcm data object
@@ -33,7 +33,7 @@ class DPMixtureModel(HasTraits):
         self.data = (pnts-self.m)/self.s
         
         self.nclusts = nclusts
-        self.itter = itter
+        self.iter = iter
         self.burnin = burnin
         self.last = last
         
@@ -49,7 +49,7 @@ class DPMixtureModel(HasTraits):
         self.cdp.setT(self.nclusts)
         self.cdp.setJ(1)
         self.cdp.setBurnin(self.burnin)
-        self.cdp.setIter(self.itter-self.last)
+        self.cdp.setIter(self.iter-self.last)
         if verbose:
             self.cdp.setVerbose(True)
         self.cdp.run()
@@ -57,14 +57,18 @@ class DPMixtureModel(HasTraits):
         self._run = True #we've fit the mixture model
         
         idx = 0
+        n = self.burnin+self.iter-self.last+1
         for i in range(self.last):
             for j in range(self.nclusts):
                 self.pi[idx] = self._getpi(j)
                 self.mus[idx,:] = self._getmu(j)
                 self.sigmas[idx,:,:] = self._getsigma(j)
                 idx+=1
-        
-        
+            self.cdp.step()
+            if verbose:
+                print "it = %d" % (n+i)
+        if verbose:
+            print "Done"
                 
     def _getpi(self, idx):
         return self.cdp.getp(idx)
