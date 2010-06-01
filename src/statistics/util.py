@@ -8,17 +8,16 @@ Created on Nov 5, 2009
 from __future__ import division
 import numpy
 from numpy.linalg import solve, inv
-from fcm.statistics.distributions import mixnormpdf, mvnormpdf
+from fcm.statistics.distributions import mixnormpdf, mvnormpdf, mixnormrnd
 
 def modesearch(pis, mus, sigmas, tol=1e-5, maxiter=20):
     n = mus.shape[0]
+    
     mdict, sm, spm = mode_search(pis, mus, sigmas, nk=0, tol=tol, maxiter=maxiter)
-
     m = numpy.array([i[0] for i in mdict.values()])
     pm = numpy.array([i[1] for i in mdict.values()])
     sm = numpy.array(sm)
     tm, tpm = check_mode(m, pm, pis, mus, sigmas)
-    
     tmp = {}
     for i in range(n):
         cur_mode = tuple(tm[i,:].tolist())
@@ -33,13 +32,7 @@ def modesearch(pis, mus, sigmas, tol=1e-5, maxiter=20):
     return rslt
 
 
-def mixnormrnd(pi, mu, sigma, k):
-    """Generate random variables from mixture of Guassians"""
-    xs = []
-    for i in range(k):
-        j = numpy.sum(numpy.random.random() > numpy.cumsum(pi))
-        xs.append(numpy.random.multivariate_normal(mu[j],sigma[j]))
-    return numpy.array(xs)                  
+                
 
 def mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
     """Search for modes in mixture of Gaussians"""
