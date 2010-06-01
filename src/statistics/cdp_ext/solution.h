@@ -39,6 +39,7 @@ public:
                                        // set x, return value
    virtual bool IsValid(Real X);
    operator Real();                    // implicit conversion
+   virtual ~R1_R1();
 };
 
 class SolutionException : public Exception

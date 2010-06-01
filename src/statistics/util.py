@@ -16,12 +16,16 @@ def modesearch(pis, mus, sigmas, tol=1e-5, maxiter=20):
 
     m = numpy.array([i[0] for i in mdict.values()])
     pm = numpy.array([i[1] for i in mdict.values()])
+    # m = numpy.array(mdict.keys())
+    # pm = numpy.array(mdict.values())
     sm = numpy.array(sm)
     tm, tpm = check_mode(m, pm, pis, mus, sigmas)
     
     tmp = {}
-    for i in range(n):
+    # for i in range(n):
+    for i in range(len(tm)):
         cur_mode = tuple(tm[i,:].tolist())
+        # cur_mode = tuple(_tm.tolist())
         if tmp.has_key(cur_mode):
             tmp[cur_mode].append(i)
         else:
@@ -43,6 +47,7 @@ def mixnormrnd(pi, mu, sigma, k):
 
 def mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
     """Search for modes in mixture of Gaussians"""
+
     k,p = mu.shape
     omega = sigma[:]
     a = numpy.copy(mu)
@@ -91,7 +96,8 @@ def mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
             px = py
             h += 1
 
-        mdict[tuple(allx[js])] = [numpy.round(x,rnd),px] # eliminate duplicates
+        # mdict[tuple(allx[js])] = [numpy.round(x,rnd),px] # eliminate duplicates
+        mdict[tuple(numpy.round(x,2))] = [numpy.round(x,rnd),px] # eliminate duplicates
 
     return mdict, sm, spm
 

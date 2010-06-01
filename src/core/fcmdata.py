@@ -2,7 +2,7 @@
 A python object representing flow cytomoetry data
 """
 from __future__ import division
-from numpy import array, median
+from numpy import array, median, mean, std
 from enthought.traits.api import HasTraits, String, Instance, List
 from annotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
