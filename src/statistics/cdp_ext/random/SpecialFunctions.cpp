@@ -464,6 +464,14 @@ double SpecialFunctions::betarand(double a, double b, MTRand& mt)
 	double rb = gammarand(b, 1, mt);
 	return ra / (ra + rb);
 }
+double SpecialFunctions::betapdf(double x, double a, double b, int logspace)
+{
+  double d = 0;
+  d = gammaln(a+b) - gammaln(a) - gammaln(b) + (a-1)*log(x)+(b-1)*log(1-x);
+  if(!logspace)
+    d = exp(d);
+  return d;
+}
 double SpecialFunctions::gammainc(double x, double a)
 {
 	if (x <= 0 || a <= 0) return 0.0;

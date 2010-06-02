@@ -4,6 +4,13 @@
 
 #include "cdpcluster.h"
 
+#if defined(CDP_CUDA)
+#include "CDPBaseCUDA.h"
+#include <cutil_inline.h>
+#include <cuda_runtime_api.h>
+#endif
+
+
 cdpcluster::~cdpcluster(void) {
 	delete param;
 }
@@ -30,6 +37,7 @@ cdpcluster::cdpcluster(int n, int d, double* x) {
   model.mnIter = iter;
 
   mt.seed(model.mnSeed);
+  //mt.seed(1138);
   //cdp.LoadData(model);
   cdp.mX = new double*[n];
   int i,j;
@@ -52,14 +60,21 @@ cdpcluster::cdpcluster(int n, int d, double* x) {
 void cdpcluster::makeResult(){
   cdp.prior.Init(model);
   cdp.InitMCMCSteps(model);
-  //purely for optimization
-  cdp.precalculate = cdp.msf.gammaln((cdp.prior.nu + (double)model.mnD)/2) - 
-    cdp.msf.gammaln(cdp.prior.nu/2) -0.5 * (double)model.mnD * log(cdp.prior.nu) - 0.5 * (double)model.mnD * 1.144729885849400;
-  
+ 
   //CDPResult result(cdp.prior.J,cdp.prior.T,cdp.prior.N,cdp.prior.D);
   param = new CDPResult(cdp.prior.J,cdp.prior.T,cdp.prior.N,cdp.prior.D);
 
-  cdp.SimulateFromPrior2((*param),mt);
+
+#if defined(CDP_CUDA)
+  if (model.mnGPU_Sample_Chunk_Size < 0) {
+    NCHUNKSIZE = model.mnN;
+  } else {
+     NCHUNKSIZE = model.mnGPU_Sample_Chunk_Size;
+  }
+    cdp.cuda.initializeInstance(model.startDevice,cdp.prior.J,cdp.prior.T, cdp.prior.N, cdp.prior.D,model.numberDevices);
+    cdp.cuda.initializeData(cdp.mX);
+#endif
+
   
   resultInit = true;
 
@@ -69,30 +84,76 @@ void cdpcluster::setVerbose(bool verbosity) {
 	verbose = verbosity;
 }
 
-void cdpcluster::run(){
+void cdpcluster::run() {
+
+  //purely for optimization
+  //cdp.precalculate = cdp.msf.gammaln((cdp.prior.nu + (double)model.mnD)/2) - 
+  //  cdp.msf.gammaln(cdp.prior.nu/2) -0.5 * (double)model.mnD * log(cdp.prior.nu) - 0.5 * (double)model.mnD * 1.144729885849400;
 
   if (!resultInit) {
   	makeResult();
   }
 
+  cdp.SimulateFromPrior2((*param),mt,0);
+
 
   
   // if any values are to be loaded from file, load them here
   //cdp.LoadInits(model,(*param), mt);
+
+  if(!model.loadK && cdp.prior.J == 1) {
+    for (int tt = 0; tt < cdp.prior.N;tt++) { //skip N random numbers, for test only, should be removed in release
+      double temp = mt();
+    }
+    #if defined(CDP_CUDA)
+      cdp.cuda.sampleWK((*param).q, (*param).p, (*param).mu, (*param).L_i, (*param).Sigma_log_det, mt, (*param).W, (*param).K);
+    #else
+      //call sampleK instead
+    #endif
+
+  }
+
   // see if we're dealing with a special case of J==1
   cdp.CheckSpecialCases(model,(*param));
+
+  #if defined(CDP_CUDA)
+    unsigned int hTimer;
+    cutilCheckError(cutCreateTimer(&hTimer));
+    cutilCheckError(cutResetTimer(hTimer));
+    cutilCheckError(cutStartTimer(hTimer));
+  #else
+    time_t tStart, tEnd;
+    //long tStart, tEnd;
+    //tStart = clock();
+    time(&tStart);
+  #endif
+
+
   // main mcmc loop
   for (int it = 0; it < model.mnBurnin + model.mnIter ; it++) {
-  	if(verbose) {
-    	std::cout << "it = " << (it+1) << endl;
-  	}
+    if(verbose) {
+      std::cout << "it = " << (it+1) << endl;
+    }
     cdp.iterate((*param),mt);
+
+
     
     if (it >= model.mnBurnin) {
-      //result.SaveDraws();
+      (*param).SaveDraws();
       (*param).UpdateMeans();
     }
     
+  }
+
+  if(verbose) {
+    #if defined(CDP_CUDA)
+      cutilCheckError(cutStopTimer(hTimer));
+      printf("GPU Processing time: %f (ms) \n", cutGetTimerValue(hTimer));
+    #else
+      //tEnd = clock();
+      time(&tEnd);
+      cout << "time lapsed:" << difftime(tEnd,tStart)  << "seconds"<< endl;
+    #endif
   }
   
   // save final parameter values
@@ -103,21 +164,18 @@ void cdpcluster::run(){
   //}
 
   
-  if(verbose) { 
-  	std::cout << "Done" << std::endl;
-  }
 };
 
 void cdpcluster::step(){
     cdp.iterate((*param),mt);
     (*param).UpdateMeans();
-}
+};
 
 void cdpcluster::stepburn(){
 	cdp.iterate(*param,mt);
-}
+};
 
-// model getters and setters
+void cdpcluster::setseed(int x){ model.mnSeed = x; };
 int cdpcluster::getn(){ return model.mnN; };
 int cdpcluster::getd(){ return model.mnD; };
 
@@ -252,6 +310,30 @@ double cdpcluster::getp(int idx){
 	int t = idx / (*param).J; // t
 	return (*param).p[j][t]; // j by t for some reason.
 };
+
+void cdpcluster::setgpunchunksize(int x){
+	model.mnGPU_Sample_Chunk_Size = x;
+}
+
+int cdpcluster::getgpunchunksize(){
+	return model.mnGPU_Sample_Chunk_Size;
+}
+
+void cdpcluster::setdevice(int x){
+	model.startDevice = x;
+}
+
+int cdpcluster::getdevice(){
+	return model.startDevice;
+}
+
+int cdpcluster::getnumberdevices(){
+	return model.numberDevices;
+}
+
+void cdpcluster::setnumberdevices(int x){
+	model.numberDevices = x;
+}
 
 // turn samplers on/off
 bool cdpcluster::samplem(){
@@ -396,7 +478,7 @@ void cdpcluster::loadRowsCols(double* from, vector<SymmetricMatrix>& to, int idx
 
 void cdpcluster::loadRows(double* from, int* to, int cols) {
 	for(int i=0; i<cols;++i){
-		to[i] = from[i];
+		to[i] = int(from[i]);
 	};
 };
 

@@ -14,7 +14,7 @@ if __name__ == '__main__':
     #data = loadFCS('../sample_data/coulter.lmd')
     
     # initalize model
-    model = DPMixtureModel(data, 10, iter=10, burnin=10)
+    model = DPMixtureModel(data, 16, iter=10, burnin=10)
     
     # fit model
     model.fit(verbose=True)

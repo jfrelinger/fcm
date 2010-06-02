@@ -3649,6 +3649,36 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_cdpcluster_setseed(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_setseed",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_setseed" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cdpcluster_setseed" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  (arg1)->setseed(arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_cdpcluster_setT(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   cdpcluster *arg1 = (cdpcluster *) 0 ;
@@ -4624,6 +4654,162 @@ SWIGINTERN PyObject *_wrap_cdpcluster_getp(PyObject *SWIGUNUSEDPARM(self), PyObj
   arg2 = static_cast< int >(val2);
   result = (double)(arg1)->getp(arg2);
   resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_setgpunchunksize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_setgpunchunksize",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_setgpunchunksize" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cdpcluster_setgpunchunksize" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  (arg1)->setgpunchunksize(arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_getgpunchunksize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:cdpcluster_getgpunchunksize",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_getgpunchunksize" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  result = (int)(arg1)->getgpunchunksize();
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_setdevice(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_setdevice",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_setdevice" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cdpcluster_setdevice" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  (arg1)->setdevice(arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_getdevice(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:cdpcluster_getdevice",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_getdevice" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  result = (int)(arg1)->getdevice();
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_getnumberdevices(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:cdpcluster_getnumberdevices",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_getnumberdevices" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  result = (int)(arg1)->getnumberdevices();
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_setnumberdevices(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_setnumberdevices",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_setnumberdevices" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cdpcluster_setnumberdevices" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  (arg1)->setnumberdevices(arg2);
+  resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
   return NULL;
@@ -6182,6 +6368,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cdpcluster_run", _wrap_cdpcluster_run, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_step", _wrap_cdpcluster_step, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_stepburn", _wrap_cdpcluster_stepburn, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_setseed", _wrap_cdpcluster_setseed, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_setT", _wrap_cdpcluster_setT, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_setJ", _wrap_cdpcluster_setJ, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_setBurnin", _wrap_cdpcluster_setBurnin, METH_VARARGS, NULL},
@@ -6217,6 +6404,12 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cdpcluster_getSigma", _wrap_cdpcluster_getSigma, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_getPhi", _wrap_cdpcluster_getPhi, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_getp", _wrap_cdpcluster_getp, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_setgpunchunksize", _wrap_cdpcluster_setgpunchunksize, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_getgpunchunksize", _wrap_cdpcluster_getgpunchunksize, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_setdevice", _wrap_cdpcluster_setdevice, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_getdevice", _wrap_cdpcluster_getdevice, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_getnumberdevices", _wrap_cdpcluster_getnumberdevices, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_setnumberdevices", _wrap_cdpcluster_setnumberdevices, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_samplem", _wrap_cdpcluster_samplem, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_samplePhi", _wrap_cdpcluster_samplePhi, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_samplew", _wrap_cdpcluster_samplew, METH_VARARGS, NULL},

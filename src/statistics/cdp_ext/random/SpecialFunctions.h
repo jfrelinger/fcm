@@ -24,5 +24,6 @@ public:
 	static double chi2rand(double a, MTRand& mt);
 	static bool betarand(double a, double b, int nSize, MTRand& mt, vector<double>& result);
 	static double betarand(double a, double b, MTRand& mt);
+	double betapdf(double x, double a, double b,int logspace);
 	static double binorand(int n, double p, MTRand& mt);
 };
