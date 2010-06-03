@@ -1,3 +1,6 @@
+/* cdpresult.cpp
+ * @author Quanli Wang, quanli@stat.duke.edu
+ */
 #include <math.h>
 #include "stdafx.h"
 #include "Model.h"
@@ -7,15 +10,14 @@
 #define WANT_MATH                    // include.h will get math fns
 #include "newmatap.h"                // need matrix applications
 #include "newmatio.h"                // need matrix output routines
-//#if defined(CDP_TBB)
-//	#include "tbb/concurrent_vector.h"
-//	using namespace tbb;
-//#endif
+#if defined(CDP_TBB)
+	#include "tbb/concurrent_vector.h"
+	using namespace tbb;
+#endif
 #include "cdpresult.h"
-CDPResult::CDPResult(){
-};
 CDPResult::CDPResult(int nclusters, int ncomponents, int npoints, int dimension)
 {
+	isEM = 0;
 	J = nclusters;
 	T = ncomponents;
 	N = npoints;
@@ -28,6 +30,7 @@ CDPResult::CDPResult(int nclusters, int ncomponents, int npoints, int dimension)
 	Sigma.reserve( J * T);
 	p.reserve( J );
 	pV.reserve(J );
+	eta.reserve(J);
 
 	xmbar.reserve(N);
 	xmubar.reserve(N);
@@ -38,62 +41,69 @@ CDPResult::CDPResult(int nclusters, int ncomponents, int npoints, int dimension)
 	
 	W = new int[N];
 	K = new int[N];
+	for(int z=0;z<N;z++){
+		W[z] = 0;
+		K[z] = 0;
+	}
+}
 
-//	postmufile.open("postmu.txt");
-//	if(postmufile.fail())
-//	  {
-//	    std::cout << "Failed to create postmu.txt" << endl;
-//	    exit(1);
-//	  }
-//	postpfile.open("postp.txt");
-//	if(postpfile.fail())
-//	  {
-//	    std::cout << "Failed to create postp.txt" << endl;
-//	    exit(1);
-//	  }
-//
-//	postSigmafile.open("postSigma.txt");
-//	if(postSigmafile.fail())
-//	  {
-//	    std::cout << "Failed to create postSigma.txt" << endl;
-//	    exit(1);
-//	  }
-//
-//	postqfile.open("postq.txt");
-//	if(postqfile.fail())
-//	  {
-//	    std::cout << "Failed to create postq.txt" << endl;
-//	    exit(1);
-//	  }
-//
-//	postmfile.open("postm.txt");
-//	if(postmfile.fail())
-//	  {
-//	    std::cout << "Failed to create postm.txt" << endl;
-//	    exit(1);
-//	  }
-//
-//	postPhifile.open("postPhi.txt");
-//	if(postPhifile.fail())
-//	  {
-//	    std::cout << "Failed to create postPhi.txt" << endl;
-//	    exit(1);
-//	  }
+void CDPResult::OpenPostFiles() {
+	if (isEM == 0) {
+		postmufile.open("postmu.txt");
+		if(postmufile.fail())
+		  {
+			std::cout << "Failed to create postmu.txt" << endl;
+			exit(1);
+		  }
+		postpfile.open("postp.txt");
+		if(postpfile.fail())
+		  {
+			std::cout << "Failed to create postp.txt" << endl;
+			exit(1);
+		  }
 
+		postSigmafile.open("postSigma.txt");
+		if(postSigmafile.fail())
+		  {
+			std::cout << "Failed to create postSigma.txt" << endl;
+			exit(1);
+		  }
 
+		/*postqfile.open("postq.txt");
+		if(postqfile.fail())
+		  {
+			std::cout << "Failed to create postq.txt" << endl;
+			exit(1);
+		  }
+
+		postmfile.open("postm.txt");
+		if(postmfile.fail())
+		  {
+			std::cout << "Failed to create postm.txt" << endl;
+			exit(1);
+		  }
+
+		postPhifile.open("postPhi.txt");
+		if(postPhifile.fail())
+		  {
+			std::cout << "Failed to create postPhi.txt" << endl;
+			exit(1);
+		  }*/
+	}
 }
 
 CDPResult::~CDPResult(void)
 {
 	delete [] W;
 	delete [] K;
-//	postmufile.close();
-//	postpfile.close();
-//	postSigmafile.close();
-//	postmfile.close();
-//	postqfile.close();
-//	postPhifile.close();
-	
+	if (isEM == 0) {
+		postmufile.close();
+		postpfile.close();
+		postSigmafile.close();
+		//postmfile.close();
+		//postqfile.close();
+		//postPhifile.close();
+	}
 }
 
 /*************************************************************************
@@ -101,13 +111,13 @@ CDPResult::~CDPResult(void)
  ************************************************************************/
 bool CDPResult::SaveDraws(){
 
-//  SavePDraw();
-//  SaveMuDraw();
-//  SavePhiDraw();
-//
-//  SaveQDraw();
-//  SaveMDraw();
-//  SaveSigmaDraw();
+  SavePDraw();
+  SaveMuDraw();
+  //SavePhiDraw();
+
+  //SaveQDraw();
+  //SaveMDraw();
+  SaveSigmaDraw();
   return true;
 }
 
@@ -187,20 +197,50 @@ bool CDPResult::SavePhiDraw()
  * functions for saving all parameter values needed to continue mcmc
  ********************************************************************/
 bool CDPResult::SaveFinal() {
-	SaveK("lastk.txt");
-	SaveW("lastw.txt");
-	SaveMu("lastmu.txt");
-	SaveSigma("lastSigma.txt");
-	SaveM("lastm.txt");
-	SavePhi("lastPhi.txt");
-	SaveP("lastp.txt");
-	SaveQ("lastq.txt");
-	SaveAlpha("lastalpha.txt");
-	SaveAlpha0("lastalpha0.txt");
-	SavepV("lastpV.txt");
-	SaveqV("lastqV.txt");
+	if (isEM ==0) {
+		SaveK("lastk.txt");
+		//SaveW("lastw.txt");
+		SaveMu("lastmu.txt");
+		SaveSigma("lastSigma.txt");
+		//SaveM("lastm.txt");
+		//SavePhi("lastPhi.txt");
+		SaveP("lastp.txt");
+		//SaveQ("lastq.txt");
+		SaveAlpha("lastalpha.txt");
+		//SaveAlpha0("lastalpha0.txt");
+		SavepV("lastpV.txt");
+		//SaveqV("lastqV.txt");
+		SaveEta("lastEta.txt");
+	} else {
+		SaveMu("lastmu.txt");
+		SaveSigma("lastSigma.txt");
+		SaveP("lastp.txt");
+		SaveAlpha("lastalpha.txt");
+		SavepV("lastpV.txt");
+		SaveEta("lastEta.txt");
+	}
 	return true;
 }
+
+bool CDPResult::SaveEta(string FileName) {
+	ofstream theFile(FileName.c_str());
+	if (theFile.fail()) {
+		std::cout << "Failed to create file " << FileName.c_str()  << endl;
+		exit(1);
+	}
+	
+	for(int j=0;j<J;j++)
+    {
+		for(int t=0;t<T;t++)
+		{
+			theFile << eta[j][t] << "\t";
+		}
+		theFile<<endl;
+    }
+	theFile.close();
+	return true;
+}
+
 bool CDPResult::SaveAlpha0(string FileName) {
   ofstream theFile(FileName.c_str());
   if (theFile.fail()) {
@@ -211,6 +251,8 @@ bool CDPResult::SaveAlpha0(string FileName) {
   theFile.close();
   return true;
 }
+
+
 
 bool CDPResult::SaveAlpha(string FileName) {
   ofstream theFile(FileName.c_str());
@@ -353,11 +395,9 @@ bool CDPResult::SaveSigma(string FileName) {
 	for (int i = 0; i < J*T; i++) {
 		for (int j = 0; j < D; j++) {
 			for (int k = 0; k <= j; k++) {
-				std::cout << i << j << k << std::endl;
 				theFile << Sigma[i][j][k] << "\t";
 			}
 			for (int k = j+1; k < D; k++) {
-				std::cout << i << j << k << std::endl;
 				theFile << Sigma[i][k][j] << "\t";
 			}
 		}

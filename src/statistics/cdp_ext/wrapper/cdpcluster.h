@@ -15,6 +15,7 @@ class cdpcluster{
 	void run();
 	void step();
 	void stepburn();
+	void setseed(int x);
 	void setT(int t);
 	void setJ(int j);
 	void setBurnin(int t);
@@ -50,6 +51,12 @@ class cdpcluster{
 	double getSigma(int i, int j, int k);
 	double getPhi(int i, int j , int k);
 	double getp(int idx);
+	void setgpunchunksize(int x);
+	int getgpunchunksize();
+	void setdevice(int x);
+	int getdevice();
+	int getnumberdevices();
+	void setnumberdevices(int x);
 	
 	bool samplem();
 	void samplem(bool x);

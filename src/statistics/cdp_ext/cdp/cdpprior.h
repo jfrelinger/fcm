@@ -1,3 +1,6 @@
+/* cdpprior.h
+ * @author Quanli Wang, quanli@stat.duke.edu
+ */
 #pragma once
 class Model;
 class CDPPrior
@@ -12,6 +15,7 @@ public:
 	double f0;
 	double ee;
 	double ff;
+	double aa;
 	double gamma;
 	RowVector m0;
 	SymmetricMatrix Phi0;

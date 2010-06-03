@@ -1,6 +1,12 @@
+/* cdp.cpp
+ * @author Quanli Wang, quanli@stat.duke.edu
+ */
 #pragma once
+
+#if  defined(PYWRAP)
 #include "cdpresult.h"
 #include "cdpbase.h"
+#endif
 
 class Model;
 class CDP:public CDPBase
@@ -14,29 +20,28 @@ class CDP:public CDPBase
 
   void CheckSpecialCases(Model& model, CDPResult& result);
 
-  bool SimulateFromPrior(CDPResult& result, MTRand& mt);
-  bool SimulateFromPrior2(CDPResult& result, MTRand& mt);
-  bool clusterIterate(int clustnum,vector<int>& w1d,CDPResult& result, MTRand& mt);
+  bool SimulateFromPrior2(CDPResult& result, MTRand& mt, int isEM);
+  bool clusterIterate_one(CDPResult& result, MTRand& mt);
   bool iterate(CDPResult& result, MTRand& mt);
 
   void partition(int* W, vector<vector<int> >& w1d);
-  void partition(int* K, vector<int>& w1d, vector<vector<int> >& wk2d);
-
+  
   void UpdateKJ(int* K,vector<int>& w1d, vector<int>& KJ);
-
+  
   // turn off/off individual sampling steps
   bool mcsamplem;
   bool mcsamplePhi;
   bool mcsamplew;
   bool mcsampleq;
   bool mcsamplealpha0;
-  
+
   bool mcsamplemu;
   bool mcsampleSigma;
   bool mcsamplek;
   bool mcsamplep;
-  bool mcsamplealpha;
- 
+  bool mcsamplealpha;	
+  bool mcsampleEta;
+
  private:
   static bool LoadFileData(string FileName, Matrix& A, int rows, int columns);
   static bool LoadFileData(string FileName, double*** A, int rows, int columns);
@@ -50,5 +55,4 @@ class CDP:public CDPBase
 #endif
   static bool LoadFileData(string FileName, int* A, int columns);
   static bool LoadFileData(string FileName, RowVector& A, int columns);
-  
 };
