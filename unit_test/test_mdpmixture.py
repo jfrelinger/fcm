@@ -14,7 +14,7 @@ class ModalDp_clusterTestCase(unittest.TestCase):
         self.clst1 = DPCluster(.25, self.mu1, self.sig)
         self.clst2 = DPCluster(.25, self.mu1, self.sig)
         self.clst3 = DPCluster(.5, self.mu2, self.sig)
-        self.mix = ModalDPMixture([self.clst1, self.clst2, self.clst3], {0 : [0,1], 1 : [2]})
+        self.mix = ModalDPMixture([self.clst1, self.clst2, self.clst3], {0 : [0,1], 1 : [2]}, {0: self.mu1, 1:self.mu2})
 
 
     def tearDown(self):

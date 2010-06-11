@@ -17,19 +17,23 @@ def modesearch(pis, mus, sigmas, tol=1e-5, maxiter=20):
     m = numpy.array([i[0] for i in mdict.values()])
     pm = numpy.array([i[1] for i in mdict.values()])
     sm = numpy.array(sm)
-    tm, tpm = check_mode(m, pm, pis, mus, sigmas)
+    #tm, tpm = check_mode(m, pm, pis, mus, sigmas)
     tmp = {}
-    for i in range(n):
-        cur_mode = tuple(tm[i,:].tolist())
+
+    for i in range(m.shape[0]):
+        cur_mode = tuple(m[i,:].tolist())
         if tmp.has_key(cur_mode):
             tmp[cur_mode].append(i)
         else:
             tmp[cur_mode] = [i]
              
     rslt = {}
-    for i,v in enumerate(tmp.itervalues()):
+    modes = {}
+    for i,key in enumerate(tmp.keys()):
+        v = tmp[key]
         rslt[i] = v
-    return rslt
+        modes[i] = numpy.array(key)
+    return modes, rslt
 
 
                 

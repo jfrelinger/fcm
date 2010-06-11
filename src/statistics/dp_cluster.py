@@ -86,9 +86,9 @@ class DPMixture(HasTraits):
         '''
         return array([i.pi for i in self.clusters])
     
-    def make_modal(self, tol=1e-5):
-        cmap = modesearch(self.pis(), self.mus(), self.sigmas(), tol)
-        return ModalDPMixture(self.clusters, cmap)
+    def make_modal(self, tol=1e-5, maxiter=20):
+        modes,cmap = modesearch(self.pis(), self.mus(), self.sigmas(), tol, maxiter)
+        return ModalDPMixture(self.clusters, cmap, modes)
         
         
     
@@ -99,7 +99,8 @@ class ModalDPMixture(DPMixture, HasTraits):
     '''
     clusters = List(DPCluster)
     cmap = Dict(Int, List(Int))
-    def __init__(self, clusters, cmap):
+    modes = Dict(Int, Array)
+    def __init__(self, clusters, cmap, modes):
         '''
         DPMixture(clusters)
         cluster = list of DPCluster objects
@@ -107,6 +108,7 @@ class ModalDPMixture(DPMixture, HasTraits):
         '''
         self.clusters = clusters
         self.cmap = cmap
+        self.modemap = modes
 
         
     def prob(self,x):
@@ -115,4 +117,10 @@ class ModalDPMixture(DPMixture, HasTraits):
             rslt.append(sum([self.clusters[i].prob(x) for i in self.cmap[j]]))
             
         return array(rslt)
+    
+    def modes(self):
+        lst = []
+        for i in self.modemap.itervalues():
+            lst.append(i)
+        return array(lst)        
 
