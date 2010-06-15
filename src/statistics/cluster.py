@@ -54,6 +54,7 @@ class DPMixtureModel(HasTraits):
             self.cdp.setVerbose(True)
         self.cdp.run()
         
+        
         self._run = True #we've fit the mixture model
         
         idx = 0
@@ -78,14 +79,16 @@ class DPMixtureModel(HasTraits):
         for i in range(self.d):
             tmp[i] = self.cdp.getMu(idx,i)
             
-        return tmp*self.s + self.m
-    
+        return tmp
+
     def _getsigma(self, idx):
         tmp = zeros((self.d,self.d))
         for i in range(self.d):
             for j in range(self.d):
-                tmp[i,j] = self.cdp.getSigma(idx,i,j)    
-        return tmp*outer(self.s, self.s)
+                tmp[i,j] = self.cdp.getSigma(idx,i,j)   
+        
+        return tmp
+        
         
         
     def get_results(self):
@@ -94,7 +97,10 @@ class DPMixtureModel(HasTraits):
         if self._run:
             rslts = []
             for i in range(self.last * self.nclusts):
-                rslts.append(DPCluster(self.pi[i],self.mus[i], self.sigmas[i]))
-        
-        return DPMixture(rslts)
+                tmp = DPCluster(self.pi[i],(self.mus[i]*self.s) + self.m, self.sigmas[i]*outer(self.s,self.s))
+                tmp.nmu = self.mus[i]
+                tmp.nsigma = self.sigmas[i]
+                rslts.append(tmp)
+        tmp = DPMixture(rslts, self.m, self.s)
+        return tmp
             

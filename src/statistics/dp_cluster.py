@@ -9,6 +9,7 @@ from numpy import array
 from component import Component
 from util import modesearch
 from enthought.traits.api import HasTraits, List, Float, Array, Dict, Int
+from warnings import warn
 
 
 class DPCluster(HasTraits, Component):
@@ -43,12 +44,18 @@ class DPMixture(HasTraits):
     collection of compoents that describe a mixture model
     '''
     clusters = List(DPCluster)
-    def __init__(self, clusters):
+    m = Array
+    s = Array
+    def __init__(self, clusters, m = False, s = False):
         '''
         DPMixture(clusters)
         cluster = list of DPCluster objects
         '''
         self.clusters = clusters
+        if m is not False:
+            self.m = m
+        if s is not False:
+            self.s = s
         
     def prob(self, x):
         '''
@@ -65,19 +72,25 @@ class DPMixture(HasTraits):
         probs = self.prob(x)
         return probs.argmax(0)
     
-    def mus(self):
+    def mus(self, normed=False):
         '''
         DPMixture.mus():
         returns an array of all cluster means
         '''
-        return array([i.mu for i in self.clusters])
+        if normed:
+            return array([i.nmu for i in self.clusters])
+        else:
+            return array([i.mu for i in self.clusters])
     
-    def sigmas(self):
+    def sigmas(self, normed=False):
         '''
         DPMixture.sigmas():
         returns an array of all cluster variance/covariances
         '''
-        return array([i.sigma for i in self.clusters])
+        if normed:
+            return array([i.nsigma for i in self.clusters])
+        else:
+            return array([i.sigma for i in self.clusters])
     
     def pis(self):
         '''
@@ -87,8 +100,14 @@ class DPMixture(HasTraits):
         return array([i.pi for i in self.clusters])
     
     def make_modal(self, tol=1e-5, maxiter=20):
-        modes,cmap = modesearch(self.pis(), self.mus(), self.sigmas(), tol, maxiter)
-        return ModalDPMixture(self.clusters, cmap, modes)
+        try:
+            modes,cmap = modesearch(self.pis(), self.mus(True), self.sigmas(True), tol, maxiter)
+            return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s)
+
+        except AttributeError:
+            warn("trying to make modal of a mixture I'm not sure is normalized.\nThe mode finding algorithm is designed for normalized data.\nResults may be unexpected")
+            modes,cmap = modesearch(self.pis(), self.mus(), self.sigmas(), tol, maxiter)
+            return ModalDPMixture(self.clusters, cmap, modes)   
         
         
     
@@ -100,7 +119,9 @@ class ModalDPMixture(DPMixture, HasTraits):
     clusters = List(DPCluster)
     cmap = Dict(Int, List(Int))
     modes = Dict(Int, Array)
-    def __init__(self, clusters, cmap, modes):
+    m = Array
+    s = Array
+    def __init__(self, clusters, cmap, modes, m=False, s=False):
         '''
         DPMixture(clusters)
         cluster = list of DPCluster objects
@@ -110,6 +131,10 @@ class ModalDPMixture(DPMixture, HasTraits):
         self.cmap = cmap
         self.modemap = modes
 
+        if m is not False:
+            self.m = m
+        if s is not False:
+            self.s = s
         
     def prob(self,x):
         rslt = []
@@ -121,6 +146,9 @@ class ModalDPMixture(DPMixture, HasTraits):
     def modes(self):
         lst = []
         for i in self.modemap.itervalues():
-            lst.append(i)
+            try:
+                lst.append((array(i)*self.s)+self.m)
+            except AttributeError:
+                lst.append(i)
         return array(lst)        
 
