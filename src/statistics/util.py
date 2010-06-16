@@ -41,7 +41,7 @@ def modesearch(pis, mus, sigmas, tol=1e-5, maxiter=20):
 def mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
     """Search for modes in mixture of Gaussians"""
     k,p = mu.shape
-    omega = sigma[:]
+    omega = numpy.copy(sigma)
     a = numpy.copy(mu)
 
     for j in range(k):
