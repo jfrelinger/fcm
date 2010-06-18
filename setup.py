@@ -60,5 +60,7 @@ setup(name='fcm',
       author='Jacob Frelinger',
       author_email='jacob.frelinger@duke.edu',
       ext_modules = [cdp_extension],
-      requires=['numpy (>=1.3.0)'], # figure out the rest of what's a required package.
+      requires=['numpy (>=1.3.0)',
+                'scipy (>=0.6)',
+                'enthought.traits (>=3.1)'], # figure out the rest of what's a required package.
       )
