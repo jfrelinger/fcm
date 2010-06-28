@@ -59,8 +59,8 @@ class DPMixture(HasTraits):
         
     def prob(self, x):
         '''
-        DPMixture(x)
-        returns a list of probabilities of x being in each component of the mixture
+        DPMixture.prob(x)
+        returns an array of probabilities of x being in each component of the mixture
         '''
         return array([i.prob(x) for i in self.clusters])
     
@@ -137,6 +137,10 @@ class ModalDPMixture(DPMixture, HasTraits):
             self.s = s
         
     def prob(self,x):
+        '''
+        ModalDPMixture.prob(x)
+        returns  an array of probabilities of x being in each mode of the modal mixture
+        '''
         rslt = []
         for j in self.cmap.keys():
             rslt.append(sum([self.clusters[i].prob(x) for i in self.cmap[j]]))
@@ -144,11 +148,23 @@ class ModalDPMixture(DPMixture, HasTraits):
         return array(rslt)
     
     def modes(self):
+        '''
+        ModalDPMixture.modes():
+        return an array of mode locations
+        '''
         lst = []
         for i in self.modemap.itervalues():
             try:
                 lst.append((array(i)*self.s)+self.m)
             except AttributeError:
                 lst.append(i)
-        return array(lst)        
+        return array(lst)
+    
+    def classify(self, x):
+        '''
+        ModalDPMixture.classify(x):
+        returns the classification (which mixture) x is a member of
+        '''
+        probs = self.prob(x)
+        return probs.argmax(0)
 

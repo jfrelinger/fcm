@@ -41,11 +41,11 @@ class DPMixtureModel(HasTraits):
         self.pi = zeros((nclusts*last))
         self.mus = zeros((nclusts*last, self.d))
         self.sigmas = zeros((nclusts*last, self.d, self.d))
-        
+        self.cdp = cdpcluster(self.data)
         self._run = False
         
     def fit(self, verbose=False):
-        self.cdp = cdpcluster(self.data)
+        
         self.cdp.setT(self.nclusts)
         self.cdp.setJ(1)
         self.cdp.setBurnin(self.burnin)

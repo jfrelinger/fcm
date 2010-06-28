@@ -103,6 +103,8 @@ class cdpcluster:
     def getf0(self): return _cdp.cdpcluster_getf0(self)
     def setee(self, *args): return _cdp.cdpcluster_setee(self, *args)
     def getee(self): return _cdp.cdpcluster_getee(self)
+    def setaa(self, *args): return _cdp.cdpcluster_setaa(self, *args)
+    def getaa(self): return _cdp.cdpcluster_getaa(self)
     def setff(self, *args): return _cdp.cdpcluster_setff(self, *args)
     def getff(self): return _cdp.cdpcluster_getff(self)
     def getMu(self, *args): return _cdp.cdpcluster_getMu(self, *args)
