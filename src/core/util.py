@@ -74,6 +74,9 @@ class SubsampleNode(Node):
         self.prefix = 's'
         
     def view(self):
+        """
+        return the view of the data associated with this node
+        """
         return self.parent.view().__getitem__(self.param)
     
 class DropChannelNode(Node):
@@ -88,6 +91,9 @@ class DropChannelNode(Node):
         self.prefix = 'd'
     
     def view(self):
+        """
+        return the view of the data associated with this node
+        """
         return self.parent.view()[:,self.param]
     
     
@@ -103,6 +109,9 @@ class GatingNode(Node):
         self.prefix = 'g'
         
     def view(self):
+        """
+        return the view of the data associated with this node
+        """
         return self.parent.view()[self.data]
         
 class Tree(HasTraits):
@@ -166,6 +175,10 @@ class Tree(HasTraits):
             self.current = self.nodes[name]
         
     def rename_node(self, old_name, new_name):
+        """
+        Rename a node name
+        D(old,new) -> rename old to new
+        """
         if not self.nodes.has_key(old_name):
             # we don't have old_name...
             raise KeyError, 'No node named %s' % old_name

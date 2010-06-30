@@ -42,7 +42,7 @@ class Annotation(HasTraits):
     def __setitem__(self, name, value):
         """
         allow usage of annotation.foo  = x or annotation[foo] =x to set the
-        intendede value
+        intended value
         """
         self._mydict[name] = value
         self.__dict__[name] = self._mydict[name]
@@ -67,5 +67,8 @@ class Annotation(HasTraits):
         return (self._mydict,)
     
     def copy(self):
+        """
+        D.copy() -> a shallow copy of D
+        """
         return Annotation(self._mydict.copy())
     

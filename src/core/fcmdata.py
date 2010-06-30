@@ -102,6 +102,7 @@ class FCMdata(HasTraits):
         return self.view()[:, self.markers]
     
     def get_spill(self):
+        """return the spillover matrix from the original fcs used in compisating""" 
         try:
             return self.notes.text['spill']
         except KeyError:

@@ -45,7 +45,10 @@ class DPMixtureModel(HasTraits):
         self._run = False
         
     def fit(self, verbose=False):
-        
+        """
+        fit the mixture model to the data
+        use get_results() to get the fitted model
+        """
         self.cdp.setT(self.nclusts)
         self.cdp.setJ(1)
         self.cdp.setBurnin(self.burnin)
@@ -92,15 +95,20 @@ class DPMixtureModel(HasTraits):
         
         
     def get_results(self):
+        """
+        get the results of the fitted mixture model
+        """
         
-        self.pi = self.pi/sum(self.pi)
         if self._run:
+            self.pi = self.pi/sum(self.pi)
             rslts = []
             for i in range(self.last * self.nclusts):
                 tmp = DPCluster(self.pi[i],(self.mus[i]*self.s) + self.m, self.sigmas[i]*outer(self.s,self.s))
                 tmp.nmu = self.mus[i]
                 tmp.nsigma = self.sigmas[i]
                 rslts.append(tmp)
-        tmp = DPMixture(rslts, self.m, self.s)
-        return tmp
+            tmp = DPMixture(rslts, self.m, self.s)
+            return tmp
+        else:
+            return None # TODO raise exception
             

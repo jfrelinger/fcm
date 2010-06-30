@@ -154,6 +154,7 @@ class FCSreader(object):
         
     
     def fix_lmd(self, offset, start, stop):
+        """function to handle lmd counting differently then most other FCS data"""
         text = self.read_bytes(offset, start, stop)
         for j in range(0,-10,-1):
             if text[0] == text[j-1]:
@@ -311,6 +312,10 @@ def loadFCS(filename, auto_logicle=True, auto_comp=True, spill=None):
     return tmp.get_FCMdata(auto_comp)
 
 def is_fl_channel(name):
+    """
+    Try and decide if a channel is a flourescent channel or if it's some other type
+    returns a boolean
+    """
     name = name.lower()
     if name.startswith('cs'):
         return False

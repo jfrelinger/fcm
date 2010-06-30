@@ -100,6 +100,9 @@ class DPMixture(HasTraits):
         return array([i.pi for i in self.clusters])
     
     def make_modal(self, tol=1e-5, maxiter=20):
+        """
+        find the modes and return a modal dp mixture
+        """
         try:
             modes,cmap = modesearch(self.pis(), self.mus(True), self.sigmas(True), tol, maxiter)
             return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s)

@@ -3,6 +3,8 @@ from partition import Partition
 from component import Component
 from numpy import identity, zeros
 
+# we should probably go thorugh and implement this so it works
+
 class Centroid(Component):
     def __init__(self, pos):
         self.pos = pos
