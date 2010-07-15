@@ -80,6 +80,7 @@ class Gate(object):
         ax.scatter(fcm[:,idxs[0]], fcm[:,idxs[1]], 
                    s=1, c= 'b', edgecolors='none')
 
+        self.gate=None
         self.canvas = ax.figure.canvas
         self.ax = ax
         self.vertices = []
@@ -156,6 +157,7 @@ class Gate(object):
         #args = (self.idxs[0], self.idxs[1])
         gate = g(xy, self.idxs)
         gate.gate(self.fcm)
+        self.gate = gate
         #self.fcm.note['gate_%d_%d' % args] = idx
         self.vertices = []
         self.poly = None
@@ -183,6 +185,7 @@ def poly_gate(fcm, idxs):
     ax = fig.add_subplot(111)
     gate = Gate(fcm, idxs, ax)
     plt.show()
+    return gate.gate
 
 if __name__ == '__main__':
     import sys
@@ -198,3 +201,4 @@ if __name__ == '__main__':
 
     plt.show()
     print fcm.tree.nodes
+    print gate.gate

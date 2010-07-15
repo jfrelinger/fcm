@@ -27,6 +27,7 @@ class Gate(object):
         self.vertices = []
         self.poly = None
         self.background = None
+        self.g = None
 
         self.t = time.time()
         self.double_click_t = 1.0
@@ -68,7 +69,14 @@ class Gate(object):
     def gate(self, x, y):
         g = QuadGate([x,y], self.idxs)
         self.fcm.gate(g)
-        
+        self.g = g
+
+def quad_gate(fcm, idxs):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    gate = Gate(fcm, idxs, ax)
+    plt.show()
+    return gate.g
             
 
 if __name__ == '__main__':
