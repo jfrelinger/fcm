@@ -2,6 +2,7 @@ import re
 from enthought.traits.api import HasTraits, String, This, Array, Instance, Dict
 import logging
 import os
+from warnings import warn
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s: %(message)s',
@@ -82,6 +83,8 @@ class SubsampleNode(Node):
         self.parent = parent
         self.param = param
         self.prefix = 's'
+        if type(param) == tuple:
+            self.channels = self.parent.channels[param[1]]
         
     def view(self):
         """
