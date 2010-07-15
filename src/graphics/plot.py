@@ -2,6 +2,7 @@
 
 from util import bilinear_interpolate
 from scipy import histogram
+from numpy import histogram2d
 import pylab
 
 def hist(fcms, index, savefile=None, display=True, **kwargs):
@@ -105,7 +106,23 @@ def pair_plot(data, savefile=None, display=True, **kwargs):
 
     return figure
     
+    
+def contour(data, indices, savefile=None, display=True, **kwargs):
+    x = data[:,indices[0]]
+    y = data[:,indices[1]]
+    z = histogram2d(x,y)
+    figure = pylab.figure()
+    pylab.contour(z[0])
+    
+    
+    if display:
+        pylab.show()
+        
+    if savefile:
+        pylab.savefig(savefile)
 
+    return figure
+    
 if __name__ == '__main__':
     import sys
     sys.path.append('../')
