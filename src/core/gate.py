@@ -24,14 +24,15 @@ class Gate(HasTraits):
 class PolyGate(Gate):
     """An object representing a polygonal gatable region"""
         
-    def gate(self, fcm, chan = None):
+    def gate(self, fcm, chan = None, invert = False):
         """
         return gated region of FCM data
         """
         if chan is None:
             chan = self.chan
         idxs = points_in_poly(self.vert, fcm.view()[:, chan])
-
+        if invert:
+            idxs = numpy.invert(idxs)
         # matplotlib has points in poly routine in C
         # no faster than our numpy version
         # idxs = points_inside_poly(fcm.pnts[:, chan], self.vert)

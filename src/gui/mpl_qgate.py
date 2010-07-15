@@ -75,7 +75,7 @@ if __name__ == '__main__':
     import sys
     sys.path.append('../')
     from io import FCSreader
-    import networkx
+    #import networkx
 
     fcm = FCSreader('../../sample_data/3FITC_4PE_004.fcs').get_FCMdata()
 
@@ -85,6 +85,6 @@ if __name__ == '__main__':
     gate = Gate(fcm, idxs, ax)
 
     plt.show()
-    networkx.draw(fcm.tree.g)
     plt.show()
     print fcm.tree.view()
+    print fcm.tree.nodes

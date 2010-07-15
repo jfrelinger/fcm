@@ -197,3 +197,4 @@ if __name__ == '__main__':
     gate = Gate(fcm, idxs, ax)
 
     plt.show()
+    print fcm.tree.nodes

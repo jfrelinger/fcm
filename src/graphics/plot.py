@@ -79,6 +79,33 @@ def heatmaps(fcm, savefile=None, display=True, **kwargs):
     heatmap(fcm, indices, nrows=n, ncols=n, savefile=savefile,
             display=display, **kwargs)
 
+def pair_plot(data, savefile=None, display=True, **kwargs):
+    chan = data.channels
+    l = len(chan)
+    figure = pylab.figure()
+    pylab.subplot(l,l,1)
+    for i in range(l):
+        for j in range(i+1):
+            pylab.subplot(l, l,i*l+j+1)
+            if i == j:
+                pylab.hist(data[:,i], bins=200, **kwargs)
+            else:
+                pylab.scatter(data[:,i], data[:,j], **kwargs)
+                
+            if j == 0:
+                pylab.ylabel(chan[i])
+            if i == l-1:
+                pylab.xlabel(chan[j])
+        
+    if display:
+        pylab.show()
+        
+    if savefile:
+        pylab.savefig(savefile)
+
+    return figure
+    
+
 if __name__ == '__main__':
     import sys
     sys.path.append('../')
@@ -88,3 +115,6 @@ if __name__ == '__main__':
     # heatmap(fcm, [(0,1),(2,3)], nrows=1, ncols=2, s=1, edgecolors='none')
     heatmaps(fcm, s=1, edgecolors='none', display=False,
              savefile='3FITC_4PE_004.png', cmap=pylab.cm.hsv)
+    
+
+

@@ -41,14 +41,21 @@ class Node(object):
         
         return self.data
     
+    def __getattr__(self, name):
+        if name == 'channels':
+            return self.parent.channels
+        else:
+            raise AttributeError("'%s' has no attribue '%s'" %(str(self.__class__), name))
+    
 class RootNode(Node):
     """
     Root Node
     """
-    def __init__(self, name, data):
+    def __init__(self, name, data, channels):
         self.name = name
         self.parent = None
         self.data = data
+        self.channels = channels
         self.prefix='root'
         
 class TransformNode(Node):
@@ -84,11 +91,12 @@ class DropChannelNode(Node):
     Node of data removing specific channels
     """
     
-    def __init__(self, name, parent, param):
+    def __init__(self, name, parent, param, channels):
         self.name = name
         self.parent = parent
         self.param = param
         self.prefix = 'd'
+        self.channels = channels
     
     def view(self):
         """
@@ -120,9 +128,9 @@ class Tree(HasTraits):
     root = Instance(RootNode)
     current = Instance(Node)
 
-    def __init__(self, pnts):
+    def __init__(self, pnts, channels):
         self.nodes = {}
-        self.root = RootNode('root', pnts)
+        self.root = RootNode('root', pnts, channels)
         self.nodes['root'] = self.root
         self.current = self.root
 

@@ -40,9 +40,9 @@ class FCMdata(HasTraits):
         self.name = name
 #        if type(pnts) != type(array([])):
 #            raise BadFCMPointDataTypeError(pnts, "pnts isn't a numpy.array")
-        self.tree = Tree(pnts)
+        self.tree = Tree(pnts, channels)
         #self.pnts = pnts
-        self.channels = channels
+        #self.channels = channels
         #TODO add some default intelegence for determining scatters if None
         self.scatters = scatters
         self.markers = []
@@ -50,7 +50,7 @@ class FCMdata(HasTraits):
             for chan in range(len(channels)):
                 if chan in self.scatters:
                     pass
-                elif self.channels[chan] in self.scatters:
+                elif self.tree.root.channels[chan] in self.scatters:
                     pass
                 else:
                     self.markers.append(chan)
@@ -81,7 +81,10 @@ class FCMdata(HasTraits):
             return self.tree.view()[item]
 
     def __getattr__(self, name):
-        return self.tree.view().__getattribute__(name)
+        if name == 'channels':
+            return self.current_node().channels
+        else:
+            return self.tree.view().__getattribute__(name)
                 
     def name_to_index(self, channels):
         """Return the channel indexes for the named channels"""

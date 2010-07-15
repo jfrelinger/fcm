@@ -56,6 +56,6 @@ class DropChannel(object):
             left.extend(fcm.name_to_index(i))
             
         left.sort()
-        node = DropChannelNode("", fcm.get_cur_node(), left)
+        node = DropChannelNode("", fcm.get_cur_node(), left, channels)
         fcm.add_view(node)
         return fcm

@@ -22,7 +22,13 @@ class FCSreader(object):
     a FCMdata object out of a fcs file
     """
     def __init__(self, filename, auto_logicle = True, sidx = None, spill=None):
-        self.filename = filename
+        #self.filename = filename
+        if type(filename) == str:
+            self.filename=filename
+            self._fh = open(filename, 'rb')
+        else: # we should have gotten a filehandle then
+            self.filename = filename.name
+            self._fh = filename
         self.logicle = auto_logicle
         #self._fh = cStringIO.StringIO(open(filename, 'rb').read())
         self._fh = open(filename, 'rb')
