@@ -41,6 +41,9 @@ class Node(object):
         
         return self.data
     
+    def pprint(self, depth):
+        return "  "*depth + self.name + "\n"
+    
     def __getattr__(self, name):
         if name == 'channels':
             return self.parent.channels
@@ -138,9 +141,11 @@ class Tree(HasTraits):
         '''return the parent of a node'''
         return self.current.parent
 
-    def children(self):
+    def children(self , node =None):
         '''return the children of a node'''
-        return [i for i in self.nodes.values() if i.parent == self.current]
+        if node == None:
+            node = self.current
+        return [i for i in self.nodes.values() if i.parent == node]
 
     def visit(self, name):
         '''visit a node in the tree'''
@@ -178,6 +183,7 @@ class Tree(HasTraits):
         if name in self.nodes.keys():
             raise KeyError, 'name, %s, already in use in tree' % name
         else:
+            node.name = name
             self.nodes[name] = node
             node.parent = self.current
             self.current = self.nodes[name]
@@ -198,6 +204,14 @@ class Tree(HasTraits):
             del self.nodes[old_name] # remove old node.
                 
 
+    def pprint(self):
+        return self._rpprint(self.root, 0)
+        
+    def _rpprint(self, n, d):
+        tmp = n.pprint(d)
+        for i in self.children(n):
+            tmp+= self._rpprint(i,d+1)
+        return tmp
         
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
