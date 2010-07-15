@@ -66,6 +66,7 @@ class QuadGate(Gate):
                 fcm.tree.visit(name)
                 node = GatingNode("q%d" % i, root, quad[i])
                 fcm.add_view(node)
+        return fcm
 
 class IntervalGate(Gate):
     """

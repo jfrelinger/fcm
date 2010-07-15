@@ -88,7 +88,7 @@ def pair_plot(data, savefile=None, display=True, **kwargs):
         for j in range(i+1):
             pylab.subplot(l, l,i*l+j+1)
             if i == j:
-                pylab.hist(data[:,i], bins=200, **kwargs)
+                pylab.hist(data[:,i], bins=200, histtype='stepfilled', **kwargs)
             else:
                 pylab.scatter(data[:,i], data[:,j], **kwargs)
                 
