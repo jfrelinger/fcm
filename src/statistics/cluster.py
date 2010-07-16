@@ -6,9 +6,12 @@ Created on Oct 30, 2009
 
 from enthought.traits.api import HasTraits
 from numpy import zeros, outer, sum
+from scipy.cluster import vq
 
 from cdp import cdpcluster
 from dp_cluster import DPCluster, DPMixture
+from kmeans import KMeans
+
 
 class DPMixtureModel(HasTraits):
     '''
@@ -143,3 +146,22 @@ class DPMixtureModel(HasTraits):
         else:
             return None # TODO raise exception
             
+            
+
+class KMeansModel(HasTraits):
+    '''
+    KmeansModel(data, k, iter=20, tol=1e-5)
+    kmeans clustering model
+    '''
+    def __init__(self, data, k, iter=20, tol=1e-5):
+        self.data = data.view()
+        self.k = k
+        self.iter = iter
+        self.tol = tol
+        
+    def fit(self):
+        self.r = vq.kmeans(self.data, self.k, iter=self.iter, thresh=self.tol)
+        
+    
+    def get_results(self):
+        return KMeans(self.r[0])
