@@ -31,13 +31,14 @@ class DPMixtureModel(HasTraits):
         self.m = pnts.mean(0)
         self.s = pnts.std(0)
         self.data = (pnts-self.m)/self.s
-        
+
         self.nclusts = nclusts
         self.iter = iter
         self.burnin = burnin
         self.last = last
         
-        self.d = self.data.shape[1]
+        self.n, self.d = self.data.shape
+        
         self.pi = zeros((nclusts*last))
         self.mus = zeros((nclusts*last, self.d))
         self.sigmas = zeros((nclusts*last, self.d, self.d))
@@ -109,6 +110,16 @@ class DPMixtureModel(HasTraits):
                 rslts.append(tmp)
             tmp = DPMixture(rslts, self.m, self.s)
             return tmp
+        else:
+            return None # TODO raise exception
+        
+    def get_class(self):
+        """
+        get the last classification from the model
+        """
+        
+        if self._run:
+            return self.cdp.getK(self.n)
         else:
             return None # TODO raise exception
             

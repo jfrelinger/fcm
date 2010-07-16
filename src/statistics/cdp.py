@@ -87,6 +87,7 @@ class cdpcluster:
     def getclustN(self): return _cdp.cdpcluster_getclustN(self)
     def getT(self): return _cdp.cdpcluster_getT(self)
     def getJ(self): return _cdp.cdpcluster_getJ(self)
+    def getK(self, *args): return _cdp.cdpcluster_getK(self, *args)
     def setlambda0(self, *args): return _cdp.cdpcluster_setlambda0(self, *args)
     def getlambda0(self): return _cdp.cdpcluster_getlambda0(self)
     def setphi0(self, *args): return _cdp.cdpcluster_setphi0(self, *args)

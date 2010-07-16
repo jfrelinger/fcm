@@ -239,9 +239,18 @@ void cdpcluster::setee( double ee ) {
 	 model.mdee = ee;
 };
 
+
 double cdpcluster::getee() {
 	 return model.mdee;
 };
+
+void cdpcluster::setaa( double aa ) {
+	model.mdaa = aa;
+};
+
+double cdpcluster::getaa() {
+	return model.mdaa;
+}; 
 
 void cdpcluster::setff( double ff ) {
 	 model.mdff = ff;
@@ -258,6 +267,17 @@ void cdpcluster::setT(int t) { // top level clusters
 int cdpcluster::getT() {
 	return model.mnT;
 };
+
+
+int cdpcluster::getK(int idx) { // fetch k
+	return (*param).K[idx];
+}
+
+void cdpcluster::getK(int d, int* res) {
+	for(int i = 0; i< d; i++) {
+		res[i] = (*param).K[i];
+	};
+};	
 
 void cdpcluster::setJ(int j) { // compoenent clusters
 	model.mnJ = j;
