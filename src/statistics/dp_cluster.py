@@ -5,7 +5,7 @@ Created on Oct 30, 2009
 '''
 
 from distributions import mvnormpdf
-from numpy import array
+from numpy import array, log, sum, exp
 from component import Component
 from util import modesearch
 from enthought.traits.api import HasTraits, List, Float, Array, Dict, Int
@@ -111,6 +111,9 @@ class DPMixture(HasTraits):
             warn("trying to make modal of a mixture I'm not sure is normalized.\nThe mode finding algorithm is designed for normalized data.\nResults may be unexpected")
             modes,cmap = modesearch(self.pis(), self.mus(), self.sigmas(), tol, maxiter)
             return ModalDPMixture(self.clusters, cmap, modes)   
+        
+    def log_likelihood(self, x):
+        return sum(log(sum(self.prob(x),axis=0)))
         
         
     

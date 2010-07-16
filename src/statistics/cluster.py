@@ -75,6 +75,26 @@ class DPMixtureModel(HasTraits):
         if verbose:
             print "Done"
                 
+    def step(self):
+        tpi = zeros((self.nclusts))
+        tmus = zeros((self.nclusts,self.d))
+        tsigmas = zeros((self.nclusts,self.d,self.d))
+        self.cdp.step()
+        for j in range(self.nclusts):
+                tpi[j] = self._getpi(j)
+                tmus[j,:] = self._getmu(j)
+                tsigmas[j,:,:] = self._getsigma(j)
+                
+        rslts = []
+        for i in range(self.nclusts):
+            tmp = DPCluster(tpi[i],(tmus[i]*self.s) + self.m, tsigmas[i]*outer(self.s,self.s))
+            tmp.nmu = tmus[i]
+            tmp.nsigma = tsigmas[i]
+            rslts.append(tmp)
+        tmp = DPMixture(rslts, self.m, self.s)
+        return tmp
+        
+        
     def _getpi(self, idx):
         return self.cdp.getp(idx)
     
