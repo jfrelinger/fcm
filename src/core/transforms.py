@@ -3,7 +3,7 @@
 
 from scipy.optimize import fsolve, brentq
 from scipy import interpolate
-from numpy import arange, exp, log, min, max, sign, concatenate, zeros, vectorize
+from numpy import arange, exp, log, log10, min, max, sign, concatenate, zeros, vectorize, where
 
 from util import TransformNode
 
@@ -51,7 +51,7 @@ def logicle(fcm, channels, T, m, r, order=2, intervals=1000.0):
     npnts = fcm.view().copy()
     for i in channels:
         npnts.T[i] = _logicle(npnts[:, i].T, T, m, r, order, intervals)
-    node = TransformNode('', fcm.current_node(), npnts)
+    node = TransformNode('', fcm.cur_node(), npnts)
     fcm.add_view(node)
     return fcm
  
@@ -75,7 +75,15 @@ def hyperlog(fcm, channels, b, d, r, order=2, intervals=1000.0):
     npnts = fcm.view().copy()
     for i in channels:
         npnts.T[i] = _hyperlog(npnts[:,i].T, b, d, r, order=2, intervals=1000.0)
-    node = TransformNode('', fcm.get_current_node(), npnts)
+    node = TransformNode('', fcm.get_cur_node(), npnts)
+    fcm.add_view(node)
+    return fcm
+
+def log_transform(fcm, channels):
+    npnts = fcm.view().copy()
+    for i in channels:
+        npnts[:,i] = where(npnts[:,i] <= 1, 0, log10(npnts[:,i]))
+    node = TransformNode('', fcm.get_cur_node(), npnts)
     fcm.add_view(node)
     return fcm
 

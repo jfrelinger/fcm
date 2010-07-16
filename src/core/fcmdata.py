@@ -8,6 +8,7 @@ from annotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
 from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
+from transforms import log_transform as _log
 from util import Tree, RootNode, fcmlog
 
 class FCMdata(HasTraits):
@@ -146,6 +147,11 @@ class FCMdata(HasTraits):
     def hyperlog(self, channels, b, d, r, order=2, intervals=1000.0):
         """return hyperlog transformed channels"""
         return _hyperlog(self, channels, b, d, r, order, intervals)
+    
+    @fcmlog
+    def log(self, channels):
+        """return log base 10 transformed channels"""
+        return _log(self, channels)
     
     @fcmlog
     def gate(self, g, chan=None):
