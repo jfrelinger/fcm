@@ -5,7 +5,9 @@ Created on Oct 30, 2009
 '''
 
 from distributions import mvnormpdf
-from numpy import array, log, sum, exp
+from numpy import array, log, sum, exp, zeros, concatenate
+from numpy.random import multivariate_normal as mvn
+from numpy.random import multinomial
 from component import Component
 from util import modesearch
 from enthought.traits.api import HasTraits, List, Float, Array, Dict, Int
@@ -37,6 +39,11 @@ class DPCluster(HasTraits, Component):
         '''
         return self.pi * mvnormpdf(x, self.mu, self.sigma)
     
+    def draw(self, n=1):
+        '''
+        draw a random sample of size n form this cluster
+        '''
+        return mvn(self.mu, self.sigma, n)
 
 
 class DPMixture(HasTraits):
@@ -114,6 +121,24 @@ class DPMixture(HasTraits):
         
     def log_likelihood(self, x):
         return sum(log(sum(self.prob(x),axis=0)))
+    
+    def draw(self, n):
+        '''
+        draw n samples from the represented mixture model
+        '''
+        d = multinomial(n, self.pis())
+        results = None
+        for index, count in enumerate(d):
+            if count > 0:
+                try:
+                    results = concatenate((results, self.clusters[index].draw(count)),0)
+                except ValueError:
+                    results = self.clusters[index].draw(count)
+                    
+        return results
+                
+            
+            
         
         
     
