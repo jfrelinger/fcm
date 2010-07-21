@@ -12,8 +12,10 @@
 
 
 cdpcluster::~cdpcluster(void) {
+	if (resultInit) {
 	delete param;
-}
+	};
+};
 
 //cdpcluster::cdpcluster(int d, int n, double** x, int iter, int burn) {
 cdpcluster::cdpcluster(int n, int d, double* x) {
@@ -487,6 +489,7 @@ void cdpcluster::loadalpha(int i, double* x) {
 
 void cdpcluster::loadRowsCols(double* from, vector<SymmetricMatrix>& to, int idx, int rows, int columns) {
 	for(int i=0;i<idx;++i){
+		to.push_back(SymmetricMatrix(Real(rows)));
 		for(int j=0;j<rows;++j){
 			for(int k=0;k<columns;++k){
 				int pos = (i*rows*columns)+(j*columns)+k;
@@ -504,9 +507,11 @@ void cdpcluster::loadRows(double* from, int* to, int cols) {
 
 void cdpcluster::loadRowsCols(double* from, vector<RowVector>& to, int n, int d){
 	for(int i=0;i<n;++i){
+		to.push_back(RowVector(Real(d)));
 		for(int j=0;j<d;++j){
 			int pos = i*d+j;
-			to[i][j] = from[pos];
+			//to.push_back(from[pos]);
+			to.at(i)[j] = from[pos];
 		};
 	}; 
 };
