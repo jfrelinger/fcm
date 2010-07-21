@@ -12,11 +12,16 @@ class KMeans(HasTraits):
     '''
     K means model
     '''
-    centroids = Array()
+    cent = Array()
     def __init__(self, centroids):
-        self.centroids = centroids
+        self.cent = centroids
         
     def classify(self, x):
         return vq.vq(x, self.centroids)[0]
     
+    def mus(self):
+        return self.cent
+    
+    def centroids(self):
+        return self.mus()
     
