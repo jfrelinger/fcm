@@ -51,7 +51,7 @@ def logicle(fcm, channels, T, m, r, order=2, intervals=1000.0):
     npnts = fcm.view().copy()
     for i in channels:
         npnts.T[i] = _logicle(npnts[:, i].T, T, m, r, order, intervals)
-    node = TransformNode('', fcm.cur_node(), npnts)
+    node = TransformNode('', fcm.get_cur_node(), npnts)
     fcm.add_view(node)
     return fcm
  
