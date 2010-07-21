@@ -48,6 +48,10 @@ class DPMixtureModel(HasTraits):
         self.cdp = cdpcluster(self.data)
         self._run = False
         
+    def __del__(self):
+        self.cdp.makeResult()
+        
+        
     def fit(self, verbose=False):
         """
         fit the mixture model to the data
