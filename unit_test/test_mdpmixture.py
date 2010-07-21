@@ -1,6 +1,6 @@
 import unittest
 from fcm.statistics import DPCluster, ModalDPMixture
-from numpy import array, eye
+from numpy import array, eye, argmax
 
 
 class ModalDp_clusterTestCase(unittest.TestCase):
@@ -36,6 +36,7 @@ class ModalDp_clusterTestCase(unittest.TestCase):
         
     def testclassify(self):
         pnt = array([self.mu1, self.mu2])
+        assert self.mix.classify(array([self.mu1, self.mu2, self.mu1, self.mu2, self.mu1, self.mu2])).tolist() == [0,1,0,1,0,1], 'classify not working'
         assert self.mix.classify(pnt)[0] == 0, 'classify classifys mu1 as belonging to something else'
         assert self.mix.classify(pnt)[1] == 1, 'classify classifys m21 as belonging to something else'
 
