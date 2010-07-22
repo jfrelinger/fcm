@@ -8,6 +8,7 @@ from annotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
 from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
+from transforms import log_transform as _log
 from util import Tree, RootNode, fcmlog
 
 class FCMdata(HasTraits):
@@ -40,9 +41,9 @@ class FCMdata(HasTraits):
         self.name = name
 #        if type(pnts) != type(array([])):
 #            raise BadFCMPointDataTypeError(pnts, "pnts isn't a numpy.array")
-        self.tree = Tree(pnts)
+        self.tree = Tree(pnts, channels)
         #self.pnts = pnts
-        self.channels = channels
+        #self.channels = channels
         #TODO add some default intelegence for determining scatters if None
         self.scatters = scatters
         self.markers = []
@@ -50,7 +51,7 @@ class FCMdata(HasTraits):
             for chan in range(len(channels)):
                 if chan in self.scatters:
                     pass
-                elif self.channels[chan] in self.scatters:
+                elif self.tree.root.channels[chan] in self.scatters:
                     pass
                 else:
                     self.markers.append(chan)
@@ -81,7 +82,10 @@ class FCMdata(HasTraits):
             return self.tree.view()[item]
 
     def __getattr__(self, name):
-        return self.tree.view().__getattribute__(name)
+        if name == 'channels':
+            return self.current_node().channels
+        else:
+            return self.tree.view().__getattribute__(name)
                 
     def name_to_index(self, channels):
         """Return the channel indexes for the named channels"""
@@ -102,6 +106,7 @@ class FCMdata(HasTraits):
         return self.view()[:, self.markers]
     
     def get_spill(self):
+        """return the spillover matrix from the original fcs used in compisating""" 
         try:
             return self.notes.text['spill']
         except KeyError:
@@ -142,6 +147,11 @@ class FCMdata(HasTraits):
     def hyperlog(self, channels, b, d, r, order=2, intervals=1000.0):
         """return hyperlog transformed channels"""
         return _hyperlog(self, channels, b, d, r, order, intervals)
+    
+    @fcmlog
+    def log(self, channels):
+        """return log base 10 transformed channels"""
+        return _log(self, channels)
     
     @fcmlog
     def gate(self, g, chan=None):

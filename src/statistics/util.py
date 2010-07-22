@@ -11,38 +11,38 @@ from numpy.linalg import solve, inv
 from fcm.statistics.distributions import mixnormpdf, mvnormpdf, mixnormrnd
 
 def modesearch(pis, mus, sigmas, tol=1e-5, maxiter=20):
+    """find the modes of a mixture of guassians"""
     n = mus.shape[0]
     
-    mdict, sm, spm = mode_search(pis, mus, sigmas, nk=0, tol=tol, maxiter=maxiter)
+    mdict, sm, spm = _mode_search(pis, mus, sigmas, nk=0, tol=tol, maxiter=maxiter)
     m = numpy.array([i[0] for i in mdict.values()])
     pm = numpy.array([i[1] for i in mdict.values()])
-    # m = numpy.array(mdict.keys())
-    # pm = numpy.array(mdict.values())
     sm = numpy.array(sm)
-    tm, tpm = check_mode(m, pm, pis, mus, sigmas)
+    #tm, tpm = check_mode(m, pm, pis, mus, sigmas)
     tmp = {}
-    # for i in range(n):
-    for i in range(len(tm)):
-        cur_mode = tuple(tm[i,:].tolist())
-        # cur_mode = tuple(_tm.tolist())
+
+    for i in range(m.shape[0]):
+        cur_mode = tuple(m[i,:].tolist())
         if tmp.has_key(cur_mode):
             tmp[cur_mode].append(i)
         else:
             tmp[cur_mode] = [i]
              
     rslt = {}
-    for i,v in enumerate(tmp.itervalues()):
+    modes = {}
+    for i,key in enumerate(tmp.keys()):
+        v = tmp[key]
         rslt[i] = v
-    return rslt
+        modes[i] = numpy.array(key)
+    return modes, rslt
 
 
                 
 
-def mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
+def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
     """Search for modes in mixture of Gaussians"""
-
     k,p = mu.shape
-    omega = sigma[:]
+    omega = numpy.copy(sigma)
     a = numpy.copy(mu)
 
     for j in range(k):

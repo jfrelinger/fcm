@@ -1,5 +1,5 @@
 import sys
-# sys.path.append("/home/jolly/MyPython") 
+sys.path.append("/home/jolly/MyPython") 
 
 from fcm import loadFCS
 from fcm.statistics import DPMixtureModel
@@ -8,6 +8,9 @@ from fcm.graphics.plot import heatmap
 
 import time
 import numpy
+
+
+
 
 if __name__ == '__main__':
     #load data
@@ -35,6 +38,9 @@ if __name__ == '__main__':
 
     # get results
     baz = model.get_results()
+    print model.get_class()
+    print numpy.max(model.get_class())
+    print numpy.min(model.get_class())
     #print model._getp(1)
     # pull out all means
     mus = baz.mus()[-k:]
@@ -43,10 +49,13 @@ if __name__ == '__main__':
     # print baz.pis()
     # mus = mus*xs + xm
     
-    #plot component results.
-    # figure(figsize=(12,12))
-    cs = range(len(mus))
-    # print cs
+    #plot results.
+    for i,j,k in [(1,0,1),(2,0,2),(3,0,3), (4,2,3)]:
+        subplot(2,2,i)
+        scatter(data[:,j], data[:,k], s=.1)
+        scatter(mus[:,j], mus[:,k], c='r')
+        
+    show()
 
 #     ss = 1500*pis
 #     pis[pis<20] = 20

@@ -2687,8 +2687,9 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int argnum, int flags)
 
 #define SWIGTYPE_p_cdpcluster swig_types[0]
 #define SWIGTYPE_p_char swig_types[1]
-static swig_type_info *swig_types[3];
-static swig_module_info swig_module = {swig_types, 2, 0, 0, 0, 0};
+#define SWIGTYPE_p_int swig_types[2]
+static swig_type_info *swig_types[4];
+static swig_module_info swig_module = {swig_types, 3, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -3983,6 +3984,50 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_cdpcluster_getK(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  int *arg3 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *array2 = NULL ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_getK",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_getK" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp dims[1];
+    if (!PyInt_Check(obj1))
+    {
+      const char* typestring = pytype_string(obj1);
+      PyErr_Format(PyExc_TypeError,
+        "Int dimension expected.  '%s' given.",
+        typestring);
+      SWIG_fail;
+    }
+    arg2 = (int) PyInt_AsLong(obj1);
+    dims[0] = (npy_intp) arg2;
+    array2 = PyArray_SimpleNew(1, dims, NPY_INT);
+    if (!array2) SWIG_fail;
+    arg3 = (int*) array_data(array2);
+  }
+  (arg1)->getK(arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  {
+    resultobj = SWIG_Python_AppendOutput(resultobj,array2);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_cdpcluster_setlambda0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   cdpcluster *arg1 = (cdpcluster *) 0 ;
@@ -4392,6 +4437,58 @@ SWIGINTERN PyObject *_wrap_cdpcluster_getee(PyObject *SWIGUNUSEDPARM(self), PyOb
   }
   arg1 = reinterpret_cast< cdpcluster * >(argp1);
   result = (double)(arg1)->getee();
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_setaa(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_setaa",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_setaa" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cdpcluster_setaa" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  (arg1)->setaa(arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cdpcluster_getaa(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:cdpcluster_getaa",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_getaa" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  result = (double)(arg1)->getaa();
   resultobj = SWIG_From_double(static_cast< double >(result));
   return resultobj;
 fail:
@@ -6381,6 +6478,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cdpcluster_getclustN", _wrap_cdpcluster_getclustN, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_getT", _wrap_cdpcluster_getT, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_getJ", _wrap_cdpcluster_getJ, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_getK", _wrap_cdpcluster_getK, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_setlambda0", _wrap_cdpcluster_setlambda0, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_getlambda0", _wrap_cdpcluster_getlambda0, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_setphi0", _wrap_cdpcluster_setphi0, METH_VARARGS, NULL},
@@ -6397,6 +6495,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cdpcluster_getf0", _wrap_cdpcluster_getf0, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_setee", _wrap_cdpcluster_setee, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_getee", _wrap_cdpcluster_getee, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_setaa", _wrap_cdpcluster_setaa, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_getaa", _wrap_cdpcluster_getaa, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_setff", _wrap_cdpcluster_setff, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_getff", _wrap_cdpcluster_getff, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_getMu", _wrap_cdpcluster_getMu, METH_VARARGS, NULL},
@@ -6441,18 +6541,22 @@ static PyMethodDef SwigMethods[] = {
 
 static swig_type_info _swigt__p_cdpcluster = {"_p_cdpcluster", "cdpcluster *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_int = {"_p_int", "int *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_cdpcluster,
   &_swigt__p_char,
+  &_swigt__p_int,
 };
 
 static swig_cast_info _swigc__p_cdpcluster[] = {  {&_swigt__p_cdpcluster, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_cdpcluster,
   _swigc__p_char,
+  _swigc__p_int,
 };
 
 

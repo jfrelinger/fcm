@@ -1,5 +1,7 @@
 import numpy
 
+
+# do we even use this?
 class Partition(object):
     """Stores information about how a data set was partitioned.
 

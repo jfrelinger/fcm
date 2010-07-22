@@ -23,22 +23,26 @@ from cdp import mvnpdf
 #    return y
 
 def mvnormpdf(x, mu, va):
+    """
+    calculate the multi-variate normal pdf 
+    D(x, mu, sigma) -> float
+    """
     try:
         n,p = x.shape
     except ValueError:
         n = x.shape
         p = 0
     if p > 0:
-        results = zeros((n,))
+        results = zeros((n,1))
         for i in range(n):
-            results[i] = mvnpdf(x[i,:],mu,va)
+            results[i,0] = mvnpdf(x[i,:],mu,va)
     else:
         results = array([mvnpdf(x,mu,va)])
     
     return results
 
 def mixnormpdf(x, prop, mu, Sigma):
-    """Mixture of multivariate normal pdfs for maximization"""
+    """Mixture of multivariate normal pdfs"""
     # print "in mixnormpdf ..."
     tmp = 0.0
     for i in range(len(prop)):

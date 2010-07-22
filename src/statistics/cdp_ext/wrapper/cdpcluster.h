@@ -28,6 +28,8 @@ class cdpcluster{
 	int getclustN();
 	int getT();
 	int getJ();
+	int getK(int idx);
+	void getK(int d, int* res);
 	void setlambda0( double lambda0 );
 	double getlambda0();
 	void setphi0( double phi0 );
@@ -44,6 +46,8 @@ class cdpcluster{
 	double getf0();
 	void setee( double ee );
 	double getee();
+	void setaa( double aa );
+	double getaa();
 	void setff( double ff );
 	double getff();	
 	double getMu(int idx, int pos);

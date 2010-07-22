@@ -24,17 +24,20 @@ class Gate(HasTraits):
 class PolyGate(Gate):
     """An object representing a polygonal gatable region"""
         
-    def gate(self, fcm, chan = None):
+    def gate(self, fcm, chan = None, invert = False):
         """
         return gated region of FCM data
         """
         if chan is None:
             chan = self.chan
-        idxs = points_in_poly(self.vert, fcm.view()[:, chan])
-
+        #idxs = points_in_poly(self.vert, fcm.view()[:, chan])
+        
         # matplotlib has points in poly routine in C
         # no faster than our numpy version
-        # idxs = points_inside_poly(fcm.pnts[:, chan], self.vert)
+        idxs = points_inside_poly(fcm.view()[:, chan], self.vert)
+        
+        if invert:
+            idxs = numpy.invert(idxs)
         
         node = GatingNode("", fcm.get_cur_node(), idxs)
         fcm.add_view(node)
@@ -65,6 +68,7 @@ class QuadGate(Gate):
                 fcm.tree.visit(name)
                 node = GatingNode("q%d" % i, root, quad[i])
                 fcm.add_view(node)
+        return fcm
 
 class IntervalGate(Gate):
     """

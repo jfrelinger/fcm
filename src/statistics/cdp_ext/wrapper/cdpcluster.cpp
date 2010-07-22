@@ -12,8 +12,10 @@
 
 
 cdpcluster::~cdpcluster(void) {
+	if (resultInit) {
 	delete param;
-}
+	};
+};
 
 //cdpcluster::cdpcluster(int d, int n, double** x, int iter, int burn) {
 cdpcluster::cdpcluster(int n, int d, double* x) {
@@ -239,9 +241,18 @@ void cdpcluster::setee( double ee ) {
 	 model.mdee = ee;
 };
 
+
 double cdpcluster::getee() {
 	 return model.mdee;
 };
+
+void cdpcluster::setaa( double aa ) {
+	model.mdaa = aa;
+};
+
+double cdpcluster::getaa() {
+	return model.mdaa;
+}; 
 
 void cdpcluster::setff( double ff ) {
 	 model.mdff = ff;
@@ -258,6 +269,17 @@ void cdpcluster::setT(int t) { // top level clusters
 int cdpcluster::getT() {
 	return model.mnT;
 };
+
+
+int cdpcluster::getK(int idx) { // fetch k
+	return (*param).K[idx];
+}
+
+void cdpcluster::getK(int d, int* res) {
+	for(int i = 0; i< d; i++) {
+		res[i] = (*param).K[i];
+	};
+};	
 
 void cdpcluster::setJ(int j) { // compoenent clusters
 	model.mnJ = j;
@@ -467,6 +489,7 @@ void cdpcluster::loadalpha(int i, double* x) {
 
 void cdpcluster::loadRowsCols(double* from, vector<SymmetricMatrix>& to, int idx, int rows, int columns) {
 	for(int i=0;i<idx;++i){
+		to.push_back(SymmetricMatrix(Real(rows)));
 		for(int j=0;j<rows;++j){
 			for(int k=0;k<columns;++k){
 				int pos = (i*rows*columns)+(j*columns)+k;
@@ -484,9 +507,11 @@ void cdpcluster::loadRows(double* from, int* to, int cols) {
 
 void cdpcluster::loadRowsCols(double* from, vector<RowVector>& to, int n, int d){
 	for(int i=0;i<n;++i){
+		to.push_back(RowVector(Real(d)));
 		for(int j=0;j<d;++j){
 			int pos = i*d+j;
-			to[i][j] = from[pos];
+			//to.push_back(from[pos]);
+			to.at(i)[j] = from[pos];
 		};
 	}; 
 };

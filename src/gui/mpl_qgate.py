@@ -27,6 +27,7 @@ class Gate(object):
         self.vertices = []
         self.poly = None
         self.background = None
+        self.g = None
 
         self.t = time.time()
         self.double_click_t = 1.0
@@ -68,14 +69,21 @@ class Gate(object):
     def gate(self, x, y):
         g = QuadGate([x,y], self.idxs)
         self.fcm.gate(g)
-        
+        self.g = g
+
+def quad_gate(fcm, idxs):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    gate = Gate(fcm, idxs, ax)
+    plt.show()
+    return gate.g
             
 
 if __name__ == '__main__':
     import sys
     sys.path.append('../')
     from io import FCSreader
-    import networkx
+    #import networkx
 
     fcm = FCSreader('../../sample_data/3FITC_4PE_004.fcs').get_FCMdata()
 
@@ -85,6 +93,6 @@ if __name__ == '__main__':
     gate = Gate(fcm, idxs, ax)
 
     plt.show()
-    networkx.draw(fcm.tree.g)
     plt.show()
     print fcm.tree.view()
+    print fcm.tree.nodes

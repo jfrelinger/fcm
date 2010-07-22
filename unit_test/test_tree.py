@@ -4,13 +4,13 @@ from fcm.core.util import Tree, RootNode
 
 class TreeTestCase(unittest.TestCase):
     def setUp(self):
-        self.t = Tree(RootNode('root',[0,0,0]))
-        self.t.add_child('gate1', RootNode('gate1',[1,2,3]))
-        self.t.add_child('gate11', RootNode('gate11',[4,5,6]))
+        self.t = Tree(RootNode('root',[0,0,0], []), [])
+        self.t.add_child('gate1', RootNode('gate1',[1,2,3], [] ))
+        self.t.add_child('gate11', RootNode('gate11',[4,5,6], []))
         self.t.visit('root')
-        self.t.add_child('gate2', RootNode('gate2',[2,3,4]))
-        self.t.add_child('gate21', RootNode('gate21',[3,4,5]))
-        self.t.add_child('gate211', RootNode('gate211',[4,5,6]))
+        self.t.add_child('gate2', RootNode('gate2',[2,3,4], []))
+        self.t.add_child('gate21', RootNode('gate21',[3,4,5], []))
+        self.t.add_child('gate211', RootNode('gate211',[4,5,6], []))
         
     def testView(self):
         assert self.t.view() == [4,5,6], 'view current node failed'

@@ -24,8 +24,9 @@ class FCMcollection(DictMixin, HasTraits):
     def __init__(self, name, fcms=None, notes=None):
         """
         Initialize with fcm collection and notes.
-        Tree of operations not implemented yet - how is this done in fcmdata?
+        Tree of operations not implemented yet
         """
+        #  - how is this done in fcmdata?
         self.fcmdict = {}
         self.name = name
         if fcms is not None:
@@ -37,6 +38,9 @@ class FCMcollection(DictMixin, HasTraits):
             self.notes = notes
 
     def keys(self):
+        """
+        D.keys() -> list of D's keys
+        """
         return self.fcmdict.keys()
 
     def __getitem__(self, item):

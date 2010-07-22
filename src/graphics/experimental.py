@@ -53,12 +53,12 @@ def spin(fcm, idx0, idx1, idx2):
 if __name__ == '__main__':
     import sys
     sys.path.append('../')
-    from io import FCSreader
+    import fcm
 
-    fcm = FCSreader('../../sample_data/3FITC_4PE_004.fcs').get_FCMdata()
+    xs = fcm.loadFCS('../../sample_data/3FITC_4PE_004.fcs')
     
-    surface(fcm, 2, 3)
+    surface(xs, 2, 3)
 
-    spin(fcm, 1, 2, 3)
+    spin(xs, 1, 2, 3)
 
     mlab.show()

@@ -2,6 +2,7 @@
 
 from util import bilinear_interpolate
 from scipy import histogram
+from numpy import histogram2d
 import pylab
 
 def hist(fcms, index, savefile=None, display=True, **kwargs):
@@ -28,7 +29,8 @@ def hist(fcms, index, savefile=None, display=True, **kwargs):
     return figure
 
 
-def heatmap(fcm, indices, nrows=1, ncols=1, savefile=None, display=True,
+def heatmap(fcm, indices, nrows=1, ncols=1, s=1, edgecolors='none', 
+            savefile=None, display=True,
             **kwargs):
     """Plot a heatmap.
 
@@ -55,9 +57,9 @@ def heatmap(fcm, indices, nrows=1, ncols=1, savefile=None, display=True,
             y = fcm[:,idx[1]]
             if not kwargs.has_key('c'):
                 z = bilinear_interpolate(x, y)
-                pylab.scatter(x, y, c=z, **kwargs)
+                pylab.scatter(x, y, c=z, s=s, edgecolors=edgecolors, **kwargs)
             else:
-                pylab.scatter(x, y, **kwargs)
+                pylab.scatter(x, y, s=s, edgecolors=edgecolors, **kwargs)
             pylab.xlabel(fcm.channels[idx[0]])
             pylab.ylabel(fcm.channels[idx[1]])
         pylab.xticks([])
@@ -79,6 +81,49 @@ def heatmaps(fcm, savefile=None, display=True, **kwargs):
     heatmap(fcm, indices, nrows=n, ncols=n, savefile=savefile,
             display=display, **kwargs)
 
+def pair_plot(data, savefile=None, display=True, **kwargs):
+    chan = data.channels
+    l = len(chan)
+    figure = pylab.figure()
+    pylab.subplot(l,l,1)
+    for i in range(l):
+        for j in range(i+1):
+            pylab.subplot(l, l,i*l+j+1)
+            if i == j:
+                pylab.hist(data[:,i], bins=200, histtype='stepfilled', **kwargs)
+            else:
+                pylab.scatter(data[:,i], data[:,j], **kwargs)
+                
+            if j == 0:
+                pylab.ylabel(chan[i])
+            if i == l-1:
+                pylab.xlabel(chan[j])
+        
+    if display:
+        pylab.show()
+        
+    if savefile:
+        pylab.savefig(savefile)
+
+    return figure
+    
+    
+def contour(data, indices, savefile=None, display=True, **kwargs):
+    x = data[:,indices[0]]
+    y = data[:,indices[1]]
+    z = histogram2d(x,y)
+    figure = pylab.figure()
+    pylab.contour(z[0])
+    
+    
+    if display:
+        pylab.show()
+        
+    if savefile:
+        pylab.savefig(savefile)
+
+    return figure
+    
 if __name__ == '__main__':
     import sys
     sys.path.append('../')
@@ -88,3 +133,6 @@ if __name__ == '__main__':
     # heatmap(fcm, [(0,1),(2,3)], nrows=1, ncols=2, s=1, edgecolors='none')
     heatmaps(fcm, s=1, edgecolors='none', display=False,
              savefile='3FITC_4PE_004.png', cmap=pylab.cm.hsv)
+    
+
+

@@ -4,8 +4,8 @@ Created on Oct 30, 2009
 @author: Jacob Frelinger
 '''
 import unittest
-from fcm.statistics import DPCluster, DPMixture
-from numpy import array, eye
+from fcm.statistics import DPCluster, DPMixture, ModalDPMixture
+from numpy import array, eye, argmax
 
 
 class Dp_clusterTestCase(unittest.TestCase):
@@ -44,8 +44,14 @@ class Dp_clusterTestCase(unittest.TestCase):
         assert self.mix.classify(pnt)[1] == 1, 'classify classifys m21 as belonging to something else'
 
     def testMakeModal(self):
+
         modal = self.mix.make_modal()
+#        modal = ModalDPMixture([self.clst1, self.clst2],
+#                                { 0: [0], 1: [1]},
+#                                [self.mu1, self.mu2])
         pnt = array([self.mu1, self.mu2])
+        assert modal.classify(array([self.mu1, self.mu2, self.mu1, self.mu2, self.mu1, self.mu2])).tolist() == [0,1,0,1,0,1], 'classify not working'
+        assert self.mix.classify(self.mu1) == modal.classify(self.mu1), 'derived modal mixture is wrong'
         assert self.mix.classify(pnt)[0] == modal.classify(pnt)[0], 'derived modal mixture is wrong'
         assert self.mix.classify(pnt)[1] == modal.classify(pnt)[1], 'derived modal mixture is wrong'
 if __name__ == "__main__":

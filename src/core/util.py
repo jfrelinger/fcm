@@ -2,6 +2,7 @@ import re
 from enthought.traits.api import HasTraits, String, This, Array, Instance, Dict
 import logging
 import os
+from warnings import warn
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s: %(message)s',
@@ -41,14 +42,24 @@ class Node(object):
         
         return self.data
     
+    def pprint(self, depth):
+        return "  "*depth + self.name + "\n"
+    
+    def __getattr__(self, name):
+        if name == 'channels':
+            return self.parent.channels
+        else:
+            raise AttributeError("'%s' has no attribue '%s'" %(str(self.__class__), name))
+    
 class RootNode(Node):
     """
     Root Node
     """
-    def __init__(self, name, data):
+    def __init__(self, name, data, channels):
         self.name = name
         self.parent = None
         self.data = data
+        self.channels = channels
         self.prefix='root'
         
 class TransformNode(Node):
@@ -72,8 +83,13 @@ class SubsampleNode(Node):
         self.parent = parent
         self.param = param
         self.prefix = 's'
+        if type(param) == tuple:
+            self.channels = self.parent.channels[param[1]]
         
     def view(self):
+        """
+        return the view of the data associated with this node
+        """
         return self.parent.view().__getitem__(self.param)
     
 class DropChannelNode(Node):
@@ -81,13 +97,17 @@ class DropChannelNode(Node):
     Node of data removing specific channels
     """
     
-    def __init__(self, name, parent, param):
+    def __init__(self, name, parent, param, channels):
         self.name = name
         self.parent = parent
         self.param = param
         self.prefix = 'd'
+        self.channels = channels
     
     def view(self):
+        """
+        return the view of the data associated with this node
+        """
         return self.parent.view()[:,self.param]
     
     
@@ -103,6 +123,9 @@ class GatingNode(Node):
         self.prefix = 'g'
         
     def view(self):
+        """
+        return the view of the data associated with this node
+        """
         return self.parent.view()[self.data]
         
 class Tree(HasTraits):
@@ -111,9 +134,9 @@ class Tree(HasTraits):
     root = Instance(RootNode)
     current = Instance(Node)
 
-    def __init__(self, pnts):
+    def __init__(self, pnts, channels):
         self.nodes = {}
-        self.root = RootNode('root', pnts)
+        self.root = RootNode('root', pnts, channels)
         self.nodes['root'] = self.root
         self.current = self.root
 
@@ -121,9 +144,11 @@ class Tree(HasTraits):
         '''return the parent of a node'''
         return self.current.parent
 
-    def children(self):
+    def children(self , node =None):
         '''return the children of a node'''
-        return [i for i in self.nodes.values() if i.parent == self.current]
+        if node == None:
+            node = self.current
+        return [i for i in self.nodes.values() if i.parent == node]
 
     def visit(self, name):
         '''visit a node in the tree'''
@@ -161,11 +186,16 @@ class Tree(HasTraits):
         if name in self.nodes.keys():
             raise KeyError, 'name, %s, already in use in tree' % name
         else:
+            node.name = name
             self.nodes[name] = node
             node.parent = self.current
             self.current = self.nodes[name]
         
     def rename_node(self, old_name, new_name):
+        """
+        Rename a node name
+        D(old,new) -> rename old to new
+        """
         if not self.nodes.has_key(old_name):
             # we don't have old_name...
             raise KeyError, 'No node named %s' % old_name
@@ -177,6 +207,14 @@ class Tree(HasTraits):
             del self.nodes[old_name] # remove old node.
                 
 
+    def pprint(self):
+        return self._rpprint(self.root, 0)
+        
+    def _rpprint(self, n, d):
+        tmp = n.pprint(d)
+        for i in self.children(n):
+            tmp+= self._rpprint(i,d+1)
+        return tmp
         
 if __name__ == '__main__':
     import matplotlib.pyplot as plt

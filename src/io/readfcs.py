@@ -22,7 +22,13 @@ class FCSreader(object):
     a FCMdata object out of a fcs file
     """
     def __init__(self, filename, auto_logicle = True, sidx = None, spill=None):
-        self.filename = filename
+        #self.filename = filename
+        if type(filename) == str:
+            self.filename=filename
+            self._fh = open(filename, 'rb')
+        else: # we should have gotten a filehandle then
+            self.filename = filename.name
+            self._fh = filename
         self.logicle = auto_logicle
         #self._fh = cStringIO.StringIO(open(filename, 'rb').read())
         self._fh = open(filename, 'rb')
@@ -154,6 +160,7 @@ class FCSreader(object):
         
     
     def fix_lmd(self, offset, start, stop):
+        """function to handle lmd counting differently then most other FCS data"""
         text = self.read_bytes(offset, start, stop)
         for j in range(0,-10,-1):
             if text[0] == text[j-1]:
@@ -311,6 +318,10 @@ def loadFCS(filename, auto_logicle=True, auto_comp=True, spill=None):
     return tmp.get_FCMdata(auto_comp)
 
 def is_fl_channel(name):
+    """
+    Try and decide if a channel is a flourescent channel or if it's some other type
+    returns a boolean
+    """
     name = name.lower()
     if name.startswith('cs'):
         return False
