@@ -20,6 +20,8 @@ sample_data/treg/*
 .*\.log
 scratch/*
 build/*
+.*setuptools*
+.*egg*
 
 syntax: regexp
 ^MANIFEST$
