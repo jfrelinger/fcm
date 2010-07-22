@@ -29,7 +29,8 @@ def hist(fcms, index, savefile=None, display=True, **kwargs):
     return figure
 
 
-def heatmap(fcm, indices, nrows=1, ncols=1, savefile=None, display=True,
+def heatmap(fcm, indices, nrows=1, ncols=1, s=1, edgecolors='none', 
+            savefile=None, display=True,
             **kwargs):
     """Plot a heatmap.
 
@@ -56,9 +57,9 @@ def heatmap(fcm, indices, nrows=1, ncols=1, savefile=None, display=True,
             y = fcm[:,idx[1]]
             if not kwargs.has_key('c'):
                 z = bilinear_interpolate(x, y)
-                pylab.scatter(x, y, c=z, **kwargs)
+                pylab.scatter(x, y, c=z, s=s, edgecolors=edgecolors, **kwargs)
             else:
-                pylab.scatter(x, y, **kwargs)
+                pylab.scatter(x, y, s=s, edgecolors=edgecolors, **kwargs)
             pylab.xlabel(fcm.channels[idx[0]])
             pylab.ylabel(fcm.channels[idx[1]])
         pylab.xticks([])
