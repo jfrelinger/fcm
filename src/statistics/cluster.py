@@ -46,23 +46,33 @@ class DPMixtureModel(HasTraits):
         self.mus = zeros((nclusts*last, self.d))
         self.sigmas = zeros((nclusts*last, self.d, self.d))
         self.cdp = cdpcluster(self.data)
+        self.cdp.setphi0(0.5)
+        self.cdp.setgamma(5)
+        self.cdp.setaa(5)
+
+        self._prerun = False
         self._run = False
         
     def __del__(self):
         self.cdp.makeResult()
         
         
+    def _setup(self, verbose):
+        if not self._prerun:
+            self.cdp.setT(self.nclusts)
+            self.cdp.setJ(1)
+            self.cdp.setBurnin(self.burnin)
+            self.cdp.setIter(self.iter-self.last)
+            if verbose:
+                self.cdp.setVerbose(True)
+            self._prerun = True
+        
     def fit(self, verbose=False):
         """
         fit the mixture model to the data
         use get_results() to get the fitted model
         """
-        self.cdp.setT(self.nclusts)
-        self.cdp.setJ(1)
-        self.cdp.setBurnin(self.burnin)
-        self.cdp.setIter(self.iter-self.last)
-        if verbose:
-            self.cdp.setVerbose(True)
+        self._setup(verbose)
         self.cdp.run()
         
         
@@ -82,7 +92,8 @@ class DPMixtureModel(HasTraits):
         if verbose:
             print "Done"
                 
-    def step(self):
+    def step(self, verbose=False):
+        self._setup(verbose)
         tpi = zeros((self.nclusts))
         tmus = zeros((self.nclusts,self.d))
         tsigmas = zeros((self.nclusts,self.d,self.d))
