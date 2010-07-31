@@ -61,7 +61,7 @@ def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
     spm = [] # density at starting points
 
     etol = numpy.exp(tol)
-    rnd = -1*numpy.floor(numpy.log10(tol))
+    rnd = int(-1*numpy.floor(numpy.log10(tol)))
             
 
     for js in range(nk):
