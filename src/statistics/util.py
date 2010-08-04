@@ -90,8 +90,8 @@ def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
             h += 1
 
         # mdict[tuple(allx[js])] = [numpy.round(x,rnd),px] # eliminate duplicates
-        mdict[tuple(numpy.round(x,2))] = [numpy.round(x,rnd),px] # eliminate duplicates
-
+        #mdict[tuple(numpy.round(x,2))] = [numpy.round(x,rnd),px] # eliminate duplicates
+        mdict[tuple(x)] = [numpy.round(x,rnd),px] # eliminate duplicates
     return mdict, sm, spm
 
 def check_mode(m, pm, pi, mu, sigma):
