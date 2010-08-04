@@ -46,9 +46,9 @@ class DPMixtureModel(HasTraits):
         self.mus = zeros((nclusts*last, self.d))
         self.sigmas = zeros((nclusts*last, self.d, self.d))
         self.cdp = cdpcluster(self.data)
-        self.cdp.setphi0(0.5)
-        self.cdp.setgamma(5)
-        self.cdp.setaa(5)
+        # self.cdp.setphi0(0.5)
+        # self.cdp.setgamma(5)
+        # self.cdp.setaa(5)
 
         self._prerun = False
         self._run = False
