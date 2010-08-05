@@ -15,14 +15,17 @@ def modesearch(pis, mus, sigmas, tol=1e-5, maxiter=20):
     n = mus.shape[0]
     
     mdict, sm, spm = _mode_search(pis, mus, sigmas, nk=0, tol=tol, maxiter=maxiter)
+
     m = numpy.array([i[0] for i in mdict.values()])
     pm = numpy.array([i[1] for i in mdict.values()])
     sm = numpy.array(sm)
     #tm, tpm = check_mode(m, pm, pis, mus, sigmas)
     tmp = {}
 
-    for i in range(m.shape[0]):
-        cur_mode = tuple(m[i,:].tolist())
+    # use stored index as dict items are not ordered
+    for j, key in enumerate(mdict):
+        i = key[0]
+        cur_mode = tuple(m[j,:].tolist())
         if tmp.has_key(cur_mode):
             tmp[cur_mode].append(i)
         else:
@@ -91,7 +94,7 @@ def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
 
         # mdict[tuple(allx[js])] = [numpy.round(x,rnd),px] # eliminate duplicates
         #mdict[tuple(numpy.round(x,2))] = [numpy.round(x,rnd),px] # eliminate duplicates
-        mdict[tuple(x)] = [numpy.round(x,rnd),px] # eliminate duplicates
+        mdict[(js, tuple(x))] = [numpy.round(x,rnd),px] # eliminate duplicates
     return mdict, sm, spm
 
 def check_mode(m, pm, pi, mu, sigma):
