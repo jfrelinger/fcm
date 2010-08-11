@@ -22,7 +22,7 @@ class DPMixtureModel(HasTraits):
 
     def __init__(self,fcmdata, nclusts, iter=1000, burnin= 100, last= 5):
         '''
-        DPMixtureModel(fcmdata, nclusts, itter=1000, burnin= 100, last= 5)
+        DPMixtureModel(fcmdata, nclusts, iter=1000, burnin= 100, last= 5)
         fcmdata = a fcm data object
         nclusts = number of clusters to fit
         itter = number of mcmc itterations
