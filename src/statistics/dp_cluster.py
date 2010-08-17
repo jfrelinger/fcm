@@ -79,7 +79,12 @@ class DPMixture(HasTraits):
         returns the classification (which mixture) x is a member of
         '''
         probs = self.prob(x)
-        return probs.argmax(0)
+        try:
+            n,j = x.shape 
+            #return array([i.argmax(0) for i in probs])
+            return probs.argmax(1)
+        except ValueError:
+            return probs.argmax(0)
     
     def mus(self, normed=False):
         '''
@@ -213,7 +218,8 @@ class ModalDPMixture(DPMixture, HasTraits):
         probs = self.prob(x)
         try:
             n,j = x.shape 
-            return array([i.argmax(0) for i in probs])
+            #return array([i.argmax(0) for i in probs])
+            return probs.argmax(1)
         except ValueError:
             return probs.argmax(0)
 
