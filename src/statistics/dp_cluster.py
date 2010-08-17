@@ -4,7 +4,7 @@ Created on Oct 30, 2009
 @author: Jacob Frelinger
 '''
 
-from distributions import mvnormpdf, mixnormpdf
+from distributions import mvnormpdf, compmixnormpdf
 from numpy import array, log, sum, exp, zeros, concatenate
 from numpy.random import multivariate_normal as mvn
 from numpy.random import multinomial
@@ -38,7 +38,7 @@ class DPCluster(HasTraits, Component):
         returns probability of x beloging to this mixture compoent
         '''
         #return self.pi * mvnormpdf(x, self.mu, self.sigma)
-        return mixnormpdf(x, self.pi, self.mu, self.sigma)
+        return compmixnormpdf(x, self.pi, self.mu, self.sigma)
     
     def draw(self, n=1):
         '''
@@ -70,7 +70,8 @@ class DPMixture(HasTraits):
         DPMixture.prob(x)
         returns an array of probabilities of x being in each component of the mixture
         '''
-        return array([i.prob(x) for i in self.clusters])
+        #return array([i.prob(x) for i in self.clusters])
+        return compmixnormpdf(x,self.pis(), self.mus(), self.sigmas())
     
     def classify(self, x):
         '''

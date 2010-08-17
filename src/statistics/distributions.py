@@ -35,17 +35,12 @@ def mvnormpdf(x, mu, va):
     if p > 0:
         results = mvnpdf(x,mu,va,n)
     else:
-        results = array([mvnpdf(x,mu,va)])
+        results = mvnpdf(x,mu,va)
     
     return results
 
-def mixnormpdf(x, prop, mu, Sigma):
-    """Mixture of multivariate normal pdfs"""
-    # print "in mixnormpdf ..."
-#    tmp = 0.0
-#    for i in range(len(prop)):
-#        tmp += prop[i]*mvnormpdf(x, mu[i], Sigma[i])
-#    return tmp
+def compmixnormpdf(x, prop, mu, Sigma):
+    """Component mixture multivariate normal pdfs"""
     try:
         n,d = x.shape
     except ValueError:
@@ -59,11 +54,30 @@ def mixnormpdf(x, prop, mu, Sigma):
 
     if c == 1: 
         tmp = wmvnpdf(x,prop,mu,Sigma,n)
+        if n == 1:
+            tmp = tmp[0]
+    
     else:
         tmp = wmvnpdf(x,prop,mu,Sigma,n*c)
-        print tmp.shape
-        tmp = sum(reshape(tmp, (n,c)),1)
+        tmp = reshape(tmp, (n,c))
+        #tmp = sum(tmp,1)
+        if n == 1:
+            tmp = tmp[0]
     return tmp
+
+def mixnormpdf(x, prop, mu, Sigma):
+    """Mixture of multivariate normal pdfs"""
+    # print "in mixnormpdf ..."
+#    tmp = 0.0
+#    for i in range(len(prop)):
+#        tmp += prop[i]*mvnormpdf(x, mu[i], Sigma[i])
+#    return tmp
+    tmp = compmixnormpdf(x, prop, mu, Sigma)
+    try:
+        return sum(tmp,1)
+    except ValueError:
+        return sum(tmp,0)
+        
 
 def mixnormrnd(pi, mu, sigma, k):
     """Generate random variables from mixture of Guassians"""
@@ -84,11 +98,12 @@ if __name__ == '__main__':
     sig = array([[1,.75],[.75, 1]])
 
     print 'new:', mvnormpdf(x,mu,sig)
-    print 'array:', mvnormpdf(array([x,x-1]), mu, sig)
+    print 'array:', mvnormpdf(array([x,x-2]), mu, sig)
     
     x = array([[1,0],[5,5],[0,0]])
     mu = array([[0,0],[5,5]])
     sig = array([[[1,.75],[.75, 1]],[[1,0],[0,1]]])
     p = array([.5,.5])
     print 'mix:', mixnormpdf(x,p,mu,sig)
+    print 'mix:', mixnormpdf(x[0],p,mu,sig)
     
