@@ -174,23 +174,23 @@ class ModalDPMixture(DPMixture, HasTraits):
         ModalDPMixture.prob(x)
         returns  an array of probabilities of x being in each mode of the modal mixture
         '''
+        probs = compmixnormpdf(x,self.pis(), self.mus(), self.sigmas())
+        
         try:
             n,j = x.shape # check we're more then 1 point
-            rslt = []
-            for k in x:
-                tmp = []
-                for j in self.cmap.keys():
-                    tmp.append(sum([self.clusters[i].prob(k) for i in self.cmap[j]]))
-                rslt.append(tmp)
+            rslt = zeros((n, len(self.cmap.keys())))
+            for j in self.cmap.keys():
+                rslt[:,j] = sum([probs[:,i] for i in self.cmap[j]],0)
+                
 
         
         except ValueError:
             #single point
-            rslt = []
+            rslt = zeros((len(self.cmap.keys())))
             for j in self.cmap.keys():
-                rslt.append(sum([self.clusters[i].prob(x) for i in self.cmap[j]]))
+                rslt[j] = sum([self.clusters[i].prob(x) for i in self.cmap[j]])
 
-        return array(rslt)
+        return rslt
     
     def modes(self):
         '''
