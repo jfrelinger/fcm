@@ -47,13 +47,18 @@ CDP::CDP()
 
 }
 
-CDP::~CDP(void)
+CDP::~CDP()
 {
+	std::cout << "deleteting mX" << std::endl;
 	for (int i = 0; i < prior.N; i++) {
-		delete [] mX[i];
-	}
+		if(mX[i] != 0){
+			delete [] mX[i];
+			mX[i] = 0;
+		};
+	};
 	delete [] mX;
-}
+	mX = 0;
+};
 
 void CDP::InitMCMCSteps(Model& model)
   {
@@ -408,9 +413,11 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 		} while (i<10 && mcsampleEta);
 	}
 	
+	//std::cout << "about to free" << std::endl;
 	delete [] clustercov;
 	delete [] clustermean;
 	delete [] clustercount;
+	//std::cout << "freed" << std::endl;
 	
   //sample p
   vector<int> KJ;
@@ -446,7 +453,9 @@ bool CDP::iterate(CDPResult& result, MTRand& mt) {
   parallel_for(blocked_range<size_t>(0, prior.N, 5000), WSampler(this, &result));
 #else
 #if defined(CDP_CUDA)
+  //std::cout << "sampling wk" << std::endl;
   cuda.sampleWK(result.q, result.p, result.mu, result.L_i, result.Sigma_log_det, mt, result.W, result.K);
+  //std::cout << "post sampling wk" << std::endl;
 #else
   RowVector row(prior.D);
 	for (int i = 0; i < prior.N; i++) {
@@ -466,26 +475,39 @@ bool CDP::iterate(CDPResult& result, MTRand& mt) {
 	}
 #endif
 #endif
-
+//std::cout << "pre sampling p" << std::endl;
   //sample q
   //J by 1
   RowVector p;
   RowVector pV;
+  //std::cout << "allocated vectors" << std::endl;
   if(mcsampleq)
     {
+    //std::cout << "sampling q" << std::endl;
       sampleP(result.W,prior.N,result.alpha0,prior.J,p,pV,mt);
       result.q = p;
       result.qV = pV;
+      //std::cout << "post sampling q" << std::endl;
     }
-
+  else
+  {
+  //std::cout <<"did we skip q?" << std::endl;
+  }
   //sample alpha0
+  //std::cout <<"pre sampling alpha" << std::endl;
   if(mcsamplealpha0)
     {
+    //std::cout << "sampling alpha" << std::endl;
       double alpha0 = sampleAlpha(result.qV.Store(),prior.e0,prior.f0,mt);
       if (alpha0 < 0.0001) {
 	alpha0 = 0.0001;
       }
       result.alpha0 = alpha0;
+      //std::cout << "post sampling alpha" << std::endl;
+    }
+    else
+    {
+    	//std::cout << "skipping alpha" << std::endl;
     }
   
   if (prior.J == 1) {
@@ -493,6 +515,7 @@ bool CDP::iterate(CDPResult& result, MTRand& mt) {
   } else {
 		//two layer model is disabled here
   }
+  //std::cout << "done" << std::endl;
   return true;
 }
 

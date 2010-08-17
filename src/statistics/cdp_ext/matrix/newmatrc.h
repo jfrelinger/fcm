@@ -1,4 +1,8 @@
-//$$ newmatrc.h              definition file for row/column classes
+/// \ingroup newmat
+///@{
+
+/// \file newmatrc.h
+/// Header file for row/column classes
 
 // Copyright (C) 1991,2,3,4,7: R B Davies
 
@@ -21,6 +25,8 @@ namespace NEWMAT {
 enum LSF { LoadOnEntry=1,StoreOnExit=2,DirectPart=4,StoreHere=8,HaveStore=16 };
 
 
+/// Option for accessing row or column.
+/// \internal
 class LoadAndStoreFlag : public ControlWord
 {
 public:
@@ -30,8 +36,10 @@ public:
    LoadAndStoreFlag(const ControlWord& cwx) : ControlWord(cwx) {}
 };
 
+
+/// Access a row or column of a matrix.
+/// \internal
 class MatrixRowCol
-// the row or column of a matrix
 {
 public:                                        // these are public to avoid
                                                // numerous friend statements
@@ -71,7 +79,9 @@ public:
    void CopyCheck(const MatrixRowCol&);        // ... check for data loss
    void Check(const MatrixRowCol&);            // just check for data loss
    void Check();                               // check full row/col present
-   void Copy(const Real*&);                    // copy from an array
+   void Copy(const double*&);                  // copy from an array
+   void Copy(const float*&);                   // copy from an array
+   void Copy(const int*&);                     // copy from an array
    void Copy(Real);                            // copy from constant
    void Add(Real);                             // add a constant
    void Multiply(Real);                        // multiply by constant
@@ -100,6 +110,8 @@ public:
    FREE_CHECK(MatrixRowCol)
 };
 
+/// Access a row of a matrix.
+/// \internal
 class MatrixRow : public MatrixRowCol
 {
 public:
@@ -111,6 +123,8 @@ public:
    FREE_CHECK(MatrixRow)
 };
 
+/// Access a column of a matrix.
+/// \internal
 class MatrixCol : public MatrixRowCol
 {
 public:
@@ -120,13 +134,12 @@ public:
    MatrixCol(GeneralMatrix*, Real*, LoadAndStoreFlag, int=0);
                                                // store/retrieve a col
    ~MatrixCol();
-   void Next();                                // get next row
+   void Next();                                // get next column
    FREE_CHECK(MatrixCol)
 };
 
-// MatrixColX is an alternative to MatrixCol where the complete
-// column is stored externally
-
+/// Alternative to MatrixCol where the complete column is stored externally.
+/// \internal
 class MatrixColX : public MatrixRowCol
 {
 public:
@@ -168,3 +181,6 @@ inline void MatrixColX::Next() { gm->NextCol(*this); }
 #endif
 
 #endif
+
+
+///@}

@@ -1,8 +1,12 @@
-//$$ newmat7.cpp     Invert, solve, binary operations
+/// \ingroup newmat
+///@{
+
+/// \file newmat7.cpp
+/// Invert, solve, binary operations.
 
 // Copyright (C) 1991,2,3,4: R B Davies
 
-#include "nminclude.h"
+#include "include.h"
 
 #include "newmat.h"
 #include "newmatrc.h"
@@ -40,7 +44,7 @@ void CroutMatrix::Solver(MatrixColX& mcout, const MatrixColX& mcin)
    REPORT
    int i = mcin.skip; Real* el = mcin.data-i; Real* el1 = el;
    while (i--) *el++ = 0.0;
-   el += mcin.storage; i = nrows - mcin.skip - mcin.storage;
+   el += mcin.storage; i = nrows_val - mcin.skip - mcin.storage;
    while (i--) *el++ = 0.0;
    lubksb(el1, mcout.skip);
 }
@@ -56,9 +60,10 @@ void UpperTriangularMatrix::Solver(MatrixColX& mcout,
    while (i-- > 0) *elx++ = 0.0;
    int nr = mcin.skip+mcin.storage;
    elx = mcin.data+mcin.storage; Real* el = elx;
-   int j = mcout.skip+mcout.storage-nr; int nc = ncols-nr; i = nr-mcout.skip;
+   int j = mcout.skip+mcout.storage-nr;
+   int nc = ncols_val-nr; i = nr-mcout.skip;
    while (j-- > 0) *elx++ = 0.0;
-   Real* Ael = store + (nr*(2*ncols-nr+1))/2; j = 0;
+   Real* Ael = store + (nr*(2*ncols_val-nr+1))/2; j = 0;
    while (i-- > 0)
    {
       elx = el; Real sum = 0.0; int jx = j++; Ael -= nc;
@@ -100,46 +105,25 @@ GeneralMatrix* MultipliedMatrix::Evaluate(MatrixType mt)
 {
    REPORT
    gm2 = ((BaseMatrix*&)bm2)->Evaluate();
-   gm2 = gm2->Evaluate(gm2->Type().MultRHS());     // no symmetric on RHS
-   gm1=((BaseMatrix*&)bm1)->Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   GeneralMatrix* gmx;
-   Try { gmx = GeneralMult(gm1, gm2, this, mt); }
-   CatchAll { delete this; ReThrow; }
-   delete this; return gmx;
-#else
+   gm2 = gm2->Evaluate(gm2->type().MultRHS());     // no symmetric on RHS
+   gm1 = ((BaseMatrix*&)bm1)->Evaluate();
    return GeneralMult(gm1, gm2, this, mt);
-#endif
 }
 
 GeneralMatrix* SolvedMatrix::Evaluate(MatrixType mt)
 {
    REPORT
-   gm1=((BaseMatrix*&)bm1)->Evaluate();
-   gm2=((BaseMatrix*&)bm2)->Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   GeneralMatrix* gmx;
-   Try { gmx = GeneralSolv(gm1,gm2,this,mt); }
-   CatchAll { delete this; ReThrow; }
-   delete this; return gmx;
-#else
+   gm1 = ((BaseMatrix*&)bm1)->Evaluate();
+   gm2 = ((BaseMatrix*&)bm2)->Evaluate();
    return GeneralSolv(gm1,gm2,this,mt);
-#endif
 }
 
 GeneralMatrix* KPMatrix::Evaluate(MatrixType mt)
 {
    REPORT
-   gm1=((BaseMatrix*&)bm1)->Evaluate();
-   gm2=((BaseMatrix*&)bm2)->Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   GeneralMatrix* gmx;
-   Try { gmx = GeneralKP(gm1,gm2,this,mt); }
-   CatchAll { delete this; ReThrow; }
-   delete this; return gmx;
-#else
+   gm1 = ((BaseMatrix*&)bm1)->Evaluate();
+   gm2 = ((BaseMatrix*&)bm2)->Evaluate();
    return GeneralKP(gm1,gm2,this,mt);
-#endif
 }
 
 // routines for adding or subtracting matrices of identical storage structure
@@ -157,13 +141,21 @@ static void Add(GeneralMatrix* gm, GeneralMatrix* gm1, GeneralMatrix* gm2)
    i=gm->Storage() & 3; while (i--) *s++ = *s1++ + *s2++;
 }
 
-static void Add(GeneralMatrix* gm, GeneralMatrix* gm2)
+static void AddTo(GeneralMatrix* gm, const GeneralMatrix* gm2)
 {
    REPORT
-   Real* s2=gm2->Store(); Real* s=gm->Store(); int i=gm->Storage() >> 2;
+   const Real* s2=gm2->Store(); Real* s=gm->Store(); int i=gm->Storage() >> 2;
    while (i--)
    { *s++ += *s2++; *s++ += *s2++; *s++ += *s2++; *s++ += *s2++; }
    i=gm->Storage() & 3; while (i--) *s++ += *s2++;
+}
+
+void GeneralMatrix::PlusEqual(const GeneralMatrix& gm)
+{
+   REPORT
+   if (nrows_val != gm.nrows_val || ncols_val != gm.ncols_val)
+      Throw(IncompatibleDimensionsException(*this, gm));
+   AddTo(this, &gm);
 }
 
 static void Subtract(GeneralMatrix* gm, GeneralMatrix* gm1, GeneralMatrix* gm2)
@@ -179,19 +171,27 @@ static void Subtract(GeneralMatrix* gm, GeneralMatrix* gm1, GeneralMatrix* gm2)
    i=gm->Storage() & 3; while (i--) *s++ = *s1++ - *s2++;
 }
 
-static void Subtract(GeneralMatrix* gm, GeneralMatrix* gm2)
+static void SubtractFrom(GeneralMatrix* gm, const GeneralMatrix* gm2)
 {
    REPORT
-   Real* s2=gm2->Store(); Real* s=gm->Store(); int i=gm->Storage() >> 2;
+   const Real* s2=gm2->Store(); Real* s=gm->Store(); int i=gm->Storage() >> 2;
    while (i--)
    { *s++ -= *s2++; *s++ -= *s2++; *s++ -= *s2++; *s++ -= *s2++; }
    i=gm->Storage() & 3; while (i--) *s++ -= *s2++;
 }
 
-static void ReverseSubtract(GeneralMatrix* gm, GeneralMatrix* gm2)
+void GeneralMatrix::MinusEqual(const GeneralMatrix& gm)
 {
    REPORT
-   Real* s2=gm2->Store(); Real* s=gm->Store(); int i=gm->Storage() >> 2;
+   if (nrows_val != gm.nrows_val || ncols_val != gm.ncols_val)
+      Throw(IncompatibleDimensionsException(*this, gm));
+   SubtractFrom(this, &gm);
+}
+
+static void ReverseSubtract(GeneralMatrix* gm, const GeneralMatrix* gm2)
+{
+   REPORT
+   const Real* s2=gm2->Store(); Real* s=gm->Store(); int i=gm->Storage() >> 2;
    while (i--)
    {
       *s = *s2++ - *s; s++; *s = *s2++ - *s; s++;
@@ -213,13 +213,21 @@ static void SP(GeneralMatrix* gm, GeneralMatrix* gm1, GeneralMatrix* gm2)
    i=gm->Storage() & 3; while (i--) *s++ = *s1++ * *s2++;
 }
 
-static void SP(GeneralMatrix* gm, GeneralMatrix* gm2)
+static void SP(GeneralMatrix* gm, const GeneralMatrix* gm2)
 {
    REPORT
-   Real* s2=gm2->Store(); Real* s=gm->Store(); int i=gm->Storage() >> 2;
+   const Real* s2=gm2->Store(); Real* s=gm->Store(); int i=gm->Storage() >> 2;
    while (i--)
    { *s++ *= *s2++; *s++ *= *s2++; *s++ *= *s2++; *s++ *= *s2++; }
    i=gm->Storage() & 3; while (i--) *s++ *= *s2++;
+}
+
+void GeneralMatrix::SP_Equal(const GeneralMatrix& gm)
+{
+   REPORT
+   if (nrows_val != gm.nrows_val || ncols_val != gm.ncols_val)
+      Throw(IncompatibleDimensionsException(*this, gm));
+   SP(this, &gm);
 }
 
 // routines for adding or subtracting matrices of different storage structure
@@ -372,19 +380,12 @@ static GeneralMatrix* mmMult(GeneralMatrix* gm1, GeneralMatrix* gm2)
 static GeneralMatrix* GeneralMult(GeneralMatrix* gm1, GeneralMatrix* gm2,
    MultipliedMatrix* mm, MatrixType mtx)
 {
-   if ( Rectangular(gm1->Type(), gm2->Type(), mtx))
-   {
-      REPORT
-      return mmMult(gm1, gm2);
-   }
-   else
-   {
-      REPORT
-      Compare(gm1->Type() * gm2->Type(),mtx);
-      int nr = gm2->Nrows(); int nc = gm2->Ncols();
-      if (nc <= 5 && nr > nc) { REPORT return GeneralMult1(gm1, gm2, mm, mtx); }
-      else { REPORT return GeneralMult2(gm1, gm2, mm, mtx); }
-   }
+   if ( Rectangular(gm1->type(), gm2->type(), mtx))
+      { REPORT return mmMult(gm1, gm2); }
+   Compare(gm1->type() * gm2->type(),mtx);
+   int nr = gm2->Nrows(); int nc = gm2->Ncols();
+   if (nc <= 5 && nr > nc) { REPORT return GeneralMult1(gm1, gm2, mm, mtx); }
+   REPORT return GeneralMult2(gm1, gm2, mm, mtx);
 }
 
 static GeneralMatrix* GeneralKP(GeneralMatrix* gm1, GeneralMatrix* gm2,
@@ -394,7 +395,7 @@ static GeneralMatrix* GeneralKP(GeneralMatrix* gm1, GeneralMatrix* gm2,
    Tracer tr("GeneralKP");
    int nr1 = gm1->Nrows(); int nc1 = gm1->Ncols();
    int nr2 = gm2->Nrows(); int nc2 = gm2->Ncols();
-   Compare((gm1->Type()).KP(gm2->Type()),mtx);
+   Compare((gm1->type()).KP(gm2->type()),mtx);
    GeneralMatrix* gmx = mtx.New(nr1*nr2, nc1*nc2, kp);
    MatrixRow mrx(gmx, LoadOnEntry+StoreOnExit+DirectPart);
    MatrixRow mr1(gm1, LoadOnEntry);
@@ -413,7 +414,7 @@ static GeneralMatrix* GeneralSolv(GeneralMatrix* gm1, GeneralMatrix* gm2,
 {
    REPORT
    Tracer tr("GeneralSolv");
-   Compare(gm1->Type().i() * gm2->Type(),mtx);
+   Compare(gm1->type().i() * gm2->type(),mtx);
    int nr = gm1->Nrows();
    if (nr != gm1->Ncols()) Throw(NotSquareException(*gm1));
    int nc = gm2->Ncols();
@@ -437,13 +438,13 @@ static GeneralMatrix* GeneralSolv(GeneralMatrix* gm1, GeneralMatrix* gm2,
       delete gmx;                   // <--------------------
       gm2->tDelete();
       MONITOR_REAL_DELETE("Delete (GenSolv)",nr,r)
-                          // ATandT version 2.1 gives an internal error
+                          // AT&T version 2.1 gives an internal error
       delete [] r;
       ReThrow;
    }
    gms->tDelete(); gmx->ReleaseAndDelete(); gm2->tDelete();
    MONITOR_REAL_DELETE("Delete (GenSolv)",nr,r)
-                          // ATandT version 2.1 gives an internal error
+                          // AT&T version 2.1 gives an internal error
    delete [] r;
    return gmx;
 }
@@ -454,7 +455,7 @@ static GeneralMatrix* GeneralSolvI(GeneralMatrix* gm1, BaseMatrix* sm,
 {
    REPORT
    Tracer tr("GeneralSolvI");
-   Compare(gm1->Type().i(),mtx);
+   Compare(gm1->type().i(),mtx);
    int nr = gm1->Nrows();
    if (nr != gm1->Ncols()) Throw(NotSquareException(*gm1));
    int nc = nr;
@@ -477,13 +478,13 @@ static GeneralMatrix* GeneralSolvI(GeneralMatrix* gm1, BaseMatrix* sm,
       if (gms) gms->tDelete();
       delete gmx;
       MONITOR_REAL_DELETE("Delete (GenSolvI)",nr,r)
-                          // ATandT version 2.1 gives an internal error
+                          // AT&T version 2.1 gives an internal error
       delete [] r;
       ReThrow;
    }
    gms->tDelete(); gmx->ReleaseAndDelete();
    MONITOR_REAL_DELETE("Delete (GenSolvI)",nr,r)
-                          // ATandT version 2.1 gives an internal error
+                          // AT&T version 2.1 gives an internal error
    delete [] r;
    return gmx;
 }
@@ -494,14 +495,7 @@ GeneralMatrix* InvertedMatrix::Evaluate(MatrixType mtx)
    Tracer tr("InvertedMatrix::Evaluate");
    REPORT
    gm=((BaseMatrix*&)bm)->Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-	GeneralMatrix* gmx;
-	Try { gmx = GeneralSolvI(gm,this,mtx); }
-   CatchAll { delete this; ReThrow; }
-   delete this; return gmx;
-#else
    return GeneralSolvI(gm,this,mtx);
-#endif
 }
 
 //*************************** New versions ************************
@@ -518,29 +512,23 @@ GeneralMatrix* AddedMatrix::Evaluate(MatrixType mtd)
       CatchAll
       {
          gm1->tDelete(); gm2->tDelete();
-#ifdef TEMPS_DESTROYED_QUICKLY
-         delete this;
-#endif
          ReThrow;
       }
    }
-   MatrixType mt1 = gm1->Type(), mt2 = gm2->Type(); MatrixType mts = mt1 + mt2;
+   MatrixType mt1 = gm1->type(), mt2 = gm2->type(); MatrixType mts = mt1 + mt2;
    if (!mtd) { REPORT mtd = mts; }
    else if (!(mtd.DataLossOK || mtd >= mts))
    {
       REPORT
       gm1->tDelete(); gm2->tDelete();
-#ifdef TEMPS_DESTROYED_QUICKLY
-      delete this;
-#endif
       Throw(ProgramException("Illegal Conversion", mts, mtd));
    }
    GeneralMatrix* gmx;
    bool c1 = (mtd == mt1), c2 = (mtd == mt2);
    if ( c1 && c2 && (gm1->SimpleAddOK(gm2) == 0) )
    {
-      if (gm1->reuse()) { REPORT Add(gm1,gm2); gm2->tDelete(); gmx = gm1; }
-      else if (gm2->reuse()) { REPORT Add(gm2,gm1); gmx = gm2; }
+      if (gm1->reuse()) { REPORT AddTo(gm1,gm2); gm2->tDelete(); gmx = gm1; }
+      else if (gm2->reuse()) { REPORT AddTo(gm2,gm1); gmx = gm2; }
       else
       {
          REPORT
@@ -548,9 +536,6 @@ GeneralMatrix* AddedMatrix::Evaluate(MatrixType mtd)
          Try { gmx = mt1.New(nr,nc,this); }
          CatchAll
          {
-#ifdef TEMPS_DESTROYED_QUICKLY
-            delete this;
-#endif
             ReThrow;
          }
          gmx->ReleaseAndDelete(); Add(gmx,gm1,gm2);
@@ -575,9 +560,6 @@ GeneralMatrix* AddedMatrix::Evaluate(MatrixType mtd)
          CatchAll
          {
             if (!c1) gm1->tDelete(); if (!c2) gm2->tDelete();
-#ifdef TEMPS_DESTROYED_QUICKLY
-            delete this;
-#endif
             ReThrow;
          }
          AddDS(gmx,gm1,gm2);
@@ -585,9 +567,6 @@ GeneralMatrix* AddedMatrix::Evaluate(MatrixType mtd)
          gmx->ReleaseAndDelete();
       }
    }
-#ifdef TEMPS_DESTROYED_QUICKLY
-   delete this;
-#endif
    return gmx;
 }
 
@@ -603,27 +582,22 @@ GeneralMatrix* SubtractedMatrix::Evaluate(MatrixType mtd)
       CatchAll
       {
          gm1->tDelete(); gm2->tDelete();
-#ifdef TEMPS_DESTROYED_QUICKLY
-         delete this;
-#endif
          ReThrow;
       }
    }
-   MatrixType mt1 = gm1->Type(), mt2 = gm2->Type(); MatrixType mts = mt1 + mt2;
+   MatrixType mt1 = gm1->type(), mt2 = gm2->type(); MatrixType mts = mt1 + mt2;
    if (!mtd) { REPORT mtd = mts; }
    else if (!(mtd.DataLossOK || mtd >= mts))
    {
       gm1->tDelete(); gm2->tDelete();
-#ifdef TEMPS_DESTROYED_QUICKLY
-      delete this;
-#endif
       Throw(ProgramException("Illegal Conversion", mts, mtd));
    }
    GeneralMatrix* gmx;
    bool c1 = (mtd == mt1), c2 = (mtd == mt2);
    if ( c1 && c2 && (gm1->SimpleAddOK(gm2) == 0) )
    {
-      if (gm1->reuse()) { REPORT Subtract(gm1,gm2); gm2->tDelete(); gmx = gm1; }
+      if (gm1->reuse())
+         { REPORT SubtractFrom(gm1,gm2); gm2->tDelete(); gmx = gm1; }
       else if (gm2->reuse()) { REPORT ReverseSubtract(gm2,gm1); gmx = gm2; }
       else
       {
@@ -631,9 +605,6 @@ GeneralMatrix* SubtractedMatrix::Evaluate(MatrixType mtd)
          Try { gmx = mt1.New(nr,nc,this); }
          CatchAll
          {
-#ifdef TEMPS_DESTROYED_QUICKLY
-            delete this;
-#endif
             ReThrow;
          }
          gmx->ReleaseAndDelete(); Subtract(gmx,gm1,gm2);
@@ -662,9 +633,6 @@ GeneralMatrix* SubtractedMatrix::Evaluate(MatrixType mtd)
          CatchAll
          {
             if (!c1) gm1->tDelete(); if (!c2) gm2->tDelete();
-#ifdef TEMPS_DESTROYED_QUICKLY
-            delete this;
-#endif
             ReThrow;
          }
          SubtractDS(gmx,gm1,gm2);
@@ -672,9 +640,6 @@ GeneralMatrix* SubtractedMatrix::Evaluate(MatrixType mtd)
          gmx->ReleaseAndDelete();
       }
    }
-#ifdef TEMPS_DESTROYED_QUICKLY
-   delete this;
-#endif
    return gmx;
 }
 
@@ -690,21 +655,15 @@ GeneralMatrix* SPMatrix::Evaluate(MatrixType mtd)
       CatchAll
       {
          gm1->tDelete(); gm2->tDelete();
-#ifdef TEMPS_DESTROYED_QUICKLY
-         delete this;
-#endif
          ReThrow;
       }
    }
-   MatrixType mt1 = gm1->Type(), mt2 = gm2->Type();
+   MatrixType mt1 = gm1->type(), mt2 = gm2->type();
    MatrixType mts = mt1.SP(mt2);
    if (!mtd) { REPORT mtd = mts; }
    else if (!(mtd.DataLossOK || mtd >= mts))
    {
       gm1->tDelete(); gm2->tDelete();
-#ifdef TEMPS_DESTROYED_QUICKLY
-      delete this;
-#endif
       Throw(ProgramException("Illegal Conversion", mts, mtd));
    }
    GeneralMatrix* gmx;
@@ -719,9 +678,6 @@ GeneralMatrix* SPMatrix::Evaluate(MatrixType mtd)
          Try { gmx = mt1.New(nr,nc,this); }
          CatchAll
          {
-#ifdef TEMPS_DESTROYED_QUICKLY
-            delete this;
-#endif
             ReThrow;
          }
          gmx->ReleaseAndDelete(); SP(gmx,gm1,gm2);
@@ -747,9 +703,6 @@ GeneralMatrix* SPMatrix::Evaluate(MatrixType mtd)
          CatchAll
          {
             if (!c1) gm1->tDelete(); if (!c2) gm2->tDelete();
-#ifdef TEMPS_DESTROYED_QUICKLY
-            delete this;
-#endif
             ReThrow;
          }
          SPDS(gmx,gm1,gm2);
@@ -757,9 +710,6 @@ GeneralMatrix* SPMatrix::Evaluate(MatrixType mtd)
          gmx->ReleaseAndDelete();
       }
    }
-#ifdef TEMPS_DESTROYED_QUICKLY
-   delete this;
-#endif
    return gmx;
 }
 
@@ -767,7 +717,7 @@ GeneralMatrix* SPMatrix::Evaluate(MatrixType mtd)
 
 //*************************** norm functions ****************************/
 
-Real BaseMatrix::Norm1() const
+Real BaseMatrix::norm1() const
 {
    // maximum of sum of absolute values of a column
    REPORT
@@ -779,7 +729,7 @@ Real BaseMatrix::Norm1() const
    gm->tDelete(); return value;
 }
 
-Real BaseMatrix::NormInfinity() const
+Real BaseMatrix::norm_infinity() const
 {
    // maximum of sum of absolute values of a row
    REPORT
@@ -797,30 +747,9 @@ GeneralMatrix* ConcatenatedMatrix::Evaluate(MatrixType mtx)
 {
    REPORT
    Tracer tr("Concatenate");
-#ifdef TEMPS_DESTROYED_QUICKLY
-      Try
-      {
-         gm2 = ((BaseMatrix*&)bm2)->Evaluate();
-         gm1 = ((BaseMatrix*&)bm1)->Evaluate();
-         Compare(gm1->Type() | gm2->Type(),mtx);
-         int nr=gm1->Nrows(); int nc = gm1->Ncols() + gm2->Ncols();
-         if (nr != gm2->Nrows())
-            Throw(IncompatibleDimensionsException(*gm1, *gm2));
-         GeneralMatrix* gmx = mtx.New(nr,nc,this);
-         MatrixRow mr1(gm1, LoadOnEntry); MatrixRow mr2(gm2, LoadOnEntry);
-         MatrixRow mr(gmx, StoreOnExit+DirectPart);
-         while (nr--) { mr.ConCat(mr1,mr2); mr1.Next(); mr2.Next(); mr.Next(); }
-         gmx->ReleaseAndDelete(); gm1->tDelete(); gm2->tDelete(); delete this;
-         return gmx;
-      }
-      CatchAll  { delete this; ReThrow; }
-#ifndef UseExceptions
-      return 0;
-#endif
-#else
       gm2 = ((BaseMatrix*&)bm2)->Evaluate();
       gm1 = ((BaseMatrix*&)bm1)->Evaluate();
-      Compare(gm1->Type() | gm2->Type(),mtx);
+      Compare(gm1->type() | gm2->type(),mtx);
       int nr=gm1->Nrows(); int nc = gm1->Ncols() + gm2->Ncols();
       if (nr != gm2->Nrows())
          Throw(IncompatibleDimensionsException(*gm1, *gm2));
@@ -829,39 +758,15 @@ GeneralMatrix* ConcatenatedMatrix::Evaluate(MatrixType mtx)
       MatrixRow mr(gmx, StoreOnExit+DirectPart);
       while (nr--) { mr.ConCat(mr1,mr2); mr1.Next(); mr2.Next(); mr.Next(); }
       gmx->ReleaseAndDelete(); gm1->tDelete(); gm2->tDelete(); return gmx;
-#endif
 }
 
 GeneralMatrix* StackedMatrix::Evaluate(MatrixType mtx)
 {
    REPORT
    Tracer tr("Stack");
-#ifdef TEMPS_DESTROYED_QUICKLY
-      Try
-      {
-         gm2 = ((BaseMatrix*&)bm2)->Evaluate();
-         gm1 = ((BaseMatrix*&)bm1)->Evaluate();
-         Compare(gm1->Type() & gm2->Type(),mtx);
-         int nc=gm1->Ncols();
-         int nr1 = gm1->Nrows(); int nr2 = gm2->Nrows();
-         if (nc != gm2->Ncols())
-            Throw(IncompatibleDimensionsException(*gm1, *gm2));
-         GeneralMatrix* gmx = mtx.New(nr1+nr2,nc,this);
-         MatrixRow mr1(gm1, LoadOnEntry); MatrixRow mr2(gm2, LoadOnEntry);
-         MatrixRow mr(gmx, StoreOnExit+DirectPart);
-         while (nr1--) { mr.Copy(mr1); mr1.Next(); mr.Next(); }
-         while (nr2--) { mr.Copy(mr2); mr2.Next(); mr.Next(); }
-         gmx->ReleaseAndDelete(); gm1->tDelete(); gm2->tDelete(); delete this;
-         return gmx;
-      }
-      CatchAll  { delete this; ReThrow; }
-#ifndef UseExceptions
-      return 0;
-#endif
-#else
       gm2 = ((BaseMatrix*&)bm2)->Evaluate();
       gm1 = ((BaseMatrix*&)bm1)->Evaluate();
-      Compare(gm1->Type() & gm2->Type(),mtx);
+      Compare(gm1->type() & gm2->type(),mtx);
       int nc=gm1->Ncols();
       int nr1 = gm1->Nrows(); int nr2 = gm2->Nrows();
       if (nc != gm2->Ncols())
@@ -872,7 +777,6 @@ GeneralMatrix* StackedMatrix::Evaluate(MatrixType mtx)
       while (nr1--) { mr.Copy(mr1); mr1.Next(); mr.Next(); }
       while (nr2--) { mr.Copy(mr2); mr2.Next(); mr.Next(); }
       gmx->ReleaseAndDelete(); gm1->tDelete(); gm2->tDelete(); return gmx;
-#endif
 }
 
 // ************************* equality of matrices ******************** //
@@ -917,7 +821,7 @@ bool operator==(const BaseMatrix& A, const BaseMatrix& B)
       { REPORT gmA->tDelete(); gmB->tDelete(); return false; }
 
    // check for CroutMatrix or BandLUMatrix
-   MatrixType AType = gmA->Type(); MatrixType BType = gmB->Type();
+   MatrixType AType = gmA->type(); MatrixType BType = gmB->type();
    if (AType.CannotConvert() || BType.CannotConvert() )
    {
       REPORT
@@ -928,7 +832,7 @@ bool operator==(const BaseMatrix& A, const BaseMatrix& B)
 
    // is matrix storage the same
    // will need to modify if further matrix structures are introduced
-   if (AType == BType && gmA->BandWidth() == gmB->BandWidth())
+   if (AType == BType && gmA->bandwidth() == gmB->bandwidth())
    {                                          // compare store
       REPORT
       bool bx = RealEqual(gmA->Store(),gmB->Store(),gmA->Storage());
@@ -937,7 +841,7 @@ bool operator==(const BaseMatrix& A, const BaseMatrix& B)
    }
 
    // matrix storage different - just subtract
-   REPORT  return IsZero(*gmA-*gmB);
+   REPORT  return is_zero(*gmA-*gmB);
 }
 
 bool operator==(const GeneralMatrix& A, const GeneralMatrix& B)
@@ -959,14 +863,14 @@ bool operator==(const GeneralMatrix& A, const GeneralMatrix& B)
 
    // is matrix storage the same
    // will need to modify if further matrix structures are introduced
-   if (AType == BType && A.BandWidth() == B.BandWidth())
+   if (AType == BType && A.bandwidth() == B.bandwidth())
       { REPORT return RealEqual(A.Store(),B.Store(),A.Storage()); }
 
    // matrix storage different - just subtract
-   REPORT  return IsZero(A-B);
+   REPORT  return is_zero(A-B);
 }
 
-bool GeneralMatrix::IsZero() const
+bool GeneralMatrix::is_zero() const
 {
    REPORT
    Real* s=store; int i = storage >> 2;
@@ -979,12 +883,12 @@ bool GeneralMatrix::IsZero() const
    return true;
 }
 
-bool IsZero(const BaseMatrix& A)
+bool is_zero(const BaseMatrix& A)
 {
-   Tracer tr("BaseMatrix::IsZero");
+   Tracer tr("BaseMatrix::is_zero");
    REPORT
    GeneralMatrix* gm1 = 0; bool bx;
-   Try { gm1=((BaseMatrix&)A).Evaluate(); bx = gm1->IsZero(); }
+   Try { gm1=((BaseMatrix&)A).Evaluate(); bx = gm1->is_zero(); }
    CatchAll { if (gm1) gm1->tDelete(); ReThrow; }
    gm1->tDelete();
    return bx;
@@ -996,11 +900,11 @@ bool IsZero(const BaseMatrix& A)
 bool GeneralMatrix::IsEqual(const GeneralMatrix& A) const
 {
    Tracer tr("GeneralMatrix IsEqual");
-   if (A.Type() != Type())                       // not same types
+   if (A.type() != type())                       // not same types
       { REPORT return false; }
    if (&A == this)                               // same matrix
       { REPORT  return true; }
-   if (A.nrows != nrows || A.ncols != ncols)
+   if (A.nrows_val != nrows_val || A.ncols_val != ncols_val)
                                                  // different dimensions
    { REPORT return false; }
    // is matrix storage the same - compare store
@@ -1011,28 +915,28 @@ bool GeneralMatrix::IsEqual(const GeneralMatrix& A) const
 bool CroutMatrix::IsEqual(const GeneralMatrix& A) const
 {
    Tracer tr("CroutMatrix IsEqual");
-   if (A.Type() != Type())                       // not same types
+   if (A.type() != type())                       // not same types
       { REPORT return false; }
    if (&A == this)                               // same matrix
       { REPORT  return true; }
-   if (A.nrows != nrows || A.ncols != ncols)
+   if (A.nrows_val != nrows_val || A.ncols_val != ncols_val)
                                                  // different dimensions
    { REPORT return false; }
    // is matrix storage the same - compare store
    REPORT
    return RealEqual(A.store,store,storage)
-      && intEqual(((CroutMatrix&)A).indx, indx, nrows);
+      && intEqual(((CroutMatrix&)A).indx, indx, nrows_val);
 }
 
 
 bool BandLUMatrix::IsEqual(const GeneralMatrix& A) const
 {
    Tracer tr("BandLUMatrix IsEqual");
-   if (A.Type() != Type())                       // not same types
+   if (A.type() != type())                       // not same types
       { REPORT  return false; }
    if (&A == this)                               // same matrix
       { REPORT  return true; }
-   if ( A.Nrows() != nrows || A.Ncols() != ncols
+   if ( A.Nrows() != nrows_val || A.Ncols() != ncols_val
       || ((BandLUMatrix&)A).m1 != m1 || ((BandLUMatrix&)A).m2 != m2 )
                                                  // different dimensions
    { REPORT  return false; }
@@ -1041,7 +945,90 @@ bool BandLUMatrix::IsEqual(const GeneralMatrix& A) const
    REPORT
    return RealEqual(A.Store(),store,storage)
       && RealEqual(((BandLUMatrix&)A).store2,store2,storage2)
-      && intEqual(((BandLUMatrix&)A).indx, indx, nrows);
+      && intEqual(((BandLUMatrix&)A).indx, indx, nrows_val);
+}
+
+
+// ************************* cross products ******************** //
+
+inline void crossproduct_body(Real* a, Real* b, Real* c)
+{
+   c[0] = a[1] * b[2] - a[2] * b[1];
+   c[1] = a[2] * b[0] - a[0] * b[2];
+   c[2] = a[0] * b[1] - a[1] * b[0];
+}
+
+Matrix crossproduct(const Matrix& A, const Matrix& B)
+{
+   REPORT
+   int ac = A.Ncols(); int ar = A.Nrows();
+   int bc = B.Ncols(); int br = B.Nrows();
+   Real* a = A.Store(); Real* b = B.Store();
+   if (ac == 3)
+   {
+      if (bc != 3 || ar != 1 || br != 1)
+         { Tracer et("crossproduct"); IncompatibleDimensionsException(A, B); }
+      REPORT
+      RowVector C(3);  Real* c = C.Store(); crossproduct_body(a, b, c);
+      return (Matrix&)C;
+   }
+   else
+   {
+      if (ac != 1 || bc != 1 || ar != 3 || br != 3)
+         { Tracer et("crossproduct"); IncompatibleDimensionsException(A, B); }
+      REPORT
+      ColumnVector C(3);  Real* c = C.Store(); crossproduct_body(a, b, c);
+      return (Matrix&)C;
+   }
+}
+
+ReturnMatrix crossproduct_rows(const Matrix& A, const Matrix& B)
+{
+   REPORT
+   int n = A.Nrows();
+   if (A.Ncols() != 3 || B.Ncols() != 3 || n != B.Nrows())
+   {
+      Tracer et("crossproduct_rows"); IncompatibleDimensionsException(A, B);
+   }
+   Matrix C(n, 3);
+   Real* a = A.Store(); Real* b = B.Store(); Real* c = C.Store();
+   if (n--)
+   {
+      for (;;)
+      {
+         crossproduct_body(a, b, c);
+         if (!(n--)) break;
+         a += 3; b += 3; c += 3;
+      }
+   }
+
+   return C.ForReturn();
+}
+
+ReturnMatrix crossproduct_columns(const Matrix& A, const Matrix& B)
+{
+   REPORT
+   int n = A.Ncols();
+   if (A.Nrows() != 3 || B.Nrows() != 3 || n != B.Ncols())
+   {
+      Tracer et("crossproduct_columns");
+      IncompatibleDimensionsException(A, B);
+   }
+   Matrix C(3, n);
+   Real* a = A.Store(); Real* b = B.Store(); Real* c = C.Store();
+   Real* an = a+n; Real* an2 = an+n;
+   Real* bn = b+n; Real* bn2 = bn+n;
+   Real* cn = c+n; Real* cn2 = cn+n;
+
+   int i = n; 
+   while (i--)
+   {
+      *c++   = *an    * *bn2   - *an2   * *bn;
+      *cn++  = *an2++ * *b     - *a     * *bn2++;
+      *cn2++ = *a++   * *bn++  - *an++  * *b++;
+   }
+
+   return C.ForReturn();
 }
 
 
@@ -1049,4 +1036,5 @@ bool BandLUMatrix::IsEqual(const GeneralMatrix& A) const
 }
 #endif
 
+///@}
 

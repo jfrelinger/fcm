@@ -4,6 +4,7 @@
 // Model.h: interface for the Model class.
 //
 //////////////////////////////////////////////////////////////////////
+#pragma once
 #include <map>
 #include <cstring>
 #include <string>
@@ -16,6 +17,7 @@
 #include "newmatap.h"                // need matrix applications
 
 using namespace std;
+//using namespace NEWMAT;
 
 class Model  
 {

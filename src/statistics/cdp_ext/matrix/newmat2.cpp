@@ -1,10 +1,17 @@
-//$$ newmat2.cpp      Matrix row and column operations
+/// \ingroup newmat
+///@{
+
+/// \file newmat2.cpp
+/// Matrix row and column operations.
+/// The operations on individual rows and columns used to carry out matrix
+/// add, multiply etc.
+
 
 // Copyright (C) 1991,2,3,4: R B Davies
 
 #define WANT_MATH
 
-#include "nminclude.h"
+#include "include.h"
 
 #include "newmat.h"
 #include "newmatrc.h"
@@ -526,12 +533,28 @@ void IdentityMatrix::Solver(MatrixColX& mrc, const MatrixColX& mrc1)
    // Solver makes sure input and output point to same memory
 }
 
-void MatrixRowCol::Copy(const Real*& r)
+void MatrixRowCol::Copy(const double*& r)
 {
    // THIS = *r
    REPORT
-   Real* elx = data; const Real* ely = r+skip; r += length;
-   int l = storage; while (l--) *elx++ = *ely++;
+   Real* elx = data; const double* ely = r+skip; r += length;
+   int l = storage; while (l--) *elx++ = (Real)*ely++;
+}
+
+void MatrixRowCol::Copy(const float*& r)
+{
+   // THIS = *r
+   REPORT
+   Real* elx = data; const float* ely = r+skip; r += length;
+   int l = storage; while (l--) *elx++ = (Real)*ely++;
+}
+
+void MatrixRowCol::Copy(const int*& r)
+{
+   // THIS = *r
+   REPORT
+   Real* elx = data; const int* ely = r+skip; r += length;
+   int l = storage; while (l--) *elx++ = (Real)*ely++;
 }
 
 void MatrixRowCol::Copy(Real r)
@@ -631,3 +654,5 @@ void MatrixRowCol::SubRowCol(MatrixRowCol& mrc, int skip1, int l1) const
 }
 #endif
 
+
+///@}

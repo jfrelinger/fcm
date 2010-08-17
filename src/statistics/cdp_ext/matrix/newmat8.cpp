@@ -1,10 +1,14 @@
-//$$ newmat8.cpp         Advanced LU transform, scalar functions
+/// \ingroup newmat
+///@{
+
+/// \file newmat8.cpp
+/// LU transform, scalar functions of matrices.
 
 // Copyright (C) 1991,2,3,4,8: R B Davies
 
 #define WANT_MATH
 
-#include "nminclude.h"
+#include "include.h"
 
 #include "newmat.h"
 #include "newmatrc.h"
@@ -32,28 +36,28 @@ void CroutMatrix::ludcmp()
 // matrices.
 {
    REPORT
-   Tracer trace( "Crout(ludcmp)" ); sing = false;
+   Tracer tr( "Crout(ludcmp)" ); sing = false;
    Real* akk = store;                    // runs down diagonal
 
    Real big = fabs(*akk); int mu = 0; Real* ai = akk; int k;
 
-   for (k = 1; k < nrows; k++)
+   for (k = 1; k < nrows_val; k++)
    {
-      ai += nrows; const Real trybig = fabs(*ai);
+      ai += nrows_val; const Real trybig = fabs(*ai);
       if (big < trybig) { big = trybig; mu = k; }
    }
 
 
-   if (nrows) for (k = 0;;)
+   if (nrows_val) for (k = 0;;)
    {
       /*
       int mu1;
       {
          Real big = fabs(*akk); mu1 = k; Real* ai = akk; int i;
 
-         for (i = k+1; i < nrows; i++)
+         for (i = k+1; i < nrows_val; i++)
          {
-            ai += nrows; const Real trybig = fabs(*ai);
+            ai += nrows_val; const Real trybig = fabs(*ai);
             if (big < trybig) { big = trybig; mu1 = i; }
          }
       }
@@ -64,33 +68,35 @@ void CroutMatrix::ludcmp()
 
       if (mu != k)                       //row swap
       {
-         Real* a1 = store + nrows * k; Real* a2 = store + nrows * mu; d = !d;
-         int j = nrows;
+         Real* a1 = store + nrows_val * k;
+         Real* a2 = store + nrows_val * mu; d = !d;
+         int j = nrows_val;
          while (j--) { const Real temp = *a1; *a1++ = *a2; *a2++ = temp; }
       }
 
       Real diag = *akk; big = 0; mu = k + 1;
       if (diag != 0)
       {
-         ai = akk; int i = nrows - k - 1;
+         ai = akk; int i = nrows_val - k - 1;
          while (i--)
          {
-            ai += nrows; Real* al = ai; Real mult = *al / diag; *al = mult;
-            int l = nrows - k - 1; Real* aj = akk;
+            ai += nrows_val; Real* al = ai;
+            Real mult = *al / diag; *al = mult;
+            int l = nrows_val - k - 1; Real* aj = akk;
             // work out the next pivot as part of this loop
             // this saves a column operation
             if (l-- != 0)
             {
                *(++al) -= (mult * *(++aj));
                const Real trybig = fabs(*al);
-               if (big < trybig) { big = trybig; mu = nrows - i - 1; }
+               if (big < trybig) { big = trybig; mu = nrows_val - i - 1; }
                while (l--) *(++al) -= (mult * *(++aj));
             }
          }
       }
       else sing = true;
-      if (++k == nrows) break;          // so next line won't overflow
-      akk += nrows + 1;
+      if (++k == nrows_val) break;          // so next line won't overflow
+      akk += nrows_val + 1;
    }
 }
 
@@ -103,13 +109,13 @@ void CroutMatrix::lubksb(Real* B, int mini)
    // variation in the code, so it is still similar to the NR code.
    // I follow the NR code in skipping over initial zeros in the B vector.
 
-   Tracer trace("Crout(lubksb)");
+   Tracer tr("Crout(lubksb)");
    if (sing) Throw(SingularException(*this));
-   int i, j, ii = nrows;            // ii initialised : B might be all zeros
+   int i, j, ii = nrows_val;       // ii initialised : B might be all zeros
 
 
    // scan for first non-zero in B
-   for (i = 0; i < nrows; i++)
+   for (i = 0; i < nrows_val; i++)
    {
       int ip = indx[i]; Real temp = B[ip]; B[ip] = B[i]; B[i] = temp;
       if (temp != 0.0) { ii = i; break; }
@@ -118,27 +124,27 @@ void CroutMatrix::lubksb(Real* B, int mini)
    Real* bi; Real* ai;
    i = ii + 1;
 
-   if (i < nrows)
+   if (i < nrows_val)
    {
-      bi = B + ii; ai = store + ii + i * nrows;
+      bi = B + ii; ai = store + ii + i * nrows_val;
       for (;;)
       {
          int ip = indx[i]; Real sum = B[ip]; B[ip] = B[i];
          Real* aij = ai; Real* bj = bi; j = i - ii;
          while (j--) sum -= *aij++ * *bj++;
          B[i] = sum;
-         if (++i == nrows) break;
-         ai += nrows;
+         if (++i == nrows_val) break;
+         ai += nrows_val;
       }
    }
 
-   ai = store + nrows * nrows;
+   ai = store + nrows_val * nrows_val;
 
-   for (i = nrows - 1; i >= mini; i--)
+   for (i = nrows_val - 1; i >= mini; i--)
    {
-      Real* bj = B+i; ai -= nrows; Real* ajx = ai+i;
+      Real* bj = B+i; ai -= nrows_val; Real* ajx = ai+i;
       Real sum = *bj; Real diag = *ajx;
-      j = nrows - i; while(--j) sum -= *(++ajx) * *(++bj);
+      j = nrows_val - i; while(--j) sum -= *(++ajx) * *(++bj);
       B[i] = sum / diag;
    }
 }
@@ -147,7 +153,7 @@ void CroutMatrix::lubksb(Real* B, int mini)
 
 inline Real square(Real x) { return x*x; }
 
-Real GeneralMatrix::SumSquare() const
+Real GeneralMatrix::sum_square() const
 {
    REPORT
    Real sum = 0.0; int i = storage; Real* s = store;
@@ -155,7 +161,7 @@ Real GeneralMatrix::SumSquare() const
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-Real GeneralMatrix::SumAbsoluteValue() const
+Real GeneralMatrix::sum_absolute_value() const
 {
    REPORT
    Real sum = 0.0; int i = storage; Real* s = store;
@@ -163,23 +169,23 @@ Real GeneralMatrix::SumAbsoluteValue() const
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-Real GeneralMatrix::Sum() const
+Real GeneralMatrix::sum() const
 {
    REPORT
-   Real sum = 0.0; int i = storage; Real* s = store;
-   while (i--) sum += *s++;
-   ((GeneralMatrix&)*this).tDelete(); return sum;
+   Real sm = 0.0; int i = storage; Real* s = store;
+   while (i--) sm += *s++;
+   ((GeneralMatrix&)*this).tDelete(); return sm;
 }
 
 // maxima and minima
 
 // There are three sets of routines
-// MaximumAbsoluteValue, MinimumAbsoluteValue, Maximum, Minimum
+// maximum_absolute_value, minimum_absolute_value, maximum, minimum
 // ... these find just the maxima and minima
-// MaximumAbsoluteValue1, MinimumAbsoluteValue1, Maximum1, Minimum1
+// maximum_absolute_value1, minimum_absolute_value1, maximum1, minimum1
 // ... these find the maxima and minima and their locations in a
 //     one dimensional object
-// MaximumAbsoluteValue2, MinimumAbsoluteValue2, Maximum2, Minimum2
+// maximum_absolute_value2, minimum_absolute_value2, maximum2, minimum2
 // ... these find the maxima and minima and their locations in a
 //     two dimensional object
 
@@ -188,7 +194,7 @@ Real GeneralMatrix::Sum() const
 // If we do not want the location find the maximum or minimum on the
 // array stored by GeneralMatrix
 // This won't work for BandMatrices. We call ClearCorner for
-// MaximumAbsoluteValue but for the others use the AbsoluteMinimumValue2
+// maximum_absolute_value but for the others use the absolute_minimum_value2
 // version and discard the location.
 
 // For one dimensional objects, when we want the location of the
@@ -209,7 +215,7 @@ static void NullMatrixError(const GeneralMatrix* gm)
    Throw(ProgramException("Maximum or minimum of null matrix"));
 }
 
-Real GeneralMatrix::MaximumAbsoluteValue() const
+Real GeneralMatrix::maximum_absolute_value() const
 {
    REPORT
    if (storage == 0) NullMatrixError(this);
@@ -218,7 +224,7 @@ Real GeneralMatrix::MaximumAbsoluteValue() const
    ((GeneralMatrix&)*this).tDelete(); return maxval;
 }
 
-Real GeneralMatrix::MaximumAbsoluteValue1(int& i) const
+Real GeneralMatrix::maximum_absolute_value1(int& i) const
 {
    REPORT
    if (storage == 0) NullMatrixError(this);
@@ -229,7 +235,7 @@ Real GeneralMatrix::MaximumAbsoluteValue1(int& i) const
    ((GeneralMatrix&)*this).tDelete(); return maxval;
 }
 
-Real GeneralMatrix::MinimumAbsoluteValue() const
+Real GeneralMatrix::minimum_absolute_value() const
 {
    REPORT
    if (storage == 0) NullMatrixError(this);
@@ -238,7 +244,7 @@ Real GeneralMatrix::MinimumAbsoluteValue() const
    ((GeneralMatrix&)*this).tDelete(); return minval;
 }
 
-Real GeneralMatrix::MinimumAbsoluteValue1(int& i) const
+Real GeneralMatrix::minimum_absolute_value1(int& i) const
 {
    REPORT
    if (storage == 0) NullMatrixError(this);
@@ -249,7 +255,7 @@ Real GeneralMatrix::MinimumAbsoluteValue1(int& i) const
    ((GeneralMatrix&)*this).tDelete(); return minval;
 }
 
-Real GeneralMatrix::Maximum() const
+Real GeneralMatrix::maximum() const
 {
    REPORT
    if (storage == 0) NullMatrixError(this);
@@ -258,7 +264,7 @@ Real GeneralMatrix::Maximum() const
    ((GeneralMatrix&)*this).tDelete(); return maxval;
 }
 
-Real GeneralMatrix::Maximum1(int& i) const
+Real GeneralMatrix::maximum1(int& i) const
 {
    REPORT
    if (storage == 0) NullMatrixError(this);
@@ -268,7 +274,7 @@ Real GeneralMatrix::Maximum1(int& i) const
    ((GeneralMatrix&)*this).tDelete(); return maxval;
 }
 
-Real GeneralMatrix::Minimum() const
+Real GeneralMatrix::minimum() const
 {
    REPORT
    if (storage == 0) NullMatrixError(this);
@@ -277,7 +283,7 @@ Real GeneralMatrix::Minimum() const
    ((GeneralMatrix&)*this).tDelete(); return minval;
 }
 
-Real GeneralMatrix::Minimum1(int& i) const
+Real GeneralMatrix::minimum1(int& i) const
 {
    REPORT
    if (storage == 0) NullMatrixError(this);
@@ -287,7 +293,7 @@ Real GeneralMatrix::Minimum1(int& i) const
    ((GeneralMatrix&)*this).tDelete(); return minval;
 }
 
-Real GeneralMatrix::MaximumAbsoluteValue2(int& i, int& j) const
+Real GeneralMatrix::maximum_absolute_value2(int& i, int& j) const
 {
    REPORT
    if (storage == 0) NullMatrixError(this);
@@ -302,7 +308,7 @@ Real GeneralMatrix::MaximumAbsoluteValue2(int& i, int& j) const
    ((GeneralMatrix&)*this).tDelete(); return maxval;
 }
 
-Real GeneralMatrix::MinimumAbsoluteValue2(int& i, int& j) const
+Real GeneralMatrix::minimum_absolute_value2(int& i, int& j) const
 {
    REPORT
    if (storage == 0)  NullMatrixError(this);
@@ -317,7 +323,7 @@ Real GeneralMatrix::MinimumAbsoluteValue2(int& i, int& j) const
    ((GeneralMatrix&)*this).tDelete(); return minval;
 }
 
-Real GeneralMatrix::Maximum2(int& i, int& j) const
+Real GeneralMatrix::maximum2(int& i, int& j) const
 {
    REPORT
    if (storage == 0) NullMatrixError(this);
@@ -332,7 +338,7 @@ Real GeneralMatrix::Maximum2(int& i, int& j) const
    ((GeneralMatrix&)*this).tDelete(); return maxval;
 }
 
-Real GeneralMatrix::Minimum2(int& i, int& j) const
+Real GeneralMatrix::minimum2(int& i, int& j) const
 {
    REPORT
    if (storage == 0) NullMatrixError(this);
@@ -347,42 +353,42 @@ Real GeneralMatrix::Minimum2(int& i, int& j) const
    ((GeneralMatrix&)*this).tDelete(); return minval;
 }
 
-Real Matrix::MaximumAbsoluteValue2(int& i, int& j) const
+Real Matrix::maximum_absolute_value2(int& i, int& j) const
 {
    REPORT
-   int k; Real m = GeneralMatrix::MaximumAbsoluteValue1(k); k--;
+   int k; Real m = GeneralMatrix::maximum_absolute_value1(k); k--;
    i = k / Ncols(); j = k - i * Ncols(); i++; j++;
    return m;
 }
 
-Real Matrix::MinimumAbsoluteValue2(int& i, int& j) const
+Real Matrix::minimum_absolute_value2(int& i, int& j) const
 {
    REPORT
-   int k; Real m = GeneralMatrix::MinimumAbsoluteValue1(k); k--;
+   int k; Real m = GeneralMatrix::minimum_absolute_value1(k); k--;
    i = k / Ncols(); j = k - i * Ncols(); i++; j++;
    return m;
 }
 
-Real Matrix::Maximum2(int& i, int& j) const
+Real Matrix::maximum2(int& i, int& j) const
 {
    REPORT
-   int k; Real m = GeneralMatrix::Maximum1(k); k--;
+   int k; Real m = GeneralMatrix::maximum1(k); k--;
    i = k / Ncols(); j = k - i * Ncols(); i++; j++;
    return m;
 }
 
-Real Matrix::Minimum2(int& i, int& j) const
+Real Matrix::minimum2(int& i, int& j) const
 {
    REPORT
-   int k; Real m = GeneralMatrix::Minimum1(k); k--;
+   int k; Real m = GeneralMatrix::minimum1(k); k--;
    i = k / Ncols(); j = k - i * Ncols(); i++; j++;
    return m;
 }
 
-Real SymmetricMatrix::SumSquare() const
+Real SymmetricMatrix::sum_square() const
 {
    REPORT
-   Real sum1 = 0.0; Real sum2 = 0.0; Real* s = store; int nr = nrows;
+   Real sum1 = 0.0; Real sum2 = 0.0; Real* s = store; int nr = nrows_val;
    for (int i = 0; i<nr; i++)
    {
       int j = i;
@@ -392,10 +398,10 @@ Real SymmetricMatrix::SumSquare() const
    ((GeneralMatrix&)*this).tDelete(); return sum1 + 2.0 * sum2;
 }
 
-Real SymmetricMatrix::SumAbsoluteValue() const
+Real SymmetricMatrix::sum_absolute_value() const
 {
    REPORT
-   Real sum1 = 0.0; Real sum2 = 0.0; Real* s = store; int nr = nrows;
+   Real sum1 = 0.0; Real sum2 = 0.0; Real* s = store; int nr = nrows_val;
    for (int i = 0; i<nr; i++)
    {
       int j = i;
@@ -405,13 +411,13 @@ Real SymmetricMatrix::SumAbsoluteValue() const
    ((GeneralMatrix&)*this).tDelete(); return sum1 + 2.0 * sum2;
 }
 
-Real IdentityMatrix::SumAbsoluteValue() const
-   { REPORT  return fabs(Trace()); }    // no need to do tDelete?
+Real IdentityMatrix::sum_absolute_value() const
+   { REPORT  return fabs(trace()); }    // no need to do tDelete?
 
-Real SymmetricMatrix::Sum() const
+Real SymmetricMatrix::sum() const
 {
    REPORT
-   Real sum1 = 0.0; Real sum2 = 0.0; Real* s = store; int nr = nrows;
+   Real sum1 = 0.0; Real sum2 = 0.0; Real* s = store; int nr = nrows_val;
    for (int i = 0; i<nr; i++)
    {
       int j = i;
@@ -421,281 +427,285 @@ Real SymmetricMatrix::Sum() const
    ((GeneralMatrix&)*this).tDelete(); return sum1 + 2.0 * sum2;
 }
 
-Real IdentityMatrix::SumSquare() const
+Real IdentityMatrix::sum_square() const
 {
-   Real sum = *store * *store * nrows;
+   Real sum = *store * *store * nrows_val;
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
 
-Real BaseMatrix::SumSquare() const
+Real BaseMatrix::sum_square() const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->SumSquare(); return s;
+   Real s = gm->sum_square(); return s;
 }
 
-Real BaseMatrix::NormFrobenius() const
-   { REPORT  return sqrt(SumSquare()); }
+Real BaseMatrix::norm_Frobenius() const
+   { REPORT  return sqrt(sum_square()); }
 
-Real BaseMatrix::SumAbsoluteValue() const
+Real BaseMatrix::sum_absolute_value() const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->SumAbsoluteValue(); return s;
+   Real s = gm->sum_absolute_value(); return s;
 }
 
-Real BaseMatrix::Sum() const
+Real BaseMatrix::sum() const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->Sum(); return s;
+   Real s = gm->sum(); return s;
 }
 
-Real BaseMatrix::MaximumAbsoluteValue() const
+Real BaseMatrix::maximum_absolute_value() const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->MaximumAbsoluteValue(); return s;
+   Real s = gm->maximum_absolute_value(); return s;
 }
 
-Real BaseMatrix::MaximumAbsoluteValue1(int& i) const
+Real BaseMatrix::maximum_absolute_value1(int& i) const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->MaximumAbsoluteValue1(i); return s;
+   Real s = gm->maximum_absolute_value1(i); return s;
 }
 
-Real BaseMatrix::MaximumAbsoluteValue2(int& i, int& j) const
+Real BaseMatrix::maximum_absolute_value2(int& i, int& j) const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->MaximumAbsoluteValue2(i, j); return s;
+   Real s = gm->maximum_absolute_value2(i, j); return s;
 }
 
-Real BaseMatrix::MinimumAbsoluteValue() const
+Real BaseMatrix::minimum_absolute_value() const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->MinimumAbsoluteValue(); return s;
+   Real s = gm->minimum_absolute_value(); return s;
 }
 
-Real BaseMatrix::MinimumAbsoluteValue1(int& i) const
+Real BaseMatrix::minimum_absolute_value1(int& i) const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->MinimumAbsoluteValue1(i); return s;
+   Real s = gm->minimum_absolute_value1(i); return s;
 }
 
-Real BaseMatrix::MinimumAbsoluteValue2(int& i, int& j) const
+Real BaseMatrix::minimum_absolute_value2(int& i, int& j) const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->MinimumAbsoluteValue2(i, j); return s;
+   Real s = gm->minimum_absolute_value2(i, j); return s;
 }
 
-Real BaseMatrix::Maximum() const
+Real BaseMatrix::maximum() const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->Maximum(); return s;
+   Real s = gm->maximum(); return s;
 }
 
-Real BaseMatrix::Maximum1(int& i) const
+Real BaseMatrix::maximum1(int& i) const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->Maximum1(i); return s;
+   Real s = gm->maximum1(i); return s;
 }
 
-Real BaseMatrix::Maximum2(int& i, int& j) const
+Real BaseMatrix::maximum2(int& i, int& j) const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->Maximum2(i, j); return s;
+   Real s = gm->maximum2(i, j); return s;
 }
 
-Real BaseMatrix::Minimum() const
+Real BaseMatrix::minimum() const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->Minimum(); return s;
+   Real s = gm->minimum(); return s;
 }
 
-Real BaseMatrix::Minimum1(int& i) const
+Real BaseMatrix::minimum1(int& i) const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->Minimum1(i); return s;
+   Real s = gm->minimum1(i); return s;
 }
 
-Real BaseMatrix::Minimum2(int& i, int& j) const
+Real BaseMatrix::minimum2(int& i, int& j) const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   Real s = gm->Minimum2(i, j); return s;
+   Real s = gm->minimum2(i, j); return s;
 }
 
-Real DotProduct(const Matrix& A, const Matrix& B)
+Real dotproduct(const Matrix& A, const Matrix& B)
 {
    REPORT
    int n = A.storage;
-   if (n != B.storage) Throw(IncompatibleDimensionsException(A,B));
+   if (n != B.storage)
+   {
+      Tracer tr("dotproduct");
+      Throw(IncompatibleDimensionsException(A,B));
+   }
    Real sum = 0.0; Real* a = A.store; Real* b = B.store;
    while (n--) sum += *a++ * *b++;
    return sum;
 }
 
-Real Matrix::Trace() const
+Real Matrix::trace() const
 {
    REPORT
-   Tracer trace("Trace");
-   int i = nrows; int d = i+1;
-   if (i != ncols) Throw(NotSquareException(*this));
+   Tracer tr("trace");
+   int i = nrows_val; int d = i+1;
+   if (i != ncols_val) Throw(NotSquareException(*this));
    Real sum = 0.0; Real* s = store;
 //   while (i--) { sum += *s; s += d; }
    if (i) for (;;) { sum += *s; if (!(--i)) break; s += d; }
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-Real DiagonalMatrix::Trace() const
+Real DiagonalMatrix::trace() const
 {
    REPORT
-   int i = nrows; Real sum = 0.0; Real* s = store;
+   int i = nrows_val; Real sum = 0.0; Real* s = store;
    while (i--) sum += *s++;
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-Real SymmetricMatrix::Trace() const
+Real SymmetricMatrix::trace() const
 {
    REPORT
-   int i = nrows; Real sum = 0.0; Real* s = store; int j = 2;
+   int i = nrows_val; Real sum = 0.0; Real* s = store; int j = 2;
    // while (i--) { sum += *s; s += j++; }
    if (i) for (;;) { sum += *s; if (!(--i)) break; s += j++; }
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-Real LowerTriangularMatrix::Trace() const
+Real LowerTriangularMatrix::trace() const
 {
    REPORT
-   int i = nrows; Real sum = 0.0; Real* s = store; int j = 2;
+   int i = nrows_val; Real sum = 0.0; Real* s = store; int j = 2;
    // while (i--) { sum += *s; s += j++; }
    if (i) for (;;) { sum += *s; if (!(--i)) break; s += j++; }
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-Real UpperTriangularMatrix::Trace() const
+Real UpperTriangularMatrix::trace() const
 {
    REPORT
-   int i = nrows; Real sum = 0.0; Real* s = store;
+   int i = nrows_val; Real sum = 0.0; Real* s = store;
    while (i) { sum += *s; s += i--; }             // won t cause a problem
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-Real BandMatrix::Trace() const
+Real BandMatrix::trace() const
 {
    REPORT
-   int i = nrows; int w = lower+upper+1;
-   Real sum = 0.0; Real* s = store+lower;
+   int i = nrows_val; int w = lower_val+upper_val+1;
+   Real sum = 0.0; Real* s = store+lower_val;
    // while (i--) { sum += *s; s += w; }
    if (i) for (;;) { sum += *s; if (!(--i)) break; s += w; }
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-Real SymmetricBandMatrix::Trace() const
+Real SymmetricBandMatrix::trace() const
 {
    REPORT
-   int i = nrows; int w = lower+1;
-   Real sum = 0.0; Real* s = store+lower;
+   int i = nrows_val; int w = lower_val+1;
+   Real sum = 0.0; Real* s = store+lower_val;
    // while (i--) { sum += *s; s += w; }
    if (i) for (;;) { sum += *s; if (!(--i)) break; s += w; }
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-Real IdentityMatrix::Trace() const
+Real IdentityMatrix::trace() const
 {
-   Real sum = *store * nrows;
+   Real sum = *store * nrows_val;
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
 
-Real BaseMatrix::Trace() const
+Real BaseMatrix::trace() const
 {
    REPORT
    MatrixType Diag = MatrixType::Dg; Diag.SetDataLossOK();
    GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate(Diag);
-   Real sum = gm->Trace(); return sum;
+   Real sum = gm->trace(); return sum;
 }
 
 void LogAndSign::operator*=(Real x)
 {
-   if (x > 0.0) { log_value += log(x); }
-   else if (x < 0.0) { log_value += log(-x); sign = -sign; }
-   else sign = 0;
+   if (x > 0.0) { log_val += log(x); }
+   else if (x < 0.0) { log_val += log(-x); sign_val = -sign_val; }
+   else sign_val = 0;
 }
 
-void LogAndSign::PowEq(int k)
+void LogAndSign::pow_eq(int k)
 {
-   if (sign)
+   if (sign_val)
    {
-      log_value *= k;
-      if ( (k & 1) == 0 ) sign = 1;
+      log_val *= k;
+      if ( (k & 1) == 0 ) sign_val = 1;
    }
 }
 
-Real LogAndSign::Value() const
+Real LogAndSign::value() const
 {
-   Tracer et("LogAndSign::Value");
-   if (log_value >= FloatingPointPrecision::LnMaximum())
+   Tracer et("LogAndSign::value");
+   if (log_val >= FloatingPointPrecision::LnMaximum())
       Throw(OverflowException("Overflow in exponential"));
-   return sign * exp(log_value);
+   return sign_val * exp(log_val);
 }
 
 LogAndSign::LogAndSign(Real f)
 {
-   if (f == 0.0) { log_value = 0.0; sign = 0; return; }
-   else if (f < 0.0) { sign = -1; f = -f; }
-   else sign = 1;
-   log_value = log(f);
+   if (f == 0.0) { log_val = 0.0; sign_val = 0; return; }
+   else if (f < 0.0) { sign_val = -1; f = -f; }
+   else sign_val = 1;
+   log_val = log(f);
 }
 
-LogAndSign DiagonalMatrix::LogDeterminant() const
+LogAndSign DiagonalMatrix::log_determinant() const
 {
    REPORT
-   int i = nrows; LogAndSign sum; Real* s = store;
+   int i = nrows_val; LogAndSign sum; Real* s = store;
    while (i--) sum *= *s++;
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-LogAndSign LowerTriangularMatrix::LogDeterminant() const
+LogAndSign LowerTriangularMatrix::log_determinant() const
 {
    REPORT
-   int i = nrows; LogAndSign sum; Real* s = store; int j = 2;
+   int i = nrows_val; LogAndSign sum; Real* s = store; int j = 2;
    // while (i--) { sum *= *s; s += j++; }
    if (i) for(;;) { sum *= *s; if (!(--i)) break; s += j++; }
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-LogAndSign UpperTriangularMatrix::LogDeterminant() const
+LogAndSign UpperTriangularMatrix::log_determinant() const
 {
    REPORT
-   int i = nrows; LogAndSign sum; Real* s = store;
+   int i = nrows_val; LogAndSign sum; Real* s = store;
    while (i) { sum *= *s; s += i--; }
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-LogAndSign IdentityMatrix::LogDeterminant() const
+LogAndSign IdentityMatrix::log_determinant() const
 {
    REPORT
-   int i = nrows; LogAndSign sum;
+   int i = nrows_val; LogAndSign sum;
    if (i > 0) { sum = *store; sum.PowEq(i); }
    ((GeneralMatrix&)*this).tDelete(); return sum;
 }
 
-LogAndSign BaseMatrix::LogDeterminant() const
+LogAndSign BaseMatrix::log_determinant() const
 {
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   LogAndSign sum = gm->LogDeterminant(); return sum;
+   LogAndSign sum = gm->log_determinant(); return sum;
 }
 
-LogAndSign GeneralMatrix::LogDeterminant() const
+LogAndSign GeneralMatrix::log_determinant() const
 {
    REPORT
-   Tracer tr("LogDeterminant");
-   if (nrows != ncols) Throw(NotSquareException(*this));
-   CroutMatrix C(*this); return C.LogDeterminant();
+   Tracer tr("log_determinant");
+   if (nrows_val != ncols_val) Throw(NotSquareException(*this));
+   CroutMatrix C(*this); return C.log_determinant();
 }
 
-LogAndSign CroutMatrix::LogDeterminant() const
+LogAndSign CroutMatrix::log_determinant() const
 {
    REPORT
    if (sing) return 0.0;
-   int i = nrows; int dd = i+1; LogAndSign sum; Real* s = store;
+   int i = nrows_val; int dd = i+1; LogAndSign sum; Real* s = store;
    if (i) for(;;)
    {
       sum *= *s;
@@ -706,25 +716,111 @@ LogAndSign CroutMatrix::LogDeterminant() const
 
 }
 
-Real BaseMatrix::Determinant() const
+Real BaseMatrix::determinant() const
 {
    REPORT
-   Tracer tr("Determinant");
+   Tracer tr("determinant");
    REPORT GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
-   LogAndSign ld = gm->LogDeterminant();
+   LogAndSign ld = gm->log_determinant();
    return ld.Value();
 }
 
-
-
-
-
 LinearEquationSolver::LinearEquationSolver(const BaseMatrix& bm)
-: gm( ( ((BaseMatrix&)bm).Evaluate() )->MakeSolver() )
 {
+   gm = ( ((BaseMatrix&)bm).Evaluate() )->MakeSolver();
    if (gm==&bm) { REPORT  gm = gm->Image(); }
    // want a copy if  *gm is actually bm
    else { REPORT  gm->Protect(); }
+}
+
+ReturnMatrix BaseMatrix::sum_square_rows() const
+{
+   REPORT
+   GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
+   int nr = gm->nrows();
+   ColumnVector ssq(nr);
+   if (gm->size() == 0) { REPORT ssq = 0.0; }
+   else
+   {
+      MatrixRow mr(gm, LoadOnEntry);
+      for (int i = 1; i <= nr; ++i)
+      {
+         Real sum = 0.0;
+         int s = mr.Storage();
+         Real* in = mr.Data();
+         while (s--) sum += square(*in++);
+         ssq(i) = sum;   
+         mr.Next();
+      }
+   }
+   gm->tDelete();
+   ssq.release(); return ssq.for_return();
+}
+
+ReturnMatrix BaseMatrix::sum_square_columns() const
+{
+   REPORT
+   GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
+   int nr = gm->nrows(); int nc = gm->ncols();
+   RowVector ssq(nc); ssq = 0.0;
+   if (gm->size() != 0)
+   {
+      MatrixRow mr(gm, LoadOnEntry);
+      for (int i = 1; i <= nr; ++i)
+      {
+         int s = mr.Storage();
+         Real* in = mr.Data(); Real* out = ssq.data() + mr.Skip();
+         while (s--) *out++ += square(*in++);
+         mr.Next();
+      }
+   }
+   gm->tDelete();
+   ssq.release(); return ssq.for_return();
+}
+
+ReturnMatrix BaseMatrix::sum_rows() const
+{
+   REPORT
+   GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
+   int nr = gm->nrows();
+   ColumnVector sum_vec(nr);
+   if (gm->size() == 0) { REPORT sum_vec = 0.0; }
+   else
+   {
+      MatrixRow mr(gm, LoadOnEntry);
+      for (int i = 1; i <= nr; ++i)
+      {
+         Real sum = 0.0;
+         int s = mr.Storage();
+         Real* in = mr.Data();
+         while (s--) sum += *in++;
+         sum_vec(i) = sum;   
+         mr.Next();
+      }
+   }
+   gm->tDelete();
+   sum_vec.release(); return sum_vec.for_return();
+}
+
+ReturnMatrix BaseMatrix::sum_columns() const
+{
+   REPORT
+   GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
+   int nr = gm->nrows(); int nc = gm->ncols();
+   RowVector sum_vec(nc); sum_vec = 0.0;
+   if (gm->size() != 0)
+   {
+      MatrixRow mr(gm, LoadOnEntry);
+      for (int i = 1; i <= nr; ++i)
+      {
+         int s = mr.Storage();
+         Real* in = mr.Data(); Real* out = sum_vec.data() + mr.Skip();
+         while (s--) *out++ += *in++;
+         mr.Next();
+      }
+   }
+   gm->tDelete();
+   sum_vec.release(); return sum_vec.for_return();
 }
 
 
@@ -732,3 +828,5 @@ LinearEquationSolver::LinearEquationSolver(const BaseMatrix& bm)
 }
 #endif
 
+
+///}

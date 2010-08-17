@@ -32,3 +32,56 @@ double mvnpdf(int xd, double* px,
 		InvChol.ReleaseAndDelete();
 		return val;
 	 };
+
+void mvnpdf(int xd, int xp, double* px, 
+	 int md, double* mu,
+	 int sd, int sp, double* sigma,
+	 int outd, double* out)
+	 {
+	 	for(int i = 0; i<xd; i++){
+	 		out[i] = mvnpdf(xp, &px[i*xp], md, mu, sd, sp, sigma);
+	 	};
+	 };
+	 
+double wmvnpdf(int xd, double* px,
+	 double pi,
+	 int md, double* mu,
+	 int sd, int sp, double* sigma)
+	 {
+	 	return pi * mvnpdf(xd, px, md, mu, sd, sp, sigma);
+	 };
+	 
+void wmvnpdf(int xd, int xp, double* px, 
+	 double pi,
+	 int md, double* mu,
+	 int sd, int sp, double* sigma,
+	 int outd, double* out)
+	 {
+	 	for(int i = 0; i<xd; i++){
+	 		out[i] = pi * mvnpdf(xp, &px[i*xp], md, mu, sd, sp, sigma);
+	 	};
+	 };
+
+	 
+void wmvnpdf(int xd, int xp, double* px, 
+	int pd, double* pi,
+	int md, int mp, double*mu,
+	int sk, int sd, int sp, double* sigma,
+	int outd, double* out)
+	{
+		if ((xp != mp) or 
+		(mp != sd) or
+		(sd != sp) or
+		(pd != md) or
+		(md != sk) or
+		(outd != xd*pd)) {
+			std::cout << "miss match in dim" << std::endl;
+		} 
+		else {
+			for(int j = 0; j < xd; ++j) {
+				for(int i = 0; i< pd; ++i){
+					out[pd*j+i] = pi[i] * mvnpdf(xp, &px[j*xp], mp, &mu[mp*i], sd, sp, &sigma[sd*sp*i]);
+			};
+		};
+		};
+	};

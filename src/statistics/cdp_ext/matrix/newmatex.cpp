@@ -1,10 +1,11 @@
-//$$ newmatex.cpp                    Exception handler
+/// \file newmatex.cpp
+/// \brief Exceptions thrown by matrix library.
 
 // Copyright (C) 1992,3,4,7: R B Davies
 
 #define WANT_STREAM                  // include.h will get stream fns
 
-#include "nminclude.h"                 // include standard files
+#include "include.h"                 // include standard files
 #include "newmat.h"
 
 #ifdef use_namespace
@@ -30,22 +31,29 @@ unsigned long InternalException::Select;
 static void MatrixDetails(const GeneralMatrix& A)
 // write matrix details to Exception buffer
 {
-   MatrixBandWidth bw = A.BandWidth(); int ubw = bw.upper; int lbw = bw.lower;
-   Exception::AddMessage("MatrixType = ");
-   Exception::AddMessage(A.Type().Value());
-   Exception::AddMessage("  # Rows = "); Exception::AddInt(A.Nrows());
-   Exception::AddMessage("; # Cols = "); Exception::AddInt(A.Ncols());
+   MatrixBandWidth bw = A.bandwidth();
+   int ubw = bw.upper_val; int lbw = bw.lower_val;
+   BaseException::AddMessage("MatrixType = ");
+   BaseException::AddMessage(A.Type().Value());
+   BaseException::AddMessage("  # Rows = "); BaseException::AddInt(A.Nrows());
+   BaseException::AddMessage("; # Cols = "); BaseException::AddInt(A.Ncols());
    if (lbw >=0)
-      { Exception::AddMessage("; lower BW = "); Exception::AddInt(lbw); }
+   {
+      BaseException::AddMessage("; lower BW = ");
+      BaseException::AddInt(lbw);
+   }
    if (ubw >=0)
-      { Exception::AddMessage("; upper BW = "); Exception::AddInt(ubw); }
-   Exception::AddMessage("\n");
+   {
+      BaseException::AddMessage("; upper BW = ");
+      BaseException::AddInt(ubw);
+   }
+   BaseException::AddMessage("\n");
 }
 
 NPDException::NPDException(const GeneralMatrix& A)
    : Runtime_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: matrix not positive definite\n\n");
    MatrixDetails(A);
    Tracer::AddTrace();
@@ -54,7 +62,7 @@ NPDException::NPDException(const GeneralMatrix& A)
 SingularException::SingularException(const GeneralMatrix& A)
    : Runtime_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: matrix is singular\n\n");
    MatrixDetails(A);
    Tracer::AddTrace();
@@ -63,7 +71,7 @@ SingularException::SingularException(const GeneralMatrix& A)
 ConvergenceException::ConvergenceException(const GeneralMatrix& A)
    : Runtime_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: process fails to converge\n\n");
    MatrixDetails(A);
    Tracer::AddTrace();
@@ -71,7 +79,7 @@ ConvergenceException::ConvergenceException(const GeneralMatrix& A)
 
 ConvergenceException::ConvergenceException(const char* c) : Runtime_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: ");
    AddMessage(c); AddMessage("\n\n");
    if (c) Tracer::AddTrace();
@@ -79,7 +87,7 @@ ConvergenceException::ConvergenceException(const char* c) : Runtime_error()
 
 OverflowException::OverflowException(const char* c) : Runtime_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: ");
    AddMessage(c); AddMessage("\n\n");
    if (c) Tracer::AddTrace();
@@ -87,7 +95,7 @@ OverflowException::OverflowException(const char* c) : Runtime_error()
 
 ProgramException::ProgramException(const char* c) : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: ");
    AddMessage(c); AddMessage("\n\n");
    if (c) Tracer::AddTrace();
@@ -96,7 +104,7 @@ ProgramException::ProgramException(const char* c) : Logic_error()
 ProgramException::ProgramException(const char* c, const GeneralMatrix& A)
    : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: ");
    AddMessage(c); AddMessage("\n\n");
    MatrixDetails(A);
@@ -106,7 +114,7 @@ ProgramException::ProgramException(const char* c, const GeneralMatrix& A)
 ProgramException::ProgramException(const char* c, const GeneralMatrix& A,
    const GeneralMatrix& B) : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: ");
    AddMessage(c); AddMessage("\n\n");
    MatrixDetails(A); MatrixDetails(B);
@@ -116,7 +124,7 @@ ProgramException::ProgramException(const char* c, const GeneralMatrix& A,
 ProgramException::ProgramException(const char* c, MatrixType a, MatrixType b)
    : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: ");
    AddMessage(c); AddMessage("\nMatrixTypes = ");
    AddMessage(a.Value()); AddMessage("; ");
@@ -126,7 +134,7 @@ ProgramException::ProgramException(const char* c, MatrixType a, MatrixType b)
 
 VectorException::VectorException() : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: cannot convert matrix to vector\n\n");
    Tracer::AddTrace();
 }
@@ -134,7 +142,7 @@ VectorException::VectorException() : Logic_error()
 VectorException::VectorException(const GeneralMatrix& A)
    : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: cannot convert matrix to vector\n\n");
    MatrixDetails(A);
    Tracer::AddTrace();
@@ -143,16 +151,24 @@ VectorException::VectorException(const GeneralMatrix& A)
 NotSquareException::NotSquareException(const GeneralMatrix& A)
    : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: matrix is not square\n\n");
    MatrixDetails(A);
+   Tracer::AddTrace();
+}
+
+NotSquareException::NotSquareException()
+   : Logic_error()
+{
+   Select = BaseException::Select;
+   AddMessage("detected by Newmat: matrix is not square\n\n");
    Tracer::AddTrace();
 }
 
 SubMatrixDimensionException::SubMatrixDimensionException()
    : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: incompatible submatrix dimension\n\n");
    Tracer::AddTrace();
 }
@@ -160,7 +176,7 @@ SubMatrixDimensionException::SubMatrixDimensionException()
 IncompatibleDimensionsException::IncompatibleDimensionsException()
    : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: incompatible dimensions\n\n");
    Tracer::AddTrace();
 }
@@ -169,16 +185,26 @@ IncompatibleDimensionsException::IncompatibleDimensionsException
    (const GeneralMatrix& A, const GeneralMatrix& B)
       : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: incompatible dimensions\n\n");
    MatrixDetails(A); MatrixDetails(B);
+   Tracer::AddTrace();
+}
+
+IncompatibleDimensionsException::IncompatibleDimensionsException
+   (const GeneralMatrix& A)
+      : Logic_error()
+{
+   Select = BaseException::Select;
+   AddMessage("detected by Newmat: incompatible dimensions\n\n");
+   MatrixDetails(A);
    Tracer::AddTrace();
 }
 
 NotDefinedException::NotDefinedException(const char* op, const char* matrix)
    : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: ");
    AddMessage(op);
    AddMessage(" not defined for ");
@@ -190,7 +216,7 @@ NotDefinedException::NotDefinedException(const char* op, const char* matrix)
 CannotBuildException::CannotBuildException(const char* matrix)
    : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: cannot build matrix type ");
    AddMessage(matrix); AddMessage("\n\n");
    Tracer::AddTrace();
@@ -199,7 +225,7 @@ CannotBuildException::CannotBuildException(const char* matrix)
 IndexException::IndexException(int i, const GeneralMatrix& A)
    : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: index error: requested index = ");
    AddInt(i); AddMessage("\n\n");
    MatrixDetails(A);
@@ -209,7 +235,7 @@ IndexException::IndexException(int i, const GeneralMatrix& A)
 IndexException::IndexException(int i, int j, const GeneralMatrix& A)
    : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: index error: requested indices = ");
    AddInt(i); AddMessage(", "); AddInt(j);
    AddMessage("\n\n");
@@ -221,7 +247,7 @@ IndexException::IndexException(int i, int j, const GeneralMatrix& A)
 IndexException::IndexException(int i, const GeneralMatrix& A, bool)
    : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("detected by Newmat: element error: requested index (wrt 0) = ");
    AddInt(i);
    AddMessage("\n\n");
@@ -232,7 +258,7 @@ IndexException::IndexException(int i, const GeneralMatrix& A, bool)
 IndexException::IndexException(int i, int j, const GeneralMatrix& A, bool)
    : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage(
       "detected by Newmat: element error: requested indices (wrt 0) = ");
    AddInt(i); AddMessage(", "); AddInt(j);
@@ -243,7 +269,7 @@ IndexException::IndexException(int i, int j, const GeneralMatrix& A, bool)
 
 InternalException::InternalException(const char* c) : Logic_error()
 {
-   Select = Exception::Select;
+   Select = BaseException::Select;
    AddMessage("internal error detected by Newmat: please inform author\n");
    AddMessage(c); AddMessage("\n\n");
    Tracer::AddTrace();
@@ -272,7 +298,7 @@ ExeCounter::~ExeCounter()
 
 /**************************** error handler *******************************/
 
-void MatrixErrorNoSpace(void* v) { if (!v) Throw(Bad_alloc()); }
+void MatrixErrorNoSpace(const void* v) { if (!v) Throw(Bad_alloc()); }
 // throw exception if v is null
 
 
@@ -285,20 +311,12 @@ void CroutMatrix::GetRow(MatrixRowCol&)
    { Throw(NotDefinedException("GetRow","Crout")); }
 void CroutMatrix::GetCol(MatrixRowCol&)
    { Throw(NotDefinedException("GetCol","Crout")); }
-void CroutMatrix::operator=(const BaseMatrix&)
-   { Throw(NotDefinedException("=","Crout")); }
 void BandLUMatrix::GetRow(MatrixRowCol&)
    { Throw(NotDefinedException("GetRow","BandLUMatrix")); }
 void BandLUMatrix::GetCol(MatrixRowCol&)
    { Throw(NotDefinedException("GetCol","BandLUMatrix")); }
-void BandLUMatrix::operator=(const BaseMatrix&)
-   { Throw(NotDefinedException("=","BandLUMatrix")); }
 void BaseMatrix::IEQND() const
    { Throw(NotDefinedException("inequalities", "matrices")); }
-#ifdef TEMPS_DESTROYED_QUICKLY_R
-   ReturnMatrixX::ReturnMatrixX(const ReturnMatrixX& tm)
-     : gm(tm.gm) { Throw(ProgramException("ReturnMatrixX error")); }
-#endif
 
 
 #ifdef use_namespace

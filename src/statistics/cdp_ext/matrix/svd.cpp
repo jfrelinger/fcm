@@ -1,11 +1,15 @@
-//$$svd.cpp                           singular value decomposition
+/// \ingroup newmat
+///@{
+
+/// \file svd.cpp
+/// Singular value decomposition.
 
 // Copyright (C) 1991,2,3,4,5: R B Davies
 // Updated 17 July, 1995
 
 #define WANT_MATH
 
-#include "nminclude.h"
+#include "include.h"
 #include "newmatap.h"
 #include "newmatrm.h"
 #include "precisio.h"
@@ -21,29 +25,6 @@ namespace NEWMAT {
 #endif
 
 
-static Real pythag(Real f, Real g, Real& c, Real& s)
-// return z=sqrt(f*f+g*g), c=f/z, s=g/z
-// set c=1,s=0 if z==0
-// avoid floating point overflow or divide by zero
-{
-   if (f==0 && g==0) { c=1.0; s=0.0; return 0.0; }
-   Real af = f>=0 ? f : -f;
-   Real ag = g>=0 ? g : -g;
-   if (ag<af)
-   {
-      REPORT
-      Real h = g/f; Real sq = sqrt(1.0+h*h);
-      if (f<0) sq = -sq;           // make return value non-negative
-      c = 1.0/sq; s = h/sq; return sq*f;
-   }
-   else
-   {
-      REPORT
-      Real h = f/g; Real sq = sqrt(1.0+h*h);
-      if (g<0) sq = -sq;
-      s = 1.0/sq; c = h/sq; return sq*g;
-   }
-}
 
 
 void SVD(const Matrix& A, DiagonalMatrix& Q, Matrix& U, Matrix& V,
@@ -213,7 +194,7 @@ void SVD(const Matrix& A, DiagonalMatrix& Q, Matrix& U, Matrix& V,
    if (withU & withV) SortSV(Q, U, V);
    else if (withU) SortSV(Q, U);
    else if (withV) SortSV(Q, V);
-   else SortDescending(Q);
+   else sort_descending(Q);
 }
 
 void SVD(const Matrix& A, DiagonalMatrix& D)
@@ -225,3 +206,4 @@ void SVD(const Matrix& A, DiagonalMatrix& D)
 }
 #endif
 
+///@}

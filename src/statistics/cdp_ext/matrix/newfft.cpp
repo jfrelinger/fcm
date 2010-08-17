@@ -1,4 +1,9 @@
-//$ newfft.cpp
+/// \ingroup newmat
+///@{
+
+/// \file newfft.cpp
+/// Fast Fourier transform using Sande and Gentleman method.
+
 
 // This is originally by Sande and Gentleman in 1967! I have translated from
 // Fortran into C and a little bit of C++.
@@ -1056,4 +1061,5 @@ static int BitReverse(int x, int prod, int n, const SimpleIntArray& f)
 }
 #endif
 
+///@}
 

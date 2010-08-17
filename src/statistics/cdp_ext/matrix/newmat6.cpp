@@ -1,8 +1,12 @@
-//$$ newmat6.cpp            Operators, element access, submatrices
+/// \ingroup newmat
+///@{
+
+/// \file newmat6.cpp
+/// Operators, element access.
 
 // Copyright (C) 1991,2,3,4: R B Davies
 
-#include "nminclude.h"
+#include "include.h"
 
 #include "newmat.h"
 #include "newmatrc.h"
@@ -30,15 +34,15 @@ static int tristore(int n)                      // els in triangular matrix
 Real& Matrix::operator()(int m, int n)
 {
    REPORT
-   if (m<=0 || m>nrows || n<=0 || n>ncols)
+   if (m<=0 || m>nrows_val || n<=0 || n>ncols_val)
       Throw(IndexException(m,n,*this));
-   return store[(m-1)*ncols+n-1];
+   return store[(m-1)*ncols_val+n-1];
 }
 
 Real& SymmetricMatrix::operator()(int m, int n)
 {
    REPORT
-   if (m<=0 || n<=0 || m>nrows || n>ncols)
+   if (m<=0 || n<=0 || m>nrows_val || n>ncols_val)
       Throw(IndexException(m,n,*this));
    if (m>=n) return store[tristore(m-1)+n-1];
    else return store[tristore(n-1)+m-1];
@@ -47,15 +51,15 @@ Real& SymmetricMatrix::operator()(int m, int n)
 Real& UpperTriangularMatrix::operator()(int m, int n)
 {
    REPORT
-   if (m<=0 || n<m || n>ncols)
+   if (m<=0 || n<m || n>ncols_val)
       Throw(IndexException(m,n,*this));
-   return store[(m-1)*ncols+n-1-tristore(m-1)];
+   return store[(m-1)*ncols_val+n-1-tristore(m-1)];
 }
 
 Real& LowerTriangularMatrix::operator()(int m, int n)
 {
    REPORT
-   if (n<=0 || m<n || m>nrows)
+   if (n<=0 || m<n || m>nrows_val)
       Throw(IndexException(m,n,*this));
    return store[tristore(m-1)+n-1];
 }
@@ -63,7 +67,7 @@ Real& LowerTriangularMatrix::operator()(int m, int n)
 Real& DiagonalMatrix::operator()(int m, int n)
 {
    REPORT
-   if (n<=0 || m!=n || m>nrows || n>ncols)
+   if (n<=0 || m!=n || m>nrows_val || n>ncols_val)
       Throw(IndexException(m,n,*this));
    return store[n-1];
 }
@@ -71,29 +75,29 @@ Real& DiagonalMatrix::operator()(int m, int n)
 Real& DiagonalMatrix::operator()(int m)
 {
    REPORT
-   if (m<=0 || m>nrows) Throw(IndexException(m,*this));
+   if (m<=0 || m>nrows_val) Throw(IndexException(m,*this));
    return store[m-1];
 }
 
 Real& ColumnVector::operator()(int m)
 {
    REPORT
-   if (m<=0 || m> nrows) Throw(IndexException(m,*this));
+   if (m<=0 || m> nrows_val) Throw(IndexException(m,*this));
    return store[m-1];
 }
 
 Real& RowVector::operator()(int n)
 {
    REPORT
-   if (n<=0 || n> ncols) Throw(IndexException(n,*this));
+   if (n<=0 || n> ncols_val) Throw(IndexException(n,*this));
    return store[n-1];
 }
 
 Real& BandMatrix::operator()(int m, int n)
 {
    REPORT
-   int w = upper+lower+1; int i = lower+n-m;
-   if (m<=0 || m>nrows || n<=0 || n>ncols || i<0 || i>=w)
+   int w = upper_val+lower_val+1; int i = lower_val+n-m;
+   if (m<=0 || m>nrows_val || n<=0 || n>ncols_val || i<0 || i>=w)
       Throw(IndexException(m,n,*this));
    return store[w*(m-1)+i];
 }
@@ -101,8 +105,8 @@ Real& BandMatrix::operator()(int m, int n)
 Real& UpperBandMatrix::operator()(int m, int n)
 {
    REPORT
-   int w = upper+1; int i = n-m;
-   if (m<=0 || m>nrows || n<=0 || n>ncols || i<0 || i>=w)
+   int w = upper_val+1; int i = n-m;
+   if (m<=0 || m>nrows_val || n<=0 || n>ncols_val || i<0 || i>=w)
       Throw(IndexException(m,n,*this));
    return store[w*(m-1)+i];
 }
@@ -110,8 +114,8 @@ Real& UpperBandMatrix::operator()(int m, int n)
 Real& LowerBandMatrix::operator()(int m, int n)
 {
    REPORT
-   int w = lower+1; int i = lower+n-m;
-   if (m<=0 || m>nrows || n<=0 || n>ncols || i<0 || i>=w)
+   int w = lower_val+1; int i = lower_val+n-m;
+   if (m<=0 || m>nrows_val || n<=0 || n>ncols_val || i<0 || i>=w)
       Throw(IndexException(m,n,*this));
    return store[w*(m-1)+i];
 }
@@ -119,20 +123,20 @@ Real& LowerBandMatrix::operator()(int m, int n)
 Real& SymmetricBandMatrix::operator()(int m, int n)
 {
    REPORT
-   int w = lower+1;
+   int w = lower_val+1;
    if (m>=n)
    {
       REPORT
-      int i = lower+n-m;
-      if ( m>nrows || n<=0 || i<0 )
+      int i = lower_val+n-m;
+      if ( m>nrows_val || n<=0 || i<0 )
          Throw(IndexException(m,n,*this));
       return store[w*(m-1)+i];
    }
    else
    {
       REPORT
-      int i = lower+m-n;
-      if ( n>nrows || m<=0 || i<0 )
+      int i = lower_val+m-n;
+      if ( n>nrows_val || m<=0 || i<0 )
          Throw(IndexException(m,n,*this));
       return store[w*(n-1)+i];
    }
@@ -142,15 +146,15 @@ Real& SymmetricBandMatrix::operator()(int m, int n)
 Real Matrix::operator()(int m, int n) const
 {
    REPORT
-   if (m<=0 || m>nrows || n<=0 || n>ncols)
+   if (m<=0 || m>nrows_val || n<=0 || n>ncols_val)
       Throw(IndexException(m,n,*this));
-   return store[(m-1)*ncols+n-1];
+   return store[(m-1)*ncols_val+n-1];
 }
 
 Real SymmetricMatrix::operator()(int m, int n) const
 {
    REPORT
-   if (m<=0 || n<=0 || m>nrows || n>ncols)
+   if (m<=0 || n<=0 || m>nrows_val || n>ncols_val)
       Throw(IndexException(m,n,*this));
    if (m>=n) return store[tristore(m-1)+n-1];
    else return store[tristore(n-1)+m-1];
@@ -159,15 +163,15 @@ Real SymmetricMatrix::operator()(int m, int n) const
 Real UpperTriangularMatrix::operator()(int m, int n) const
 {
    REPORT
-   if (m<=0 || n<m || n>ncols)
+   if (m<=0 || n<m || n>ncols_val)
       Throw(IndexException(m,n,*this));
-   return store[(m-1)*ncols+n-1-tristore(m-1)];
+   return store[(m-1)*ncols_val+n-1-tristore(m-1)];
 }
 
 Real LowerTriangularMatrix::operator()(int m, int n) const
 {
    REPORT
-   if (n<=0 || m<n || m>nrows)
+   if (n<=0 || m<n || m>nrows_val)
       Throw(IndexException(m,n,*this));
    return store[tristore(m-1)+n-1];
 }
@@ -175,7 +179,7 @@ Real LowerTriangularMatrix::operator()(int m, int n) const
 Real DiagonalMatrix::operator()(int m, int n) const
 {
    REPORT
-   if (n<=0 || m!=n || m>nrows || n>ncols)
+   if (n<=0 || m!=n || m>nrows_val || n>ncols_val)
       Throw(IndexException(m,n,*this));
    return store[n-1];
 }
@@ -183,29 +187,29 @@ Real DiagonalMatrix::operator()(int m, int n) const
 Real DiagonalMatrix::operator()(int m) const
 {
    REPORT
-   if (m<=0 || m>nrows) Throw(IndexException(m,*this));
+   if (m<=0 || m>nrows_val) Throw(IndexException(m,*this));
    return store[m-1];
 }
 
 Real ColumnVector::operator()(int m) const
 {
    REPORT
-   if (m<=0 || m> nrows) Throw(IndexException(m,*this));
+   if (m<=0 || m> nrows_val) Throw(IndexException(m,*this));
    return store[m-1];
 }
 
 Real RowVector::operator()(int n) const
 {
    REPORT
-   if (n<=0 || n> ncols) Throw(IndexException(n,*this));
+   if (n<=0 || n> ncols_val) Throw(IndexException(n,*this));
    return store[n-1];
 }
 
 Real BandMatrix::operator()(int m, int n) const
 {
    REPORT
-   int w = upper+lower+1; int i = lower+n-m;
-   if (m<=0 || m>nrows || n<=0 || n>ncols || i<0 || i>=w)
+   int w = upper_val+lower_val+1; int i = lower_val+n-m;
+   if (m<=0 || m>nrows_val || n<=0 || n>ncols_val || i<0 || i>=w)
       Throw(IndexException(m,n,*this));
    return store[w*(m-1)+i];
 }
@@ -213,8 +217,8 @@ Real BandMatrix::operator()(int m, int n) const
 Real UpperBandMatrix::operator()(int m, int n) const
 {
    REPORT
-   int w = upper+1; int i = n-m;
-   if (m<=0 || m>nrows || n<=0 || n>ncols || i<0 || i>=w)
+   int w = upper_val+1; int i = n-m;
+   if (m<=0 || m>nrows_val || n<=0 || n>ncols_val || i<0 || i>=w)
       Throw(IndexException(m,n,*this));
    return store[w*(m-1)+i];
 }
@@ -222,8 +226,8 @@ Real UpperBandMatrix::operator()(int m, int n) const
 Real LowerBandMatrix::operator()(int m, int n) const
 {
    REPORT
-   int w = lower+1; int i = lower+n-m;
-   if (m<=0 || m>nrows || n<=0 || n>ncols || i<0 || i>=w)
+   int w = lower_val+1; int i = lower_val+n-m;
+   if (m<=0 || m>nrows_val || n<=0 || n>ncols_val || i<0 || i>=w)
       Throw(IndexException(m,n,*this));
    return store[w*(m-1)+i];
 }
@@ -231,34 +235,34 @@ Real LowerBandMatrix::operator()(int m, int n) const
 Real SymmetricBandMatrix::operator()(int m, int n) const
 {
    REPORT
-   int w = lower+1;
+   int w = lower_val+1;
    if (m>=n)
    {
       REPORT
-      int i = lower+n-m;
-      if ( m>nrows || n<=0 || i<0 )
+      int i = lower_val+n-m;
+      if ( m>nrows_val || n<=0 || i<0 )
          Throw(IndexException(m,n,*this));
       return store[w*(m-1)+i];
    }
    else
    {
       REPORT
-      int i = lower+m-n;
-      if ( n>nrows || m<=0 || i<0 )
+      int i = lower_val+m-n;
+      if ( n>nrows_val || m<=0 || i<0 )
          Throw(IndexException(m,n,*this));
       return store[w*(n-1)+i];
    }
 }
 
 
-Real BaseMatrix::AsScalar() const
+Real BaseMatrix::as_scalar() const
 {
    REPORT
    GeneralMatrix* gm = ((BaseMatrix&)*this).Evaluate();
 
-   if (gm->nrows!=1 || gm->ncols!=1)
+   if (gm->nrows_val!=1 || gm->ncols_val!=1)
    {
-      Tracer tr("AsScalar");
+      Tracer tr("as_scalar");
       Try
          { Throw(ProgramException("Cannot convert to scalar", *gm)); }
       CatchAll { gm->tDelete(); ReThrow; }
@@ -267,180 +271,6 @@ Real BaseMatrix::AsScalar() const
    Real x = *(gm->store); gm->tDelete(); return x;
 }
 
-#ifdef TEMPS_DESTROYED_QUICKLY
-
-AddedMatrix& BaseMatrix::operator+(const BaseMatrix& bm) const
-{
-   REPORT
-   AddedMatrix* x = new AddedMatrix(this, &bm);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-SPMatrix& SP(const BaseMatrix& bm1,const BaseMatrix& bm2)
-{
-   REPORT
-   SPMatrix* x = new SPMatrix(&bm1, &bm2);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-KPMatrix& KP(const BaseMatrix& bm1,const BaseMatrix& bm2)
-{
-   REPORT
-   KPMatrix* x = new KPMatrix(&bm1, &bm2);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-MultipliedMatrix& BaseMatrix::operator*(const BaseMatrix& bm) const
-{
-   REPORT
-   MultipliedMatrix* x = new MultipliedMatrix(this, &bm);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-ConcatenatedMatrix& BaseMatrix::operator|(const BaseMatrix& bm) const
-{
-   REPORT
-   ConcatenatedMatrix* x = new ConcatenatedMatrix(this, &bm);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-StackedMatrix& BaseMatrix::operator&(const BaseMatrix& bm) const
-{
-   REPORT
-   StackedMatrix* x = new StackedMatrix(this, &bm);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-//SolvedMatrix& InvertedMatrix::operator*(const BaseMatrix& bmx) const
-SolvedMatrix& InvertedMatrix::operator*(const BaseMatrix& bmx)
-{
-   REPORT
-   SolvedMatrix* x;
-   Try { x = new SolvedMatrix(bm, &bmx); MatrixErrorNoSpace(x); }
-   CatchAll { delete this; ReThrow; }
-   delete this;                // since we are using bm rather than this
-   return *x;
-}
-
-SubtractedMatrix& BaseMatrix::operator-(const BaseMatrix& bm) const
-{
-   REPORT
-   SubtractedMatrix* x = new SubtractedMatrix(this, &bm);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-ShiftedMatrix& BaseMatrix::operator+(Real f) const
-{
-   REPORT
-   ShiftedMatrix* x = new ShiftedMatrix(this, f);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-NegShiftedMatrix& operator-(Real f,const BaseMatrix& bm1)
-{
-   REPORT
-   NegShiftedMatrix* x = new NegShiftedMatrix(f, &bm1);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-ScaledMatrix& BaseMatrix::operator*(Real f) const
-{
-   REPORT
-   ScaledMatrix* x = new ScaledMatrix(this, f);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-ScaledMatrix& BaseMatrix::operator/(Real f) const
-{
-   REPORT
-   ScaledMatrix* x = new ScaledMatrix(this, 1.0/f);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-ShiftedMatrix& BaseMatrix::operator-(Real f) const
-{
-   REPORT
-   ShiftedMatrix* x = new ShiftedMatrix(this, -f);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-TransposedMatrix& BaseMatrix::t() const
-{
-   REPORT
-   TransposedMatrix* x = new TransposedMatrix(this);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-NegatedMatrix& BaseMatrix::operator-() const
-{
-   REPORT
-   NegatedMatrix* x = new NegatedMatrix(this);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-ReversedMatrix& BaseMatrix::Reverse() const
-{
-   REPORT
-   ReversedMatrix* x = new ReversedMatrix(this);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-InvertedMatrix& BaseMatrix::i() const
-{
-   REPORT
-   InvertedMatrix* x = new InvertedMatrix(this);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-RowedMatrix& BaseMatrix::AsRow() const
-{
-   REPORT
-   RowedMatrix* x = new RowedMatrix(this);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-ColedMatrix& BaseMatrix::AsColumn() const
-{
-   REPORT
-   ColedMatrix* x = new ColedMatrix(this);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-DiagedMatrix& BaseMatrix::AsDiagonal() const
-{
-   REPORT
-   DiagedMatrix* x = new DiagedMatrix(this);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-MatedMatrix& BaseMatrix::AsMatrix(int nrx, int ncx) const
-{
-   REPORT
-   MatedMatrix* x = new MatedMatrix(this,nrx,ncx);
-   MatrixErrorNoSpace(x);
-   return *x;
-}
-
-#else
 
 AddedMatrix BaseMatrix::operator+(const BaseMatrix& bm) const
 { REPORT return AddedMatrix(this, &bm); }
@@ -469,6 +299,9 @@ SubtractedMatrix BaseMatrix::operator-(const BaseMatrix& bm) const
 ShiftedMatrix BaseMatrix::operator+(Real f) const
 { REPORT return ShiftedMatrix(this, f); }
 
+ShiftedMatrix operator+(Real f, const BaseMatrix& BM)
+{ REPORT return ShiftedMatrix(&BM, f); }
+
 NegShiftedMatrix operator-(Real f, const BaseMatrix& bm)
 { REPORT return NegShiftedMatrix(f, &bm); }
 
@@ -477,6 +310,9 @@ ScaledMatrix BaseMatrix::operator*(Real f) const
 
 ScaledMatrix BaseMatrix::operator/(Real f) const
 { REPORT return ScaledMatrix(this, 1.0/f); }
+
+ScaledMatrix operator*(Real f, const BaseMatrix& BM)
+{ REPORT return ScaledMatrix(&BM, f); }
 
 ShiftedMatrix BaseMatrix::operator-(Real f) const
 { REPORT return ShiftedMatrix(this, -f); }
@@ -487,26 +323,25 @@ TransposedMatrix BaseMatrix::t() const
 NegatedMatrix BaseMatrix::operator-() const
 { REPORT return NegatedMatrix(this); }
 
-ReversedMatrix BaseMatrix::Reverse() const
+ReversedMatrix BaseMatrix::reverse() const
 { REPORT return ReversedMatrix(this); }
 
 InvertedMatrix BaseMatrix::i() const
 { REPORT return InvertedMatrix(this); }
 
 
-RowedMatrix BaseMatrix::AsRow() const
+RowedMatrix BaseMatrix::as_row() const
 { REPORT return RowedMatrix(this); }
 
-ColedMatrix BaseMatrix::AsColumn() const
+ColedMatrix BaseMatrix::as_column() const
 { REPORT return ColedMatrix(this); }
 
-DiagedMatrix BaseMatrix::AsDiagonal() const
+DiagedMatrix BaseMatrix::as_diagonal() const
 { REPORT return DiagedMatrix(this); }
 
-MatedMatrix BaseMatrix::AsMatrix(int nrx, int ncx) const
+MatedMatrix BaseMatrix::as_matrix(int nrx, int ncx) const
 { REPORT return MatedMatrix(this,nrx,ncx); }
 
-#endif
 
 void GeneralMatrix::operator=(Real f)
 { REPORT int i=storage; Real* s=store; while (i--) { *s++ = f; } }
@@ -518,12 +353,29 @@ void Matrix::operator=(const BaseMatrix& X)
    Eq(X,MatrixType::Rt);
 } 
 
+void SquareMatrix::operator=(const BaseMatrix& X)
+{
+   REPORT //CheckConversion(X);
+   // MatrixConversionCheck mcc;
+   Eq(X,MatrixType::Rt);
+   if (nrows_val != ncols_val)
+      { Tracer tr("SquareMatrix(=)"); Throw(NotSquareException(*this)); }
+}
+
+void SquareMatrix::operator=(const Matrix& m)
+{
+   REPORT
+   if (m.nrows_val != m.ncols_val)
+      { Tracer tr("SquareMatrix(=Matrix)"); Throw(NotSquareException(*this)); }
+   Eq(m);
+}
+
 void RowVector::operator=(const BaseMatrix& X)
 {
    REPORT  // CheckConversion(X);
    // MatrixConversionCheck mcc;
    Eq(X,MatrixType::RV);
-   if (nrows!=1)
+   if (nrows_val!=1)
       { Tracer tr("RowVector(=)"); Throw(VectorException(*this)); }
 }
 
@@ -532,7 +384,7 @@ void ColumnVector::operator=(const BaseMatrix& X)
    REPORT //CheckConversion(X);
    // MatrixConversionCheck mcc;
    Eq(X,MatrixType::CV);
-   if (ncols!=1)
+   if (ncols_val!=1)
       { Tracer tr("ColumnVector(=)"); Throw(VectorException(*this)); }
 }
 
@@ -571,11 +423,41 @@ void IdentityMatrix::operator=(const BaseMatrix& X)
    Eq(X,MatrixType::Id);
 }
 
-void GeneralMatrix::operator<<(const Real* r)
+
+void CroutMatrix::operator=(const CroutMatrix& gm)
+{
+   if (&gm == this) { REPORT tag_val = -1; return; }
+   REPORT
+   if (indx > 0) { delete [] indx; indx = 0; }
+   ((CroutMatrix&)gm).get_aux(*this);
+   Eq(gm);
+}
+   
+
+
+
+
+void GeneralMatrix::operator<<(const double* r)
 {
    REPORT
    int i = storage; Real* s=store;
-   while(i--) *s++ = *r++;
+   while(i--) *s++ = (Real)*r++;
+}
+
+
+void GeneralMatrix::operator<<(const float* r)
+{
+   REPORT
+   int i = storage; Real* s=store;
+   while(i--) *s++ = (Real)*r++;
+}
+
+
+void GeneralMatrix::operator<<(const int* r)
+{
+   REPORT
+   int i = storage; Real* s=store;
+   while(i--) *s++ = (Real)*r++;
 }
 
 
@@ -604,9 +486,6 @@ void GenericMatrix::operator=(const BaseMatrix& bmx)
 
 /*************************** += etc ***************************************/
 
-// will also need versions for SubMatrix
-
-
 
 // GeneralMatrix operators
 
@@ -615,19 +494,25 @@ void GeneralMatrix::operator+=(const BaseMatrix& X)
    REPORT
    Tracer tr("GeneralMatrix::operator+=");
    // MatrixConversionCheck mcc;
-   Protect();                                   // so it cannot get deleted
-						// during Evaluate
+   Protect();  // so it cannot get deleted during Evaluate
    GeneralMatrix* gm = ((BaseMatrix&)X).Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   AddedMatrix* am = new AddedMatrix(this,gm);
-   MatrixErrorNoSpace(am);
-   if (gm==this) Release(2); else Release();
-   Eq2(*am,Type());
-#else
    AddedMatrix am(this,gm);
    if (gm==this) Release(2); else Release();
-   Eq2(am,Type());
-#endif
+   Eq2(am,type());
+}
+
+// GeneralMatrix operators
+
+void GeneralMatrix::SP_eq(const BaseMatrix& X)
+{
+   REPORT
+   Tracer tr("GeneralMatrix::SP_eq");
+   // MatrixConversionCheck mcc;
+   Protect();  // so it cannot get deleted during Evaluate
+   GeneralMatrix* gm = ((BaseMatrix&)X).Evaluate();
+   SPMatrix spm(this,gm);
+   if (gm==this) Release(2); else Release();
+   Eq2(spm,type());
 }
 
 void GeneralMatrix::operator-=(const BaseMatrix& X)
@@ -638,16 +523,9 @@ void GeneralMatrix::operator-=(const BaseMatrix& X)
    Protect();                                   // so it cannot get deleted
 						// during Evaluate
    GeneralMatrix* gm = ((BaseMatrix&)X).Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   SubtractedMatrix* am = new SubtractedMatrix(this,gm);
-   MatrixErrorNoSpace(am);
-   if (gm==this) Release(2); else Release();
-   Eq2(*am,Type());
-#else
    SubtractedMatrix am(this,gm);
    if (gm==this) Release(2); else Release();
-   Eq2(am,Type());
-#endif
+   Eq2(am,type());
 }
 
 void GeneralMatrix::operator*=(const BaseMatrix& X)
@@ -658,16 +536,9 @@ void GeneralMatrix::operator*=(const BaseMatrix& X)
    Protect();                                   // so it cannot get deleted
 						// during Evaluate
    GeneralMatrix* gm = ((BaseMatrix&)X).Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   MultipliedMatrix* am = new MultipliedMatrix(this,gm);
-   MatrixErrorNoSpace(am);
-   if (gm==this) Release(2); else Release();
-   Eq2(*am,Type());
-#else
    MultipliedMatrix am(this,gm);
    if (gm==this) Release(2); else Release();
-   Eq2(am,Type());
-#endif
+   Eq2(am,type());
 }
 
 void GeneralMatrix::operator|=(const BaseMatrix& X)
@@ -678,16 +549,9 @@ void GeneralMatrix::operator|=(const BaseMatrix& X)
    Protect();                                   // so it cannot get deleted
 						// during Evaluate
    GeneralMatrix* gm = ((BaseMatrix&)X).Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   ConcatenatedMatrix* am = new ConcatenatedMatrix(this,gm);
-   MatrixErrorNoSpace(am);
-   if (gm==this) Release(2); else Release();
-   Eq2(*am,Type());
-#else
    ConcatenatedMatrix am(this,gm);
    if (gm==this) Release(2); else Release();
-   Eq2(am,Type());
-#endif
+   Eq2(am,type());
 }
 
 void GeneralMatrix::operator&=(const BaseMatrix& X)
@@ -698,16 +562,9 @@ void GeneralMatrix::operator&=(const BaseMatrix& X)
    Protect();                                   // so it cannot get deleted
 						// during Evaluate
    GeneralMatrix* gm = ((BaseMatrix&)X).Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   StackedMatrix* am = new StackedMatrix(this,gm);
-   MatrixErrorNoSpace(am);
-   if (gm==this) Release(2); else Release();
-   Eq2(*am,Type());
-#else
    StackedMatrix am(this,gm);
    if (gm==this) Release(2); else Release();
-   Eq2(am,Type());
-#endif
+   Eq2(am,type());
 }
 
 void GeneralMatrix::operator+=(Real r)
@@ -715,14 +572,8 @@ void GeneralMatrix::operator+=(Real r)
    REPORT
    Tracer tr("GeneralMatrix::operator+=(Real)");
    // MatrixConversionCheck mcc;
-#ifdef TEMPS_DESTROYED_QUICKLY
-   ShiftedMatrix* am = new ShiftedMatrix(this,r);
-   MatrixErrorNoSpace(am);
-   Release(); Eq2(*am,Type());
-#else
    ShiftedMatrix am(this,r);
-   Release(); Eq2(am,Type());
-#endif
+   Release(); Eq2(am,type());
 }
 
 void GeneralMatrix::operator*=(Real r)
@@ -730,14 +581,8 @@ void GeneralMatrix::operator*=(Real r)
    REPORT
    Tracer tr("GeneralMatrix::operator*=(Real)");
    // MatrixConversionCheck mcc;
-#ifdef TEMPS_DESTROYED_QUICKLY
-   ScaledMatrix* am = new ScaledMatrix(this,r);
-   MatrixErrorNoSpace(am);
-   Release(); Eq2(*am,Type());
-#else
    ScaledMatrix am(this,r);
-   Release(); Eq2(am,Type());
-#endif
+   Release(); Eq2(am,type());
 }
 
 
@@ -750,16 +595,24 @@ void GenericMatrix::operator+=(const BaseMatrix& X)
    if (!gm) Throw(ProgramException("GenericMatrix is null"));
    gm->Protect();            // so it cannot get deleted during Evaluate
    GeneralMatrix* gmx = ((BaseMatrix&)X).Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   AddedMatrix* am = new AddedMatrix(gm,gmx);
-   MatrixErrorNoSpace(am);
-   if (gmx==gm) gm->Release(2); else gm->Release();
-   GeneralMatrix* gmy = am->Evaluate();
-#else
    AddedMatrix am(gm,gmx);
    if (gmx==gm) gm->Release(2); else gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-#endif
+   if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
+   else { REPORT }
+   gm->Protect();
+}
+
+void GenericMatrix::SP_eq(const BaseMatrix& X)
+{
+   REPORT
+   Tracer tr("GenericMatrix::SP_eq");
+   if (!gm) Throw(ProgramException("GenericMatrix is null"));
+   gm->Protect();            // so it cannot get deleted during Evaluate
+   GeneralMatrix* gmx = ((BaseMatrix&)X).Evaluate();
+   SPMatrix spm(gm,gmx);
+   if (gmx==gm) gm->Release(2); else gm->Release();
+   GeneralMatrix* gmy = spm.Evaluate();
    if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
    else { REPORT }
    gm->Protect();
@@ -772,16 +625,9 @@ void GenericMatrix::operator-=(const BaseMatrix& X)
    if (!gm) Throw(ProgramException("GenericMatrix is null"));
    gm->Protect();            // so it cannot get deleted during Evaluate
    GeneralMatrix* gmx = ((BaseMatrix&)X).Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   SubtractedMatrix* am = new SubtractedMatrix(gm,gmx);
-   MatrixErrorNoSpace(am);
-   if (gmx==gm) gm->Release(2); else gm->Release();
-   GeneralMatrix* gmy = am->Evaluate();
-#else
    SubtractedMatrix am(gm,gmx);
    if (gmx==gm) gm->Release(2); else gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-#endif
    if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
    else { REPORT }
    gm->Protect();
@@ -794,16 +640,9 @@ void GenericMatrix::operator*=(const BaseMatrix& X)
    if (!gm) Throw(ProgramException("GenericMatrix is null"));
    gm->Protect();            // so it cannot get deleted during Evaluate
    GeneralMatrix* gmx = ((BaseMatrix&)X).Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   MultipliedMatrix* am = new MultipliedMatrix(gm,gmx);
-   MatrixErrorNoSpace(am);
-   if (gmx==gm) gm->Release(2); else gm->Release();
-   GeneralMatrix* gmy = am->Evaluate();
-#else
    MultipliedMatrix am(gm,gmx);
    if (gmx==gm) gm->Release(2); else gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-#endif
    if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
    else { REPORT }
    gm->Protect();
@@ -816,16 +655,9 @@ void GenericMatrix::operator|=(const BaseMatrix& X)
    if (!gm) Throw(ProgramException("GenericMatrix is null"));
    gm->Protect();            // so it cannot get deleted during Evaluate
    GeneralMatrix* gmx = ((BaseMatrix&)X).Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   ConcatenatedMatrix* am = new ConcatenatedMatrix(gm,gmx);
-   MatrixErrorNoSpace(am);
-   if (gmx==gm) gm->Release(2); else gm->Release();
-   GeneralMatrix* gmy = am->Evaluate();
-#else
    ConcatenatedMatrix am(gm,gmx);
    if (gmx==gm) gm->Release(2); else gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-#endif
    if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
    else { REPORT }
    gm->Protect();
@@ -838,16 +670,9 @@ void GenericMatrix::operator&=(const BaseMatrix& X)
    if (!gm) Throw(ProgramException("GenericMatrix is null"));
    gm->Protect();            // so it cannot get deleted during Evaluate
    GeneralMatrix* gmx = ((BaseMatrix&)X).Evaluate();
-#ifdef TEMPS_DESTROYED_QUICKLY
-   StackedMatrix* am = new StackedMatrix(gm,gmx);
-   MatrixErrorNoSpace(am);
-   if (gmx==gm) gm->Release(2); else gm->Release();
-   GeneralMatrix* gmy = am->Evaluate();
-#else
    StackedMatrix am(gm,gmx);
    if (gmx==gm) gm->Release(2); else gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-#endif
    if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
    else { REPORT }
    gm->Protect();
@@ -858,16 +683,9 @@ void GenericMatrix::operator+=(Real r)
    REPORT
    Tracer tr("GenericMatrix::operator+= (Real)");
    if (!gm) Throw(ProgramException("GenericMatrix is null"));
-#ifdef TEMPS_DESTROYED_QUICKLY
-   ShiftedMatrix* am = new ShiftedMatrix(gm,r);
-   MatrixErrorNoSpace(am);
-   gm->Release();
-   GeneralMatrix* gmy = am->Evaluate();
-#else
    ShiftedMatrix am(gm,r);
    gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-#endif
    if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
    else { REPORT }
    gm->Protect();
@@ -878,16 +696,9 @@ void GenericMatrix::operator*=(Real r)
    REPORT
    Tracer tr("GenericMatrix::operator*= (Real)");
    if (!gm) Throw(ProgramException("GenericMatrix is null"));
-#ifdef TEMPS_DESTROYED_QUICKLY
-   ScaledMatrix* am = new ScaledMatrix(gm,r);
-   MatrixErrorNoSpace(am);
-   gm->Release();
-   GeneralMatrix* gmy = am->Evaluate();
-#else
    ScaledMatrix am(gm,r);
    gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-#endif
    if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
    else { REPORT }
    gm->Protect();
@@ -899,23 +710,23 @@ void GenericMatrix::operator*=(Real r)
 Real& Matrix::element(int m, int n)
 {
    REPORT
-   if (m<0 || m>= nrows || n<0 || n>= ncols)
+   if (m<0 || m>= nrows_val || n<0 || n>= ncols_val)
       Throw(IndexException(m,n,*this,true));
-   return store[m*ncols+n];
+   return store[m*ncols_val+n];
 }
 
 Real Matrix::element(int m, int n) const
 {
    REPORT
-   if (m<0 || m>= nrows || n<0 || n>= ncols)
+   if (m<0 || m>= nrows_val || n<0 || n>= ncols_val)
       Throw(IndexException(m,n,*this,true));
-   return store[m*ncols+n];
+   return store[m*ncols_val+n];
 }
 
 Real& SymmetricMatrix::element(int m, int n)
 {
    REPORT
-   if (m<0 || n<0 || m >= nrows || n>=ncols)
+   if (m<0 || n<0 || m >= nrows_val || n>=ncols_val)
       Throw(IndexException(m,n,*this,true));
    if (m>=n) return store[tristore(m)+n];
    else return store[tristore(n)+m];
@@ -924,7 +735,7 @@ Real& SymmetricMatrix::element(int m, int n)
 Real SymmetricMatrix::element(int m, int n) const
 {
    REPORT
-   if (m<0 || n<0 || m >= nrows || n>=ncols)
+   if (m<0 || n<0 || m >= nrows_val || n>=ncols_val)
       Throw(IndexException(m,n,*this,true));
    if (m>=n) return store[tristore(m)+n];
    else return store[tristore(n)+m];
@@ -933,23 +744,23 @@ Real SymmetricMatrix::element(int m, int n) const
 Real& UpperTriangularMatrix::element(int m, int n)
 {
    REPORT
-   if (m<0 || n<m || n>=ncols)
+   if (m<0 || n<m || n>=ncols_val)
       Throw(IndexException(m,n,*this,true));
-   return store[m*ncols+n-tristore(m)];
+   return store[m*ncols_val+n-tristore(m)];
 }
 
 Real UpperTriangularMatrix::element(int m, int n) const
 {
    REPORT
-   if (m<0 || n<m || n>=ncols)
+   if (m<0 || n<m || n>=ncols_val)
       Throw(IndexException(m,n,*this,true));
-   return store[m*ncols+n-tristore(m)];
+   return store[m*ncols_val+n-tristore(m)];
 }
 
 Real& LowerTriangularMatrix::element(int m, int n)
 {
    REPORT
-   if (n<0 || m<n || m>=nrows)
+   if (n<0 || m<n || m>=nrows_val)
       Throw(IndexException(m,n,*this,true));
    return store[tristore(m)+n];
 }
@@ -957,7 +768,7 @@ Real& LowerTriangularMatrix::element(int m, int n)
 Real LowerTriangularMatrix::element(int m, int n) const
 {
    REPORT
-   if (n<0 || m<n || m>=nrows)
+   if (n<0 || m<n || m>=nrows_val)
       Throw(IndexException(m,n,*this,true));
    return store[tristore(m)+n];
 }
@@ -965,7 +776,7 @@ Real LowerTriangularMatrix::element(int m, int n) const
 Real& DiagonalMatrix::element(int m, int n)
 {
    REPORT
-   if (n<0 || m!=n || m>=nrows || n>=ncols)
+   if (n<0 || m!=n || m>=nrows_val || n>=ncols_val)
       Throw(IndexException(m,n,*this,true));
    return store[n];
 }
@@ -973,7 +784,7 @@ Real& DiagonalMatrix::element(int m, int n)
 Real DiagonalMatrix::element(int m, int n) const
 {
    REPORT
-   if (n<0 || m!=n || m>=nrows || n>=ncols)
+   if (n<0 || m!=n || m>=nrows_val || n>=ncols_val)
       Throw(IndexException(m,n,*this,true));
    return store[n];
 }
@@ -981,50 +792,50 @@ Real DiagonalMatrix::element(int m, int n) const
 Real& DiagonalMatrix::element(int m)
 {
    REPORT
-   if (m<0 || m>=nrows) Throw(IndexException(m,*this,true));
+   if (m<0 || m>=nrows_val) Throw(IndexException(m,*this,true));
    return store[m];
 }
 
 Real DiagonalMatrix::element(int m) const
 {
    REPORT
-   if (m<0 || m>=nrows) Throw(IndexException(m,*this,true));
+   if (m<0 || m>=nrows_val) Throw(IndexException(m,*this,true));
    return store[m];
 }
 
 Real& ColumnVector::element(int m)
 {
    REPORT
-   if (m<0 || m>= nrows) Throw(IndexException(m,*this,true));
+   if (m<0 || m>= nrows_val) Throw(IndexException(m,*this,true));
    return store[m];
 }
 
 Real ColumnVector::element(int m) const
 {
    REPORT
-   if (m<0 || m>= nrows) Throw(IndexException(m,*this,true));
+   if (m<0 || m>= nrows_val) Throw(IndexException(m,*this,true));
    return store[m];
 }
 
 Real& RowVector::element(int n)
 {
    REPORT
-   if (n<0 || n>= ncols)  Throw(IndexException(n,*this,true));
+   if (n<0 || n>= ncols_val)  Throw(IndexException(n,*this,true));
    return store[n];
 }
 
 Real RowVector::element(int n) const
 {
    REPORT
-   if (n<0 || n>= ncols)  Throw(IndexException(n,*this,true));
+   if (n<0 || n>= ncols_val)  Throw(IndexException(n,*this,true));
    return store[n];
 }
 
 Real& BandMatrix::element(int m, int n)
 {
    REPORT
-   int w = upper+lower+1; int i = lower+n-m;
-   if (m<0 || m>= nrows || n<0 || n>= ncols || i<0 || i>=w)
+   int w = upper_val+lower_val+1; int i = lower_val+n-m;
+   if (m<0 || m>= nrows_val || n<0 || n>= ncols_val || i<0 || i>=w)
       Throw(IndexException(m,n,*this,true));
    return store[w*m+i];
 }
@@ -1032,8 +843,8 @@ Real& BandMatrix::element(int m, int n)
 Real BandMatrix::element(int m, int n) const
 {
    REPORT
-   int w = upper+lower+1; int i = lower+n-m;
-   if (m<0 || m>= nrows || n<0 || n>= ncols || i<0 || i>=w)
+   int w = upper_val+lower_val+1; int i = lower_val+n-m;
+   if (m<0 || m>= nrows_val || n<0 || n>= ncols_val || i<0 || i>=w)
       Throw(IndexException(m,n,*this,true));
    return store[w*m+i];
 }
@@ -1041,8 +852,8 @@ Real BandMatrix::element(int m, int n) const
 Real& UpperBandMatrix::element(int m, int n)
 {
    REPORT
-   int w = upper+1; int i = n-m;
-   if (m<0 || m>= nrows || n<0 || n>= ncols || i<0 || i>=w)
+   int w = upper_val+1; int i = n-m;
+   if (m<0 || m>= nrows_val || n<0 || n>= ncols_val || i<0 || i>=w)
       Throw(IndexException(m,n,*this,true));
    return store[w*m+i];
 }
@@ -1050,8 +861,8 @@ Real& UpperBandMatrix::element(int m, int n)
 Real UpperBandMatrix::element(int m, int n) const
 {
    REPORT
-   int w = upper+1; int i = n-m;
-   if (m<0 || m>= nrows || n<0 || n>= ncols || i<0 || i>=w)
+   int w = upper_val+1; int i = n-m;
+   if (m<0 || m>= nrows_val || n<0 || n>= ncols_val || i<0 || i>=w)
       Throw(IndexException(m,n,*this,true));
    return store[w*m+i];
 }
@@ -1059,8 +870,8 @@ Real UpperBandMatrix::element(int m, int n) const
 Real& LowerBandMatrix::element(int m, int n)
 {
    REPORT
-   int w = lower+1; int i = lower+n-m;
-   if (m<0 || m>= nrows || n<0 || n>= ncols || i<0 || i>=w)
+   int w = lower_val+1; int i = lower_val+n-m;
+   if (m<0 || m>= nrows_val || n<0 || n>= ncols_val || i<0 || i>=w)
       Throw(IndexException(m,n,*this,true));
    return store[w*m+i];
 }
@@ -1068,8 +879,8 @@ Real& LowerBandMatrix::element(int m, int n)
 Real LowerBandMatrix::element(int m, int n) const
 {
    REPORT
-   int w = lower+1; int i = lower+n-m;
-   if (m<0 || m>= nrows || n<0 || n>= ncols || i<0 || i>=w)
+   int w = lower_val+1; int i = lower_val+n-m;
+   if (m<0 || m>= nrows_val || n<0 || n>= ncols_val || i<0 || i>=w)
       Throw(IndexException(m,n,*this,true));
    return store[w*m+i];
 }
@@ -1077,20 +888,20 @@ Real LowerBandMatrix::element(int m, int n) const
 Real& SymmetricBandMatrix::element(int m, int n)
 {
    REPORT
-   int w = lower+1;
+   int w = lower_val+1;
    if (m>=n)
    {
       REPORT
-      int i = lower+n-m;
-      if ( m>=nrows || n<0 || i<0 )
+      int i = lower_val+n-m;
+      if ( m>=nrows_val || n<0 || i<0 )
          Throw(IndexException(m,n,*this,true));
       return store[w*m+i];
    }
    else
    {
       REPORT
-      int i = lower+m-n;
-      if ( n>=nrows || m<0 || i<0 )
+      int i = lower_val+m-n;
+      if ( n>=nrows_val || m<0 || i<0 )
          Throw(IndexException(m,n,*this,true));
       return store[w*n+i];
    }
@@ -1099,20 +910,20 @@ Real& SymmetricBandMatrix::element(int m, int n)
 Real SymmetricBandMatrix::element(int m, int n) const
 {
    REPORT
-   int w = lower+1;
+   int w = lower_val+1;
    if (m>=n)
    {
       REPORT
-      int i = lower+n-m;
-      if ( m>=nrows || n<0 || i<0 )
+      int i = lower_val+n-m;
+      if ( m>=nrows_val || n<0 || i<0 )
          Throw(IndexException(m,n,*this,true));
       return store[w*m+i];
    }
    else
    {
       REPORT
-      int i = lower+m-n;
-      if ( n>=nrows || m<0 || i<0 )
+      int i = lower_val+m-n;
+      if ( n>=nrows_val || m<0 || i<0 )
          Throw(IndexException(m,n,*this,true));
       return store[w*n+i];
    }
@@ -1122,3 +933,5 @@ Real SymmetricBandMatrix::element(int m, int n) const
 }
 #endif
 
+
+///}

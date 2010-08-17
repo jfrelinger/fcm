@@ -1,4 +1,8 @@
-//$$ newmatio.h           definition file for matrix package input/output
+/// \ingroup newmat
+///@{
+
+/// \file newmatio.h
+/// Definition file for matrix package output.
 
 // Copyright (C) 1991,2,3,4: R B Davies
 
@@ -15,9 +19,10 @@
 namespace NEWMAT {
 #endif
 
+#include <fstream>
+#include <iostream>
 
-
-/**************************** input/output *****************************/
+// **************************** input/output *****************************/
 
 ostream& operator<<(ostream&, const BaseMatrix&);
 
@@ -59,3 +64,5 @@ Omanip_width setw(int i);
 
 // body file: newmat9.cpp
 
+
+///@}

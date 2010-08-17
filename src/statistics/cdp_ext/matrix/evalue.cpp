@@ -1,10 +1,14 @@
-//$$evalue.cpp                           eigen-value decomposition
+/// \ingroup newmat
+///@{
+
+/// \file evalue.cpp
+/// Eigen-value decomposition (Householder method).
 
 // Copyright (C) 1991,2,3,4: R B Davies
 
 #define WANT_MATH
 
-#include "nminclude.h"
+#include "include.h"
 #include "newmatap.h"
 #include "newmatrm.h"
 #include "precisio.h"
@@ -28,8 +32,8 @@ static void tred2(const SymmetricMatrix& A, DiagonalMatrix& D,
    REPORT
    Real tol =
       FloatingPointPrecision::Minimum()/FloatingPointPrecision::Epsilon();
-   int n = A.Nrows(); Z.ReSize(n,n); Z.Inject(A);
-   D.ReSize(n); E.ReSize(n);
+   int n = A.Nrows(); Z.resize(n,n); Z.Inject(A);
+   D.resize(n); E.resize(n);
    Real* z = Z.Store(); int i;
 
    for (i=n-1; i > 0; i--)                   // i=0 is excluded
@@ -183,7 +187,7 @@ static void tred3(const SymmetricMatrix& X, DiagonalMatrix& D,
    REPORT
    Real tol =
       FloatingPointPrecision::Minimum()/FloatingPointPrecision::Epsilon();
-   int n = X.Nrows(); A = X; D.ReSize(n); E.ReSize(n);
+   int n = X.Nrows(); A = X; D.resize(n); E.resize(n);
    Real* ei = E.Store() + n;
    for (int i = n-1; i >= 0; i--)
    {
@@ -280,13 +284,13 @@ static void tql1(DiagonalMatrix& D, DiagonalMatrix& E)
    }
 }
 
-void EigenValues(const SymmetricMatrix& A, DiagonalMatrix& D, Matrix& Z)
+void eigenvalues(const SymmetricMatrix& A, DiagonalMatrix& D, Matrix& Z)
 { REPORT DiagonalMatrix E; tred2(A, D, E, Z); tql2(D, E, Z); SortSV(D,Z,true); }
 
-void EigenValues(const SymmetricMatrix& X, DiagonalMatrix& D)
+void eigenvalues(const SymmetricMatrix& X, DiagonalMatrix& D)
 { REPORT DiagonalMatrix E; SymmetricMatrix A; tred3(X,D,E,A); tql1(D,E); }
 
-void EigenValues(const SymmetricMatrix& X, DiagonalMatrix& D,
+void eigenvalues(const SymmetricMatrix& X, DiagonalMatrix& D,
    SymmetricMatrix& A)
 { REPORT DiagonalMatrix E; tred3(X,D,E,A); tql1(D,E); }
 
@@ -294,4 +298,6 @@ void EigenValues(const SymmetricMatrix& X, DiagonalMatrix& D,
 #ifdef use_namespace
 }
 #endif
+
+///@}
 

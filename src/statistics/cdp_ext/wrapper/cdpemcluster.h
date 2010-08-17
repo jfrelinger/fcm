@@ -1,20 +1,23 @@
-#ifndef CDPCLUSTER_H_
-#define CDPCLUSTER_H_
+#ifndef CDPEMCLUSTER_H_
+#define CDPEMCLUSTER_H_
 
 #include "MersenneTwister.h"
 #include "Model.h"
-#include "cdp.h"
+#include "cdp_em.h"
+#include "cdpresultem.h"
+
 
 //int main(int argc,char* argv[]);
 
-class cdpcluster{
+class cdpemcluster{
 	public:
-	virtual ~cdpcluster(); 
-	cdpcluster(int n, int d, double* x);
-	void makeResult();
+	virtual ~cdpemcluster(); 
+	cdpemcluster(int n, int d, double* x);
+
+	//void makeResult();
 	void run();
-	void step();
-	void stepburn();
+	//void step();
+	//void stepburn();
 	void setseed(int x);
 	void setT(int t);
 	void setJ(int j);
@@ -106,12 +109,14 @@ class cdpcluster{
 	void loadRowsCols(double* from, vector<SymmetricMatrix>& to, int idx, int rows, int columns);
 	void loadRows(double* from, RowVector& A, int cols);
 	bool resultInit;
-	CDPResult* param;
-	//CDPResult result;
+	
+	CDP cdpfunctions;
+	CDPResultEM* param;
+	
 	Model model;
-	CDP cdp;
+	CDP_EM cdp;
 	MTRand mt;
 	bool verbose;
 };
 
-#endif /*CDPCLUSTER_H_*/
+#endif /*CDPEMCLUSTER_H_*/

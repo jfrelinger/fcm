@@ -1,5 +1,11 @@
 #pragma once
 // extension to handle extra EM variables
+
+#if  defined(PYWRAP)
+	#include "cdpresult.h"
+#endif
+#define WANT_STREAM
+
 class CDPResultEM : public CDPResult 
 {
 public:

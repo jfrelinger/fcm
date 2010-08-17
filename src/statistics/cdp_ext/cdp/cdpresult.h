@@ -1,4 +1,9 @@
 #pragma once
+#include <vector>
+#define WANT_STREAM
+
+
+
 //class concurrent_vector;
 class CDPResult
 {

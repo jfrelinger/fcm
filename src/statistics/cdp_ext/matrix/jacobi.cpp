@@ -1,4 +1,9 @@
-//$$jacobi.cpp                           jacobi eigenvalue analysis
+/// \ingroup newmat
+///@{
+
+/// \file jacobi.cpp
+/// Eigen value decomposition using Jacobi method.
+
 
 // Copyright (C) 1991,2,3,4: R B Davies
 
@@ -8,7 +13,7 @@
 
 #define WANT_MATH
 
-#include "nminclude.h"
+#include "include.h"
 #include "newmatap.h"
 #include "precisio.h"
 #include "newmatrm.h"
@@ -30,8 +35,8 @@ void Jacobi(const SymmetricMatrix& X, DiagonalMatrix& D, SymmetricMatrix& A,
    Real epsilon = FloatingPointPrecision::Epsilon();
    Tracer et("Jacobi");
    REPORT
-   int n = X.Nrows(); DiagonalMatrix B(n), Z(n); D.ReSize(n); A = X;
-   if (eivec) { REPORT V.ReSize(n,n); D = 1.0; V = D; }
+   int n = X.Nrows(); DiagonalMatrix B(n), Z(n); D.resize(n); A = X;
+   if (eivec) { REPORT V.resize(n,n); D = 1.0; V = D; }
    B << A; D = B; Z = 0.0; A.Inject(Z);
    bool converged = false;
    for (int i=1; i<=50; i++)
@@ -121,3 +126,5 @@ void Jacobi(const SymmetricMatrix& X, DiagonalMatrix& D, Matrix& V)
 }
 #endif
 
+
+///@}

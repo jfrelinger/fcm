@@ -1,4 +1,10 @@
-//$$ newmat1.cpp   Matrix type functions
+/// \ingroup newmat
+///@{
+
+/// \file newmat1.cpp
+/// MatrixType functions.
+/// Find the type of a matrix resulting from a multiply, add etc
+/// Make a new matrix corresponding to a MatrixType
 
 // Copyright (C) 1991,2,3,4: R B Davies
 
@@ -20,17 +26,19 @@ namespace NEWMAT {
 /************************* MatrixType functions *****************************/
 
 
+// Skew needs more work <<<<<<<<<
+
 // all operations to return MatrixTypes which correspond to valid types
 // of matrices.
 // Eg: if it has the Diagonal attribute, then it must also have
-// Upper, Lower, Band and Symmetric.
+// Upper, Lower, Band, Square and Symmetric.
 
 
 MatrixType MatrixType::operator*(const MatrixType& mt) const
 {
    REPORT
-   int a = attribute & mt.attribute & ~Symmetric;
-   a |= (a & Diagonal) * 31;                   // recognise diagonal
+   int a = attribute & mt.attribute & ~(Symmetric | Skew);
+   a |= (a & Diagonal) * 63;                   // recognise diagonal
    return MatrixType(a);
 }
 
@@ -42,21 +50,32 @@ MatrixType MatrixType::SP(const MatrixType& mt) const
 // Will need to include both Skew => Symmetric
 {
    REPORT
-   int a = ((attribute | mt.attribute) & ~(Symmetric + Valid + Ones))
+   int a = ((attribute | mt.attribute) & ~(Symmetric + Skew + Valid + Ones))
       | (attribute & mt.attribute);
    if ((a & Lower) != 0  &&  (a & Upper) != 0) a |= Diagonal;
-   a |= (a & Diagonal) * 31;                   // recognise diagonal
+   if ((attribute & Skew) != 0)
+   {
+      if ((mt.attribute & Symmetric) != 0) a |= Skew;  
+      if ((mt.attribute & Skew) != 0) { a &= ~Skew; a |= Symmetric; }
+   }
+   else if ((mt.attribute & Skew) != 0 && (attribute & Symmetric) != 0)
+      a |= Skew;  
+   a |= (a & Diagonal) * 63;                   // recognise diagonal
    return MatrixType(a);
 }
 
 MatrixType MatrixType::KP(const MatrixType& mt) const
 // Kronecker product
 // Lower, Upper, Diag, Symmetric, Band, Valid if both are
-// Do not treat Band separately
+// Band if LHS is band & other is square 
 // Ones is complicated so leave this out
 {
    REPORT
-   int a = (attribute & mt.attribute) & ~Ones;
+   int a = (attribute & mt.attribute)  & ~Ones;
+   if ((attribute & Band) != 0 && (mt.attribute & Square) != 0)
+      a |= Band;
+   //int a = ((attribute & mt.attribute) | (attribute & Band)) & ~Ones;
+
    return MatrixType(a);
 }
 
@@ -64,7 +83,7 @@ MatrixType MatrixType::i() const               // type of inverse
 {
    REPORT
    int a = attribute & ~(Band+LUDeco);
-   a |= (a & Diagonal) * 31;                   // recognise diagonal
+   a |= (a & Diagonal) * 63;                   // recognise diagonal
    return MatrixType(a);
 }
 
@@ -85,30 +104,35 @@ MatrixType MatrixType::MultRHS() const
    return (attribute >= Dg) ? attribute : (attribute & ~Symmetric);
 }
 
+// this is used for deciding type of multiplication
 bool Rectangular(MatrixType a, MatrixType b, MatrixType c)
 {
    REPORT
    return
-      ((a.attribute | b.attribute | c.attribute) & ~MatrixType::Valid) == 0;
+      ((a.attribute | b.attribute | c.attribute)
+      & ~(MatrixType::Valid | MatrixType::Square)) == 0;
 }
 
-const char* MatrixType::Value() const
+const char* MatrixType::value() const
 {
 // make a string with the name of matrix with the given attributes
    switch (attribute)
    {
    case Valid:                              REPORT return "Rect ";
-   case Valid+Symmetric:                    REPORT return "Sym  ";
-   case Valid+Band:                         REPORT return "Band ";
-   case Valid+Symmetric+Band:               REPORT return "SmBnd";
-   case Valid+Upper:                        REPORT return "UT   ";
-   case Valid+Diagonal+Symmetric+Band+Upper+Lower:
+   case Valid+Square:                       REPORT return "Squ  ";
+   case Valid+Symmetric+Square:             REPORT return "Sym  ";
+   case Valid+Skew+Square:                  REPORT return "Skew ";
+   case Valid+Band+Square:                  REPORT return "Band ";
+   case Valid+Symmetric+Band+Square:        REPORT return "SmBnd";
+   case Valid+Skew+Band+Square:             REPORT return "SkBnd";
+   case Valid+Upper+Square:                 REPORT return "UT   ";
+   case Valid+Diagonal+Symmetric+Band+Upper+Lower+Square:
                                             REPORT return "Diag ";
-   case Valid+Diagonal+Symmetric+Band+Upper+Lower+Ones:
+   case Valid+Diagonal+Symmetric+Band+Upper+Lower+Ones+Square:
                                             REPORT return "Ident";
-   case Valid+Band+Upper:                   REPORT return "UpBnd";
-   case Valid+Lower:                        REPORT return "LT   ";
-   case Valid+Band+Lower:                   REPORT return "LwBnd";
+   case Valid+Band+Upper+Square:            REPORT return "UpBnd";
+   case Valid+Lower+Square:                 REPORT return "LT   ";
+   case Valid+Band+Lower+Square:            REPORT return "LwBnd";
    default:
       REPORT
       if (!(attribute & Valid))             return "UnSp ";
@@ -132,35 +156,40 @@ GeneralMatrix* MatrixType::New(int nr, int nc, BaseMatrix* bm) const
       if (nr==1) { gm = new RowVector(nc); break; }
       gm = new Matrix(nr, nc); break;
 
-   case Valid+Symmetric:
+   case Valid+Square:
+      REPORT
+      if (nc!=nr) { Throw(NotSquareException()); }
+      gm = new SquareMatrix(nr); break;
+
+   case Valid+Symmetric+Square:
       REPORT gm = new SymmetricMatrix(nr); break;
 
-   case Valid+Band:
+   case Valid+Band+Square:
       {
          REPORT
-         MatrixBandWidth bw = bm->BandWidth();
-         gm = new BandMatrix(nr,bw.lower,bw.upper); break;
+         MatrixBandWidth bw = bm->bandwidth();
+         gm = new BandMatrix(nr,bw.lower_val,bw.upper_val); break;
       }
 
-   case Valid+Symmetric+Band:
-      REPORT gm = new SymmetricBandMatrix(nr,bm->BandWidth().lower); break;
+   case Valid+Symmetric+Band+Square:
+      REPORT gm = new SymmetricBandMatrix(nr,bm->bandwidth().lower_val); break;
 
-   case Valid+Upper:
+   case Valid+Upper+Square:
       REPORT gm = new UpperTriangularMatrix(nr); break;
 
-   case Valid+Diagonal+Symmetric+Band+Upper+Lower:
+   case Valid+Diagonal+Symmetric+Band+Upper+Lower+Square:
       REPORT gm = new DiagonalMatrix(nr); break;
 
-   case Valid+Band+Upper:
-      REPORT gm = new UpperBandMatrix(nr,bm->BandWidth().upper); break;
+   case Valid+Band+Upper+Square:
+      REPORT gm = new UpperBandMatrix(nr,bm->bandwidth().upper_val); break;
 
-   case Valid+Lower:
+   case Valid+Lower+Square:
       REPORT gm = new LowerTriangularMatrix(nr); break;
 
-   case Valid+Band+Lower:
-      REPORT gm = new LowerBandMatrix(nr,bm->BandWidth().lower); break;
+   case Valid+Band+Lower+Square:
+      REPORT gm = new LowerBandMatrix(nr,bm->bandwidth().lower_val); break;
 
-   case Valid+Diagonal+Symmetric+Band+Upper+Lower+Ones:
+   case Valid+Diagonal+Symmetric+Band+Upper+Lower+Ones+Square:
       REPORT gm = new IdentityMatrix(nr); break;
 
    default:
@@ -175,3 +204,6 @@ GeneralMatrix* MatrixType::New(int nr, int nc, BaseMatrix* bm) const
 }
 #endif
 
+
+
+///@}

@@ -1,11 +1,16 @@
-//$$ controlw.h                Control word class
+/// \ingroup newmat
+///@{
+
+/// \file controlw.h
+/// Control word class.
+/// Manipulate bits used for setting options.
+
 
 #ifndef CONTROL_WORD_LIB
 #define CONTROL_WORD_LIB 0
 
-// for organising an int as a series of bits which indicate whether an
-// option is on or off.
-
+/// Organise an int as a series of bits to set options.
+/// \internal
 class ControlWord
 {
 protected:
@@ -46,3 +51,6 @@ public:
 
 
 #endif
+
+///@}
+

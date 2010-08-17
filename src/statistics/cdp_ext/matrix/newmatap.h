@@ -1,4 +1,8 @@
-//$$ newmatap.h           definition file for matrix package applications
+/// \ingroup newmat
+///@{
+
+/// \file newmatap.h
+/// Definition file for advanced matrix functions.
 
 // Copyright (C) 1991,2,3,4,8: R B Davies
 
@@ -21,7 +25,13 @@ void QRZT(const Matrix&, Matrix&, Matrix&);
 
 void QRZ(Matrix&, UpperTriangularMatrix&);
 
-void QRZ(const Matrix&, Matrix&, Matrix&);
+void QRZ(const Matrix&, Matrix&, Matrix&); 
+
+inline void QRZT(Matrix& X, Matrix& Y, LowerTriangularMatrix& L, Matrix& M)
+   { QRZT(X, L); QRZT(X, Y, M); } 
+
+inline void QRZ(Matrix& X, Matrix& Y, UpperTriangularMatrix& U, Matrix& M)
+   { QRZ(X, U); QRZ(X, Y, M); } 
 
 inline void HHDecompose(Matrix& X, LowerTriangularMatrix& L)
 { QRZT(X,L); }
@@ -29,9 +39,70 @@ inline void HHDecompose(Matrix& X, LowerTriangularMatrix& L)
 inline void HHDecompose(const Matrix& X, Matrix& Y, Matrix& M)
 { QRZT(X, Y, M); }
 
+void updateQRZT(Matrix& X, LowerTriangularMatrix& L);
+
+void updateQRZ(Matrix& X, UpperTriangularMatrix& U);
+
+void updateQRZ(const Matrix& X, Matrix& MX, Matrix& MU);
+
+void updateQRZ(UpperTriangularMatrix& X, UpperTriangularMatrix& U);
+
+void updateQRZ(const UpperTriangularMatrix& X, Matrix& MX, Matrix& MU);
+
+inline void UpdateQRZT(Matrix& X, LowerTriangularMatrix& L)
+   { updateQRZT(X, L); }
+
+inline void UpdateQRZ(Matrix& X, UpperTriangularMatrix& U)
+   { updateQRZ(X, U); }
+
+inline void UpdateQRZ(UpperTriangularMatrix& X, UpperTriangularMatrix& U)
+   { updateQRZ(X, U); }
+
+inline void UpdateQRZ(const UpperTriangularMatrix& X, Matrix& MX, Matrix& MU)
+   { updateQRZ(X, MX, MU); }
+   
+inline void UpdateQRZ(const Matrix& X, Matrix& MX, Matrix& MU)
+   { updateQRZ(X, MX, MU); }
+
+
+// Matrix A's first n columns are orthonormal
+// so A.Columns(1,n).t() * A.Columns(1,n) is the identity matrix.
+// Fill out the remaining columns of A to make them orthonormal
+// so A.t() * A is the identity matrix 
+void extend_orthonormal(Matrix& A, int n);
+
+
 ReturnMatrix Cholesky(const SymmetricMatrix&);
 
 ReturnMatrix Cholesky(const SymmetricBandMatrix&);
+
+
+// produces the Cholesky decomposition of A + x.t() * x
+// where A = chol.t() * chol and x is a RowVector
+void update_Cholesky(UpperTriangularMatrix& chol, RowVector x);
+inline void UpdateCholesky(UpperTriangularMatrix& chol, const RowVector& x)
+   { update_Cholesky(chol, x); }
+
+// produces the Cholesky decomposition of A - x.t() * x
+// where A = chol.t() * chol and x is a RowVector
+void downdate_Cholesky(UpperTriangularMatrix &chol, RowVector x);
+inline void DowndateCholesky(UpperTriangularMatrix &chol, const RowVector& x)
+   { downdate_Cholesky(chol, x); }
+
+// a RIGHT circular shift of the rows and columns from
+// 1,...,k-1,k,k+1,...l,l+1,...,p to
+// 1,...,k-1,l,k,k+1,...l-1,l+1,...p
+void right_circular_update_Cholesky(UpperTriangularMatrix &chol, int k, int l);
+inline void RightCircularUpdateCholesky(UpperTriangularMatrix &chol,
+  int k, int l) { right_circular_update_Cholesky(chol, k, l); }
+
+// a LEFT circular shift of the rows and columns from
+// 1,...,k-1,k,k+1,...l,l+1,...,p to
+// 1,...,k-1,k+1,...l,k,l+1,...,p to
+void left_circular_update_Cholesky(UpperTriangularMatrix &chol, int k, int l); 
+inline void LeftCircularUpdateCholesky(UpperTriangularMatrix &chol,
+   int k, int l) { left_circular_update_Cholesky(chol, k, l); } 
+
 
 void SVD(const Matrix&, DiagonalMatrix&, Matrix&, Matrix&,
     bool=true, bool=true);
@@ -54,11 +125,20 @@ void Jacobi(const SymmetricMatrix&, DiagonalMatrix&, Matrix&);
 void Jacobi(const SymmetricMatrix&, DiagonalMatrix&, SymmetricMatrix&,
    Matrix&, bool=true);
 
-void EigenValues(const SymmetricMatrix&, DiagonalMatrix&);
+void eigenvalues(const SymmetricMatrix&, DiagonalMatrix&);
 
-void EigenValues(const SymmetricMatrix&, DiagonalMatrix&, SymmetricMatrix&);
+void eigenvalues(const SymmetricMatrix&, DiagonalMatrix&, SymmetricMatrix&);
 
-void EigenValues(const SymmetricMatrix&, DiagonalMatrix&, Matrix&);
+void eigenvalues(const SymmetricMatrix&, DiagonalMatrix&, Matrix&);
+
+inline void EigenValues(const SymmetricMatrix& A, DiagonalMatrix& D)
+   { eigenvalues(A, D); }
+
+inline void EigenValues(const SymmetricMatrix& A, DiagonalMatrix& D,
+   SymmetricMatrix& S) { eigenvalues(A, D, S); }
+
+inline void EigenValues(const SymmetricMatrix& A, DiagonalMatrix& D, Matrix& V)
+   { eigenvalues(A, D, V); }
 
 class SymmetricEigenAnalysis
 // not implemented yet
@@ -72,12 +152,15 @@ private:
    FREE_CHECK(SymmetricEigenAnalysis)
 };
 
-void SortAscending(GeneralMatrix&);
+void sort_ascending(GeneralMatrix&);
 
-void SortDescending(GeneralMatrix&);
+void sort_descending(GeneralMatrix&);
 
+inline void SortAscending(GeneralMatrix& gm) { sort_ascending(gm); }
 
-// class for deciding which fft to use and containing new fft function
+inline void SortDescending(GeneralMatrix& gm) { sort_descending(gm); }
+
+/// Decide which fft method to use and carry out new fft function
 class FFT_Controller
 {
 public:
@@ -111,6 +194,11 @@ void DCT_inverse(const ColumnVector&, ColumnVector&);
 void DST(const ColumnVector&, ColumnVector&);
 
 void DST_inverse(const ColumnVector&, ColumnVector&);
+
+void FFT2(const Matrix& U, const Matrix& V, Matrix& X, Matrix& Y);
+
+void FFT2I(const Matrix& U, const Matrix& V, Matrix& X, Matrix& Y);
+
 
 // This class is used by the new FFT program
 
@@ -147,6 +235,17 @@ public:
    int Counter() const { return counter; }
 };
 
+// multiplication by Helmert matrix
+ReturnMatrix Helmert(int n, bool full=false);
+ReturnMatrix Helmert(const ColumnVector& X, bool full=false);
+ReturnMatrix Helmert(int n, int j, bool full=false);
+ReturnMatrix Helmert_transpose(const ColumnVector& Y, bool full=false);
+Real Helmert_transpose(const ColumnVector& Y, int j, bool full=false);
+ReturnMatrix Helmert(const Matrix& X, bool full=false);
+ReturnMatrix Helmert_transpose(const Matrix& Y, bool full=false);
+
+
+
 
 #ifdef use_namespace
 }
@@ -164,8 +263,10 @@ public:
 // body file: newfft.cpp
 // body file: sort.cpp
 // body file: svd.cpp
+// body file: nm_misc.cpp
 
 
 
+///@}
 
 

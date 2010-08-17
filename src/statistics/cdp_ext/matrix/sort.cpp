@@ -1,10 +1,14 @@
-//$$ sort.cpp                            Sorting
+/// \ingroup newmat
+///@{
+
+/// \file sort.cpp
+/// Sorting functions.
 
 // Copyright (C) 1991,2,3,4: R B Davies
 
 #define WANT_MATH
 
-#include "nminclude.h"
+#include "include.h"
 
 #include "newmatap.h"
 
@@ -42,10 +46,10 @@ static void InsertionSortAscending(Real* first, const int length,
    int guard);
 
 
-void SortDescending(GeneralMatrix& GM)
+void sort_descending(GeneralMatrix& GM)
 {
    REPORT
-   Tracer et("QuickSortDescending");
+   Tracer et("sort_descending");
 
    Real* data = GM.Store(); int max = GM.Storage();
 
@@ -118,10 +122,10 @@ static void MyQuickSortDescending(Real* first, Real* last, int depth)
    }
 }
 
-void SortAscending(GeneralMatrix& GM)
+void sort_ascending(GeneralMatrix& GM)
 {
    REPORT
-   Tracer et("QuickSortAscending");
+   Tracer et("sort_ascending");
 
    Real* data = GM.Store(); int max = GM.Storage();
 
@@ -270,3 +274,4 @@ void SortSV(DiagonalMatrix& D, Matrix& U, Matrix& V, bool ascending)
 }
 #endif
 
+///@}

@@ -8,35 +8,20 @@
 //#define CDP_CUDA
 
 #include <math.h>
-
 #include <cstdio> // for debugging
-
 #include "stdafx.h"
-
 #include "Model.h"
-
 #define WANT_STREAM                  // include.h will get stream fns
-
 #define WANT_MATH                    // include.h will get math fns
-
 #include "newmatap.h"                // need matrix applications
-
 #include "newmatio.h"                // need matrix output routines
-
 #include "MersenneTwister.h"
-
 #include "specialfunctions2.h"
-
 #include "cdpprior.h"
-
 #include "cdpbase.h"
-
 #include "cdpresult.h"
-
 #include "cdpresultem.h"
-
 #include "cdp.h"
-
 #include "cdp_em.h"
 
 
@@ -44,21 +29,15 @@
 
 
 #if defined(CDP_TBB)
-
 	#include "cdpt.h"
-
 #endif
 
 
 
 #if defined(CDP_CUDA)
-
 	#include "CDPBaseCUDA.h"
-
 	#include <cutil_inline.h>
-
 	#include <cuda_runtime_api.h>
-
 #endif
 
 //int DIM,MEAN_CHD_DIM,PACK_DIM,CHD_DIM,LOGDET_OFFSET,DATA_PADDED_DIM,NCHUNKSIZE;
@@ -74,19 +53,22 @@ CDP_EM::CDP_EM()
 
 
 
-CDP_EM::~CDP_EM(void)
+CDP_EM::~CDP_EM()
 
 {
-
-	/*for (int i = 0; i < prior.N; i++) {
-
+	mX = 0;
+	/*
+	if (mX != 0){
+	for (int i = 0; i < prior.N; i++) {
 		delete [] mX[i];
-
+		mX[i] = 0;
 	}
+	delete [] mX;
+	mX = 0;
+	};
+	*/
 
-	delete [] mX;*/
-
-}
+};
 
 
 

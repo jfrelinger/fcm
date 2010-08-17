@@ -1,4 +1,9 @@
-//$$ fft.cpp                         Fast fourier transform
+/// \ingroup newmat
+///@{
+
+/// \file fft.cpp
+/// \brief Fast Fourier (Carl de Boor) and trig transforms.
+
 
 // Copyright (C) 1991,2,3,4,8: R B Davies
 
@@ -6,7 +11,7 @@
 #define WANT_MATH
 // #define WANT_STREAM
 
-#include "nminclude.h"
+#include "include.h"
 
 #include "newmatap.h"
 
@@ -136,7 +141,7 @@ void RealFFT(const ColumnVector& U, ColumnVector& X, ColumnVector& Y)
    while (i--) { *a++ = *u++; *b++ = *u++; }
    FFT(A,B,A,B);
    int n21 = n2 + 1;
-   X.ReSize(n21); Y.ReSize(n21);
+   X.resize(n21); Y.resize(n21);
    i = n2 - 1;
    a = A.Store(); b = B.Store();              // first els of A and B
    Real* an = a + i; Real* bn = b + i;        // last els of A and B
@@ -188,7 +193,7 @@ void RealFFTI(const ColumnVector& A, const ColumnVector& B, ColumnVector& U)
       *xn-- =  hn * ( ap - samcbp); *yn-- =  - hn * (-bm + sbpcam);
    }
    FFT(X,Y,X,Y);             // have done inverting elsewhere
-   U.ReSize(n); i = n2;
+   U.resize(n); i = n2;
    x = X.Store(); y = Y.Store(); Real* u = U.Store();
    while (i--) { *u++ = *x++; *u++ = - *y++; }
 }
@@ -215,15 +220,9 @@ void FFT(const ColumnVector& U, const ColumnVector& V,
 
    ColumnVector B = V;
    ColumnVector A = U;
-   X.ReSize(n); Y.ReSize(n);
+   X.resize(n); Y.resize(n);
    const int nextmx = 8;
-#ifndef ATandT
    int prime[8] = { 2,3,5,7,11,13,17,19 };
-#else
-   int prime[8];
-   prime[0]=2; prime[1]=3; prime[2]=5; prime[3]=7;
-   prime[4]=11; prime[5]=13; prime[6]=17; prime[7]=19;
-#endif
    int after = 1; int before = n; int next = 0; bool inzee = true;
    int now = 0; int b1;             // initialised to keep gnu happy
 
@@ -244,7 +243,7 @@ void FFT(const ColumnVector& U, const ColumnVector& V,
    }
    while (before != 1);
 
-   if (inzee) { REPORT A.Release(); X = A; B.Release(); Y = B; }
+   if (inzee) { REPORT A.release(); X = A; B.release(); Y = B; }
 }
 
 // Trigonometric transforms
@@ -265,8 +264,8 @@ void DCT_II(const ColumnVector& U, ColumnVector& V)
    int i = n2;
    while (i--) { *a++ = *u++; *(--b) = *u++; }
    ColumnVector X, Y;
-   RealFFT(A, X, Y); A.CleanUp();
-   V.ReSize(n);
+   RealFFT(A, X, Y); A.cleanup();
+   V.resize(n);
    Real* x = X.Store(); Real* y = Y.Store();
    Real* v = V.Store(); Real* w = v + n;
    *v = *x;
@@ -300,7 +299,7 @@ void DCT_II_inverse(const ColumnVector& V, ColumnVector& U)
       *(++x) = vi * c + wi * s; *(++y) = vi * s - wi * c;
    }
    ColumnVector A; RealFFTI(X, Y, A);
-   X.CleanUp(); Y.CleanUp(); U.ReSize(n);
+   X.cleanup(); Y.cleanup(); U.resize(n);
    Real* a = A.Store(); Real* b = a + n; Real* u = U.Store();
    i = n2;
    while (i--) { *u++ = *a++; *u++ = *(--b); }
@@ -320,8 +319,8 @@ void DST_II(const ColumnVector& U, ColumnVector& V)
    int i = n2;
    while (i--) { *a++ = *u++; *(--b) = -(*u++); }
    ColumnVector X, Y;
-   RealFFT(A, X, Y); A.CleanUp();
-   V.ReSize(n);
+   RealFFT(A, X, Y); A.cleanup();
+   V.resize(n);
    Real* x = X.Store(); Real* y = Y.Store();
    Real* v = V.Store(); Real* w = v + n;
    *(--w) = *x;
@@ -355,7 +354,7 @@ void DST_II_inverse(const ColumnVector& V, ColumnVector& U)
       *(++x) = vi * s + wi * c; *(++y) = - vi * c + wi * s;
    }
    ColumnVector A; RealFFTI(X, Y, A);
-   X.CleanUp(); Y.CleanUp(); U.ReSize(n);
+   X.cleanup(); Y.cleanup(); U.resize(n);
    Real* a = A.Store(); Real* b = a + n; Real* u = U.Store();
    i = n2;
    while (i--) { *u++ = *a++; *u++ = -(*(--b)); }
@@ -383,7 +382,7 @@ void DCT_inverse(const ColumnVector& V, ColumnVector& U)
    sum1 += vi; sum2 -= vi;
    vi = *v; *x = vi; *y = 0.0; vi /= 2.0; sum1 += vi; sum2 += vi;
    ColumnVector A; RealFFTI(X, Y, A);
-   X.CleanUp(); Y.CleanUp(); U.ReSize(n+1);
+   X.cleanup(); Y.cleanup(); U.resize(n+1);
    Real* a = A.Store(); Real* b = a + n; Real* u = U.Store(); v = u + n;
    i = n2; int k = 0; *u++ = sum1 / n2; *v-- = sum2 / n2;
    while (i--)
@@ -420,7 +419,7 @@ void DST_inverse(const ColumnVector& V, ColumnVector& U)
    while (i--) { *y++ = *(++v); Real vi2 = *(++v); *x++ = vi2 - vi; vi = vi2; }
    *x = -2 * vi; *y = 0.0;
    ColumnVector A; RealFFTI(X, Y, A);
-   X.CleanUp(); Y.CleanUp(); U.ReSize(n+1);
+   X.cleanup(); Y.cleanup(); U.resize(n+1);
    Real* a = A.Store(); Real* b = a + n; Real* u = U.Store(); v = u + n;
    i = n2; int k = 0; *u++ = 0.0; *v-- = 0.0;
    while (i--)
@@ -441,6 +440,36 @@ void DST(const ColumnVector& U, ColumnVector& V)
    V *= (V.Nrows()-1)/2;
 }
 
+// Two dimensional FFT
+void FFT2(const Matrix& U, const Matrix& V, Matrix& X, Matrix& Y)
+{
+   Tracer trace("FFT2");
+   REPORT
+   int m = U.Nrows(); int n = U.Ncols();
+   if (m != V.Nrows() || n != V.Ncols() || m == 0 || n == 0)
+      Throw(ProgramException("Matrix dimensions unequal or zero", U, V));
+   X = U; Y = V;
+   int i; ColumnVector CVR; ColumnVector CVI;
+   for (i = 1; i <= m; ++i)
+   {
+      FFT(X.Row(i).t(), Y.Row(i).t(), CVR, CVI);
+      X.Row(i) = CVR.t(); Y.Row(i) = CVI.t();
+   }
+   for (i = 1; i <= n; ++i)
+   {
+      FFT(X.Column(i), Y.Column(i), CVR, CVI);
+      X.Column(i) = CVR; Y.Column(i) = CVI;
+   }
+}
+
+void FFT2I(const Matrix& U, const Matrix& V, Matrix& X, Matrix& Y)
+{
+   // Inverse transform
+   Tracer trace("FFT2I");
+   REPORT
+   FFT2(U,-V,X,Y);
+   const Real n = X.Nrows() * X.Ncols(); X /= n; Y /= (-n);
+}
 
 
 #ifdef use_namespace
@@ -448,3 +477,4 @@ void DST(const ColumnVector& U, ColumnVector& V)
 #endif
 
 
+///@}

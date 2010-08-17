@@ -11,9 +11,12 @@
 #endif
 
 
-cdpcluster::~cdpcluster(void) {
+cdpcluster::~cdpcluster() {
 	if (resultInit) {
-	delete param;
+		if (param != 0){
+			delete param;
+			param = 0;
+		};
 	};
 };
 

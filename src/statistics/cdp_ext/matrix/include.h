@@ -1,11 +1,17 @@
-//$$ include.h           include files required by various versions of C++
+/// \defgroup rbd_common RBD common library 
+///@{
+
+/// \file include.h
+/// Set options and and details of include files.
 
 #ifndef INCLUDE_LIB
 #define INCLUDE_LIB
 
 //#define use_namespace                   // define name spaces
 
-//#define SETUP_C_SUBSCRIPTS              // allow element access via A[i][j]
+#define SETUP_C_SUBSCRIPTS              // allow element access via A[i][j]
+
+//#define OPT_COMPATIBLE                  // for use with opt++
 
 // Activate just one of the following 3 statements
 
@@ -25,25 +31,62 @@
 #define USING_DOUBLE                    // elements of type double
 //#define USING_FLOAT                   // elements of type float
 
-// de-activate the following statement if your (very old) compiler
-// does not define bool
+#define bool_LIB 0                      // for compatibility with my older libraries
 
-#define bool_LIB 0
-
-//#define _Ios_Fmtflags ios::fmtflags    // for Gnu 3 and Intel for Linux
+//#define ios_format_flags ios::fmtflags  // for Gnu 3 and Intel for Linux
 
 
 #define _STANDARD_                    // using standard library
 
 //#define use_float_h                   // use float.h for precision data
 
+
+//#define HAS_INT64                     // if unsigned _int64 is recognised
+                                        // used by newran03
+
+//#define set_unix_options              // set if running UNIX or LINUX
+
+// comment out next line if Exception causes a problem
+#define TypeDefException
+
 //*********************** end of options set by user ********************
 
+
+// for Gnu C++ version 3
+#if defined __GNUG__ && __GNUG__ >= 3
+   #define _STANDARD_                   // use standard library
+   #define ios_format_flags ios::fmtflags
+#endif
+
+// for Intel C++ for Linux
+#if defined __ICC
+   #define _STANDARD_                   // use standard library
+   #define ios_format_flags ios::fmtflags
+#endif
+
+// for Intel C++ for Windows
+#if defined __ICL
+   #define _STANDARD_                   // use standard library
+   #define ios_format_flags ios::fmtflags
+#endif
+
+// for Microsoft Visual C++ 7 and above (and Intel simulating these)
+#if defined _MSC_VER && _MSC_VER >= 1300
+   #define _STANDARD_                   // use standard library
+#endif
+
+// for Borland Builder C++ 2006 and above
+#if defined __BCPLUSPLUS__ && __BCPLUSPLUS__ >= 0x0570
+   #define _STANDARD_                   // use standard library
+   #define ios_format_flags ios::fmtflags
+#endif
 
 
 #ifdef _STANDARD_                       // using standard library
    #include <cstdlib>
-       #include <limits>              // required by VC++6 ?
+   #if defined _MSC_VER && _MSC_VER == 1200
+      #include <limits>              // for VC++6
+   #endif
    #ifdef WANT_STREAM
       #include <iostream>
       #include <iomanip>
@@ -56,6 +99,9 @@
    #endif
    #ifdef WANT_TIME
       #include <ctime>
+   #endif
+   #ifdef WANT_FSTREAM
+      #include <fstream>
    #endif
    using namespace std;
 #else
@@ -88,6 +134,9 @@
    #ifdef WANT_TIME
       #include <time.h>
    #endif
+   #ifdef WANT_FSTREAM
+      #include <fstream.h>
+   #endif
    #undef DEFAULT_HEADER
 #endif
 
@@ -107,6 +156,9 @@
    #endif
    #ifdef WANT_TIME
       #include <time.h>
+   #endif
+   #ifdef WANT_FSTREAM
+      #include <fstream.h>
    #endif
    #undef DEFAULT_HEADER
 #endif
@@ -129,6 +181,9 @@
    #ifdef WANT_TIME
       #include <time.h>
    #endif
+   #ifdef WANT_FSTREAM
+      #include <fstream.h>
+   #endif
    #undef DEFAULT_HEADER
 #endif
 
@@ -148,6 +203,9 @@
    #ifdef WANT_TIME
       #include <time.h>
    #endif
+   #ifdef WANT_FSTREAM
+      #include <fstream.h>
+   #endif
    #undef DEFAULT_HEADER
 #endif
 
@@ -166,6 +224,9 @@
    #endif
    #ifdef WANT_TIME
       #include <time.h>
+   #endif
+   #ifdef WANT_FSTREAM
+      #include <fstream.h>
    #endif
    #undef DEFAULT_HEADER
 #endif
@@ -187,6 +248,9 @@
 #ifdef WANT_TIME
 #include <time.h>
 #endif
+#ifdef WANT_FSTREAM
+#include <fstream.h>
+#endif
 #undef DEFAULT_HEADER
 #endif
 
@@ -205,6 +269,9 @@
 #endif
 #ifdef WANT_TIME
 #include <time.h>
+#endif
+#ifdef WANT_FSTREAM
+#include <fstream.h>
 #endif
 #undef DEFAULT_HEADER
 #endif
@@ -228,6 +295,9 @@
 #ifdef WANT_TIME
 #include <time.h>
 #endif
+#ifdef WANT_FSTREAM
+#include <fstream.h>
+#endif
 #endif                                  // DEFAULT_HEADER
 
 #endif                                  // _STANDARD_
@@ -248,6 +318,29 @@ typedef long double long_Real;
 #endif
 
 
+// This is for (very old) compilers that do not have bool automatically defined
+
+#ifndef bool_LIB
+#define bool_LIB 0
+
+class bool
+{
+	int value;
+public:
+	bool(const int b) { value = b ? 1 : 0; }
+	bool(const void* b) { value = b ? 1 : 0; }
+	bool() {}
+	operator int() const { return value; }
+	int operator!() const { return !value; }
+};
+
+
+const bool true = 1;
+const bool false = 0;
+
+#endif
+
+
 #ifdef use_namespace
 }
 #endif
@@ -263,3 +356,7 @@ namespace RBD_LIBRARIES                 // access all my libraries
 
 
 #endif
+
+
+///@}
+

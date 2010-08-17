@@ -6,6 +6,7 @@
 #if  defined(PYWRAP)
 #include "cdpresult.h"
 #include "cdpbase.h"
+using namespace std;
 #endif
 
 class Model;
@@ -13,7 +14,7 @@ class CDP:public CDPBase
 {
  public:
   CDP();
-  ~CDP(void);
+  ~CDP();
   void InitMCMCSteps(Model& model);
   void LoadData(Model& model);
   void LoadInits(Model& model,CDPResult& result, MTRand& mt);

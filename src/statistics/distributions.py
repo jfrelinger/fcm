@@ -2,10 +2,10 @@
 Distributions used in FCS analysis
 """
 
-from numpy import pi, exp, dot, ones, array, sqrt, fabs, tile, sum, prod, diag, zeros, cumsum
+from numpy import pi, exp, dot, ones, array, sqrt, fabs, tile, sum, prod, diag, zeros, cumsum, reshape
 from numpy.linalg import inv, det, cholesky
 from numpy.random import random, multivariate_normal
-from cdp import mvnpdf
+from cdp import mvnpdf, wmvnpdf
 #def mvnormpdf(x, mu, va):
 #    """
 #    multi variate normal pdf, derived from David Cournapeau's em package
@@ -33,9 +33,7 @@ def mvnormpdf(x, mu, va):
         n = x.shape
         p = 0
     if p > 0:
-        results = zeros((n,1))
-        for i in range(n):
-            results[i,0] = mvnpdf(x[i,:],mu,va)
+        results = mvnpdf(x,mu,va,n)
     else:
         results = array([mvnpdf(x,mu,va)])
     
@@ -44,11 +42,28 @@ def mvnormpdf(x, mu, va):
 def mixnormpdf(x, prop, mu, Sigma):
     """Mixture of multivariate normal pdfs"""
     # print "in mixnormpdf ..."
-    tmp = 0.0
-    for i in range(len(prop)):
-        tmp += prop[i]*mvnormpdf(x, mu[i], Sigma[i])
-    return tmp
+#    tmp = 0.0
+#    for i in range(len(prop)):
+#        tmp += prop[i]*mvnormpdf(x, mu[i], Sigma[i])
+#    return tmp
+    try:
+        n,d = x.shape
+    except ValueError:
+        d = x.shape[0]
+        n = 1
+        x = x.reshape((1,d))
+    try:
+        c = prop.shape[0]
+    except AttributeError:
+        c = 1
 
+    if c == 1: 
+        tmp = wmvnpdf(x,prop,mu,Sigma,n)
+    else:
+        tmp = wmvnpdf(x,prop,mu,Sigma,n*c)
+        print tmp.shape
+        tmp = sum(reshape(tmp, (n,c)),1)
+    return tmp
 
 def mixnormrnd(pi, mu, sigma, k):
     """Generate random variables from mixture of Guassians"""

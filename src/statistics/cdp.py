@@ -54,10 +54,6 @@ def _swig_repr(self):
     except: strthis = ""
     return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
 
-
-def mvnpdf(*args):
-  return _cdp.mvnpdf(*args)
-mvnpdf = _cdp.mvnpdf
 class cdpcluster:
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, cdpcluster, name, value)
@@ -143,6 +139,97 @@ class cdpcluster:
     def printModel(self): return _cdp.cdpcluster_printModel(self)
 cdpcluster_swigregister = _cdp.cdpcluster_swigregister
 cdpcluster_swigregister(cdpcluster)
+
+def mvnpdf(*args):
+  return _cdp.mvnpdf(*args)
+mvnpdf = _cdp.mvnpdf
+
+def wmvnpdf(*args):
+  return _cdp.wmvnpdf(*args)
+wmvnpdf = _cdp.wmvnpdf
+
+class cdpemcluster:
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, cdpemcluster, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, cdpemcluster, name)
+    __repr__ = _swig_repr
+    __swig_destroy__ = _cdp.delete_cdpemcluster
+    __del__ = lambda self : None;
+    def __init__(self, *args): 
+        this = _cdp.new_cdpemcluster(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def run(self): return _cdp.cdpemcluster_run(self)
+    def setseed(self, *args): return _cdp.cdpemcluster_setseed(self, *args)
+    def setT(self, *args): return _cdp.cdpemcluster_setT(self, *args)
+    def setJ(self, *args): return _cdp.cdpemcluster_setJ(self, *args)
+    def setBurnin(self, *args): return _cdp.cdpemcluster_setBurnin(self, *args)
+    def setIter(self, *args): return _cdp.cdpemcluster_setIter(self, *args)
+    def setVerbose(self, *args): return _cdp.cdpemcluster_setVerbose(self, *args)
+    def getBurnin(self): return _cdp.cdpemcluster_getBurnin(self)
+    def getIter(self): return _cdp.cdpemcluster_getIter(self)
+    def getn(self): return _cdp.cdpemcluster_getn(self)
+    def getd(self): return _cdp.cdpemcluster_getd(self)
+    def getclustN(self): return _cdp.cdpemcluster_getclustN(self)
+    def getT(self): return _cdp.cdpemcluster_getT(self)
+    def getJ(self): return _cdp.cdpemcluster_getJ(self)
+    def getK(self, *args): return _cdp.cdpemcluster_getK(self, *args)
+    def setlambda0(self, *args): return _cdp.cdpemcluster_setlambda0(self, *args)
+    def getlambda0(self): return _cdp.cdpemcluster_getlambda0(self)
+    def setphi0(self, *args): return _cdp.cdpemcluster_setphi0(self, *args)
+    def getphi0(self): return _cdp.cdpemcluster_getphi0(self)
+    def setnu0(self, *args): return _cdp.cdpemcluster_setnu0(self, *args)
+    def getnu0(self): return _cdp.cdpemcluster_getnu0(self)
+    def setgamma(self, *args): return _cdp.cdpemcluster_setgamma(self, *args)
+    def getgamma(self): return _cdp.cdpemcluster_getgamma(self)
+    def setnu(self, *args): return _cdp.cdpemcluster_setnu(self, *args)
+    def getnu(self): return _cdp.cdpemcluster_getnu(self)
+    def sete0(self, *args): return _cdp.cdpemcluster_sete0(self, *args)
+    def gete0(self): return _cdp.cdpemcluster_gete0(self)
+    def setf0(self, *args): return _cdp.cdpemcluster_setf0(self, *args)
+    def getf0(self): return _cdp.cdpemcluster_getf0(self)
+    def setee(self, *args): return _cdp.cdpemcluster_setee(self, *args)
+    def getee(self): return _cdp.cdpemcluster_getee(self)
+    def setaa(self, *args): return _cdp.cdpemcluster_setaa(self, *args)
+    def getaa(self): return _cdp.cdpemcluster_getaa(self)
+    def setff(self, *args): return _cdp.cdpemcluster_setff(self, *args)
+    def getff(self): return _cdp.cdpemcluster_getff(self)
+    def getMu(self, *args): return _cdp.cdpemcluster_getMu(self, *args)
+    def getm(self, *args): return _cdp.cdpemcluster_getm(self, *args)
+    def getSigma(self, *args): return _cdp.cdpemcluster_getSigma(self, *args)
+    def getPhi(self, *args): return _cdp.cdpemcluster_getPhi(self, *args)
+    def getp(self, *args): return _cdp.cdpemcluster_getp(self, *args)
+    def setgpunchunksize(self, *args): return _cdp.cdpemcluster_setgpunchunksize(self, *args)
+    def getgpunchunksize(self): return _cdp.cdpemcluster_getgpunchunksize(self)
+    def setdevice(self, *args): return _cdp.cdpemcluster_setdevice(self, *args)
+    def getdevice(self): return _cdp.cdpemcluster_getdevice(self)
+    def getnumberdevices(self): return _cdp.cdpemcluster_getnumberdevices(self)
+    def setnumberdevices(self, *args): return _cdp.cdpemcluster_setnumberdevices(self, *args)
+    def samplem(self, *args): return _cdp.cdpemcluster_samplem(self, *args)
+    def samplePhi(self, *args): return _cdp.cdpemcluster_samplePhi(self, *args)
+    def samplew(self, *args): return _cdp.cdpemcluster_samplew(self, *args)
+    def sampleq(self, *args): return _cdp.cdpemcluster_sampleq(self, *args)
+    def samplealpha0(self, *args): return _cdp.cdpemcluster_samplealpha0(self, *args)
+    def samplemu(self, *args): return _cdp.cdpemcluster_samplemu(self, *args)
+    def sampleSigma(self, *args): return _cdp.cdpemcluster_sampleSigma(self, *args)
+    def samplek(self, *args): return _cdp.cdpemcluster_samplek(self, *args)
+    def samplep(self, *args): return _cdp.cdpemcluster_samplep(self, *args)
+    def samplealpha(self, *args): return _cdp.cdpemcluster_samplealpha(self, *args)
+    def loadMu(self, *args): return _cdp.cdpemcluster_loadMu(self, *args)
+    def loadm(self, *args): return _cdp.cdpemcluster_loadm(self, *args)
+    def loadp(self, *args): return _cdp.cdpemcluster_loadp(self, *args)
+    def loadpV(self, *args): return _cdp.cdpemcluster_loadpV(self, *args)
+    def loadSigma(self, *args): return _cdp.cdpemcluster_loadSigma(self, *args)
+    def loadPhi(self, *args): return _cdp.cdpemcluster_loadPhi(self, *args)
+    def loadW(self, *args): return _cdp.cdpemcluster_loadW(self, *args)
+    def loadK(self, *args): return _cdp.cdpemcluster_loadK(self, *args)
+    def loadq(self, *args): return _cdp.cdpemcluster_loadq(self, *args)
+    def loadqV(self, *args): return _cdp.cdpemcluster_loadqV(self, *args)
+    def loadalpha(self, *args): return _cdp.cdpemcluster_loadalpha(self, *args)
+    def printModel(self): return _cdp.cdpemcluster_printModel(self)
+cdpemcluster_swigregister = _cdp.cdpemcluster_swigregister
+cdpemcluster_swigregister(cdpemcluster)
 
 
 
