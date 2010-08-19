@@ -52,11 +52,7 @@ class DPMixtureModel(HasTraits):
 
         self._prerun = False
         self._run = False
-        
-    def __del__(self):
-        self.cdp.makeResult()
-        
-        
+     
     def _setup(self, verbose):
         if not self._prerun:
             self.cdp.setT(self.nclusts)
