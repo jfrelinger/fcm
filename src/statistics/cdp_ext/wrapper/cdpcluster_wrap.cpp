@@ -2793,6 +2793,8 @@ namespace swig {
 #include "cdpemcluster.h"
 #include "mvnpdf.h"
 
+#include <stdexcept>
+
 
 #ifndef SWIG_FILE_WITH_INIT
 #  define NO_IMPORT_ARRAY
@@ -3899,7 +3901,14 @@ SWIGINTERN PyObject *_wrap_wmvnpdf__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObj
     if (!array10) SWIG_fail;
     arg11 = (double*) array_data(array10);
   }
-  wmvnpdf(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11);
+  {
+    try {
+      wmvnpdf(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11);
+    } catch (invalid_argument &e) {
+      PyErr_SetString(PyExc_ValueError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
   resultobj = SWIG_Py_Void();
   {
     resultobj = SWIG_Python_AppendOutput(resultobj,array10);
@@ -4042,7 +4051,14 @@ SWIGINTERN PyObject *_wrap_wmvnpdf__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObj
     if (!array13) SWIG_fail;
     arg14 = (double*) array_data(array13);
   }
-  wmvnpdf(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14);
+  {
+    try {
+      wmvnpdf(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14);
+    } catch (invalid_argument &e) {
+      PyErr_SetString(PyExc_ValueError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
   resultobj = SWIG_Py_Void();
   {
     resultobj = SWIG_Python_AppendOutput(resultobj,array13);
@@ -5559,7 +5575,14 @@ SWIGINTERN PyObject *_wrap_cdpcluster_setdevice(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cdpcluster_setdevice" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
-  (arg1)->setdevice(arg2);
+  {
+    try {
+      (arg1)->setdevice(arg2);
+    } catch (runtime_error &e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5581,7 +5604,14 @@ SWIGINTERN PyObject *_wrap_cdpcluster_getdevice(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_getdevice" "', argument " "1"" of type '" "cdpcluster *""'"); 
   }
   arg1 = reinterpret_cast< cdpcluster * >(argp1);
-  result = (int)(arg1)->getdevice();
+  {
+    try {
+      result = (int)(arg1)->getdevice();
+    } catch (runtime_error &e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -8450,7 +8480,14 @@ SWIGINTERN PyObject *_wrap_cdpemcluster_setdevice(PyObject *SWIGUNUSEDPARM(self)
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cdpemcluster_setdevice" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
-  (arg1)->setdevice(arg2);
+  {
+    try {
+      (arg1)->setdevice(arg2);
+    } catch (runtime_error &e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -8472,7 +8509,14 @@ SWIGINTERN PyObject *_wrap_cdpemcluster_getdevice(PyObject *SWIGUNUSEDPARM(self)
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpemcluster_getdevice" "', argument " "1"" of type '" "cdpemcluster *""'"); 
   }
   arg1 = reinterpret_cast< cdpemcluster * >(argp1);
-  result = (int)(arg1)->getdevice();
+  {
+    try {
+      result = (int)(arg1)->getdevice();
+    } catch (runtime_error &e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:

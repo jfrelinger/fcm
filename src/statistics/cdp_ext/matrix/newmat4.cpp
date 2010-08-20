@@ -46,8 +46,8 @@ GeneralMatrix::GeneralMatrix(ArrayLengthSpecifier s)
    storage=s.Value(); tag_val=-1;
    if (storage)
    {
-      store = new Real [storage]; MatrixErrorNoSpace(store);
-      MONITOR_REAL_NEW("Make (GenMatrix)",storage,store)
+     store = new Real [storage]; MatrixErrorNoSpace(store);
+     MONITOR_REAL_NEW("Make (GenMatrix)",storage,store);
    }
    else store = 0;
 }
@@ -167,10 +167,12 @@ IdentityMatrix::IdentityMatrix(const BaseMatrix& M)
 
 GeneralMatrix::~GeneralMatrix()
 {
-   if (store)
+   if (storage)
    {
-      MONITOR_REAL_DELETE("Free (GenMatrix)",storage,store)
-      delete [] store;
+     MONITOR_REAL_DELETE("Free (GenMatrix)",storage,store) {
+       delete [] store;
+       store = NULL;
+     }
    }
 }
 
@@ -213,6 +215,8 @@ void CroutMatrix::get_aux(CroutMatrix& X)
       int n = nrows_val; int* i = ix; int* j = indx;
       while(n--) *i++ = *j++;
       X.indx = ix;
+      delete [] ix;
+      ix = NULL;
    }
 }
 
@@ -226,8 +230,10 @@ CroutMatrix::CroutMatrix(const CroutMatrix& gm) : GeneralMatrix()
 
 CroutMatrix::~CroutMatrix()
 {
-   MONITOR_INT_DELETE("Index (CroutMat)",nrows_val,indx)
-   delete [] indx;
+  MONITOR_INT_DELETE("Index (CroutMat)",nrows_val,indx) {
+    delete [] indx;
+    indx = NULL;
+  }
 }
 
 //ReturnMatrix::ReturnMatrix(GeneralMatrix& gmx)
@@ -274,8 +280,10 @@ void GeneralMatrix::resize(int nr, int nc, int s)
    REPORT
    if (store)
    {
-      MONITOR_REAL_DELETE("Free (ReDimensi)",storage,store)
-      delete [] store;
+     MONITOR_REAL_DELETE("Free (ReDimensi)",storage,store) {
+       delete [] store;
+       store = NULL;
+     }
    }
    storage=s; nrows_val=nr; ncols_val=nc; tag_val=-1;
    if (s)
@@ -787,15 +795,18 @@ void GeneralMatrix::tDelete()
 {
    if (tag_val<0)
    {
-      if (tag_val<-1) { REPORT store = 0; delete this; return; }  // borrowed
+     if (tag_val<-1) { REPORT store = 0; delete this;
+       return; }  // borrowed
       else { REPORT return; }   // not a temporary matrix - leave alone
    }
    if (tag_val==1)
    {
       if (store)
       {
-         REPORT  MONITOR_REAL_DELETE("Free   (tDelete)",storage,store)
-         delete [] store;
+	REPORT  MONITOR_REAL_DELETE("Free   (tDelete)",storage,store) {
+	  delete [] store;
+	  store = NULL;
+	}
       }
       MiniCleanUp(); return;                           // CleanUp
    }
@@ -826,6 +837,8 @@ bool GeneralMatrix::reuse()
          Real* s = new Real [storage]; MatrixErrorNoSpace(s);
          MONITOR_REAL_NEW("Make     (reuse)",storage,s)
          newmat_block_copy(storage, store, s); store = s;
+	 delete [] s;
+	 s = NULL;
       }
       else { REPORT MiniCleanUp(); }                // CleanUp
       tag_val = 0; return true;
@@ -898,8 +911,13 @@ void GeneralMatrix::Eq(const BaseMatrix& X, MatrixType mt)
       REPORT
       if (store)
       {
-         MONITOR_REAL_DELETE("Free (operator=)",storage,store)
-         REPORT delete [] store; storage = 0; store = 0;
+	MONITOR_REAL_DELETE("Free (operator=)",storage,store) {
+	  REPORT {
+	    delete [] store; 
+	  }
+	  store = NULL;
+	}
+	 storage = 0; 
       }
    }
    else { REPORT Release(counter); }
@@ -914,8 +932,13 @@ void GeneralMatrix::Eq(const BaseMatrix& X, MatrixType mt)
       REPORT
       if (store)
       {
-         MONITOR_REAL_DELETE("Free (operator=)",storage,store)
-         REPORT delete [] store; storage = 0; store = 0;
+	MONITOR_REAL_DELETE("Free (operator=)",storage,store) {
+	  REPORT {
+	    delete [] store; 
+	  }
+	  store = NULL;
+	}
+	storage = 0; 
       }
       GetMatrix(gmx);
    }
@@ -933,8 +956,13 @@ void GeneralMatrix::Eq(const GeneralMatrix& X)
       REPORT
       if (store)
       {
-         MONITOR_REAL_DELETE("Free (operator=)",storage,store)
-         REPORT delete [] store; storage = 0; store = 0;
+	MONITOR_REAL_DELETE("Free (operator=)",storage,store) {
+	  REPORT {
+	    delete [] store;
+	  } 
+	  store = NULL;
+	}
+	storage = 0;
       }
       GetMatrix(gmx);
    }
@@ -1089,7 +1117,11 @@ void nricMatrix::MakeRowPointer()
 }
 
 void nricMatrix::DeleteRowPointer()
-   { REPORT if (nrows_val) delete [] row_pointer; }
+{ REPORT if (nrows_val) {
+    delete [] row_pointer; 
+    row_pointer = NULL;
+  }
+}
 
 void GeneralMatrix::CheckStore() const
 {
@@ -1107,10 +1139,14 @@ void GeneralMatrix::cleanup()
    REPORT
    if (store && storage)
    {
-      MONITOR_REAL_DELETE("Free (cleanup)    ",storage,store)
-      REPORT delete [] store;
+     MONITOR_REAL_DELETE("Free (cleanup)    ",storage,store) {
+       REPORT {
+	 delete [] store;
+       }
+       store = NULL;
+     }
    }
-   store=0; storage=0; nrows_val=0; ncols_val=0; tag_val = -1;
+   storage=0; nrows_val=0; ncols_val=0; tag_val = -1;
 }
 
 void nricMatrix::cleanup()
@@ -1128,30 +1164,48 @@ void ColumnVector::cleanup()
 void CroutMatrix::cleanup()
 {
    REPORT
-   if (nrows_val) delete [] indx;
+     if (nrows_val) {
+       delete [] indx;
+       indx = NULL;
+     }
    GeneralMatrix::cleanup();
 }
 
 void CroutMatrix::MiniCleanUp()
 {
    REPORT
-   if (nrows_val) delete [] indx;
+     if (nrows_val) {
+       delete [] indx;
+       indx = NULL;
+     }
    GeneralMatrix::MiniCleanUp();
 }
 
 void BandLUMatrix::cleanup()
 {
    REPORT
-   if (nrows_val) delete [] indx;
-   if (storage2) delete [] store2;
+     if (nrows_val) {
+       delete [] indx;
+       indx = NULL;
+     }
+   if (storage2) {
+     delete [] store2;
+     store2 = NULL;
+   }
    GeneralMatrix::cleanup();
 }
 
 void BandLUMatrix::MiniCleanUp()
 {
    REPORT
-   if (nrows_val) delete [] indx;
-   if (storage2) delete [] store2;
+     if (nrows_val) {
+       delete [] indx;
+       indx = NULL;
+     }
+   if (storage2) {
+     delete [] store2;
+     store2 = NULL;
+   }
    GeneralMatrix::MiniCleanUp();
 }
 
@@ -1169,7 +1223,12 @@ SimpleIntArray::SimpleIntArray(int xn) : n(xn)
 
 // destroy an array - return its space to memory
 
-SimpleIntArray::~SimpleIntArray() { REPORT  if (a) delete [] a; }
+SimpleIntArray::~SimpleIntArray() { 
+  REPORT { 
+    delete [] a; 
+    a = NULL;
+  }
+}
 
 // access an element of an array; return a "reference" so elements
 // can be modified.
@@ -1228,7 +1287,12 @@ SimpleIntArray::SimpleIntArray(const SimpleIntArray& b) : Janitor(), n(b.n)
 void SimpleIntArray::resize(int n1, bool keep)
 {
    if (n1 == n) { REPORT  return; }
-   else if (n1 == 0) { REPORT  n = 0; delete [] a; a = 0; }
+   else if (n1 == 0) { REPORT  {
+       n = 0; 
+       delete [] a; 
+       a = NULL; 
+     }
+   }
    else if (n == 0)
    {
       REPORT
@@ -1247,12 +1311,18 @@ void SimpleIntArray::resize(int n1, bool keep)
          if (n > n1) n = n1;
          else for (i = n; i < n1; i++) a[i] = 0;
          for (i = 0; i < n; i++) a[i] = a1[i];
-         n = n1; delete [] a1;
+         n = n1; 
+	 delete [] a1;
+	 a1 = NULL;
       }
       else
       {
-         REPORT  n = n1; delete [] a1;
-         a = new int [n]; if (!a) Throw(Bad_alloc());
+	REPORT {
+	  n = n1; 
+	  delete [] a1;
+	  a1 = NULL;
+	}
+	a = new int [n]; if (!a) Throw(Bad_alloc());
       }
    }
 }

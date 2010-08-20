@@ -8,7 +8,7 @@ Created on Nov 5, 2009
 from __future__ import division
 import numpy
 from numpy.linalg import solve, inv
-from fcm.statistics.distributions import mixnormpdf, mvnormpdf, mixnormrnd
+from fcm.statistics.distributions import compmixnormpdf, mixnormpdf, mvnormpdf, mixnormrnd
 
 def modesearch(pis, mus, sigmas, tol=1e-5, maxiter=20):
     """find the modes of a mixture of guassians"""
@@ -70,24 +70,27 @@ def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
     for js in range(nk):
         x = allx[js]
         px = allpx[js]
-
         sm.append(x)
         spm.append(px)
-
+        w = compmixnormpdf(allx,pi,mu,sigma)
         h = 0
         eps = 1+etol
+
         while ((h<=maxiter) and (eps>etol)):
             y = numpy.zeros(p)
             Y = numpy.zeros((p,p))
             
-            for j in range(k):
-                w = pi[j]*mvnormpdf(x, mu[j], sigma[j])
-                Y += w*omega[j]
-                y += w*a[j]
+#            for j in range(k):
+#                w = mixnormpdf(x, pi[j], mu[j], sigma[j])
+#                Y += w*omega[j]
+#                y += w*a[j]
+            #w = compmixnormpdf(x,pi,mu,sigma)
+            Y = sum([w[js,j]*omega[j] for j in range(k)])
+            y = sum([w[js,j]*a[j] for j in range(k)])
             y = solve(Y, y)
             py = mixnormpdf(y, pi, mu, sigma)
+            #print py, px
             eps = py/px
-            
             x = y
             px = py
             h += 1

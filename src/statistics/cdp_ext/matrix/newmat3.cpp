@@ -831,8 +831,11 @@ MatrixRowCol::~MatrixRowCol()
 {
    if (+(cw*HaveStore))
    {
-      MONITOR_REAL_DELETE("Free    (RowCol)",-1,data)  // do not know length
-      delete [] data;
+     MONITOR_REAL_DELETE("Free    (RowCol)",-1,data) {
+       // do not know length
+       delete [] data;
+       data = NULL;
+     }
    }
 }
 

@@ -35,8 +35,10 @@ CDPP::CDPP(void)
 
 CDPP::~CDPP(void)
 {
-	delete [] wbuffer;
-	delete [] kbuffer;
+  delete [] wbuffer;
+  wbuffer = NULL;
+  delete [] kbuffer;
+  kbuffer = NULL;
 }
 void CDPP::InitPBuffer(void) {
 	wbuffer = new double[GetWBufferSize()];
@@ -367,6 +369,7 @@ void CDPP::SampleAllMuSigma(CDPResult& result) {
 		}
 	}
 	delete [] workresults;
+	workresults = NULL:
 	MPI_Barrier(MPI_COMM_WORLD);
 }
 bool CDPP::piterate(CDPResult& result) {

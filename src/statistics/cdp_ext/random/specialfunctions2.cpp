@@ -40,6 +40,7 @@ double SpecialFunctions2::mvtpdf(double* x, double* mu,LowerTriangularMatrix& Si
 		discrim+= sum * sum;
 	}
 	delete [] xx;
+	xx = NULL;
 
 	double d = precalculate - 0.5 * logdet  -0.5 * (nu + mydim) * log(1+discrim / nu);
 	if (!logspace) {
@@ -84,6 +85,7 @@ double SpecialFunctions2::mvnormpdf(double* x, double* mu, LowerTriangularMatrix
 	}
 	//	cout << "discrim = " << discrim << "\n";
 	delete [] xx;
+	xx = NULL;
     double d = -0.5 * (discrim + logdet + mydim * LOG_2_PI);
     if (!logspace) {
 		d = exp(d);
@@ -203,6 +205,7 @@ RowVector SpecialFunctions2::mvnormrand(RowVector& mu, LowerTriangularMatrix& co
 		*s++ = *m++ + sum ; 
 	}
 	delete [] rn;
+	rn = NULL;
 	return r;
 }
 

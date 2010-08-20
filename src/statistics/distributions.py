@@ -51,6 +51,8 @@ def compmixnormpdf(x, prop, mu, Sigma):
         c = prop.shape[0]
     except AttributeError:
         c = 1
+    except IndexError:
+        c = 1
 
     if c == 1: 
         tmp = wmvnpdf(x,prop,mu,Sigma,n)
@@ -105,5 +107,5 @@ if __name__ == '__main__':
     sig = array([[[1,.75],[.75, 1]],[[1,0],[0,1]]])
     p = array([.5,.5])
     print 'mix:', mixnormpdf(x,p,mu,sig)
-    print 'mix:', mixnormpdf(x[0],p,mu,sig)
+    #print 'mix:', mixnormpdf(x[0],p,mu,sig)
     

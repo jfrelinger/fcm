@@ -1,4 +1,4 @@
-/// \ingroup newmat
+// \ingroup newmat
 ///@{
 
 /// \file newmat6.cpp
@@ -427,8 +427,10 @@ void IdentityMatrix::operator=(const BaseMatrix& X)
 void CroutMatrix::operator=(const CroutMatrix& gm)
 {
    if (&gm == this) { REPORT tag_val = -1; return; }
-   REPORT
-   if (indx > 0) { delete [] indx; indx = 0; }
+   REPORT {
+     delete [] indx; 
+     indx = NULL;
+   } 
    ((CroutMatrix&)gm).get_aux(*this);
    Eq(gm);
 }
@@ -463,9 +465,12 @@ void GeneralMatrix::operator<<(const int* r)
 
 void GenericMatrix::operator=(const GenericMatrix& bmx)
 {
-   if (&bmx != this) { REPORT if (gm) delete gm; gm = bmx.gm->Image();}
-   else { REPORT }
-   gm->Protect();
+  if (&bmx != this) { REPORT  {
+      delete gm; 
+      gm = bmx.gm->Image();}
+  }
+  else { REPORT }
+  gm->Protect();
 }
 
 void GenericMatrix::operator=(const BaseMatrix& bmx)
@@ -473,12 +478,21 @@ void GenericMatrix::operator=(const BaseMatrix& bmx)
    if (gm)
    {
       int counter=bmx.search(gm);
-      if (counter==0) { REPORT delete gm; gm=0; }
+      if (counter==0) { 
+	REPORT {
+	  delete gm; 
+	  gm=NULL;
+	}
+      }
       else { REPORT gm->Release(counter); }
    }
    else { REPORT }
    GeneralMatrix* gmx = ((BaseMatrix&)bmx).Evaluate();
-   if (gmx != gm) { REPORT if (gm) delete gm; gm = gmx->Image(); }
+   if (gmx != gm) { REPORT {
+       delete gm; 
+       gm = gmx->Image(); 
+     }
+   }
    else { REPORT }
    gm->Protect();
 }
@@ -598,7 +612,11 @@ void GenericMatrix::operator+=(const BaseMatrix& X)
    AddedMatrix am(gm,gmx);
    if (gmx==gm) gm->Release(2); else gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-   if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
+   if (gmy != gm) { REPORT {
+       delete gm; 
+       gm = gmy->Image(); 
+     }
+   }
    else { REPORT }
    gm->Protect();
 }
@@ -613,7 +631,11 @@ void GenericMatrix::SP_eq(const BaseMatrix& X)
    SPMatrix spm(gm,gmx);
    if (gmx==gm) gm->Release(2); else gm->Release();
    GeneralMatrix* gmy = spm.Evaluate();
-   if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
+   if (gmy != gm) { REPORT {
+       delete gm; 
+       gm = gmy->Image(); 
+     }
+   }
    else { REPORT }
    gm->Protect();
 }
@@ -628,7 +650,11 @@ void GenericMatrix::operator-=(const BaseMatrix& X)
    SubtractedMatrix am(gm,gmx);
    if (gmx==gm) gm->Release(2); else gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-   if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
+   if (gmy != gm) { REPORT {
+       delete gm; 
+       gm = gmy->Image(); 
+     }
+   }
    else { REPORT }
    gm->Protect();
 }
@@ -643,7 +669,11 @@ void GenericMatrix::operator*=(const BaseMatrix& X)
    MultipliedMatrix am(gm,gmx);
    if (gmx==gm) gm->Release(2); else gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-   if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
+   if (gmy != gm) { REPORT {
+       delete gm; 
+       gm = gmy->Image(); 
+     }
+   }
    else { REPORT }
    gm->Protect();
 }
@@ -658,7 +688,11 @@ void GenericMatrix::operator|=(const BaseMatrix& X)
    ConcatenatedMatrix am(gm,gmx);
    if (gmx==gm) gm->Release(2); else gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-   if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
+   if (gmy != gm) { REPORT {
+       delete gm; 
+       gm = gmy->Image(); 
+     }
+   }
    else { REPORT }
    gm->Protect();
 }
@@ -673,7 +707,11 @@ void GenericMatrix::operator&=(const BaseMatrix& X)
    StackedMatrix am(gm,gmx);
    if (gmx==gm) gm->Release(2); else gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-   if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
+   if (gmy != gm) { REPORT {
+       delete gm; 
+       gm = gmy->Image(); 
+     }
+   }
    else { REPORT }
    gm->Protect();
 }
@@ -686,7 +724,11 @@ void GenericMatrix::operator+=(Real r)
    ShiftedMatrix am(gm,r);
    gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-   if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
+   if (gmy != gm) { REPORT {
+       delete gm; 
+       gm = gmy->Image(); 
+     }
+   }
    else { REPORT }
    gm->Protect();
 }
@@ -699,7 +741,11 @@ void GenericMatrix::operator*=(Real r)
    ScaledMatrix am(gm,r);
    gm->Release();
    GeneralMatrix* gmy = am.Evaluate();
-   if (gmy != gm) { REPORT delete gm; gm = gmy->Image(); }
+   if (gmy != gm) { REPORT {
+       delete gm; 
+       gm = gmy->Image(); 
+     }
+   }
    else { REPORT }
    gm->Protect();
 }

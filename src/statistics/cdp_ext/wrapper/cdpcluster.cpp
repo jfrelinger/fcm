@@ -4,6 +4,8 @@
 
 #include "cdpcluster.h"
 
+#include <stdexcept>
+
 #if defined(CDP_CUDA)
 #include "CDPBaseCUDA.h"
 #include <cutil_inline.h>
@@ -13,10 +15,8 @@
 
 cdpcluster::~cdpcluster() {
 	if (resultInit) {
-		if (param != 0){
-			delete param;
-			param = 0;
-		};
+	  delete param;
+	  param = NULL;
 	};
 };
 
@@ -28,6 +28,7 @@ cdpcluster::cdpcluster(int n, int d, double* x) {
 
   model.mnN = n;
   model.mnD = d;
+  cdp.prior.N = n;
 
   
   model.mdm0 = RowVector(d);
@@ -337,19 +338,37 @@ double cdpcluster::getp(int idx){
 };
 
 void cdpcluster::setgpunchunksize(int x){
+#if defined(CDP_CUDA)
 	model.mnGPU_Sample_Chunk_Size = x;
+#else
+	throw runtime_error("CUDA Not Supported");
+#endif
 }
 
 int cdpcluster::getgpunchunksize(){
+#if defined(CDP_CUDA)
 	return model.mnGPU_Sample_Chunk_Size;
+#else
+	throw runtime_error("CUDA Not Supported");
+	return -1;
+#endif
 }
 
 void cdpcluster::setdevice(int x){
+#if defined(CDP_CUDA)
 	model.startDevice = x;
+#else
+	throw runtime_error("CUDA Not Supported");
+#endif
 }
 
 int cdpcluster::getdevice(){
+#if defined(CDP_CUDA)
 	return model.startDevice;
+#else
+	throw runtime_error("CUDA Not Supported");
+	return -1;
+#endif
 }
 
 int cdpcluster::getnumberdevices(){

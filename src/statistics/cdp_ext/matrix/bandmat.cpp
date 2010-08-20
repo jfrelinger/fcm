@@ -313,6 +313,11 @@ void BandLUMatrix::get_aux(BandLUMatrix& X)
       MONITOR_REAL_NEW("Index (BLUM::get_aux)", storage2, rx)
       newmat_block_copy(storage2, store2, rx);
       X.store2 = rx;
+
+      delete [] ix;
+      ix = NULL;
+      delete [] rx;
+      rx = NULL;
    }
 }
 
@@ -327,26 +332,27 @@ BandLUMatrix::BandLUMatrix(const BandLUMatrix& gm) : GeneralMatrix()
 void BandLUMatrix::operator=(const BandLUMatrix& gm)
 {
    if (&gm == this) { REPORT tag_val = -1; return; }
-   REPORT
-   delete [] indx; indx = 0;
-   delete [] store2; store2 = 0; storage2 = 0;
+   REPORT {
+     delete [] indx; 
+     indx = NULL;
+     delete [] store2; 
+     store2 = NULL; 
+     storage2 = 0;
+   }
    ((BandLUMatrix&)gm).get_aux(*this);
    Eq(gm);
 }
-   
-
-
-
-
-
-
 
 BandLUMatrix::~BandLUMatrix()
 {
-   REPORT
-   MONITOR_INT_DELETE("Index (BndLUMat)",nrows_val,indx)
-   MONITOR_REAL_DELETE("Delete (BndLUMt)",storage2,store2)
-   delete [] indx; delete [] store2;
+  REPORT
+    MONITOR_INT_DELETE("Index (BndLUMat)",nrows_val,indx)
+    MONITOR_REAL_DELETE("Delete (BndLUMt)",storage2,store2)  {
+    delete [] indx; 
+    indx = NULL;
+    delete [] store2;
+    store2 = NULL;
+  }
 }
 
 MatrixType BandLUMatrix::type() const { REPORT return MatrixType::BC; }

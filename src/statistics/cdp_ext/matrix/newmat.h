@@ -474,7 +474,7 @@ protected:
    virtual short SimpleAddOK(const GeneralMatrix*) { return 0; }
              // see bandmat.cpp for explanation
    virtual void MiniCleanUp()
-      { store = 0; storage = 0; nrows_val = 0; ncols_val = 0; tag_val = -1;}
+   { store = 0; storage = 0; nrows_val = 0; ncols_val = 0; tag_val = -1;}
              // CleanUp when the data array has already been deleted
    void PlusEqual(const GeneralMatrix& gm);
    void SP_Equal(const GeneralMatrix& gm);
@@ -1455,8 +1455,14 @@ public:
    void operator-=(Real r) { operator+=(-r); }
    void operator*=(Real);
    void operator/=(Real r) { operator*=(1.0/r); }
-   ~GenericMatrix() { delete gm; }
-   void cleanup() { delete gm; gm = 0; }
+   ~GenericMatrix() { 
+     delete gm; 
+     gm = NULL;
+   }
+   void cleanup() { 
+     delete gm; 
+     gm = NULL; 
+   }
    void Release() { gm->Release(); }
    void release() { gm->release(); }
    GeneralMatrix* Evaluate(MatrixType = MatrixTypeUnSp);
@@ -1853,8 +1859,14 @@ class LinearEquationSolver : public BaseMatrix
    friend class BaseMatrix;
 public:
    LinearEquationSolver(const BaseMatrix& bm);
-   ~LinearEquationSolver() { delete gm; }
-   void cleanup() { delete gm; } 
+   ~LinearEquationSolver() { 
+     delete gm;
+     gm = NULL;
+   }
+   void cleanup() { 
+     delete gm; 
+     gm = NULL;
+   } 
    GeneralMatrix* Evaluate(MatrixType) { return gm; }
    // probably should have an error message if MatrixType != UnSp
    NEW_DELETE(LinearEquationSolver)
@@ -1934,7 +1946,10 @@ class RealStarStar
    Real** a;
 public:
    RealStarStar(Matrix& A);
-   ~RealStarStar() { delete [] a; }
+   ~RealStarStar() { 
+     delete [] a; 
+     a = NULL;
+   }
    operator Real**() { return a; }
 };
 
@@ -1944,7 +1959,10 @@ class ConstRealStarStar
    const Real** a;
 public:
    ConstRealStarStar(const Matrix& A);
-   ~ConstRealStarStar() { delete [] a; }
+   ~ConstRealStarStar() { 
+     delete [] a; 
+     a = NULL;
+   }
    operator const Real**() { return a; }
 };
 

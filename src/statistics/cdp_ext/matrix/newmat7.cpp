@@ -435,17 +435,22 @@ static GeneralMatrix* GeneralSolv(GeneralMatrix* gm1, GeneralMatrix* gm2,
    CatchAll
    {
       if (gms) gms->tDelete();
-      delete gmx;                   // <--------------------
-      gm2->tDelete();
-      MONITOR_REAL_DELETE("Delete (GenSolv)",nr,r)
-                          // AT&T version 2.1 gives an internal error
-      delete [] r;
+      delete gmx;
+      gmx = NULL; // <--------------------
+      gm2->ReleaseAndDelete();
+      MONITOR_REAL_DELETE("Delete (GenSolv)",nr,r) {
+	// AT&T version 2.1 gives an internal error
+	delete [] r;
+	r = NULL;
+      }
       ReThrow;
    }
    gms->tDelete(); gmx->ReleaseAndDelete(); gm2->tDelete();
-   MONITOR_REAL_DELETE("Delete (GenSolv)",nr,r)
+   MONITOR_REAL_DELETE("Delete (GenSolv)",nr,r) {
                           // AT&T version 2.1 gives an internal error
-   delete [] r;
+     delete [] r;
+     r = NULL;
+   }
    return gmx;
 }
 
@@ -477,15 +482,20 @@ static GeneralMatrix* GeneralSolvI(GeneralMatrix* gm1, BaseMatrix* sm,
    {
       if (gms) gms->tDelete();
       delete gmx;
-      MONITOR_REAL_DELETE("Delete (GenSolvI)",nr,r)
+      gmx = NULL;
+      MONITOR_REAL_DELETE("Delete (GenSolvI)",nr,r) {
                           // AT&T version 2.1 gives an internal error
-      delete [] r;
+	delete [] r;
+	r = NULL;
+      }
       ReThrow;
    }
    gms->tDelete(); gmx->ReleaseAndDelete();
-   MONITOR_REAL_DELETE("Delete (GenSolvI)",nr,r)
+   MONITOR_REAL_DELETE("Delete (GenSolvI)",nr,r) {
                           // AT&T version 2.1 gives an internal error
-   delete [] r;
+     delete [] r;
+     r = NULL;
+   }
    return gmx;
 }
 

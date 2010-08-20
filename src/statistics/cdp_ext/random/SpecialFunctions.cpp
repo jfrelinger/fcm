@@ -285,6 +285,7 @@ bool SpecialFunctions::gammarand(double a, double b, int nSize, MTRand& mt, vect
 			result.push_back(-b * log(pRand[i]));
 		}
 		delete [] pRand;
+		pRand = NULL;
 	}
 	//common working variables
 	double *pU = new double[nSize];
@@ -328,10 +329,14 @@ bool SpecialFunctions::gammarand(double a, double b, int nSize, MTRand& mt, vect
 					nRemain--;
 				}
 				delete [] pE;
+				pE = NULL;
 			}
 		}
 		delete [] pC;
+		pC = NULL;
+
 		delete [] pD;
+		pD = NULL;
 	}
 	
 	//Use a rejection method for a > 1
@@ -380,12 +385,19 @@ bool SpecialFunctions::gammarand(double a, double b, int nSize, MTRand& mt, vect
 			}
 		}
 		delete [] pZ;
+		pZ = NULL;
+
 		delete [] pW;
+		pW = NULL;
 	}
 	delete [] pX;
+	pX = NULL;
 	delete [] pY;
+	pY = NULL;
 	delete [] pU;
+	pU = NULL;
 	delete [] pV;
+	pV = NULL;
 	return true;
 }
 

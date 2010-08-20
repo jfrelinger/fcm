@@ -94,8 +94,10 @@ void CDPResult::OpenPostFiles() {
 
 CDPResult::~CDPResult(void)
 {
-	delete [] W;
-	delete [] K;
+  delete [] W;
+  W = NULL;
+  delete [] K;
+  K = NULL;
 	if (isEM == 0) {
 		postmufile.close();
 		postpfile.close();
@@ -511,7 +513,7 @@ void CDPResult::UpdateMeans()
   for(j=0;j<N;j++)
     {
       xmbar[j]+=m[W[j]];
-      xmubar[j]+=mu[GetIndex(W[j],K[j])];
+      xmubar[j]+=mu[GetIndex(W[j],K[j]>=T?T-1:K[j])];
     }
   nmcits++;
 }

@@ -12,12 +12,8 @@
 
 
 cdpemcluster::~cdpemcluster() {
-	if (resultInit) {
-		if (param != 0){
-			delete param;
-			param = 0;
-		};
-	};
+  delete param;
+  param = NULL;
 }
 
 //cdpemcluster::cdpemcluster(int d, int n, double** x, int iter, int burn) {

@@ -379,6 +379,7 @@ bool Model::Load(string FileName){
   }
   if(setm0){mdm0 = RowVector(mnD);mdm0=0;}
   delete[] theLine;
+  theLine = NULL;
   if (mstrDataFile == "") {
     std::cout << endl << "Warning: Text file "  << FileName.c_str() << " might come from a different platform" << endl;
     std::cout << "Suggestion: Use dos2unix/unis2dos or similar tools to convert the file first" << endl;

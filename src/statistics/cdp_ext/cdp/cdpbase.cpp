@@ -56,6 +56,7 @@ double CDPBase::sampleAlpha(double* V, double e, double f, MTRand& mt) {
 
     int r= sample(weights,q.Ncols(),mt);
     delete [] weights;
+    weights = NULL;
     return r;
   }
 
@@ -89,6 +90,7 @@ void CDPBase::sampleWK(RowVector& x, RowVector& q, vector<RowVector>& p, vector<
   newk = r%T;
   neww = r/T;
   delete [] weights;
+  weights = NULL;
 }
 
 
@@ -112,6 +114,7 @@ int CDPBase::sampleK(RowVector& x, RowVector& p, concurrent_vector<RowVector>& m
   }
   int r =  sample(weights,T,mt);
   delete [] weights;
+  weights = NULL;
   return r;
 }
 
@@ -139,6 +142,7 @@ int CDPBase::sampleK(RowVector& x, RowVector& p, concurrent_vector<RowVector>& m
 
   int r =  sample(weights,T,mt);
   delete [] weights;
+  weights = NULL;
   return r;
 }
 
@@ -159,7 +163,8 @@ int CDPBase::sample(double* w, int n, MTRand& mt) {
   for(k=0;k < n && d>myw[k];k++)
     ;
   delete [] myw;
-  return k;				//zero based index
+  myw = NULL;
+  return k;	       		//zero based index
 }
 
 
@@ -305,7 +310,9 @@ void CDPBase::sampleP(vector<int>& p, int n, double gamma, int T, RowVector& pos
     postp[i] = prod*postV[i];
   }
   delete [] a;
+  a = NULL;
   delete [] b;
+  b = NULL;
 }
 
 void CDPBase::sampleP(int* p, int n, double gamma, int T, RowVector& postp, RowVector& postV, MTRand& mt) {
@@ -343,5 +350,7 @@ void CDPBase::sampleP(int* p, int n, double gamma, int T, RowVector& postp, RowV
     postp[i] = prod*postV[i];
   }
   delete [] a;
+  a = NULL;
   delete [] b;
+  b = NULL;
 }

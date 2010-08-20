@@ -303,7 +303,9 @@ void FreeCheck::DeRegister(void* t, char* name)
       if (fcl->ClassStore==t)
       {
 	 if (last) last->next = fcl->next; else next = fcl->next;
-	 delete fcl; return;
+	 delete fcl; 
+	 fcl = NULL;
+	 return;
       }
       last = fcl;
    }
@@ -333,7 +335,10 @@ void FreeCheck::DeRegisterR(void* t, char* o, int s)
 	    Tracer::PrintTrace();
 	    cout << "\n";
 	 }
-	 delete fcl; return;
+	 if (!fcl)
+	   delete fcl; 
+	 fcl = NULL;
+	 return;
       }
       last = fcl;
    }
@@ -363,7 +368,10 @@ void FreeCheck::DeRegisterI(void* t, char* o, int s)
 	    Tracer::PrintTrace();
 	    cout << "\n";
 	 }
-	 delete fcl; return;
+	 if(!fcl)
+	   delete fcl; 
+	 fcl = NULL;
+	 return;
       }
       last = fcl;
    }

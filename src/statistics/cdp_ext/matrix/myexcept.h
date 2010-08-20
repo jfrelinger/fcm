@@ -117,6 +117,7 @@ inline void Tracer::ReName(const char* e) { entry=e; }
 
 class JumpItem;
 class Janitor;
+class Janitor;
 
 class JumpBase         // pointer to a linked list of jmp_buf s
 {
@@ -225,7 +226,6 @@ public:
 
 #endif                                // end of ! SimulateExceptions
 
-
 //******************** FREE_CHECK and NEW_DELETE ***********************//
 
 #ifdef DO_FREE_CHECK                          // DO_FREE_CHECK
@@ -296,7 +296,8 @@ public:                                                                    \
       return t;                                                            \
    }                                                                       \
    void operator delete(void* t)                                           \
-   { FreeCheck::DeRegister(t,#Class); ::operator delete(t); }
+   { 
+FreeCheck::DeRegister(t,#Class); if (t==0) return;::operator delete(t); }
 
 
 #ifdef SimulateExceptions         // SimulateExceptions
@@ -310,7 +311,8 @@ public:                                                                    \
       return t;                                                            \
    }                                                                       \
    void operator delete(void* t)                                           \
-   { FreeCheck::DeRegister(t,#Class); ::operator delete(t); }
+   { 
+FreeCheck::DeRegister(t,#Class); if (t==0) return; ::operator delete(t); }
 
 
 #endif                           // end of SimulateExceptions
@@ -341,7 +343,9 @@ public:                                                                    \
 public:                                                                    \
 	void* operator new(size_t size)                                    \
 	{ do_not_link=true; void* t = ::operator new(size); return t; }    \
-	void operator delete(void* t) { ::operator delete(t); }
+ void operator delete(void* t) { 
+if (t==0) return;
+::operator delete(t); }
 
 #endif                            // end of SimulateExceptions
 

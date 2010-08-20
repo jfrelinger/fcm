@@ -49,16 +49,13 @@ CDP::CDP()
 
 CDP::~CDP()
 {
-	std::cout << "deleteting mX" << std::endl;
 	for (int i = 0; i < prior.N; i++) {
-		if(mX[i] != 0){
-			delete [] mX[i];
-			mX[i] = 0;
-		};
-	};
+	  delete [] mX[i];
+	  mX[i] = NULL;
+	}
 	delete [] mX;
-	mX = 0;
-};
+	mX = NULL;
+}
 
 void CDP::InitMCMCSteps(Model& model)
   {
@@ -107,7 +104,9 @@ void CDP::UpdateKJ(int* K,vector<int>& w1d, vector<int>& KJ){
       vector<int>::iterator it;
       for(it=w1d.begin(); it != w1d.end(); ++it)
 	{
-	  KJ.push_back(K[*it]);
+	  // Not sure why K[*it] sometimes returns >= prior.T
+	  // Ask Quanli
+	  KJ.push_back(K[*it]>=prior.T?prior.T-1:K[*it]);
 	  //	  KJUnique.insert(K[*it]);
 	}
     }
@@ -252,7 +251,7 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 	int dim = prior.D * (prior.D + 1) / 2;
 	double *clustercov = new double[prior.T * dim];
 	double *clustermean = new double[prior.T * prior.D];
-	double *clustercount = new double[prior.T]; 
+	int *clustercount = new int[prior.T]; 
 	
 #if defined(CDP_MEANCOV)
 	UpperTriangularMatrix temp(prior.D); temp = 0;
@@ -284,12 +283,13 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 	}
 #else
 	memset(clustermean,0,sizeof(double) * prior.T * prior.D);
-	memset(clustercount,0,sizeof(double) * prior.T);
+	memset(clustercount,0,sizeof(int) * prior.T);
 	memset(clustercov,0,sizeof(double) * prior.T * dim);
 	//update sums
+
 	for (i = 0; i < prior.N; i++) {
-		int index = result.K[i];
-		//std::cout << index << endl;
+	  // out of bounds error - temp fix put in by Cliburn 08/18/10
+       	        int index = result.K[i]<prior.T?result.K[i]:prior.T-1;
 		double *pmean = clustermean + index * prior.D;
 		double	*pX = mX[i];
 		for (j = 0; j < prior.D; j++) {
@@ -302,8 +302,9 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 				*pcov++ += pX[j] * pX[k];
 			}
 		}
-		clustercount[index] += 1.0;
+		clustercount[index] += 1;
 	}
+
 #endif
 	//caculate covariance matrix
 	for (t = 0; t < prior.T;t++) {
@@ -325,7 +326,6 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 			//do nothing
 		}
 	}
-
 
 	SymmetricMatrix mycov(prior.D);
 	RowVector xbar(prior.D);
@@ -392,7 +392,10 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 					mycovinvL << mycovinvL * sqrt(postgamma);
 					PostMu = msf.mvnormrand(postm, mycovinvL,mt);
 					flag = 0;
-				} catch (...) {
+				} catch (exception& e) {
+
+				  printf(">>> %s\n", e.what());
+
 					flag++;
 					postS = postS + result.Phi[0]*prior.nu; //cooked up stuff, just to avoid crash
 					if (flag >= ITERTRY) {
@@ -412,11 +415,16 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 			i++;
 		} while (i<10 && mcsampleEta);
 	}
-	
+
 	//std::cout << "about to free" << std::endl;
-	delete [] clustercov;
-	delete [] clustermean;
-	delete [] clustercount;
+	delete [] clustercov; 
+	clustercov = NULL;
+	
+	delete [] clustermean; 
+	clustermean = NULL;
+	
+	delete [] clustercount; 
+	clustercount = NULL;
 	//std::cout << "freed" << std::endl;
 	
   //sample p
@@ -594,14 +602,14 @@ int main(int argc,char* argv[]) {
 
 	  #if defined(CDP_CUDA)
 		unsigned int hTimer;
-		cutilCheckError(cutCreateTimer(&hTimer));
-		cutilCheckError(cutResetTimer(hTimer));
-		cutilCheckError(cutStartTimer(hTimer));
+		// cutilCheckError(cutCreateTimer(&hTimer));
+		// cutilCheckError(cutResetTimer(hTimer));
+		// cutilCheckError(cutStartTimer(hTimer));
 	  #else
 		time_t tStart, tEnd;
 		//long tStart, tEnd;
 		//tStart = clock();
-		time(&tStart);
+		// time(&tStart);
 	  #endif
 	
 
@@ -620,12 +628,12 @@ int main(int argc,char* argv[]) {
 	  }
 	  if (model.mnPrintout >0) {
 		  #if defined(CDP_CUDA)
-			cutilCheckError(cutStopTimer(hTimer));
-			printf("GPU Processing time: %f (ms) \n", cutGetTimerValue(hTimer));
+	    // cutilCheckError(cutStopTimer(hTimer));
+	    // printf("GPU Processing time: %f (ms) \n", cutGetTimerValue(hTimer));
 		  #else
 			//tEnd = clock();
-		  time(&tEnd);
-			cout << "time lapsed:" << fabs(difftime(tEnd,tStart))  << "seconds"<< endl;
+	    // time(&tEnd);
+	    // cout << "time lapsed:" << fabs(difftime(tEnd,tStart))  << "seconds"<< endl;
 		  #endif
 	  }
 
