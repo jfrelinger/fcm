@@ -72,11 +72,12 @@ def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
         px = allpx[js]
         sm.append(x)
         spm.append(px)
-        w = compmixnormpdf(allx,pi,mu,sigma)
+        #w = compmixnormpdf(allx,pi,mu,sigma)
         h = 0
         eps = 1+etol
 
         while ((h<=maxiter) and (eps>etol)):
+            w = compmixnormpdf(x,pi,mu,sigma)
             y = numpy.zeros(p)
             Y = numpy.zeros((p,p))
             
@@ -85,8 +86,8 @@ def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
 #                Y += w*omega[j]
 #                y += w*a[j]
             #w = compmixnormpdf(x,pi,mu,sigma)
-            Y = sum([w[js,j]*omega[j] for j in range(k)])
-            y = sum([w[js,j]*a[j] for j in range(k)])
+            Y = sum([w[j]*omega[j] for j in range(k)])
+            y = sum([w[j]*a[j] for j in range(k)])
             y = solve(Y, y)
             py = mixnormpdf(y, pi, mu, sigma)
             #print py, px
@@ -94,6 +95,8 @@ def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
             x = y
             px = py
             h += 1
+            print 'eps=', eps
+            print 'h=', h
 
         # mdict[tuple(allx[js])] = [numpy.round(x,rnd),px] # eliminate duplicates
         #mdict[tuple(numpy.round(x,2))] = [numpy.round(x,rnd),px] # eliminate duplicates
