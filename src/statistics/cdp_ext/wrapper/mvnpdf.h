@@ -36,10 +36,6 @@ void wmvnpdf(int xd, int xp, double* px,
 	int md, int mp, double*mu,
 	int sk, int sd, int sp, double* sigma,
 	int outd, double* out);
-	
-SymmetricMatrix convert_sigma(int sd, int sp, double* sigma);
-double inv_chol_sig(int sd, int sp, double* sigma, 
-	LowerTriangularMatrix *ics
-	);
+
 	 
 #endif /*MVNDPF_H_*/

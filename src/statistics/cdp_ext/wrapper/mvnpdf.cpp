@@ -18,14 +18,23 @@ double mvnpdf(int xd, double* px,
 	 	
 		SpecialFunctions2 msf;
 		int D = xd;
-		//SymmetricMatrix Sigma(D);// = convert_sigma(sd, sp, sigma);
-//		LowerTriangularMatrix L = Cholesky(Sigma);
-		LowerTriangularMatrix InvChol(D);// = L.i();
-
-		double logdet =  inv_chol_sig(sd, sp, sigma, &InvChol); //msf.logdet(L);
+		SymmetricMatrix Sigma(D);
+		LowerTriangularMatrix L;
+		LowerTriangularMatrix InvChol;
+		for(int i = 0; i<D;++i){
+			for(int j=0; j<=i; ++j){
+				int pos = i*D+j;
+				Sigma(i+1,j+1) = sigma[pos];
+			};
+		};
+		
+		L = Cholesky(Sigma);
+		
+		InvChol = L.i();
+		double logdet = msf.logdet(L);
 		double val =  msf.mvnormpdf(px, mu, InvChol, D, 0, logdet);
-//		L.ReleaseAndDelete();
-//		Sigma.ReleaseAndDelete();
+		L.ReleaseAndDelete();
+		Sigma.ReleaseAndDelete();
 		InvChol.ReleaseAndDelete();
 		return val;
 	 };
@@ -87,26 +96,3 @@ void wmvnpdf(int xd, int xp, double* px,
 		};
 	};
 
-SymmetricMatrix convert_sigma(int sd, int sp, double* sigma){
-	SymmetricMatrix Sigma(sd);
-	for(int i = 0; i<sd;++i){
-		for(int j=0; j<=i; ++j){
-			int pos = i*sd+j;
-			Sigma(i+1,j+1) = sigma[pos];
-		};
-	};
-
-	return Sigma;
-};
-
-double inv_chol_sig(int sd, int sp, double* sigma, 
-	LowerTriangularMatrix *ics
-	){
-		SpecialFunctions2 msf;
-		SymmetricMatrix Sigma = convert_sigma(sd, sp, sigma);
-		LowerTriangularMatrix L = Cholesky(Sigma);
-		*ics  = L.i();
-		Sigma.ReleaseAndDelete();
-		L.ReleaseAndDelete();
-		return msf.logdet(*ics);
-	};
