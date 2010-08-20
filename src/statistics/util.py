@@ -10,7 +10,7 @@ import numpy
 from numpy.linalg import solve, inv
 from fcm.statistics.distributions import compmixnormpdf, mixnormpdf, mvnormpdf, mixnormrnd
 
-def modesearch(pis, mus, sigmas, tol=1e-5, maxiter=20):
+def modesearch(pis, mus, sigmas, tol=1e-6, maxiter=20):
     """find the modes of a mixture of guassians"""
     n = mus.shape[0]
     
@@ -72,32 +72,21 @@ def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
         px = allpx[js]
         sm.append(x)
         spm.append(px)
-        #w = compmixnormpdf(allx,pi,mu,sigma)
+        # w = compmixnormpdf(allx,pi,mu,sigma)
         h = 0
         eps = 1+etol
 
         while ((h<=maxiter) and (eps>etol)):
             w = compmixnormpdf(x,pi,mu,sigma)
-            y = numpy.zeros(p)
-            Y = numpy.zeros((p,p))
-            
-#            for j in range(k):
-#                w = mixnormpdf(x, pi[j], mu[j], sigma[j])
-#                Y += w*omega[j]
-#                y += w*a[j]
-            #w = compmixnormpdf(x,pi,mu,sigma)
-            Y = sum([w[j]*omega[j] for j in range(k)])
-            y = sum([w[j]*a[j] for j in range(k)])
-            y = solve(Y, y)
+            Y = numpy.sum([w[j]*omega[j] for j in range(k)], 0)
+            yy = numpy.dot(w, a)
+            y = solve(Y, yy)
             py = mixnormpdf(y, pi, mu, sigma)
-            #print py, px
             eps = py/px
             x = y
             px = py
             h += 1
 
-        # mdict[tuple(allx[js])] = [numpy.round(x,rnd),px] # eliminate duplicates
-        #mdict[tuple(numpy.round(x,2))] = [numpy.round(x,rnd),px] # eliminate duplicates
         mdict[(js, tuple(x))] = [numpy.round(x,rnd),px] # eliminate duplicates
     return mdict, sm, spm
 
@@ -122,3 +111,20 @@ def check_mode(m, pm, pi, mu, sigma):
     return numpy.array(tm), numpy.array(tpm)    
     
     
+if __name__ == '__main__':
+    pi = numpy.array([0.3,0.4,0.29,0.01])
+    mu = numpy.array([[0,0],
+                      [1,3],
+                      [-3,-1],
+                      [1.2,2.8]], 'd')
+    sigma = numpy.array([1*numpy.identity(2),
+                         1*numpy.identity(2),
+                         1*numpy.identity(2),
+                         1*numpy.identity(2)])
+    modes, rslt = modesearch(pi, mu, sigma)
+
+    for key in modes:
+        print key, modes[key]
+    print
+    for key in rslt:
+        print key, rslt[key]
