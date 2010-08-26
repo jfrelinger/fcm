@@ -109,11 +109,14 @@ class FCSreader(object):
             if header['version'] == 3.0 and self.logicle == True:
                 T = 262144
                 m = 4.5 * log(10)
-
+                scale_max, scale_min = (1e5, 0)
                 for i in to_logicle:
                     dj = data[:,i]
                     r = quantile(dj[dj < 0], 0.05)
-                    data[:,i] = _logicle(dj, T, m, r)
+                    lmin, lmax = _logicle([0,T], T, m, r)
+                    tmp = scale_max/lmax*_logicle(dj, T, m, r)
+                    tmp[tmp<scale_min]=scale_min
+                    data[:,i] = tmp
 
             
         path, name = os.path.split(self.filename)

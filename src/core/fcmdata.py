@@ -2,7 +2,7 @@
 A python object representing flow cytomoetry data
 """
 from __future__ import division
-from numpy import array, median, mean, std
+from numpy import array, median, mean, std, log
 from enthought.traits.api import HasTraits, String, Instance, List
 from annotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
@@ -139,7 +139,7 @@ class FCMdata(HasTraits):
         return FCMdata(tpnts, tchannels, tmarkers, tnotes)
     
     @fcmlog
-    def logicle(self, channels, T=262144, m=9.2103403719761836, r=None, order=2, intervals=1000.0, scale_max=1e5, scale_min=0):
+    def logicle(self, channels, T=262144, m=4.5*log(10), r=None, order=2, intervals=1000.0, scale_max=1e5, scale_min=0):
         """return logicle transformed channels"""
         return _logicle(self, channels, T, m, r, order, intervals, scale_max, scale_min)
         
