@@ -46,11 +46,17 @@ def _logicle(y, T, m, r, order=2, intervals=1000.0):
     t = interpolate.splrep(xx, yy, k=order)
     return interpolate.splev(y, t)
 
-def logicle(fcm, channels, T, m, r, order=2, intervals=1000.0):
+def logicle(fcm, channels, T, m, r=None, order=2, intervals=1000.0, scale_max=1e5, scale_min=0):
     """return logicle transformed points in fcm data for channels listed"""
     npnts = fcm.view().copy()
     for i in channels:
-        npnts.T[i] = _logicle(npnts[:, i].T, T, m, r, order, intervals)
+        if r is None:
+            tmp = npnts[:,i]
+            r = quantile(tmp[tmp<0], 0.05)
+        lmin, lmax =  _logicle([0,T], T, m,r, order, intervals)
+        tmp = scale_max/lmax*_logicle(npnts[:, i].T, T, m, r, order, intervals)
+        tmp[tmp<scale_min] = scale_min
+        npnts.T[i] = tmp
     node = TransformNode('', fcm.get_cur_node(), npnts)
     fcm.add_view(node)
     return fcm
@@ -102,6 +108,8 @@ if __name__ == '__main__':
     r = quantile(d3[d3<0], 0.05)
     w = (m-log(T/abs(r)))/2
 
+    print _logicle([0,T], T, m,r)
+    lmin, lmax = _logicle([0,T], T, m,r)
     pylab.clf()
     pylab.figtext(0.5, 0.94, 'Logicle transform with r=%.2f, d=%d and T=%d\nData is normal(0, 50, 50000) + lognormal(8, 1, 50000)' % (r, d, T),
                   va='center', ha='center', fontsize=12)
@@ -122,9 +130,11 @@ if __name__ == '__main__':
     pylab.ylabel('Raw data')
 
     pylab.subplot(3,1,3)
-    pylab.hist(_logicle(d3, T, m, r), 1250)
+    d = 1e5/lmax*_logicle(d3, T, m, r)
+    d[d<0]=0
+    pylab.hist(d, 1250)
     locs, labs = pylab.xticks()
-    pylab.xticks([])
+    #pylab.xticks([])
     pylab.yticks([])
     pylab.ylabel('Data after transform')
 
