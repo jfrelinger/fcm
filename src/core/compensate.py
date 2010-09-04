@@ -40,11 +40,13 @@ def compensate(fcm, S=None, markers=None, comp=False, scale=False):
 def _compensate(data, spill, comp=False, scale=False):
     if scale and not comp:
         spill = spill/max(spill)
-    if not comp:
+    if comp:
         spill = inv(spill)
 
     #return dot(data,spill)
-    return solve(spill,data.T).T
+    # return solve(spill,data.T).T
+
+    return solve(spill.T, data.T).T
 
 def load_compensate_matrix(file_name):
     """
