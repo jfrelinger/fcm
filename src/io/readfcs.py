@@ -14,8 +14,6 @@ import re
 import numpy
 import os
 
-
-
 class FCSreader(object):
     """
     class to hold object to read and parse fcs files.  main usage is to get 
@@ -72,6 +70,7 @@ class FCSreader(object):
         # build fcmdata object
         channels = []
         scchannels = []
+        scchannel_indexes = []
         to_logicle = []
         base_chan_name = []
         for i in range(1,int(text['par'])+1):
@@ -84,13 +83,24 @@ class FCSreader(object):
             #if not name.lower().startswith('fl'):
             if not is_fl_channel(name):
                 scchannels.append(name)
+                if name != 'Time':
+                    scchannel_indexes.append(i-1)
             else: # we're a FL channel
                 try:
                     if text['p%dr' % i] == '262144':   
                         to_logicle.append(i-1)
                 except KeyError:
                     pass
-        
+
+        # cliburn 27 Aug 2010
+        # filter out events with negative scatter
+        clean = True
+        if clean:
+            idx = numpy.zeros(data.shape[0], 'bool')
+            for k in scchannel_indexes:
+                idx |= data[:,k] <= 0
+            data = data[~idx, :]
+                
         if auto_comp:
             if self.spill is None:
                 try:
@@ -103,9 +113,7 @@ class FCSreader(object):
                     idx.append(base_chan_name.index(si))
                 c = _compensate(data[:,idx], self.spill)
                 data[:,idx] = c
-                
-                
-                    
+
             if header['version'] == 3.0 and self.logicle == True:
                 T = 262144
                 m = 4.5 * log(10)
@@ -118,6 +126,14 @@ class FCSreader(object):
                     tmp[tmp<scale_min]=scale_min
                     data[:,i] = tmp
 
+                # # log transform as alternative
+                # for i in to_logicle:
+                #     dj = data[:,i]
+                #     dj[dj < 1] = 1
+                #     lmin, lmax = numpy.log10([0,T])
+                #     tmp = scale_max/lmax*numpy.log10(dj)
+                #     tmp[tmp<scale_min]=scale_min
+                #     data[:,i] = tmp
             
         path, name = os.path.split(self.filename)
         name, ext = os.path.splitext(name)
