@@ -139,8 +139,10 @@ class FCMdata(HasTraits):
         return FCMdata(tpnts, tchannels, tmarkers, tnotes)
     
     @fcmlog
-    def logicle(self, channels, T=262144, m=4.5*log(10), r=None, order=2, intervals=1000.0, scale_max=1e5, scale_min=0):
+    def logicle(self, channels=None, T=262144, m=4.5*log(10), r=None, order=2, intervals=1000.0, scale_max=1e5, scale_min=0):
         """return logicle transformed channels"""
+        if channels is None:
+            channels = self.markers
         return _logicle(self, channels, T, m, r, order, intervals, scale_max, scale_min)
         
     @fcmlog
