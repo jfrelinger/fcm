@@ -23,23 +23,23 @@ class Dime(object):
         
         #pull mixture parameters from cluster if passed
         if cluster is  not None:
-            self.pi = cluster.get_pis()
-            self.mu = cluster.get_mus()
-            self.sigma = cluster.get_sigmas()
+            self.pi = cluster.pis()
+            self.mu = cluster.mus()
+            self.sigma = cluster.sigmas()
             # TODO add fetching cmap here
             try:
                 if cmap == None:
                     cmap = cluster.cmap
             except AttributeError:
                 pass
-        
-        #if mixture parameters are passed explicitly use them.
-        if pi is not None:
-            self.pi = pi
-        if mu is not None:
-            self.mu = mu
-        if sigma is not None:
-            self.sigma = sigma
+        else:
+            #if mixture parameters are passed explicitly use them.
+            if pi is not None:
+                self.pi = pi
+            if mu is not None:
+                self.mu = mu
+            if sigma is not None:
+                self.sigma = sigma
             
         #check we got all pramters
         if (self.pi is None or self.mu is None or self.sigma is None):
@@ -50,8 +50,8 @@ class Dime(object):
             
         self.k, self.p= self.mu.shape
         if cmap == None:
-            self.c = len(pi) # number of clusters
-            self.cpi = pi
+            self.c = len(self.pi) # number of clusters
+            self.cpi = self.pi
             cmap = {}
             for i in range(self.c):
                 cmap[i] = [i]

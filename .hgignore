@@ -31,3 +31,6 @@ syntax: regexp
 ^sample_data/ICS2D1S1R1lab4\.LMD$
 syntax: regexp
 ^sample_data/old_cmv1\.fcs$
+.project
+.pydevproject
+.settings/*
