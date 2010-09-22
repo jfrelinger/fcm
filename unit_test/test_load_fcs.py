@@ -6,7 +6,7 @@ class FCSreaderTestCase(unittest.TestCase):
         self.fcm = FCSreader('../sample_data/3FITC_4PE_004.fcs').get_FCMdata()
         
     def testGetPnts(self):
-        self.assertEqual(self.fcm.shape, self.fcm.notes.text['tot'])
+        self.assertEqual(self.fcm.shape[0], int(self.fcm.notes.text['tot']))
 
     def testGetNotes(self):
         self.assertEqual(self.fcm.notes.text['cyt'], 'FACScan')
