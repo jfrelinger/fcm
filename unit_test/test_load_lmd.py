@@ -6,7 +6,8 @@ class FCSreaderLMDTestCase(unittest.TestCase):
         self.fcm = FCSreader('../sample_data/coulter.lmd').get_FCMdata()
         
     def testGetPnts(self):
-        self.assertEqual(self.fcm.shape, (18110, 8))
+        print self.fcm.notes
+        self.assertEqual(self.fcm.shape, self.fcm.notes.text['tot'])
 
     def testGetNotes(self):
         self.assertEqual(self.fcm.notes.text['cyt'], 'Cytomics FC 500')
