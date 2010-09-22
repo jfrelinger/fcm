@@ -94,12 +94,13 @@ class FCSreader(object):
 
         # cliburn 27 Aug 2010
         # filter out events with negative scatter
-        clean = True
-        if clean:
-            idx = numpy.zeros(data.shape[0], 'bool')
-            for k in scchannel_indexes:
-                idx |= data[:,k] <= 0
-            data = data[~idx, :]
+        # BREAKS UNIT TESTS: pointy hat to cliburn
+#        clean = True
+#        if clean:
+#            idx = numpy.zeros(data.shape[0], 'bool')
+#            for k in scchannel_indexes:
+#                idx |= data[:,k] <= 0
+#            data = data[~idx, :]
                 
         if auto_comp:
             if self.spill is None:
