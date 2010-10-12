@@ -6,6 +6,7 @@
 #include <math.h>
 #include "stdafx.h"
 #include "Model.h"
+#include "stdlib.h"
 
 #define WANT_STREAM                  // include.h will get stream fns
 #define WANT_MATH                    // include.h will get math fns
@@ -181,8 +182,23 @@ void CDP::LoadInits(Model& model,CDPResult& result, MTRand& mt)
 		}
 	  }
    }
-
-  
+	
+  if(model.Zrelabel && model.mstralgorithm=="mcmc")
+    {
+		int curclass;
+		result.refZ = new int[result.N];
+	   if(!LoadFileData(model.Zfile,result.refZ,result.N))
+	{
+		std::cout << "Loading Reference Z failed!" << endl;
+		exit(1);
+	}
+		result.refZobs = (int*)calloc(result.T,sizeof(int));
+		for (int i = 0; i<result.N; i++) {
+			curclass = result.refZ[i];
+			result.refZobs[curclass] = result.refZobs[curclass]+1;
+		}
+	}
+		
   if(model.loadAlpha)
     {
       if(!LoadFileData(model.Alphafile,result.alpha,result.J))
@@ -297,11 +313,11 @@ bool CDP::LoadFileData(string FileName, int* A, int columns)
     return false;
   }
   
-  int dCurrent = 0;
+  double dCurrent = 0.0;
   for (int j = 0; j < columns; j++) {
     if (!theFile.eof()) {
       theFile >> dCurrent;
-      A[j] = dCurrent-1;
+      A[j] = ((int)dCurrent)-1;
     } else {
       std::cout << "Not enough numbers to be read" << endl;
       return false;

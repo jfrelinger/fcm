@@ -56,6 +56,8 @@ Model::Model()
   samplep = true;
   samplealpha = true;
   sampleEta = false;
+  Zrelabel = false;
+  emStoreZ = false;
 
 //#if defined(CDP_CUDA)
   startDevice = 0;
@@ -92,6 +94,8 @@ Model::Model()
   Alphafile="";
   Alpha0file="";
   etaFile="";
+  Zfile="";
+  emRefFile="";
 }
 
 string Model::ToLower(string str)
@@ -368,6 +372,12 @@ bool Model::Load(string FileName){
 		mnErrorPerTol=ToDouble(value);
 	  } else if (name=="numberdevices"){   
 	    numberDevices = ToInt(value);
+	  } else if (name=="emreffile"){
+		  emStoreZ = true;
+		  emRefFile = value;
+	  } else if (name=="mcmcrelabelref"){   
+		  Zrelabel = true;
+		  Zfile = value;
 	  } else {
 	    cout << "Unknown Parameter" << endl; //to be refined later
 	    cout << theLine << endl;

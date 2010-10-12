@@ -1,17 +1,16 @@
 #pragma once
 #include <vector>
-#define WANT_STREAM
-
-
 
 //class concurrent_vector;
 class CDPResult
 {
-public:
+
+	public:
   CDPResult(int nclusters, int ncomponents, int npoints,int dimension);
 	virtual ~CDPResult(void); 
 	int isEM;
 	double alpha0; 
+	int r;
 	
 	/* mean values of component/cluster means/covariances */
 	int nmcits; // number of mcmc iterations upon which the means are calculated
@@ -55,7 +54,10 @@ public:
 		vector<LowerTriangularMatrix> L_i; //(J by T) by (D by D)
 		vector<double> Sigma_log_det;
 	#endif
-		
+	
+	int* Z; //N by 1 -- Classification Vector
+	int* refZ; //N by 1 -- Reference Classification Vector
+	int* refZobs; //T by 1 -- Number of obs in each Classification Component
 		
 	RowVector q;	// J by 1
 	RowVector qV; //J by 1
@@ -84,7 +86,9 @@ public:
 	bool SaveqV(string FileName);
 	bool SaveAlpha(string FileName);
 	bool SaveAlpha0(string FileName);
+	
 	bool SaveEta(string FileName);
+	bool SaveZ(string FileName);
 	bool SaveFinal();
 	
 	/* functions to log the *bar values above */
@@ -101,6 +105,7 @@ public:
 	ofstream postmfile;
 	ofstream postPhifile;
 	ofstream postqfile;
+	ofstream postrfile;
 
 	bool SaveDraws();
 	bool SavePDraw();
@@ -109,5 +114,6 @@ public:
 	bool SaveQDraw();
 	bool SaveMDraw();
 	bool SavePhiDraw();
+	bool SaveRDraw();
 
 };

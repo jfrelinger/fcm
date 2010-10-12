@@ -14,7 +14,7 @@ class CDP:public CDPBase
 {
  public:
   CDP();
-  ~CDP();
+  ~CDP(void);
   void InitMCMCSteps(Model& model);
   void LoadData(Model& model);
   void LoadInits(Model& model,CDPResult& result, MTRand& mt);
@@ -28,6 +28,8 @@ class CDP:public CDPBase
   void partition(int* W, vector<vector<int> >& w1d);
   
   void UpdateKJ(int* K,vector<int>& w1d, vector<int>& KJ);
+	
+	void ComponentRelabel(CDPResult& result);
   
   // turn off/off individual sampling steps
   bool mcsamplem;
@@ -42,6 +44,8 @@ class CDP:public CDPBase
   bool mcsamplep;
   bool mcsamplealpha;	
   bool mcsampleEta;
+	
+  bool mcRelabel;
 
  private:
   static bool LoadFileData(string FileName, Matrix& A, int rows, int columns);

@@ -53,23 +53,94 @@ CDP_EM::CDP_EM()
 
 
 
-CDP_EM::~CDP_EM()
+CDP_EM::~CDP_EM(void)
 
 {
-	mX = 0;
-	/*
-	if (mX != 0){
-	for (int i = 0; i < prior.N; i++) {
+
+	/*for (int i = 0; i < prior.N; i++) {
+
 		delete [] mX[i];
-		mX[i] = 0;
+
 	}
-	delete [] mX;
-	mX = 0;
-	};
-	*/
+
+	delete [] mX;*/
 
 };
 
+void CDP_EM::getLogPostLikelihood(CDPResultEM& result)
+{
+	
+	LowerTriangularMatrix temp;
+	SymmetricMatrix sigmaInv;
+	Matrix workMat;
+	IdentityMatrix ident(result.D);
+	double epsilon = 10e-2;
+	
+	for (int t=0; t<prior.T; t++) {
+		
+		
+		int flag=0;
+		int ITERTRY = 10;
+		
+		
+		do{
+			try {
+				temp << Cholesky(result.Sigma[t]);
+				flag=0;
+			}
+			catch (NPDException) {
+				flag++;
+				result.Sigma[t] << result.Sigma[t] + ident * epsilon;
+				if (flag>ITERTRY) {
+					std::cout << "Covariance Matrix for the "<< t<< "th component could not be made pos-def after 10 tries" << endl;
+					exit(1);
+				}
+			}
+		} while (flag > 0) ;
+		
+		result.Sigma_log_det[t] = msf.logdet(temp);
+		result.L_i[t] = temp.i();
+		
+		sigmaInv << result.L_i[t].t() * result.L_i[t];
+		workMat = result.Phi[0] * ( sigmaInv );
+
+		if (emupdateeta) {
+			//sigmaInv << result.L_i[t].t() * result.L_i[t];
+			//workMat = result.Phi[0]*sigmaInv;
+			result.etaEst[t]=(prior.aa + prior.D*(prior.nu + (double)result.D + 1.0)) / (prior.aa + prior.nu*(workMat.Trace()));
+			if (result.etaEst[t] < 10e-5) {
+				result.etaEst[t] = 10e-5;
+			}
+		}
+
+		//Some of the prior part of the posterior log-likelihood. I think this is OK.
+		//result.postLL -= (prior.nu + (double)result.D + 4.0)*( result.Sigma_log_det[t] / 2.0 );
+		result.postLL -= 0.5*(prior.nu + 3.0 + 2.0*(double)result.D)*result.Sigma_log_det[t];
+
+		
+		if (emupdateeta) {
+			//result.postLL -= (prior.D*prior.nu+2.0*(prior.D-1)+prior.aa)/2.0 * log(prior.nu*workMat.Trace()+prior.aa);
+			result.postLL -= 0.5 * (prior.D*(prior.nu+prior.D+1.0)+prior.aa) * log(prior.nu*workMat.Trace()+prior.aa);
+		} else {
+			result.postLL -= 0.5 * prior.nu * workMat.Trace();
+		}	
+
+		result.postLL -= (1.0/(2.0 * prior.gamma)) * (( result.mu[t] - prior.m0 ) * sigmaInv * ( result.mu[t].t() - prior.m0.t() )).AsScalar();
+
+	}	
+	
+	double sum = 0.0;
+	for (int t=0; t<result.T-1; t++) {sum += log( 1.0 - result.pV[0][t] );}
+	
+	// Some of the posterior log-likelihood
+	
+	result.postLL += ( (double)result.T + prior.ee - 2.0 )*log(result.alpha[0]) - prior.ff*result.alpha[0];
+	
+	result.postLL += (result.alpha[0] - 1.0)*sum;
+	
+	
+	
+}
 
 
 bool CDP_EM::iterateEM(CDPResultEM& result,int printout)
@@ -105,6 +176,8 @@ bool CDP_EM::iterateEM(CDPResultEM& result,int printout)
 	getXbar(result);
 #endif
 	
+	getLogPostLikelihood(result);
+	
 	updatePandAlpha(result);
 	updateMu(result);
 
@@ -121,64 +194,6 @@ bool CDP_EM::iterateEM(CDPResultEM& result,int printout)
 //	std::cout << result.Sigma[0];
 	
 	
-	LowerTriangularMatrix temp;
-	SymmetricMatrix sigmaInv;
-	Matrix workMat;
-	IdentityMatrix ident(result.D);
-	double epsilon = 10e-2;
-		
-	for (int t=0; t<prior.T; t++) {
-		
-		
-		int flag=0;
-		int ITERTRY = 10;
-		
-		
-		do{
-			try {
-				temp << Cholesky(result.Sigma[t]);
-				flag=0;
-			}
-			catch (NPDException) {
-				flag++;
-				result.Sigma[t] << result.Sigma[t] + ident * epsilon;
-				if (flag>ITERTRY) {
-					std::cout << "Covariance Matrix for the "<< t<< "th component could not be made pos-def after 10 tries" << endl;
-					exit(1);
-				}
-			}
-		} while (flag > 0) ;
-			
-		result.Sigma_log_det[t] = msf.logdet(temp);
-		result.L_i[t] = temp.i();
-		
-		sigmaInv << result.L_i[t].t() * result.L_i[t];
-		workMat = result.Phi[0] * ( sigmaInv );
-
-		if (emupdateeta) {
-			//sigmaInv << result.L_i[t].t() * result.L_i[t];
-			//workMat = result.Phi[0]*sigmaInv;
-			result.etaEst[t]=(prior.aa + prior.D*(prior.nu + (double)result.D + 1.0)) / (prior.aa + prior.nu*(workMat.Trace()));
-			if (result.etaEst[t] < 10e-5) {
-				result.etaEst[t] = 10e-5;
-			}
-		}
-					 
-		//Some of the prior part of the posterior log-likelihood. I think this is OK.
-		//result.postLL -= (prior.nu + (double)result.D + 4.0)*( result.Sigma_log_det[t] / 2.0 );
-		result.postLL -= 0.5*(prior.nu + 3.0 + 2.0*(double)result.D)*result.Sigma_log_det[t];
-					 
-		
-		if (emupdateeta) {
-			//result.postLL -= (prior.D*prior.nu+2.0*(prior.D-1)+prior.aa)/2.0 * log(prior.nu*workMat.Trace()+prior.aa);
-			result.postLL -= 0.5 * (prior.D*(prior.nu+prior.D+1.0)+prior.aa) * log(prior.nu*workMat.Trace()+prior.aa);
-		} else {
-			result.postLL -= 0.5 * prior.nu * workMat.Trace();
-		}	
-
-		result.postLL -= (1.0/(2.0 * prior.gamma)) * (( result.mu[t] - prior.m0 ) * sigmaInv * ( result.mu[t].t() - prior.m0.t() )).AsScalar();
-
-	}	
 	if (printout>0) {  
 		std::cout << "log posterior = " << result.postLL << endl;
 	}
@@ -216,7 +231,7 @@ void CDP_EM::getPi_ij(CDPResultEM& result)
 
 {
 
-	int i,t;
+	int i,t,maxind;
 	RowVector x_row(result.D);
 	RowVector pi_row(result.T);
 	RowVector shift(result.N);
@@ -245,7 +260,9 @@ void CDP_EM::getPi_ij(CDPResultEM& result)
 		//if(i==0){std::cout << result.pi_ij[0][0] << endl;}
 		
 		shift[i] = result.pi_ij.Row(i+1).Minimum();
-		maxPdf[i] = result.pi_ij.Row(i+1).Maximum();
+		maxPdf[i] = result.pi_ij.Row(i+1).Maximum1(maxind);
+		result.Z[i] = maxind-1;
+
 		
 		if (shift[i] < maxPdf[i] - 70.0) {
 			shift[i] = maxPdf[i]-70.0;
@@ -361,7 +378,7 @@ void CDP_EM::updatePandAlpha(CDPResultEM& result)
 
 	
 
-	double vepsilon = 0.000000000000001;
+	double vepsilon = 1.0e-20;
 
 	double ww = 1.0;
 
@@ -421,12 +438,6 @@ void CDP_EM::updatePandAlpha(CDPResultEM& result)
 	result.p[0][result.T-1] = ww;
 
 	
-
-	// Some of the posterior log-likelihood
-
-	result.postLL += ( (double)result.T + prior.ee - 2.0 )*log(result.alpha[0]) - prior.ff*result.alpha[0];
-
-	result.postLL += (result.alpha[0] - 1.0)*sum;
 
 	//std::cout << ( (double)result.T + prior.ee - 2.0 )*log(result.alpha[0]) - prior.ff*result.alpha[0] + (result.alpha[0] - 1.0)*sum << endl;
 
@@ -568,18 +579,14 @@ void CDP_EM::updateSigma(CDPResultEM& result)
 
 void CDP_EM::EMAlgorithm(Model& model, MTRand& mt){
 	
-	
-	
-	double oldLL = 10000000000.0;
-	
 	double errTol;
-	SymmetricMatrix sigmaInv;
 	Matrix workMat;
-	
+	SymmetricMatrix sigmaInv;
+
 	cdpfunctions.LoadData(model);
 	mX = cdpfunctions.mX;
 
-	
+	emSaveRef = model.emStoreZ;
 	prior.Init(model);
 	cdpfunctions.prior = prior;
 	
@@ -601,7 +608,7 @@ void CDP_EM::EMAlgorithm(Model& model, MTRand& mt){
 
 	emcuda.initializeInstanceEM(model.startDevice,prior.J,prior.T, prior.N, 
 								  
-								  prior.D,model.numberDevices); 
+								  prior.D,model.numberDevices,emSaveRef); 
 
 	emcuda.initializeDataEM(mX);
 	
@@ -612,6 +619,7 @@ void CDP_EM::EMAlgorithm(Model& model, MTRand& mt){
 	// see if we're dealing with a special case of J==1
 	cdpfunctions.CheckSpecialCases(model,result);
 	
+	
 	emupdateeta = model.sampleEta;
 	
 	result.etaEst = RowVector(prior.T);
@@ -620,7 +628,10 @@ void CDP_EM::EMAlgorithm(Model& model, MTRand& mt){
 		for (int t=0; t<prior.T; t++) {
 			sigmaInv << result.L_i[t].t() * result.L_i[t];
 			workMat = result.Phi[0]*sigmaInv;
-			result.etaEst[t]=(prior.aa - prior.nu + 2) / (prior.aa + prior.nu*(workMat.Trace()));
+			result.etaEst[t]=(prior.aa + prior.D*(prior.nu + (double)result.D + 1.0)) / (prior.aa + prior.nu*(workMat.Trace()));
+			if (result.etaEst[t] < 10e-5) {
+				result.etaEst[t] = 10e-5;
+			}
 		}
 	} else {
 		for (int t=0; t<prior.T; t++) {
@@ -652,17 +663,37 @@ void CDP_EM::EMAlgorithm(Model& model, MTRand& mt){
 #endif
 	// main EM loop
 	errTol = log(1.0 + model.mnErrorPerTol);
-	
-	for (int it = 0; (it < model.mnIter) & (fabs(result.postLL - oldLL) > errTol) ; it++) {
+	lastIter = false;
+	double oldLL = result.postLL - 10000.0;
+
+	for (int it = 0; (it < model.mnIter) & (result.postLL - oldLL > errTol) ; it++) {
 		
+
 		oldLL = result.postLL;
 		
 		int printout = model.mnPrintout > 0 && it % model.mnPrintout == 0 ? 1: 0;
 		if (printout>0) {  
 			std::cout << "it = " << (it+1) << endl;
 		}
-		iterateEM(result,printout);	
+		iterateEM(result,printout);
+		if (it==0){
+		  oldLL = result.postLL - 10000.0;
+		}
 	}
+	if (result.postLL - oldLL < 0.0){
+	  std::cout << "Reached Max Precision (LL decreased)" << endl;
+	}
+
+	if (emSaveRef){
+		#if defined(CDP_CUDA)
+		emcuda.updateLastPi(result.p[0], result.mu, result.L_i, result.Sigma_log_det, result.Z);
+		#else
+			lastIter=true;
+			getPi_ij(result);
+		#endif	
+		result.SaveZ(model.emRefFile);
+	}
+	
 	
  if (model.mnPrintout >0) {
 	#if defined(CDP_CUDA)

@@ -31,4 +31,5 @@ public:
 	void SetAlphas(double de0, double df0, double dee, double dff);
 	//	void UpdateDefault(); //call this functionn after change D or stn
 	void Init(Model& model);
+	
 };

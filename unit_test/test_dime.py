@@ -14,7 +14,9 @@ if __name__ == '__main__':
     p = len(mu0)
 
     sigma = numpy.identity(3)
-
+#    sigma = numpy.array([[1,0,.5],
+#                         [0,1,0],
+#                         [.5,0,1]])
     x0 = numpy.random.multivariate_normal(mu0, sigma, 50)
     x1 = numpy.random.multivariate_normal(mu1, sigma, 50)
     x2 = numpy.random.multivariate_normal(mu2, sigma, 1250)
@@ -34,9 +36,11 @@ if __name__ == '__main__':
     #info = dime.DiME(x, pis, mus, sigmas, cmap=adict)
     info = dime.Dime(pi=pis, mu=mus, sigma = sigmas, cmap=adict)
     
-    infos = [info.drop(0,i) for i in range(p)]
-    infos2 = [info.drop(0,[0,1]), info.drop(0,[0,2]), info.drop(0,[1,2])]
+    const = info.drop(0,[0,1,2])
+    infos = [(info.drop(0,i)-const)/(1-const) for i in range(p)]
+    infos2 = [(info.drop(0,[0,1])-const)/(1-const), (info.drop(0,[0,2])-const)/(1-const), (info.drop(0,[1,2])-const)/(1-const)]
 
+    print const
     print infos
     print infos2
     

@@ -7186,6 +7186,55 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_cdpcluster_loadref(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cdpcluster *arg1 = (cdpcluster *) 0 ;
+  int arg2 ;
+  double *arg3 = (double *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:cdpcluster_loadref",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_cdpcluster, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cdpcluster_loadref" "', argument " "1"" of type '" "cdpcluster *""'"); 
+  }
+  arg1 = reinterpret_cast< cdpcluster * >(argp1);
+  {
+    npy_intp size[1] = {
+      -1
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1, NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 1) ||
+      !require_size(array2, size, 1)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (double*) array_data(array2);
+  }
+  (arg1)->loadref(arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_cdpcluster_printModel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   cdpcluster *arg1 = (cdpcluster *) 0 ;
@@ -10195,6 +10244,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"cdpcluster_loadq", _wrap_cdpcluster_loadq, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_loadqV", _wrap_cdpcluster_loadqV, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_loadalpha", _wrap_cdpcluster_loadalpha, METH_VARARGS, NULL},
+	 { (char *)"cdpcluster_loadref", _wrap_cdpcluster_loadref, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_printModel", _wrap_cdpcluster_printModel, METH_VARARGS, NULL},
 	 { (char *)"cdpcluster_swigregister", cdpcluster_swigregister, METH_VARARGS, NULL},
 	 { (char *)"delete_cdpemcluster", _wrap_delete_cdpemcluster, METH_VARARGS, NULL},

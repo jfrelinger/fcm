@@ -95,22 +95,27 @@ void CDPBase::sampleWK(RowVector& x, RowVector& q, vector<RowVector>& p, vector<
 
 
 #if defined(CDP_TBB)
-int CDPBase::sampleK(RowVector& x, RowVector& p, concurrent_vector<RowVector>& mu, 
+int CDPBase::sampleK(RowVector& x,int* Z, RowVector& p, concurrent_vector<RowVector>& mu, 
 					 concurrent_vector<LowerTriangularMatrix>& L_i, concurrent_vector<double>& logdet, MTRand& mt)
 #else
-  int CDPBase::sampleK(RowVector& x, RowVector& p, vector<RowVector>& mu, vector<LowerTriangularMatrix>& L_i, vector<double>& logdet, MTRand& mt)
+  int CDPBase::sampleK(RowVector& x,int* Z, RowVector& p, vector<RowVector>& mu, vector<LowerTriangularMatrix>& L_i, vector<double>& logdet, MTRand& mt)
 #endif
 {
   int T = p.Ncols();
   int D = x.Ncols();
   int i;
   double* weights = new double[T];
+  double max = 0.0;
 
   for (i=0; i < T; i++) {
     Real* px = x.Store();
     Real* pmu = mu[i].Store();
     double d = msf.mvnormpdf(px,pmu,L_i[i],D,1,logdet[i]);
     weights[i] = exp(log(p[i]) + d);
+	if(weights[i]>max){
+		max=weights[i];
+		*Z = i+1;
+	}
   }
   int r =  sample(weights,T,mt);
   delete [] weights;
@@ -118,11 +123,22 @@ int CDPBase::sampleK(RowVector& x, RowVector& p, concurrent_vector<RowVector>& m
   return r;
 }
 
+#if defined(CDP_TBB)
+int CDPBase::sampleK(RowVector& x, RowVector& p, concurrent_vector<RowVector>& mu, 
+					 concurrent_vector<LowerTriangularMatrix>& L_i, concurrent_vector<double>& logdet, MTRand& mt)
+#else
+int CDPBase::sampleK(RowVector& x, RowVector& p, vector<RowVector>& mu, vector<LowerTriangularMatrix>& L_i, vector<double>& logdet, MTRand& mt)
+#endif
+{
+	int tmpint;
+	sampleK(x,&tmpint,p,mu,L_i,logdet,mt);
+}
+
 
 #if defined(CDP_TBB)
-int CDPBase::sampleK(RowVector& x, RowVector& p, concurrent_vector<RowVector>& mu, concurrent_vector<LowerTriangularMatrix>& L_i, int index,concurrent_vector<double>& logdet, MTRand& mt)
+int CDPBase::sampleK(RowVector& x,int* Z, RowVector& p, concurrent_vector<RowVector>& mu, concurrent_vector<LowerTriangularMatrix>& L_i, int index,concurrent_vector<double>& logdet, MTRand& mt)
 #else
-  int CDPBase::sampleK(RowVector& x, RowVector& p, vector<RowVector>& mu, vector<LowerTriangularMatrix>& L_i, int index,vector<double>& logdet, MTRand& mt)
+  int CDPBase::sampleK(RowVector& x,int* Z, RowVector& p, vector<RowVector>& mu, vector<LowerTriangularMatrix>& L_i, int index,vector<double>& logdet, MTRand& mt)
 #endif
 {
   // This function gets called when J = 1; T is fixed = 20; index is fixed = 0
@@ -131,12 +147,17 @@ int CDPBase::sampleK(RowVector& x, RowVector& p, concurrent_vector<RowVector>& m
   int D = x.Ncols();
   int i;
   double* weights = new double[T];
+	double max=0.0;
 
   for (i=0; i < T; i++) {
     Real* px = x.Store();
     Real* pmu = mu[i+index * T].Store();
     double d = msf.mvnormpdf(px,pmu,L_i[i+index * T],D,1,logdet[i+index * T]);
     weights[i] = p[i] * exp(d);
+	  if(weights[i]>max){
+		  max=weights[i];
+		  *Z = i;
+	  }
 	//fprintf(stderr,"%e\n", weights[i]);
   }
 
@@ -144,6 +165,17 @@ int CDPBase::sampleK(RowVector& x, RowVector& p, concurrent_vector<RowVector>& m
   delete [] weights;
   weights = NULL;
   return r;
+}
+
+#if defined(CDP_TBB)
+int CDPBase::sampleK(RowVector& x, RowVector& p, concurrent_vector<RowVector>& mu, 
+					 concurrent_vector<LowerTriangularMatrix>& L_i,int index, concurrent_vector<double>& logdet, MTRand& mt)
+#else
+int CDPBase::sampleK(RowVector& x, RowVector& p, vector<RowVector>& mu, vector<LowerTriangularMatrix>& L_i, int index,vector<double>& logdet, MTRand& mt)
+#endif
+{
+	int tmpint;
+	return sampleK(x,&tmpint,p,mu,L_i,index,logdet,mt);
 }
 
 int CDPBase::sample(double* w, int n, MTRand& mt) {

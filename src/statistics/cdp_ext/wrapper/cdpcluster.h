@@ -95,6 +95,7 @@ class cdpcluster{
 	void loadq(int i, double* x);
 	void loadqV(int i, double* x);
 	void loadalpha(int i, double* x);
+	void loadref(int n, double*x);
 	
 	void printModel();
 

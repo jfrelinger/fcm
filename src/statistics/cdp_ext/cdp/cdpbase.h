@@ -28,6 +28,13 @@ public:
 
 	int sampleK(RowVector& x, RowVector& p, concurrent_vector<RowVector>& mu, concurrent_vector<LowerTriangularMatrix>& L_i, 
 		int index,concurrent_vector<double>& logdet, MTRand& mt);
+	
+	int sampleK(RowVector& x, int* Z, RowVector& p, concurrent_vector<RowVector>& mu, concurrent_vector<LowerTriangularMatrix>& L_i, 
+		concurrent_vector<double>& logdet, MTRand& mt); //Returns classification max Z.
+	int sampleK(RowVector& x, int* Z, RowVector& p, concurrent_vector<RowVector>& mu, concurrent_vector<LowerTriangularMatrix>& L_i, 
+		int index,concurrent_vector<double>& logdet, MTRand& mt);
+	
+
 	void sampleWK(RowVector& x, RowVector& q, concurrent_vector<RowVector>& p, concurrent_vector<RowVector>& mu, 
 		concurrent_vector<LowerTriangularMatrix>& L_i, concurrent_vector<double>& logdet, int& neww, int& newk, MTRand& mt);
 
@@ -35,8 +42,10 @@ public:
 	int sampleW(RowVector& x, RowVector& q, vector<RowVector>& p, vector<RowVector>& mu, vector<LowerTriangularMatrix>& L_i, vector<double>& loget, MTRand& mt);
 
 	int sampleK(RowVector& x, RowVector& p, vector<RowVector>& mu, vector<LowerTriangularMatrix>& L_i, vector<double>& logdet, MTRand& mt);
-
+	int sampleK(RowVector& x, int* Z, RowVector& p, vector<RowVector>& mu, vector<LowerTriangularMatrix>& L_i, vector<double>& logdet, MTRand& mt);
 	int sampleK(RowVector& x, RowVector& p, vector<RowVector>& mu, vector<LowerTriangularMatrix>& L_i, int index,vector<double>& logdet, MTRand& mt);
+	int sampleK(RowVector& x, int* Z, RowVector& p, vector<RowVector>& mu, vector<LowerTriangularMatrix>& L_i, int index,vector<double>& logdet, MTRand& mt);
+	
 	void sampleWK(RowVector& x, RowVector& q, vector<RowVector>& p, vector<RowVector>& mu, vector<LowerTriangularMatrix>& L_i, 
 		vector<double>& logdet, int& neww, int& newk, MTRand& mt);
 	#endif

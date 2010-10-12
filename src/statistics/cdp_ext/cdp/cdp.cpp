@@ -47,14 +47,12 @@ CDP::CDP()
 
 }
 
-CDP::~CDP()
+CDP::~CDP(void)
 {
 	for (int i = 0; i < prior.N; i++) {
-	  delete [] mX[i];
-	  mX[i] = NULL;
+		delete [] mX[i];
 	}
 	delete [] mX;
-	mX = NULL;
 }
 
 void CDP::InitMCMCSteps(Model& model)
@@ -104,9 +102,7 @@ void CDP::UpdateKJ(int* K,vector<int>& w1d, vector<int>& KJ){
       vector<int>::iterator it;
       for(it=w1d.begin(); it != w1d.end(); ++it)
 	{
-	  // Not sure why K[*it] sometimes returns >= prior.T
-	  // Ask Quanli
-	  KJ.push_back(K[*it]>=prior.T?prior.T-1:K[*it]);
+	  KJ.push_back(K[*it]);
 	  //	  KJUnique.insert(K[*it]);
 	}
     }
@@ -117,8 +113,8 @@ bool CDP::SimulateFromPrior2(CDPResult& result, MTRand& mt, int isEM) {
   LowerTriangularMatrix temp;
 	RowVector tmpEta(prior.T);
   //J
-  result.alpha0 = 1;
-
+  //result.alpha0 = 1;
+  /*
   LowerTriangularMatrix ltcov = Cholesky(prior.Phi0);
   SymmetricMatrix lambda = prior.Lambda0 / prior.nu0;
   //  LowerTriangularMatrix ltlambda = Cholesky(lambda);
@@ -139,35 +135,44 @@ bool CDP::SimulateFromPrior2(CDPResult& result, MTRand& mt, int isEM) {
     // alpha_j ~ Ga(ee,ff)
     //result.alpha[j] = 1;
 	result.alpha[j] = msf.gammarand(prior.ee,1.0/prior.ff,mt);
-  }
+  }*/
 
   //J by T
-  for (j = 0; j < prior.J;j++) {
-        SymmetricMatrix phi = result.Phi[j] * prior.nu;
-     phi = phi.i();
-        LowerTriangularMatrix ltphi = Cholesky(phi);
-    for (t = 0; t < prior.T;t++) {
-      int index = result.GetIndex(j,t);
+  //for (j = 0; j < prior.J;j++) {
+	
+	// alpha_j ~ Ga(ee,ff)
+	result.alpha[0] = msf.gammarand(prior.ee,1.0/prior.ff,mt);
+	
+	result.Phi.push_back(prior.Phi0);
+	result.m.push_back(prior.m0);
+	
+	SymmetricMatrix phi = prior.Phi0 * prior.nu;
+	phi = phi.i();
+	LowerTriangularMatrix ltphi = Cholesky(phi);
+	for (t = 0; t < prior.T;t++) {
+		//int index = result.GetIndex(j,t);
 		
 		// eta_t ~ Ga(aa/2,aa/2);
-	   tmpEta[t] = msf.gammarand(prior.aa / 2.0, 2.0 / prior.aa,mt);
+		tmpEta[t] = msf.gammarand(prior.aa / 2.0, 2.0 / prior.aa,mt);
+	   
+		LowerTriangularMatrix temp1 = ltphi*(1.0 / sqrt(tmpEta[t]));
 		
-		
-      // Sigma_j,t ~ IW(nu+2,nu*Phi[j])
-      result.Sigma.push_back(msf.invwishartrand((int)(prior.nu + 2),ltphi,mt));
-      //result.Sigma.push_back(prior.Lambda0);
+		// Sigma_t ~ IW(nu+2,nu*eta[t]*Phi0)
+		result.Sigma.push_back(msf.invwishartrand((int)(prior.nu + 2), temp1,mt));
+		//result.Sigma.push_back(prior.Lambda0);
 
-      temp << Cholesky(result.Sigma[index]);
-      // log of determinant of Chol(Sigma_j,t)
-      result.Sigma_log_det.push_back(msf.logdet(temp));
-      // inverse of transpose of Chol(Sigma_j,t)
-      result.L_i.push_back(temp.i());
+		temp << Cholesky(result.Sigma[t]);
+		// log of determinant of Chol(Sigma_j,t)
+		result.Sigma_log_det.push_back(msf.logdet(temp));
+		// inverse of transpose of Chol(Sigma_j,t)
+		result.L_i.push_back(temp.i());
 
-      SymmetricMatrix temp = result.Sigma[index] *prior.gamma;
+		SymmetricMatrix temp2 = result.Sigma[t] *prior.gamma;
 
-      // mu_j,t ~ N(m_j,gamma*Sigma_j,t)
-      result.mu.push_back(msf.mvnormrand(result.m[j],temp,mt));
-    }
+		// mu_j ~ N(m_j,gamma*Sigma_t)
+		result.mu.push_back(msf.mvnormrand(prior.m0,temp2,mt));
+	}
+
     result.eta.push_back(tmpEta);
     RowVector p(prior.T);p=1./(double)prior.T;
     RowVector pV(prior.T);pV=1/(double)prior.T;
@@ -176,16 +181,17 @@ bool CDP::SimulateFromPrior2(CDPResult& result, MTRand& mt, int isEM) {
     //    sampleP(&dummy,0,result.alpha[j],prior.T,p,pV,mt);
     result.p.push_back(p);
     result.pV.push_back(pV);
-  }
+  //}
 
   //J by 1
   //  sampleP(&dummy,0,result.alpha0,prior.J,p,pV,mt);
   result.q = 1./(double) prior.J;
   result.qV = 1/(double) prior.J;
   result.qV[prior.J-1] = 1.;
+
   if (isEM ==0) {
 	#if defined(CDP_CUDA)
-		cuda.sampleWK(result.q,result.p,result.mu,result.L_i, result.Sigma_log_det,mt,result.W,result.K);
+		cuda.sampleWK(result.q,result.p,result.mu,result.L_i, result.Sigma_log_det,mt,result.W,result.K,result.Z);
 	#else
 		for (int i = 0; i < prior.N;i++) {
 			RowVector row(prior.D);
@@ -196,6 +202,7 @@ bool CDP::SimulateFromPrior2(CDPResult& result, MTRand& mt, int isEM) {
 		}
 	#endif
   }
+
   return true;
 }
 
@@ -239,8 +246,8 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
     LowerTriangularMatrix li;
     double logdet;
 	
-	Matrix sigmaInv;
-	Matrix workMat;
+	Matrix sigmaInv(prior.D, prior.D);
+	//Matrix workMat(prior.D, prior.D);
 
 	vector<int> w1d;
 	int i,j,k,t;
@@ -251,7 +258,7 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 	int dim = prior.D * (prior.D + 1) / 2;
 	double *clustercov = new double[prior.T * dim];
 	double *clustermean = new double[prior.T * prior.D];
-	int *clustercount = new int[prior.T]; 
+	double *clustercount = new double[prior.T]; 
 	
 #if defined(CDP_MEANCOV)
 	UpperTriangularMatrix temp(prior.D); temp = 0;
@@ -283,13 +290,12 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 	}
 #else
 	memset(clustermean,0,sizeof(double) * prior.T * prior.D);
-	memset(clustercount,0,sizeof(int) * prior.T);
+	memset(clustercount,0,sizeof(double) * prior.T);
 	memset(clustercov,0,sizeof(double) * prior.T * dim);
 	//update sums
-
 	for (i = 0; i < prior.N; i++) {
-	  // out of bounds error - temp fix put in by Cliburn 08/18/10
-       	        int index = result.K[i]<prior.T?result.K[i]:prior.T-1;
+		int index = result.K[i];
+		//std::cout << index << endl;
 		double *pmean = clustermean + index * prior.D;
 		double	*pX = mX[i];
 		for (j = 0; j < prior.D; j++) {
@@ -302,11 +308,11 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 				*pcov++ += pX[j] * pX[k];
 			}
 		}
-		clustercount[index] += 1;
+		clustercount[index] += 1.0;
 	}
-
 #endif
 	//caculate covariance matrix
+	result.r = 0;
 	for (t = 0; t < prior.T;t++) {
 		double *pcov = clustercov + t * dim;
 		double *pmean = clustermean + t * prior.D;
@@ -320,12 +326,15 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 					*pcov++ -= clustercount[t] * pmean[j] * pmean[k]; 
 				}
 			}
+			result.r = result.r + 1;
 		} else if(clustercount[t] > 0)  {
 			memset(pcov,0,sizeof(double)*dim);
+			result.r = result.r + 1;
 		} else {
 			//do nothing
 		}
 	}
+
 
 	SymmetricMatrix mycov(prior.D);
 	RowVector xbar(prior.D);
@@ -334,7 +343,6 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 	double gamma1,gamma2;
 	SymmetricMatrix postS(prior.D);
 	RowVector postm;
-	i=0;
 	for (t=0; t < prior.T;t++) {
 		mycov = 0.0; xbar = 0.0;
 		double *pmean = clustermean + t * prior.D;
@@ -347,9 +355,9 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 			if(mcsampleEta){
 				if (clustercount[t]>0) {
 					sigmaInv << result.L_i[t].t() * result.L_i[t];
-					workMat = result.Phi[0] * ( sigmaInv );
+					//workMat = result.Phi[0] * sigmaInv;
 					gamma1 = (prior.aa + prior.D*(prior.nu + (double)prior.D + 1.0)) / 2.0;
-					gamma2 = (prior.aa + prior.nu*workMat.Trace()) / 2.0;	
+					gamma2 = (prior.aa + prior.nu*(result.Phi[0] * sigmaInv).Trace()) / 2.0;	
 				} else {
 					gamma1 = prior.aa / 2.0;
 					gamma2 = prior.aa / 2.0;
@@ -363,12 +371,12 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 				}
 			//std::cout << "eta " << result.eta[0][t] << endl;
 			}
-		
 			double nuprime = prior.nu*result.eta[0][t];
 			if (clustercount[t] >0) {
 				double temp = clustercount[t] * prior.gamma+1.0;
 				postnu = prior.nu + 3.0 + clustercount[t];
-				postS << mycov + result.Phi[0]*nuprime + (xbar-result.m[0]).t() * (xbar-result.m[0])*((clustercount[t]) / temp) ;
+				RowVector rtemp = (xbar-result.m[0]);
+				postS << mycov+rtemp.t() * rtemp/(clustercount[t] / temp) + result.Phi[0]*nuprime ;
 				postm = (result.m[0]+xbar *(clustercount[t] * prior.gamma)) / temp;
 				postgamma = prior.gamma / temp;
 			} else {
@@ -377,13 +385,15 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 				postm = result.m[0];
 				postgamma = prior.gamma;
 			}
+			//std::cout << postS << endl;
 			int flag = 0;
 			int ITERTRY = 10;
 			do {	
+				SymmetricMatrix mySinv(prior.D); mySinv = 0.0;
 				try {
-					SymmetricMatrix mySinv = postS.i();
+					mySinv << postS.i();
+					//std::cout << mySinv << endl;		problems here,exception not caught
 					LowerTriangularMatrix mySinvL = Cholesky(mySinv);
-					//std::cout << "chol mySinv" << endl;
 					PostSigma = msf.invwishartrand((int)postnu,mySinvL,mt);
 					//std::cout << "invwishartrand" << endl;
 					LowerTriangularMatrix mycovinvL = Cholesky(PostSigma);
@@ -392,12 +402,11 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 					mycovinvL << mycovinvL * sqrt(postgamma);
 					PostMu = msf.mvnormrand(postm, mycovinvL,mt);
 					flag = 0;
-				} catch (exception& e) {
-
-				  printf(">>> %s\n", e.what());
-
+				} catch (...) {
 					flag++;
-					postS = postS + result.Phi[0]*prior.nu; //cooked up stuff, just to avoid crash
+					//std::cout << mySinv << endl;		//problems here,exception not caught
+					//postS = postS + result.Phi[0]*prior.nu; 
+					postS = result.Phi[0]*prior.nu; 
 					if (flag >= ITERTRY) {
 						std::cout << "SampleMuSigma failed due to singular matrix after 10 tries" << endl;
 						exit(1);
@@ -415,17 +424,10 @@ bool CDP::clusterIterate_one(CDPResult& result, MTRand& mt)
 			i++;
 		} while (i<10 && mcsampleEta);
 	}
-
-	//std::cout << "about to free" << std::endl;
-	delete [] clustercov; 
-	clustercov = NULL;
 	
-	delete [] clustermean; 
-	clustermean = NULL;
-	
-	delete [] clustercount; 
-	clustercount = NULL;
-	//std::cout << "freed" << std::endl;
+	delete [] clustercov;
+	delete [] clustermean;
+	delete [] clustercount;
 	
   //sample p
   vector<int> KJ;
@@ -461,9 +463,7 @@ bool CDP::iterate(CDPResult& result, MTRand& mt) {
   parallel_for(blocked_range<size_t>(0, prior.N, 5000), WSampler(this, &result));
 #else
 #if defined(CDP_CUDA)
-  //std::cout << "sampling wk" << std::endl;
-  cuda.sampleWK(result.q, result.p, result.mu, result.L_i, result.Sigma_log_det, mt, result.W, result.K);
-  //std::cout << "post sampling wk" << std::endl;
+  cuda.sampleWK(result.q, result.p, result.mu, result.L_i, result.Sigma_log_det, mt, result.W, result.K, result.Z);
 #else
   RowVector row(prior.D);
 	for (int i = 0; i < prior.N; i++) {
@@ -477,45 +477,32 @@ bool CDP::iterate(CDPResult& result, MTRand& mt) {
 			result.W[i] = sampleW(row, result.q, result.p, result.mu,
 					result.L_i, result.Sigma_log_det, mt);
 		} else if (mcsamplek && !mcsamplew) {
-			result.K[i] = sampleK(row, result.p[result.W[i]], result.mu,
+			result.K[i] = sampleK(row, result.Z+i ,result.p[result.W[i]], result.mu,
 					result.L_i, result.W[i], result.Sigma_log_det, mt);
-		}
+		} 
 	}
 #endif
 #endif
-//std::cout << "pre sampling p" << std::endl;
+
   //sample q
   //J by 1
   RowVector p;
   RowVector pV;
-  //std::cout << "allocated vectors" << std::endl;
   if(mcsampleq)
     {
-    //std::cout << "sampling q" << std::endl;
       sampleP(result.W,prior.N,result.alpha0,prior.J,p,pV,mt);
       result.q = p;
       result.qV = pV;
-      //std::cout << "post sampling q" << std::endl;
     }
-  else
-  {
-  //std::cout <<"did we skip q?" << std::endl;
-  }
+
   //sample alpha0
-  //std::cout <<"pre sampling alpha" << std::endl;
   if(mcsamplealpha0)
     {
-    //std::cout << "sampling alpha" << std::endl;
       double alpha0 = sampleAlpha(result.qV.Store(),prior.e0,prior.f0,mt);
       if (alpha0 < 0.0001) {
 	alpha0 = 0.0001;
       }
       result.alpha0 = alpha0;
-      //std::cout << "post sampling alpha" << std::endl;
-    }
-    else
-    {
-    	//std::cout << "skipping alpha" << std::endl;
     }
   
   if (prior.J == 1) {
@@ -523,9 +510,10 @@ bool CDP::iterate(CDPResult& result, MTRand& mt) {
   } else {
 		//two layer model is disabled here
   }
-  //std::cout << "done" << std::endl;
   return true;
 }
+
+
 
 
 int main(int argc,char* argv[]) {
@@ -549,6 +537,7 @@ int main(int argc,char* argv[]) {
     exit (1);
   }
 
+  
   mt.seed(model.mnSeed);
   if (model.mstralgorithm == "bem") {
 	  //std::cout << "Running bem" << endl;
@@ -557,6 +546,7 @@ int main(int argc,char* argv[]) {
   } else {
 	  CDP cdp;
 	  cdp.LoadData(model);
+	  cdp.mcRelabel = model.Zrelabel;
 	  
 	  cdp.prior.Init(model);
 	  cdp.InitMCMCSteps(model);
@@ -590,7 +580,7 @@ int main(int argc,char* argv[]) {
 			  double temp = mt();
 		  }
 		  #if defined(CDP_CUDA)
-		  cdp.cuda.sampleWK(result.q, result.p, result.mu, result.L_i, result.Sigma_log_det, mt, result.W, result.K);
+		  cdp.cuda.sampleWK(result.q, result.p, result.mu, result.L_i, result.Sigma_log_det, mt, result.W, result.K, result.Z);
 		  #else
 		  //call sampleK instead
 		  #endif
@@ -602,24 +592,37 @@ int main(int argc,char* argv[]) {
 
 	  #if defined(CDP_CUDA)
 		unsigned int hTimer;
-		// cutilCheckError(cutCreateTimer(&hTimer));
-		// cutilCheckError(cutResetTimer(hTimer));
-		// cutilCheckError(cutStartTimer(hTimer));
+		unsigned int hRelabelTimer;
+		cutilCheckError(cutCreateTimer(&hRelabelTimer));
+		cutilCheckError(cutResetTimer(hRelabelTimer));
+		cutilCheckError(cutCreateTimer(&hTimer));
+		cutilCheckError(cutResetTimer(hTimer));
+		cutilCheckError(cutStartTimer(hTimer));
 	  #else
 		time_t tStart, tEnd;
 		//long tStart, tEnd;
 		//tStart = clock();
-		// time(&tStart);
+		time(&tStart);
 	  #endif
 	
-
 	  // main mcmc loop
 	  for (unsigned int it = 0; it < model.mnBurnin + model.mnIter ; it++) {
 		 int printout = model.mnPrintout > 0 && it % model.mnPrintout == 0 ? 1: 0;
 		if (printout>0) {  
 			std::cout << "it = " << (it+1) << endl;
 		}
+	
 		cdp.iterate(result,mt);
+
+		  if (model.Zrelabel) {
+			#if defined(CDP_CUDA)
+				cutilCheckError(cutStartTimer(hRelabelTimer));
+			#endif
+			cdp.ComponentRelabel(result);
+			#if defined(CDP_CUDA)
+				cutilCheckError(cutStopTimer(hRelabelTimer));
+			#endif
+		  }
 
 		if (it >= model.mnBurnin) {
 		  result.SaveDraws();
@@ -628,12 +631,13 @@ int main(int argc,char* argv[]) {
 	  }
 	  if (model.mnPrintout >0) {
 		  #if defined(CDP_CUDA)
-	    // cutilCheckError(cutStopTimer(hTimer));
-	    // printf("GPU Processing time: %f (ms) \n", cutGetTimerValue(hTimer));
+			cutilCheckError(cutStopTimer(hTimer));
+			printf("GPU Processing time: %f (ms) \n", cutGetTimerValue(hTimer));
+			printf("Relabeling Processing time: %f (ms) \n", cutGetTimerValue(hRelabelTimer));
 		  #else
 			//tEnd = clock();
-	    // time(&tEnd);
-	    // cout << "time lapsed:" << fabs(difftime(tEnd,tStart))  << "seconds"<< endl;
+		  time(&tEnd);
+			cout << "time lapsed:" << fabs(difftime(tEnd,tStart))  << "seconds"<< endl;
 		  #endif
 	  }
 

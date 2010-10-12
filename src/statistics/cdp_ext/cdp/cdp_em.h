@@ -16,17 +16,19 @@ class CDP_EM:public CDPBase
 
   bool iterateEM(CDPResultEM& result,int printout);
   void EMAlgorithm(Model& model, MTRand& mt);	
-
+  CDP cdpfunctions; 
 
 	
   // EM: functions for updating posterior parameters
-  void getPi_ij(CDPResultEM& result);
-  void getXbar(CDPResultEM& result);
-  void updatePandAlpha(CDPResultEM& result);
-  void updateMu(CDPResultEM& result);
-  void updateSigma(CDPResultEM& result); 
+	void getPi_ij(CDPResultEM& result);
+	void getLogPostLikelihood(CDPResultEM& result);
+	void getXbar(CDPResultEM& result);
+	void updatePandAlpha(CDPResultEM& result);
+	void updateMu(CDPResultEM& result);
+	void updateSigma(CDPResultEM& result); 
 	
-  bool emupdateeta;
- private:
-  CDP cdpfunctions; 
+	bool emupdateeta;
+	bool emSaveRef;
+	bool lastIter;
+
 };

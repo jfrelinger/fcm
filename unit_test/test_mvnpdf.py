@@ -1,6 +1,6 @@
-from statistics.distributions import mvnormpdf, compmixnormpdf
+from statistics.distributions import mvnormpdf, compmixnormpdf, mixnormpdf
 import unittest
-from numpy import array, eye, pi, fabs, sqrt, dot, ones, exp
+from numpy import array, eye, pi, fabs, sqrt, dot, ones, exp, sum
 from numpy.linalg import inv, det, cholesky
 from random import uniform
 
@@ -72,11 +72,13 @@ class mvnpdfTestCase(unittest.TestCase):
             sigma = array([eye(2)+a, eye(2)+b])
             result = array([[float(pmvnormpdf(x[0,:],mu[0,:],sigma[0,:,:])),float(pmvnormpdf(x[0,:],mu[1,:],sigma[1,:,:]))],[float(pmvnormpdf(x[1,:],mu[0,:],sigma[0,:,:])),float(pmvnormpdf(x[1,:],mu[1,:],sigma[1,:,:]))]])
             #print result, compmixnormpdf(x,pi,mu,sigma)
+            #print mixnormpdf(x,pi,mu,sigma), sum(result,1)
             self.assertAlmostEqual( result[0,0], compmixnormpdf(x,pi,mu,sigma)[0,0], 6,'pmvnormpdf and mvnormpdf differ in result, %f != %f, (%d): %s, %s, %s ' % (result[0,0], compmixnormpdf(x,pi,mu,sigma)[0,0],i, str(x[0,:]), str(mu[0]), str(sigma[0]).replace('\n',','))) 
             self.assertAlmostEqual( result[1,0], compmixnormpdf(x,pi,mu,sigma)[1,0], 6,'pmvnormpdf and mvnormpdf differ in result, %f != %f, (%d): %s, %s, %s ' % (result[1,0], compmixnormpdf(x,pi,mu,sigma)[1,0],i, str(x[0,:]), str(mu[1]), str(sigma[1]).replace('\n',',')))
             self.assertAlmostEqual( result[0,0], compmixnormpdf(x,pi,mu,sigma)[0,0], 6,'pmvnormpdf and mvnormpdf differ in result, %f != %f, (%d): %s, %s, %s ' % (result[0,1], compmixnormpdf(x,pi,mu,sigma)[0,1],i, str(x[0,:]), str(mu[0]), str(sigma[0]).replace('\n',','))) 
             self.assertAlmostEqual( result[1,0], compmixnormpdf(x,pi,mu,sigma)[1,0], 6,'pmvnormpdf and mvnormpdf differ in result, %f != %f, (%d): %s, %s, %s ' % (result[1,1], compmixnormpdf(x,pi,mu,sigma)[1,0],i, str(x[0,:]), str(mu[1]), str(sigma[1]).replace('\n',',')))
-    
+            self.assertAlmostEqual( sum(result,1)[0], mixnormpdf(x,pi,mu,sigma)[0],6,'')
+            self.assertAlmostEqual( sum(result,1)[1], mixnormpdf(x,pi,mu,sigma)[1],6,'')
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testSubSample']
     unittest.main()

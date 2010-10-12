@@ -45,6 +45,8 @@ CDPResult::CDPResult(int nclusters, int ncomponents, int npoints, int dimension)
 		W[z] = 0;
 		K[z] = 0;
 	}
+	
+	Z = new int[N];	
 }
 
 void CDPResult::OpenPostFiles() {
@@ -66,6 +68,13 @@ void CDPResult::OpenPostFiles() {
 		if(postSigmafile.fail())
 		  {
 			std::cout << "Failed to create postSigma.txt" << endl;
+			exit(1);
+		  }
+		
+		postrfile.open("postr.txt");
+		if(postrfile.fail())
+		  {
+			std::cout << "Failed to create postr.txt" << endl;
 			exit(1);
 		  }
 
@@ -94,14 +103,13 @@ void CDPResult::OpenPostFiles() {
 
 CDPResult::~CDPResult(void)
 {
-  delete [] W;
-  W = NULL;
-  delete [] K;
-  K = NULL;
+	delete [] W;
+	delete [] K;
 	if (isEM == 0) {
 		postmufile.close();
 		postpfile.close();
 		postSigmafile.close();
+		postrfile.close();
 		//postmfile.close();
 		//postqfile.close();
 		//postPhifile.close();
@@ -120,6 +128,7 @@ bool CDPResult::SaveDraws(){
   //SaveQDraw();
   //SaveMDraw();
   SaveSigmaDraw();
+  SaveRDraw();
   return true;
 }
 
@@ -145,6 +154,11 @@ bool CDPResult::SaveMuDraw(){
   return true;
 }
 
+bool CDPResult::SaveRDraw(){
+  postrfile << r << endl;
+  return true;
+}
+
 bool CDPResult::SaveSigmaDraw(){
   for (int i = 0; i < J*T; i++) {
     for (int j = 0; j < D; j++) {
@@ -159,7 +173,6 @@ bool CDPResult::SaveSigmaDraw(){
   }
   return true;
 }
-
 bool CDPResult::SaveQDraw(){
   for(int j=0;j<J;j++)
     {
@@ -370,6 +383,20 @@ bool CDPResult::SaveK(string FileName) {
 }
 
 
+bool CDPResult::SaveZ(string FileName) {
+	ofstream theFile(FileName.c_str());
+	if (theFile.fail()) {
+		std::cout << "Failed to create file " << FileName.c_str()  << endl;
+		exit(1);
+	}
+	for (int i = 0; i < N; i++) {
+		theFile << Z[i]+1 << endl;
+	}
+	//theFile << endl;
+	theFile.close();
+	return true;
+}
+
 bool CDPResult::SaveMu(string FileName) {
 	ofstream theFile(FileName.c_str());
 	if (theFile.fail()) {
@@ -513,7 +540,7 @@ void CDPResult::UpdateMeans()
   for(j=0;j<N;j++)
     {
       xmbar[j]+=m[W[j]];
-      xmubar[j]+=mu[GetIndex(W[j],K[j]>=T?T-1:K[j])];
+      xmubar[j]+=mu[GetIndex(W[j],K[j])];
     }
   nmcits++;
 }

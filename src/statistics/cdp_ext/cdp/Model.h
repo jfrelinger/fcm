@@ -17,7 +17,6 @@
 #include "newmatap.h"                // need matrix applications
 
 using namespace std;
-//using namespace NEWMAT;
 
 class Model  
 {
@@ -78,6 +77,9 @@ public:
 	bool samplealpha;
 	
 	bool sampleEta;
+	
+	bool Zrelabel;
+	bool emStoreZ;
 
 //#if defined(CDP_CUDA)
 	int startDevice;
@@ -117,6 +119,8 @@ public:
 	string Alphafile;
 	string Alpha0file;
 	string etaFile;
+	string Zfile;
+	string emRefFile;
 
 };
 

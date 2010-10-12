@@ -509,6 +509,11 @@ void cdpcluster::loadalpha(int i, double* x) {
 	loadRows(x, (*param).alpha, i);
 };
 
+void cdpcluster::loadref(int n, double* x) {
+	model.Zrelabel = true;
+	loadRows(x, (*param).refZobs, n);
+}
+
 void cdpcluster::loadRowsCols(double* from, vector<SymmetricMatrix>& to, int idx, int rows, int columns) {
 	for(int i=0;i<idx;++i){
 		to.push_back(SymmetricMatrix(Real(rows)));
@@ -520,6 +525,7 @@ void cdpcluster::loadRowsCols(double* from, vector<SymmetricMatrix>& to, int idx
 		};
 	};
 };
+
 
 void cdpcluster::loadRows(double* from, int* to, int cols) {
 	for(int i=0; i<cols;++i){

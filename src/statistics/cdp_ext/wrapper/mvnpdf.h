@@ -37,5 +37,12 @@ void wmvnpdf(int xd, int xp, double* px,
 	int sk, int sd, int sp, double* sigma,
 	int outd, double* out);
 
-	 
+#if defined(CDP_CUDA)
+void cuda_wmvnpdf(int n, int d, int k,
+		double* px, double* pi, double* mu, double* sigma,
+		double* out);
+REAL * cuda_load_data(int n, int d, double* px);
+REAL * cuda_load_param(int k, int d,
+				double* pi, double* mu, double* sigma);
+#endif
 #endif /*MVNDPF_H_*/
