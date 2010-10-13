@@ -30,8 +30,13 @@ if __name__ == '__main__':
     m2 = DPMixtureModel(data,k, iter=0, burnin=nburnin, last=0)
     xm = model.m
     xs = model.s
-    model.load_mu(numpy.zeros((16,4)))
-    model.sample_mu = False
+    #model.load_mu(numpy.zeros((16,4)))
+    #model.load_pi(numpy.array([.99]))
+    foo = numpy.zeros(data.shape[0])+1
+    print foo
+    #model.load_ref(foo)
+    #model.sample_mu = False
+    #model.sample_pi = False
     # fit model
     start = time.clock()
     print "about to fit"
@@ -57,8 +62,10 @@ if __name__ == '__main__':
     #idx = numpy.where(pis > 1e-3, True, False)
     #mod = baz.make_modal(tol=1e-5)
     #modes = mod.modes()
-    print mus
-    print r[-1].mus()
+    print co
+    #print mus
+    print pis*5
+    #print r[-1].mus()
     # print baz.pis()
     # mus = mus*xs + xm
     

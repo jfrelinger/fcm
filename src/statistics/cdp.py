@@ -136,6 +136,7 @@ class cdpcluster:
     def loadq(self, *args): return _cdp.cdpcluster_loadq(self, *args)
     def loadqV(self, *args): return _cdp.cdpcluster_loadqV(self, *args)
     def loadalpha(self, *args): return _cdp.cdpcluster_loadalpha(self, *args)
+    def loadref(self, *args): return _cdp.cdpcluster_loadref(self, *args)
     def printModel(self): return _cdp.cdpcluster_printModel(self)
 cdpcluster_swigregister = _cdp.cdpcluster_swigregister
 cdpcluster_swigregister(cdpcluster)

@@ -105,6 +105,8 @@ CDPResult::~CDPResult(void)
 {
 	delete [] W;
 	delete [] K;
+	delete [] refZ;
+	delete [] refZobs;
 	if (isEM == 0) {
 		postmufile.close();
 		postpfile.close();

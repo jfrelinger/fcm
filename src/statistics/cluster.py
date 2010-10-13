@@ -66,6 +66,19 @@ class DPMixtureModel(HasTraits):
         self.samplek = True
         self.sample_pi = True
         self.samplealpha = True
+        
+        #load hyper paramters
+        self.lambda0 = self.cdp.getlambda0()
+        self.phi0 = self.cdp.getphi0()
+        self.nu0 = self.cdp.getnu0()
+        self.gamma = self.cdp.getgamma()
+        self.nu = self.cdp.getnu()
+        self.e0 = self.cdp.gete0()
+        self.f0 = self.cdp.getf0()
+        self.ee = self.cdp.getee()
+        self.aa = self.cdp.getaa()
+        self.ff = self.cdp.getff()
+
 
 
         self._prerun = False
@@ -96,7 +109,7 @@ class DPMixtureModel(HasTraits):
             self._prior_mu = (mu.copy()-self.m)/self.s
             
         self._load_mu = True
-        print self._prior_mu
+        
     
     def load_sigma(self, sigma):
         if len(sigma.shape) > 3:
@@ -137,12 +150,16 @@ class DPMixtureModel(HasTraits):
         if sum(tmp) > 1:
             raise ValueError('Proposed Pis sum to more then 1')
         if n < self.nclusts:
-            self.prior_pi = zeros((self.nclusts))
-            self.prior_pi[0:n] = tmp
-            left = (1.0- sum(tmp))/self.nclusts-n
+            self._prior_pi = zeros((self.nclusts))
+            self._prior_pi[0:n] = tmp
+            left = (1.0 - sum(tmp))/(self.nclusts-n)
             for i in range(n,self.nclusts):
-                self.prior_pi[i] = left
+                self._prior_pi[i] = left
+        else:
+            self._prior_pi = tmp
         
+        self._prior_pi = self._prior_pi.reshape((1,self.nclusts))
+
         self._load_pi = True
             
     def load_ref(self, ref):
@@ -173,6 +190,19 @@ class DPMixtureModel(HasTraits):
             self.cdp.samplep(self.sample_pi)
             self.cdp.samplealpha(self.samplealpha)
             
+            self.cdp.setlambda0(self.lambda0)
+            self.cdp.setphi0(self.phi0)
+            self.cdp.setnu0(self.nu0)
+            self.cdp.setgamma(self.gamma)
+            self.cdp.setnu(self.nu)
+            self.cdp.sete0(self.e0)
+            self.cdp.setf0(self.f0)
+            self.cdp.setee(self.ee)
+            self.cdp.setaa(self.aa)
+            self.cdp.setff(self.ff)
+
+            
+            
             self.cdp.makeResult()
             
             if verbose:
@@ -187,6 +217,9 @@ class DPMixtureModel(HasTraits):
                 self.cdp.loadp(self._prior_pi)
                 
             if self._load_ref:
+                print "loading ref"
+                print self._ref
+                print self._ref.shape
                 self.cdp.loadref(self._ref)
             
             

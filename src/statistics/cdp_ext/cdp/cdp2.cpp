@@ -192,7 +192,7 @@ void CDP::LoadInits(Model& model,CDPResult& result, MTRand& mt)
 		std::cout << "Loading Reference Z failed!" << endl;
 		exit(1);
 	}
-		result.refZobs = (int*)calloc(result.T,sizeof(int));
+		result.refZobs = new int[result.T];
 		for (int i = 0; i<result.N; i++) {
 			curclass = result.refZ[i];
 			result.refZobs[curclass] = result.refZobs[curclass]+1;

@@ -141,6 +141,15 @@ void cdpcluster::run() {
       std::cout << "it = " << (it+1) << endl;
     }
     cdp.iterate((*param),mt);
+	if (model.Zrelabel) {
+#if defined(CDP_CUDA)
+		cutilCheckError(cutStartTimer(hRelabelTimer));
+#endif
+		cdp.ComponentRelabel((*param));
+#if defined(CDP_CUDA)
+		cutilCheckError(cutStopTimer(hRelabelTimer));
+#endif
+	  }
 
 
     
@@ -510,8 +519,20 @@ void cdpcluster::loadalpha(int i, double* x) {
 };
 
 void cdpcluster::loadref(int n, double* x) {
+	int curclass;
+
 	model.Zrelabel = true;
-	loadRows(x, (*param).refZobs, n);
+	(*param).refZ = new int[(*param).N];
+	for(int i=0; i<n;++i)
+	{
+		(*param).refZ[i] = int(x[i]);
+	}
+	(*param).refZobs = new int[(*param).T];
+	for (int i = 0; i<(*param).N; i++) {
+		curclass = (*param).refZ[i];
+		(*param).refZobs[curclass] = (*param).refZobs[curclass]+1;
+	}
+
 }
 
 void cdpcluster::loadRowsCols(double* from, vector<SymmetricMatrix>& to, int idx, int rows, int columns) {
