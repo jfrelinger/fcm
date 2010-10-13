@@ -54,7 +54,7 @@ cdp_extension = Extension('fcm.statistics._cdp',
                             )
 
 setup(name='fcm',
-      version='0.01',
+      version='0.7',
       packages=['fcm', 'fcm.core', 'fcm.graphics', 'fcm.gui', 'fcm.io', 'fcm.statistics' ],
       package_dir = {'fcm': 'src'},
       package_data= {'': ['data/*']},

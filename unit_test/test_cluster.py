@@ -30,9 +30,11 @@ if __name__ == '__main__':
     m2 = DPMixtureModel(data,k, iter=0, burnin=nburnin, last=0)
     xm = model.m
     xs = model.s
-    
+    model.load_mu(numpy.zeros((16,4)))
+    model.sample_mu = False
     # fit model
     start = time.clock()
+    print "about to fit"
     model.fit(verbose=True)
     print "Time for %d iterations: %.2f seconds" % (niter + nburnin, 
                                                     time.clock() - start)

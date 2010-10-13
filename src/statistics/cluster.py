@@ -5,7 +5,8 @@ Created on Oct 30, 2009
 '''
 
 from enthought.traits.api import HasTraits
-from numpy import zeros, outer, sum
+from numpy import zeros, outer, sum, eye, array
+from numpy.random import multivariate_normal as mvn
 from scipy.cluster import vq
 
 from cdp import cdpcluster
@@ -39,7 +40,11 @@ class DPMixtureModel(HasTraits):
         self.iter = iter
         self.burnin = burnin
         self.last = last
-        
+        if len(self.data.shape) == 1:
+            self.data = self.data.reshape((self.data.shape[0],1))
+            
+        if len(self.data.shape) != 2:
+            raise ValueError("pnts is the wrong shape")
         self.n, self.d = self.data.shape
         
         self.pi = zeros((nclusts*last))
@@ -50,18 +55,143 @@ class DPMixtureModel(HasTraits):
         # self.cdp.setgamma(5)
         # self.cdp.setaa(5)
 
+        #setup samplers...
+        self.samplem = True
+        self.samplePhi = True
+        self.samplew = True
+        self.sampleq = True
+        self.samplealpha0 = True
+        self.sample_mu = True
+        self.sample_sigma = True
+        self.samplek = True
+        self.sample_pi = True
+        self.samplealpha = True
+
+
         self._prerun = False
         self._run = False
+        self._load_mu = False
+        self._load_sigma = False
+        self._load_pi = False
+        self._load_ref = False
      
+     
+    def load_mu(self, mu):
+        if len(mu.shape) > 2:
+            raise ValueError('Shape of Mu is wrong')
+        if len(mu.shape)==2:
+            (n,d) = mu.shape
+        else:
+            n = 1
+            d = mu.shape[0]
+        if n > self.nclusts:
+            raise ValueError('number of proposed Mus grater then number of clusters')
+        elif d != self.d:
+            raise ValueError('Dimension mismatch between Mus and Data')
+        elif n < self.nclusts:
+            self._prior_mu = zeros((self.nclusts,self.d))
+            self._prior_mu[0:n,:] = (mu.copy()-self.m)/self.s
+            self._prior_mu[n:,:] = mvn(zeros((self.d,)), eye(self.d), self.nclusts-n)
+        else:
+            self._prior_mu = (mu.copy()-self.m)/self.s
+            
+        self._load_mu = True
+        print self._prior_mu
+    
+    def load_sigma(self, sigma):
+        if len(sigma.shape) > 3:
+            raise ValueError('Shape of Sigma is wrong')
+        
+        if len(sigma.shape)==2:
+            sigma = array(sigma)
+            
+        if sigma.shape[1] != sigma.shape[2]:
+            raise ValueError("Sigmas must be square matricies")
+        
+        n,d = sigma.shape[0:2]
+        
+        if n > self.nclusts:
+            raise ValueError('number of proposed Sigmass grater then number of clusters')
+        
+        if d != self.d:
+            raise ValueError('Dimension mismatch between Sigmas and Data')
+        
+        elif n < self.nclusts:
+            self._prior_sigma = zeros((self.nclusts,self.d, self.d))
+            self._prior_sigma[0:n,:,:] = (sigma.copy())/outer(self.s,self.s)
+            for i in range(n,self.nclusts):
+                self._prior_sigma[i,:,:] = eye(self.d)
+        else:
+            self._prior_sigma = (sigma.copy())/outer(self.s,self.s)
+            
+        self._load_sigma = True
+    
+    def load_pi(self, pi):
+        tmp = array(pi)
+        if len(tmp.shape) != 1:
+            raise ValueError("Shape of pi is wrong")
+        n = tmp.shape[0]
+        if n > self.nclusts:
+            raise ValueError('number of proposed Pis grater then number of clusters')
+        
+        if sum(tmp) > 1:
+            raise ValueError('Proposed Pis sum to more then 1')
+        if n < self.nclusts:
+            self.prior_pi = zeros((self.nclusts))
+            self.prior_pi[0:n] = tmp
+            left = (1.0- sum(tmp))/self.nclusts-n
+            for i in range(n,self.nclusts):
+                self.prior_pi[i] = left
+        
+        self._load_pi = True
+            
+    def load_ref(self, ref):
+        ref = array(ref)
+        if len(ref.shape) != 1:
+            raise ValueError("reference assignments are the wrong shape")
+        if ref.shape[0] != self.data.shape[0]:
+            raise ValueError("Reference assignments are not the same as the number of points")
+        
+        self._ref = ref
+        self._load_ref = True
+    
     def _setup(self, verbose):
         if not self._prerun:
             self.cdp.setT(self.nclusts)
             self.cdp.setJ(1)
             self.cdp.setBurnin(self.burnin)
             self.cdp.setIter(self.iter-self.last)
+            
+            self.cdp.samplem(self.samplem)
+            self.cdp.samplePhi(self.samplePhi)
+            self.cdp.samplew(self.samplew)
+            self.cdp.sampleq(self.sampleq)
+            self.cdp.samplealpha0(self.samplealpha0)
+            self.cdp.samplemu(self.sample_mu)
+            self.cdp.sampleSigma(self.sample_sigma)
+            self.cdp.samplek(self.samplek)
+            self.cdp.samplep(self.sample_pi)
+            self.cdp.samplealpha(self.samplealpha)
+            
+            self.cdp.makeResult()
+            
             if verbose:
                 self.cdp.setVerbose(True)
+            if self._load_mu:
+                self.cdp.loadMu(self._prior_mu)
+                
+            if self._load_sigma:
+                self.cdp.loadSigma(self._prior_sigma)
+            
+            if self._load_pi:
+                self.cdp.loadp(self._prior_pi)
+                
+            if self._load_ref:
+                self.cdp.loadref(self._ref)
+            
+            
             self._prerun = True
+            
         
     def fit(self, verbose=False):
         """
