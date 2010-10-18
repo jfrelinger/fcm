@@ -34,3 +34,4 @@ syntax: regexp
 .project
 .pydevproject
 .settings/*
+CUDA_src/obj/*
