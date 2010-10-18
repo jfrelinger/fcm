@@ -112,7 +112,7 @@ void cdpcluster::run() {
       double temp = mt();
     }
     #if defined(CDP_CUDA)
-      cdp.cuda.sampleWK((*param).q, (*param).p, (*param).mu, (*param).L_i, (*param).Sigma_log_det, mt, (*param).W, (*param).K);
+      cdp.cuda.sampleWK((*param).q, (*param).p, (*param).mu, (*param).L_i, (*param).Sigma_log_det, mt, (*param).W, (*param).K, (*param).Z);
     #else
       //call sampleK instead
     #endif
