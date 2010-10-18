@@ -58,7 +58,7 @@ ifdef CUDA
 	CUDA_SDK_INC = -I$(CUDA_SDK_COMMONDIR)/inc
 	CUDA_LIB  = -L$(CUDA_PATH)/lib -L$(CUDA_SDK_PATH)/lib -L$(CUDA_SDK_COMMONDIR)/lib -lcuda -lcudart -lcutil_i386 -lcublas \
 		-L$(BOOST_LIB_PATH) 
-	INCPATH += -I../src/statistics/cdp_ext/CUDA  $(CUDA_INC)
+	INCPATH += -ICUDA  $(CUDA_INC)
 
 else
 	CUDA_OBJS =
@@ -153,13 +153,13 @@ obj/cdpresultem.o:	../src/statistics/cdp_ext/cdp/cdpresultem.cpp ../src/statisti
 
 #### CUDA files
 
-obj/%.c_o : ../src/statistics/cdp_ext/CUDA/%.c
+obj/%.c_o : CUDA/%.c
 	$(GCC) $(PROFILE) -c $< -o $@ $(LOCAL_INC)
 
-obj/%.cpp_o : ../src/statistics/cdp_ext/CUDA/%.cpp
+obj/%.cpp_o : CUDA/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCPATH) $(LOCAL_INC) $(CUDA_INC) $(CUDA_SDK_INC) $(PROFILE) -c $< -o $@
 	
-obj/%.cu_o : ../src/statistics/cdp_ext/CUDA/%.cu $(CUDA_HEADERS)
+obj/%.cu_o : CUDA/%.cu $(CUDA_HEADERS)
 	$(NVCC) $(NVCC_DBG_FLAGS) -c $< -o $@ -I. $(INCPATH) $(LOCAL_INC) $(CUDA_INC) $(CUDA_SDK_INC) -DUNIX
 
 ### Random
