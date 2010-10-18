@@ -89,7 +89,7 @@ void cdpemcluster::run(){
 
 	cdp.emcuda.initializeInstanceEM(model.startDevice,cdp.prior.J,cdp.prior.T, cdp.prior.N, 
 								  
-								  cdp.prior.D,model.numberDevices); 
+								  cdp.prior.D,model.numberDevices, false);
 
 	cdp.emcuda.initializeDataEM(cdp.mX);
 	
