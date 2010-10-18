@@ -122,17 +122,20 @@ void cdpcluster::run() {
   // see if we're dealing with a special case of J==1
   cdp.CheckSpecialCases(model,(*param));
 
-  #if defined(CDP_CUDA)
-    unsigned int hTimer;
-    cutilCheckError(cutCreateTimer(&hTimer));
-    cutilCheckError(cutResetTimer(hTimer));
-    cutilCheckError(cutStartTimer(hTimer));
-  #else
+#if defined(CDP_CUDA)
+	unsigned int hTimer;
+	unsigned int hRelabelTimer;
+	cutilCheckError(cutCreateTimer(&hRelabelTimer));
+	cutilCheckError(cutResetTimer(hRelabelTimer));
+	cutilCheckError(cutCreateTimer(&hTimer));
+	cutilCheckError(cutResetTimer(hTimer));
+	cutilCheckError(cutStartTimer(hTimer));
+#else
     time_t tStart, tEnd;
     //long tStart, tEnd;
     //tStart = clock();
     time(&tStart);
-  #endif
+#endif
 
 
   // main mcmc loop
