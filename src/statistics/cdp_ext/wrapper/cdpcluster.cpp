@@ -535,6 +535,7 @@ void cdpcluster::loadref(int n, double* x) {
 		curclass = (*param).refZ[i];
 		(*param).refZobs[curclass] = (*param).refZobs[curclass]+1;
 	}
+	(*param).loadZ = true;
 
 }
 

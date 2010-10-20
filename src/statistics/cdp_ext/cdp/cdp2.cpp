@@ -197,6 +197,7 @@ void CDP::LoadInits(Model& model,CDPResult& result, MTRand& mt)
 			curclass = result.refZ[i];
 			result.refZobs[curclass] = result.refZobs[curclass]+1;
 		}
+	    result.loadZ = true;
 	}
 		
   if(model.loadAlpha)

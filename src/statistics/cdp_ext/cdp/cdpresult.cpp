@@ -46,6 +46,7 @@ CDPResult::CDPResult(int nclusters, int ncomponents, int npoints, int dimension)
 		K[z] = 0;
 	}
 	
+	loadZ = false;
 	Z = new int[N];	
 }
 
@@ -105,8 +106,10 @@ CDPResult::~CDPResult(void)
 {
 	delete [] W;
 	delete [] K;
-	delete [] refZ;
-	delete [] refZobs;
+	if (loadZ) {
+	    delete [] refZ;
+	    delete [] refZobs;
+	}
 	if (isEM == 0) {
 		postmufile.close();
 		postpfile.close();

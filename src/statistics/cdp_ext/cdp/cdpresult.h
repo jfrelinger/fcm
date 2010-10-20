@@ -55,6 +55,7 @@ class CDPResult
 		vector<double> Sigma_log_det;
 	#endif
 	
+	bool loadZ; // are we tracking reference classification?
 	int* Z; //N by 1 -- Classification Vector
 	int* refZ; //N by 1 -- Reference Classification Vector
 	int* refZobs; //T by 1 -- Number of obs in each Classification Component
