@@ -46,7 +46,9 @@ ifdef CUDA
 			obj/calcSigma_kernel.cu_o \
 			obj/calcSumPi_kernel.cu_o \
 			obj/CUDASharedFunctions.cpp_o \
-			obj/CUDASharedFunctions_kernel.cu_o 
+			obj/CUDASharedFunctions_kernel.cu_o \
+			obj/shiftMeasure_kernel.cu_o  \
+			obj/argMaxMeasure_kernel.cu_o
 
 	CUDA_HEADERS = CUDA/CDPBaseCUDA.h \
 			CUDA/EMCDPBaseCUDA.h \
