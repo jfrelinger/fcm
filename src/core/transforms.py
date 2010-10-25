@@ -88,10 +88,14 @@ def hyperlog(fcm, channels, b, d, r, order=2, intervals=1000.0):
 def log_transform(fcm, channels):
     npnts = fcm.view().copy()
     for i in channels:
-        npnts[:,i] = where(npnts[:,i] <= 1, 0, log10(npnts[:,i]))
+        #npnts[:,i] = where(npnts[:,i] <= 1, 0, log10(npnts[:,i]))
+        npnts[:,i] = _log_transform(npnts[:,i])
     node = TransformNode('', fcm.get_cur_node(), npnts)
     fcm.add_view(node)
     return fcm
+
+def _log_transform(npnts):
+    return where(npnts <= 1, 0, log10(npnts))
 
 if __name__ == '__main__':
     from numpy.random import normal, lognormal, shuffle

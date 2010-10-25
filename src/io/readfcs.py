@@ -3,7 +3,7 @@
 from warnings import warn
 from fcm import FCMdata
 from fcm.core import Annotation
-from fcm.core.transforms import _logicle, quantile
+from fcm.core.transforms import _logicle, quantile, _log_transform
 from fcm.core.compensate import _compensate, get_spill
 from fcm import UnimplementedFcsDataMode
 
@@ -19,7 +19,7 @@ class FCSreader(object):
     class to hold object to read and parse fcs files.  main usage is to get 
     a FCMdata object out of a fcs file
     """
-    def __init__(self, filename, auto_logicle = True, sidx = None, spill=None):
+    def __init__(self, filename, transform = 'log', sidx = None, spill=None):
         #self.filename = filename
         if type(filename) == str:
             self.filename=filename
@@ -27,7 +27,7 @@ class FCSreader(object):
         else: # we should have gotten a filehandle then
             self.filename = filename.name
             self._fh = filename
-        self.logicle = auto_logicle
+        self.transform = transform
         #self._fh = cStringIO.StringIO(open(filename, 'rb').read())
         self._fh = open(filename, 'rb')
         self.cur_offset = 0
@@ -71,7 +71,7 @@ class FCSreader(object):
         channels = []
         scchannels = []
         scchannel_indexes = []
-        to_logicle = []
+        to_transform = []
         base_chan_name = []
         for i in range(1,int(text['par'])+1):
             base_chan_name.append( text['p%dn' % i])
@@ -88,7 +88,7 @@ class FCSreader(object):
             else: # we're a FL channel
                 try:
                     if text['p%dr' % i] == '262144':   
-                        to_logicle.append(i-1)
+                        to_transform.append(i-1)
                 except KeyError:
                     pass
 
@@ -115,17 +115,24 @@ class FCSreader(object):
                 c = _compensate(data[:,idx], self.spill)
                 data[:,idx] = c
 
-            if header['version'] == 3.0 and self.logicle == True:
+            if self.transform == 'logicle':
                 T = 262144
                 m = 4.5 * log(10)
                 scale_max, scale_min = (1e5, 0)
-                for i in to_logicle:
+                for i in to_transform:
                     dj = data[:,i]
                     r = quantile(dj[dj < 0], 0.05)
                     lmin, lmax = _logicle([0,T], T, m, r)
                     tmp = scale_max/lmax*_logicle(dj, T, m, r)
                     tmp[tmp<scale_min]=scale_min
                     data[:,i] = tmp
+            elif self.transform == 'log':
+                for i in to_transform:
+                    data[:,i] = _log_transform(data[:,i])
+            
+            elif self.transform == "hyperlog":
+                pass # TODO figure out good default parameters for hyperlog transform
+                    
 
                 # # log transform as alternative
                 # for i in to_logicle:
@@ -331,10 +338,10 @@ def log_factory(base):
 
 log2 = log_factory(2)
 
-def loadFCS(filename, auto_logicle=True, auto_comp=True, spill=None):
+def loadFCS(filename, transform='log', auto_comp=True, spill=None):
     """Load and return a FCM data object from an FCS file"""
     
-    tmp = FCSreader(filename, auto_logicle, spill=spill)
+    tmp = FCSreader(filename, transform, spill=spill)
     return tmp.get_FCMdata(auto_comp)
 
 def is_fl_channel(name):
