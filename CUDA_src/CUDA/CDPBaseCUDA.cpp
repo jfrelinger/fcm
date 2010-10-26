@@ -32,18 +32,27 @@ static CUT_THREADPROC WKSamplerThread(TGPUplan *plan){
 	int nchunksize = N;
 	if (nchunksize>NCHUNKSIZE) { nchunksize = NCHUNKSIZE;}
 	if (plan->Multithread) {
+		printf("allocating DX\n");
 		plan->dX = allocateGPURealMemory(DATA_PADDED_DIM * (N+DATA_IN_BLOCK));			//extra memory here.
+		printf("Allocating dMeanAndSigma\n");
 		plan->dMeanAndSigma = allocateGPURealMemory(PACK_DIM * plan->kT * plan->kJ);
+		printf("Allocating drandom number\n");
 		plan->dRandomNumber = allocateGPURealMemory(N+DATA_IN_BLOCK);			
 		cudaMemcpy(plan->dX,plan->h_X, N * DATA_PADDED_DIM * SIZE_REAL,cudaMemcpyHostToDevice);
 		cudaMemcpy(plan->dMeanAndSigma,plan->h_MeanAndSigma ,plan->kT * PACK_DIM * SIZE_REAL, cudaMemcpyHostToDevice);	
 		cudaMemcpy(plan->dRandomNumber,plan->h_Rand, N * SIZE_REAL, cudaMemcpyHostToDevice);
+		printf("allocating dComponent\n");
 		plan->dComponent = allocateGPUIntMemory(N); //only  for K
+		printf("Allocating ddensity\n");
 		plan->dDensity = allocateGPURealMemory((nchunksize+SAMPLE_BLOCK) * plan->kT * plan->kJ);
 #if defined(CDP_MEANCOV)
+		printf("allocating dMean\n");
 		plan->dMean = allocateGPURealMemory(plan->kD * plan->kT * plan->kJ);
+		printf("allocating dCov\n");
 		plan->dCov = allocateGPURealMemory(plan->kD * plan->kD * plan->kT * plan->kJ);
+		printf("allocating dRowInicies\n");
 		plan->dRowIndices = allocateGPUIntMemory(plan->kT * plan->kJ + 1);	//move to global allocation?
+		printf("allocating dIndicies\n")
 		plan->dIndices = allocateGPUIntMemory(plan->N);
 #endif
 	}
@@ -238,20 +247,33 @@ void CDPBaseCUDA::MakeGPUPlans(int startdevice, int numdevices) {
 	nchunksize = plans[0].N;
 	if (nchunksize>NCHUNKSIZE) { nchunksize = NCHUNKSIZE;}
 	if (!plans[0].Multithread) { //in this case, we only do allocate device memory once
+	printf("does this work?\n");
+	fprintf(stderr,"*****GPUPlans...\n");
 		plans[0].dMeanAndSigma = allocateGPURealMemory(PACK_DIM * kT * kJ);
+	fprintf(stderr,"*****GPUPlans...MeanAndSigma\n");
 		plans[0].dX = allocateGPURealMemory(DATA_PADDED_DIM * (plans[0].N+DATA_IN_BLOCK));
+	fprintf(stderr,"*****GPUPlans...dX\n");
 		plans[0].dRandomNumber = allocateGPURealMemory(plans[0].N+DATA_IN_BLOCK);
+	fprintf(stderr,"*****GPUPlans...RandomNumber\n");
 		plans[0].dComponent = allocateGPUIntMemory(plans[0].N * 2);
+	fprintf(stderr,"*****GPUPlans...Component\n");
 		plans[0].dDensity = allocateGPURealMemory((nchunksize+SAMPLE_BLOCK) * kT * kJ);
+	fprintf(stderr,"*****GPUPlans...Density\n");
 		plans[0].dZ = allocateGPUIntMemory(nchunksize);
+	fprintf(stderr,"*****GPUPlans...Z\n");
 #if defined(CDP_MEANCOV)
+	printf("dMean\n");
 		plans[0].dMean = allocateGPURealMemory(kT*kJ*kD);
+		printf("dCov\n");
 		plans[0].dCov = allocateGPURealMemory(kT*kJ*kD*kD);
+		printf("dRowIndices\n");
 		plans[0].dRowIndices = allocateGPUIntMemory(kT*kJ + 1);
+		printf("dIndices\n");
 		plans[0].dIndices = allocateGPUIntMemory(plans[0].N);
 #endif
 	} else {
 		#if defined(MULTI_GPU)
+			printf("MULTIGPU!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n\n\n");
 			for (i = 0; i < numdevices; i++) {
 				workers[i]->call(bind(cudaMalloc, (void**)((void*)&plans[i].dRandomNumber),SIZE_REAL * (plans[i].N+DATA_IN_BLOCK)));
 				workers[i]->call(bind(cudaMalloc, (void**)((void*)&plans[i].dComponent),SIZE_INT*  plans[i].N * 2));
@@ -350,9 +372,9 @@ int CDPBaseCUDA::initializeInstance(
 
 void CDPBaseCUDA::finalize(void) {
 	// fix the memory here later!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	return;
+	//return;
 	if (plans[0].Multithread) {
-		#if defined(MULTI_GPU)
+#if defined(MULTI_GPU)
 			for(int i=0; i<kDeviceCount; i++) {
 				workers[i]->call(bind(cudaFree,plans[i].dX));
 				workers[i]->call(bind(cudaFree,plans[i].dMeanAndSigma));
@@ -375,11 +397,18 @@ void CDPBaseCUDA::finalize(void) {
 			cudaThreadExit();
 		#endif
 	} else {
+		printf("free dDesnsity\n");
 		cudaFree(plans[0].dDensity);
+		printf("free dX\n");
 		cudaFree(plans[0].dX);
+		printf("free dMeanAndSigma\n");
 		cudaFree(plans[0].dMeanAndSigma);
+		printf("free dRandomNumber\n");
 		cudaFree(plans[0].dRandomNumber);
+		printf("free dComponent\n");
 		cudaFree(plans[0].dComponent);
+		printf("free dZ\n");
+		cudaFree(plans[0].dZ);
 
 #if defined(CDP_MEANCOV)
 		cudaFree(plans[0].dMean);
@@ -387,20 +416,19 @@ void CDPBaseCUDA::finalize(void) {
 		cudaFree(plans[0].dRowIndices);
 		cudaFree(plans[0].dIndices);
 #endif
+		//std::cout << cudaGetErrorString(cudaThreadSynchronize()) << std::endl;
+		std::cout << cudaGetErrorString(cudaThreadExit()) << std::endl;
 
 	}
 
+	if(initializedInstance != 0) {
 	delete [] hX;
-	// free(hX);
 	hX = NULL;
 	delete [] hMeanAndSigma;
-	// free(hMeanAndSigma);
 	hMeanAndSigma = NULL;
 	delete [] hComponent;
-	// free(hComponent);
 	hComponent = NULL;
 	delete hRandomNumber;
-	// free(hRandomNumber);
 	hRandomNumber = NULL;
 	delete [] hZ;
 	hZ = NULL;
@@ -428,6 +456,8 @@ void CDPBaseCUDA::finalize(void) {
 	#endif
 
 	initializedInstance = 0;
+	printf("DONE\n");
+	}
 }
 
 int CDPBaseCUDA::initializeData(double** iX) {
