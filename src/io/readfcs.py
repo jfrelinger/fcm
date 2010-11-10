@@ -338,10 +338,10 @@ def log_factory(base):
 
 log2 = log_factory(2)
 
-def loadFCS(filename, transform='log', auto_comp=True, spill=None):
+def loadFCS(filename, transform='log', auto_comp=True, spill=None, sidx=None):
     """Load and return a FCM data object from an FCS file"""
     
-    tmp = FCSreader(filename, transform, spill=spill)
+    tmp = FCSreader(filename, transform, spill=spill, sidx=sidx)
     return tmp.get_FCMdata(auto_comp)
 
 def is_fl_channel(name):
