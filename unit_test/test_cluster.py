@@ -1,5 +1,5 @@
 import sys
-sys.path.append("/home/jolly/MyPython") 
+#sys.path.append("/home/jolly/MyPython") 
 
 from fcm import loadFCS
 from fcm.statistics import DPMixtureModel

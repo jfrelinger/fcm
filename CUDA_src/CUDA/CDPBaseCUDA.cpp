@@ -389,7 +389,7 @@ void CDPBaseCUDA::finalize(void) {
 		cudaFree(plans[0].dIndices);
 #endif
 		//std::cout << cudaGetErrorString(cudaThreadSynchronize()) << std::endl;
-		std::cout << cudaGetErrorString(cudaThreadExit()) << std::endl;
+		//std::cout << cudaGetErrorString(cudaThreadExit()) << std::endl;
 
 	}
 /*
