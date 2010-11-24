@@ -4,7 +4,7 @@ CXX = g++
 
 INSTALL = /usr/bin/install -SC
 
-PYTHON = /usr/bin/python
+PYTHON = /usr/bin/python2.6
 PYCONFIG = $(PYTHON)-config
 
 CXXFLAGS = $(C_DEBUG) -fPIC -DPYWRAP `$(PYCONFIG) --cflags` -Dmain=oldmain
@@ -20,9 +20,9 @@ CUDA_PATH = /usr/local/cuda
 
 OSNAME := $(shell uname)
 ifeq ($(OSNAME),Linux)
-	CUDA_SDK_PATH   := /home/jolly/NVIDIA_GPU_Computing_SDK/C
+	CUDA_SDK_PATH   := /usr/local/cuda_sdk/C
 	BOOST_INC_PATH 	:= /usr/include/boost
-	BOOST_LIB_PATH 	:= /usr/lib/
+	BOOST_LIB_PATH 	:= /usr/lib64/
 	#BOOST_LIB	:= boost_thread
 endif
 ifeq ($(OSNAME),Darwin)
@@ -58,7 +58,7 @@ ifdef CUDA
 	CUDA_INC = -I$(CUDA_PATH)/include -I$(BOOST_INC_PATH)
 	CUDA_SDK_COMMONDIR = $(CUDA_SDK_PATH)/common
 	CUDA_SDK_INC = -I$(CUDA_SDK_COMMONDIR)/inc
-	CUDA_LIB  = -L$(CUDA_PATH)/lib -L$(CUDA_SDK_PATH)/lib -L$(CUDA_SDK_COMMONDIR)/lib -lcuda -lcudart -lcutil_i386 -lcublas \
+	CUDA_LIB  = -L$(CUDA_PATH)/lib64 -L$(CUDA_SDK_PATH)/lib -L$(CUDA_SDK_COMMONDIR)/lib -lcuda -lcudart -lcutil -lcublas \
 		-L$(BOOST_LIB_PATH) 
 	INCPATH += -ICUDA  $(CUDA_INC)
 
