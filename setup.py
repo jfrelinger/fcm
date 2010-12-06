@@ -1,6 +1,13 @@
 from distutils.core import setup, Extension
 from numpy import get_include
 
+logicle_extension = Extension('fcm.core._logicle',
+                              sources = [ 'src/core/logicle_ext/%s' %i for i in [
+                                'Logicle.cpp',
+                                'my_logicle.cpp',
+                                'my_logicle_wrapper.cpp']],
+                              include_dirs = [get_include()]
+                              )
 cdp_extension = Extension('fcm.statistics._cdp',
                           sources = [ 'src/statistics/cdp_ext/%s' %i for i in ['cdp/Model.cpp',
                                 'cdp/cdpp.cpp',
@@ -61,7 +68,7 @@ setup(name='fcm',
       description='Python Flow Cytometry (FCM) Tools',
       author='Jacob Frelinger',
       author_email='jacob.frelinger@duke.edu',
-      ext_modules = [cdp_extension],
+      ext_modules = [cdp_extension, logicle_extension],
       requires=['numpy (>=1.3.0)',
                 'scipy (>=0.6)',
                 'enthought.traits (>=3.1)'], # figure out the rest of what's a required package.
