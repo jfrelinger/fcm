@@ -3332,6 +3332,8 @@ SWIGINTERN PyObject *_wrap_logicle_scale(PyObject *SWIGUNUSEDPARM(self), PyObjec
     } catch (Logicle::IllegalParameter &e) {
       SWIG_exception(SWIG_ValueError, const_cast<char*>(e.message()));
       return NULL;
+    } catch (Logicle::DidNotConverge &e) {
+      SWIG_exception(SWIG_RuntimeError, const_cast<char*>(e.message()));
     }
   }
   resultobj = SWIG_Py_Void();

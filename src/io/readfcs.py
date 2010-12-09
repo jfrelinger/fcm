@@ -117,12 +117,12 @@ class FCSreader(object):
 
             if self.transform == 'logicle':
                 T = 262144
-                m = 4.5 * log(10)
+                m = 4.5
                 scale_max, scale_min = (1e5, 0)
                 for i in to_transform:
                     dj = data[:,i]
                     r = quantile(dj[dj < 0], 0.05)
-                    lmin, lmax = _logicle([0,T], T, m, r)
+                    lmin, lmax = _logicle([0,T], T, m, r) # is this needed as lmax is now always 1?
                     tmp = scale_max/lmax*_logicle(dj, T, m, r)
                     tmp[tmp<scale_min]=scale_min
                     data[:,i] = tmp

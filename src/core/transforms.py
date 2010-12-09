@@ -3,7 +3,7 @@
 
 from scipy.optimize import fsolve, brentq
 from scipy import interpolate
-from numpy import array, arange, exp, log, log10, min, max, sign, concatenate, zeros, vectorize, where
+from numpy import array, abs, arange, exp, log, log10, min, max, sign, concatenate, zeros, vectorize, where
 
 from util import TransformNode
 
@@ -33,33 +33,21 @@ def S(x, y, T, m, w):
     xw = sgn*(x-w)
     return sgn*T*exp(-(m-w))*(exp(xw)-p**2*exp(-xw/p)+p**2-1) - y
 
-def logicle0(y, T, m, r):
-    if r>=0:
-        return m+log((exp(-m)*T+y)/T)
-    else:
-        w = (m-log(T/abs(r)))/2
-        return brentq(S, -100, 100, (y, T, m, w))
-logicle0 = vectorize(logicle0)
-
-def _logicle(y, T, m, r, order=2, intervals=1000.0):
-#    ub = log(max(y)+1-min(y))
-#    xx = exp(arange(0, ub, ub/intervals))-1+min(y)
-#    yy = logicle0(xx, T, m, r)
-#    t = interpolate.splrep(xx, yy, k=order)
-#    return interpolate.splev(y, t)
+def _logicle(y, T, m, r):
     y = array(y, dtype='double')
-    clogicle.logicle_scale(10000, 1, 4.5, 0, y)
+    w = (m - log10(T/abs(r)))/2.0
+    clogicle.logicle_scale(T, w, m, 0, y)
     return y
 
-def logicle(fcm, channels, T, m, r=None, order=2, intervals=1000.0, scale_max=1e5, scale_min=0):
+def logicle(fcm, channels, T, m, r=None, scale_max=1e5, scale_min=0):
     """return logicle transformed points in fcm data for channels listed"""
     npnts = fcm.view().copy()
     for i in channels:
         if r is None:
             tmp = npnts[:,i]
             r = quantile(tmp[tmp<0], 0.05)
-        lmin, lmax =  _logicle([0,T], T, m,r, order, intervals)
-        tmp = scale_max/lmax*_logicle(npnts[:, i].T, T, m, r, order, intervals)
+        lmin, lmax =  _logicle([0,T], T, m,r) # Do we need this as lmax is always 1?
+        tmp = scale_max/lmax*_logicle(npnts[:, i].T, T, m, r)
         tmp[tmp<scale_min] = scale_min
         npnts.T[i] = tmp
     node = TransformNode('', fcm.get_cur_node(), npnts)
@@ -104,6 +92,7 @@ def _log_transform(npnts):
 
 if __name__ == '__main__':
     from numpy.random import normal, lognormal, shuffle
+    import numpy
     import pylab
     import time
 
@@ -113,16 +102,18 @@ if __name__ == '__main__':
 
     T = 262144
     d = 4
-    m = d*log(10)
+    #m = d*log(10)
+    m = 4.5
     print m
     r = quantile(d3[d3<0], 0.05)
     w = (m-log(T/abs(r)))/2
+    w = (m - numpy.log10(T/numpy.abs(r)))/2.0
     #if (w<0):
-    w = .5
+    #w = .5
     print w
     print _logicle([0,T], T, m,r)
     n = array([0,T], dtype='double')
-    clogicle.logicle_scale(10000, w, 4.5, 0, n)
+    clogicle.logicle_scale(T, w, 4.5, 0, n)
     print n
     lmin, lmax = _logicle([0,T], T, m,r)
     pylab.clf()
@@ -154,11 +145,15 @@ if __name__ == '__main__':
     pylab.ylabel('Data after transform')
     pylab.subplot(4,1,4)
     d = array(d3, dtype='double')
-    clogicle.logicle_scale(10000, w, 4.5, 0, d)
+    tmp = array([0.0,T])
+    clogicle.logicle_scale( T, w,m,0,tmp)
+    l_min = tmp[0]
+    l_max = tmp[1]
+    clogicle.logicle_scale(T, w, m, 0, d)
     #d[d<0]=0
-    pylab.hist(1e5*d, 1250)
+    pylab.hist(1e5/l_max*d, 1250)
     pylab.yticks([])
-    pylab.ylim((0,600))
+    #pylab.ylim((0,600))
     pylab.ylabel('Data after transform')
     # pylab.savefig('logicle.png')
     pylab.show()

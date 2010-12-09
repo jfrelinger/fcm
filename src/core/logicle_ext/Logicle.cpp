@@ -168,7 +168,7 @@ double Logicle::solve (double b, double w)
 	double f = 2 * log(d) + w * d + f_b;
 	double last_f = NaN;
 
-	for (int i = 1; i < 20; ++i)
+	for (int i = 1; i < 40; ++i)
 	{
 		// compute the derivative
 		double df = 2 / d + w;
@@ -261,7 +261,7 @@ double Logicle::scale (double value) const
 	if (x > 1)
 		tolerance = 3 * x * EPSILON;
 
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 40; ++i)
 	{
 		// compute the function and its first two derivatives
 		double ae2bx = p->a * exp(p->b * x);
