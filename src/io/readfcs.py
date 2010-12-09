@@ -19,7 +19,7 @@ class FCSreader(object):
     class to hold object to read and parse fcs files.  main usage is to get 
     a FCMdata object out of a fcs file
     """
-    def __init__(self, filename, transform = 'log', sidx = None, spill=None):
+    def __init__(self, filename, transform = 'logicle', sidx = None, spill=None):
         #self.filename = filename
         if type(filename) == str:
             self.filename=filename
@@ -338,7 +338,7 @@ def log_factory(base):
 
 log2 = log_factory(2)
 
-def loadFCS(filename, transform='log', auto_comp=True, spill=None, sidx=None):
+def loadFCS(filename, transform='logicle', auto_comp=True, spill=None, sidx=None):
     """Load and return a FCM data object from an FCS file"""
     
     tmp = FCSreader(filename, transform, spill=spill, sidx=sidx)
