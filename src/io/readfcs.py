@@ -124,7 +124,7 @@ class FCSreader(object):
                     r = quantile(dj[dj < 0], 0.05)
                     lmin, lmax = _logicle([0,T], T, m, r) # is this needed as lmax is now always 1?
                     tmp = scale_max/lmax*_logicle(dj, T, m, r)
-                    tmp[tmp<scale_min]=scale_min
+                    #tmp[tmp<scale_min]=scale_min
                     data[:,i] = tmp
             elif self.transform == 'log':
                 for i in to_transform:

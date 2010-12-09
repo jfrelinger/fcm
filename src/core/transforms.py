@@ -48,7 +48,7 @@ def logicle(fcm, channels, T, m, r=None, scale_max=1e5, scale_min=0):
             r = quantile(tmp[tmp<0], 0.05)
         lmin, lmax =  _logicle([0,T], T, m,r) # Do we need this as lmax is always 1?
         tmp = scale_max/lmax*_logicle(npnts[:, i].T, T, m, r)
-        tmp[tmp<scale_min] = scale_min
+        #tmp[tmp<scale_min] = scale_min
         npnts.T[i] = tmp
     node = TransformNode('', fcm.get_cur_node(), npnts)
     fcm.add_view(node)
