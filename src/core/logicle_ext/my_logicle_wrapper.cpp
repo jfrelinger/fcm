@@ -2683,6 +2683,9 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int argnum, int flags)
 
 
 
+  #define SWIG_exception(code, msg) do { SWIG_Error(code, msg); SWIG_fail;; } while(0) 
+
+
 /* -------- TYPES TABLE (BEGIN) -------- */
 
 #define SWIGTYPE_p_char swig_types[0]
@@ -3323,7 +3326,14 @@ SWIGINTERN PyObject *_wrap_logicle_scale(PyObject *SWIGUNUSEDPARM(self), PyObjec
     arg6 = 1;
     for (i5=0; i5 < array_numdims(array5); ++i5) arg6 *= array_size(array5,i5);
   }
-  logicle_scale(arg1,arg2,arg3,arg4,arg5,arg6);
+  {
+    try {
+      logicle_scale(arg1,arg2,arg3,arg4,arg5,arg6);
+    } catch (Logicle::IllegalParameter &e) {
+      SWIG_exception(SWIG_ValueError, const_cast<char*>(e.message()));
+      return NULL;
+    }
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:

@@ -10,5 +10,6 @@
 #include "logicle.h"
 
 void logicle_scale(double t, double w, double m, double a, double* x, int n);
-
+void logicle_scale(double t, double w, double m, double a, float* x, int n);
+class IllegalParameter {public: const char * message ();};
 #endif /* MY_LOGICLE_H_ */

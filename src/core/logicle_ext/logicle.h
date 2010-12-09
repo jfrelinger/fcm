@@ -82,7 +82,6 @@ public:
 	};
 
 	Logicle (double T, double W, double M = DEFAULT_DECADES, double A = 0);
-	Logicle (double T, double W, double M, double A, int bins);
 	Logicle (const Logicle & logicle);
 
 	virtual ~Logicle ();
@@ -115,7 +114,7 @@ protected:
 
 	logicle_params * p;
 
-
+	Logicle (double T, double W, double M, double A, int bins);
 
 	static double solve (double b, double w);
 

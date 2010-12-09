@@ -14,3 +14,11 @@ void logicle_scale(double t, double w, double m, double a, double* x, int n) {
 		x[j] = l->scale(x[j]);
 	}
 }
+
+void logicle_scale(double t, double w, double m, double a, float* x, int n) {
+	Logicle *l = new Logicle(t, w, m, a);
+	//Logicle *l = (Logicle *)logicle_initialize(t, w, m, a, 0);
+	for(int j=0;j<n;j++) {
+		x[j] = float(l->scale(double(x[j])));
+	}
+}
