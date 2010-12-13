@@ -1,6 +1,37 @@
 from distutils.core import setup, Extension
 from numpy import get_include
 
+mvnpdf_extension = Extension('fcm.statistics._mvnpdf',
+                             sources = ['src/statistics/%s' % i for i in 
+                                ['mvnpdf_ext/mvnpdf.cpp',
+                                'mvnpdf_ext/mvnpdf_wrap.cpp',
+                                'cdp_ext/random/specialfunctions2.cpp',
+                                'cdp_ext/random/SpecialFunctions.cpp',
+                                'cdp_ext/matrix/newmat1.cpp',
+                                'cdp_ext/matrix/newmat2.cpp',
+                                'cdp_ext/matrix/newmat3.cpp',
+                                'cdp_ext/matrix/newmat4.cpp',
+                                'cdp_ext/matrix/newmat5.cpp',
+                                'cdp_ext/matrix/newmat6.cpp',
+                                'cdp_ext/matrix/newmat7.cpp',
+                                'cdp_ext/matrix/newmat8.cpp',
+                                'cdp_ext/matrix/newmat9.cpp',
+                                'cdp_ext/matrix/newmatex.cpp',
+                                'cdp_ext/matrix/myexcept.cpp',
+                                'cdp_ext/matrix/bandmat.cpp',
+                                'cdp_ext/matrix/submat.cpp',
+                                'cdp_ext/matrix/newmatrm.cpp',
+                                'cdp_ext/matrix/svd.cpp',
+                                'cdp_ext/matrix/sort.cpp',
+                                'cdp_ext/matrix/cholesky.cpp']],
+                            include_dirs = [get_include(), 
+                                    'src/statistics/cdp_ext/matrix',
+                                    'src/statistics/cdp_ext/random',
+                                    'src/statistics/mvnpdf_ext'],
+                            libraries = ['m', 'stdc++']
+                            )
+                                        
+
 logicle_extension = Extension('fcm.core._logicle',
                               sources = [ 'src/core/logicle_ext/%s' %i for i in [
                                 'Logicle.cpp',
@@ -21,7 +52,6 @@ cdp_extension = Extension('fcm.statistics._cdp',
                                 'cdp/cdpbase.cpp',
                                 'wrapper/cdpcluster.cpp',
                                 'wrapper/cdpemcluster.cpp',
-                                'wrapper/mvnpdf.cpp',
                                 'wrapper/cdpcluster_wrap.cpp',
                                 'random/specialfunctions2.cpp',
                                 'random/SpecialFunctions.cpp',
@@ -68,7 +98,7 @@ setup(name='fcm',
       description='Python Flow Cytometry (FCM) Tools',
       author='Jacob Frelinger',
       author_email='jacob.frelinger@duke.edu',
-      ext_modules = [cdp_extension, logicle_extension],
+      ext_modules = [cdp_extension, logicle_extension, mvnpdf_extension],
       requires=['numpy (>=1.3.0)',
                 'scipy (>=0.6)',
                 'enthought.traits (>=3.1)'], # figure out the rest of what's a required package.
