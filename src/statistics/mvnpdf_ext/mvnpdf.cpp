@@ -87,15 +87,17 @@ void wmvnpdf(int xd, int xp, double* px,
 			int k = pd; // k components
 			int n = xd; // n events
 			int d = xp; // d dimensions
+/*
 #if defined(CDP_CUDA)
 		cuda_wmvnpdf(n, d, k, px, pi, mu, sigma, out);
 #else
+*/
 			for(int j = 0; j < xd; ++j) {
 				for(int i = 0; i< pd; ++i){
 					out[pd*j+i] = pi[i] * mvnpdf(xp, &px[j*xp], mp, &mu[mp*i], sd, sp, &sigma[sd*sp*i]);
 				};
 			};
-#endif
+//#endif
 		};
 	};
 

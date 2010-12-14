@@ -5,7 +5,7 @@ Distributions used in FCS analysis
 from numpy import pi, exp, dot, ones, array, sqrt, fabs, tile, sum, prod, diag, zeros, cumsum, reshape
 from numpy.linalg import inv, det, cholesky
 from numpy.random import random, multivariate_normal
-from cdp import mvnpdf, wmvnpdf
+from mvnpdf import mvnpdf, wmvnpdf
 #def mvnormpdf(x, mu, va):
 #    """
 #    multi variate normal pdf, derived from David Cournapeau's em package

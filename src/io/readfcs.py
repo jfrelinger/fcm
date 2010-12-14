@@ -19,7 +19,7 @@ class FCSreader(object):
     class to hold object to read and parse fcs files.  main usage is to get 
     a FCMdata object out of a fcs file
     """
-    def __init__(self, filename, transform = 'log', sidx = None, spill=None):
+    def __init__(self, filename, transform = 'logicle', sidx = None, spill=None):
         #self.filename = filename
         if type(filename) == str:
             self.filename=filename
@@ -117,14 +117,14 @@ class FCSreader(object):
 
             if self.transform == 'logicle':
                 T = 262144
-                m = 4.5 * log(10)
+                m = 4.5
                 scale_max, scale_min = (1e5, 0)
                 for i in to_transform:
                     dj = data[:,i]
                     r = quantile(dj[dj < 0], 0.05)
-                    lmin, lmax = _logicle([0,T], T, m, r)
+                    lmin, lmax = _logicle([0,T], T, m, r) # is this needed as lmax is now always 1?
                     tmp = scale_max/lmax*_logicle(dj, T, m, r)
-                    tmp[tmp<scale_min]=scale_min
+                    #tmp[tmp<scale_min]=scale_min
                     data[:,i] = tmp
             elif self.transform == 'log':
                 for i in to_transform:
@@ -338,7 +338,7 @@ def log_factory(base):
 
 log2 = log_factory(2)
 
-def loadFCS(filename, transform='log', auto_comp=True, spill=None, sidx=None):
+def loadFCS(filename, transform='logicle', auto_comp=True, spill=None, sidx=None):
     """Load and return a FCM data object from an FCS file"""
     
     tmp = FCSreader(filename, transform, spill=spill, sidx=sidx)

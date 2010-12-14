@@ -141,14 +141,6 @@ class cdpcluster:
 cdpcluster_swigregister = _cdp.cdpcluster_swigregister
 cdpcluster_swigregister(cdpcluster)
 
-def mvnpdf(*args):
-  return _cdp.mvnpdf(*args)
-mvnpdf = _cdp.mvnpdf
-
-def wmvnpdf(*args):
-  return _cdp.wmvnpdf(*args)
-wmvnpdf = _cdp.wmvnpdf
-
 class cdpemcluster:
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, cdpemcluster, name, value)
