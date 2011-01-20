@@ -132,6 +132,7 @@ int CDPBase::sampleK(RowVector& x, RowVector& p, vector<RowVector>& mu, vector<L
 {
 	int tmpint;
 	sampleK(x,&tmpint,p,mu,L_i,logdet,mt);
+	return 0;
 }
 
 

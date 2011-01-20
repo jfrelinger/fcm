@@ -10,6 +10,7 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
+#include <limits>
 #define WANT_STREAM
 #include "../matrix/newmatio.h"
 
@@ -118,7 +119,7 @@ void Munkres::step4() {
 	 * once no uncovered exist goto step 6.
 	 */
 	bool done = false;
-	while(not done){
+	while(!done){
 		int i,j;
 		if (find_zero(cost,&i,&j))
 		{
@@ -325,8 +326,8 @@ bool Munkres::find_zero(SquareMatrix mat, int* row, int* col) {
 
 float Munkres::min_uncovered() {
 	// find the minumum uncovered value in the cost matrix.
-	Real min = INFINITY;
-	bool a = 5 < min;
+
+	Real min = std::numeric_limits<Real>::infinity();
 
 	for (int i =1; i<= size; i++)
 	{

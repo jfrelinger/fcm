@@ -35,7 +35,11 @@ def S(x, y, T, m, w):
 
 def _logicle(y, T, m, r):
     y = array(y, dtype='double')
-    w = (m - log10(T/abs(r)))/2.0
+    if r == 0:
+        w = 1 # don't like this but it works... FIX!
+    else:
+        w = (m - log10(T/abs(r)))/2.0
+
     clogicle.logicle_scale(T, w, m, 0, y)
     return y
 
