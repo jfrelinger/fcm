@@ -100,12 +100,19 @@ matrix_obj = obj/bandmat.o \
 
 munkres_obj = obj/Munkres.o
 
-py_obj = obj/cdpcluster.o obj/mvnpdf.o obj/cdpcluster_wrap.o obj/cdpemcluster.o
+py_cdp_obj = obj/cdpcluster.o obj/cdpcluster_wrap.o obj/cdpemcluster.o
+py_mvn_obj = obj/mvnpdf.o obj/mvnpdf_wrap.o
 
-OBJ = $(cdp_obj) $(rand_obj) $(matrix_obj) $(py_obj) $(CUDA_OBJS) $(munkres_obj)
+OBJ = $(cdp_obj) $(rand_obj) $(matrix_obj) $(py_cdp_obj) $(py_mvn_obj) $(CUDA_OBJS) $(munkres_obj)
 ### Python files
-_cdp.so: $(py_obj) $(cdp_obj) $(CUDA_OBJS) $(rand_obj) $(matrix_obj) $(munkres_obj)
-	$(CXX) $(LDFLAGS) -shared $(cdp_obj) $(matrix_obj) $(rand_obj) $(munkres_obj) $(CUDA_OBJS)  obj/cdpcluster_wrap.o  obj/cdpcluster.o obj/mvnpdf.o obj/cdpemcluster.o $(INCPATH) $(LIBPATH) $(PYTHONINC) -L. $(CUDA_LIB) -lstdc++ -o _cdp.so
+
+all: _cdp.so _mvnpdf.so
+
+_cdp.so: $(py_cdp_obj) $(cdp_obj) $(CUDA_OBJS) $(rand_obj) $(matrix_obj) $(munkres_obj)
+	$(CXX) $(LDFLAGS) -shared $(cdp_obj) $(matrix_obj) $(rand_obj) $(munkres_obj) $(CUDA_OBJS) $(py_cdp_obj) $(INCPATH) $(LIBPATH) $(PYTHONINC) -L. $(CUDA_LIB) -lstdc++ -o _cdp.so
+
+_mvnpdf.so: $(py_mvn_obj) $(CUDA_MVN_OBJS) $(rand_obj) $(matrix_obj) 
+	$(CXX) $(LDFLAGS) -shared $(py_mvn_obj) $(matrix_obj) $(rand_obj) $(INCPATH) $(LIBPATH) $(PYTHONINC) -L. $(CUDA_LIB) -lstdc++ -o _mvnpdf.so
 
 obj/cdpcluster.o:	../src/statistics/cdp_ext/wrapper/cdpcluster.cpp ../src/statistics/cdp_ext/wrapper/cdpcluster.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCPATH) $(CUDA_INC) $(CUDA_SDK_INC)
@@ -113,12 +120,14 @@ obj/cdpcluster.o:	../src/statistics/cdp_ext/wrapper/cdpcluster.cpp ../src/statis
 obj/cdpemcluster.o:	../src/statistics/cdp_ext/wrapper/cdpemcluster.cpp ../src/statistics/cdp_ext/wrapper/cdpemcluster.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCPATH) $(CUDA_INC) $(CUDA_SDK_INC)
 
-obj/mvnpdf.o: ../src/statistics/cdp_ext/wrapper/mvnpdf.cpp ../src/statistics/cdp_ext/wrapper/mvnpdf.h
+obj/mvnpdf.o: ../src/statistics/mvnpdf_ext/mvnpdf.cpp ../src/statistics/mvnpdf_ext/mvnpdf.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCPATH) $(CUDA_INC) $(CUDA_SDK_INC)
 
+obj/mvnpdf_wrap.o: ../src/statistics/mvnpdf_ext/mvnpdf_wrap.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCPATH) $(PYTHONINC) $(CUDA_INC) $(CUDA_SDK_INC)
 
 obj/cdpcluster_wrap.o: ../src/statistics/cdp_ext/wrapper/cdpcluster_wrap.cpp
-	$(CXX) $(CXXFLAGS)  $(INCPATH) $(PYTHONINC) $(CUDA_INC) $(CUDA_SDK_INC) -c ../src/statistics/cdp_ext/wrapper/cdpcluster_wrap.cpp -o obj/cdpcluster_wrap.o
+	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCPATH) $(PYTHONINC) $(CUDA_INC) $(CUDA_SDK_INC) 
 
 obj/Munkres.o:		../src/statistics/cdp_ext/munkres/Munkres.cpp ../src/statistics/cdp_ext/munkres/Munkres.h
 		$(CXX) $(CXXFLAGS) -c ../src/statistics/cdp_ext/munkres/Munkres.cpp -o $@ $(INCPATH)
@@ -178,6 +187,7 @@ obj/%.o:           	../src/statistics/cdp_ext/matrix/%.cpp
 clean :
 	$(RM) $(OBJ)
 	$(RM) _cdp.so
+	$(RM) _mvnpdf.so
 
 
 ### install
