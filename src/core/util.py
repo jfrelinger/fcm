@@ -1,5 +1,4 @@
 import re
-from enthought.traits.api import HasTraits, String, This, Array, Instance, Dict
 import logging
 import os
 from warnings import warn
@@ -23,11 +22,6 @@ class Node(object):
     """
     base node object
     """
-    
-    name = String
-    parent = This
-    data = Array
-    prefix = String
 
     def __init__(self, name, parent, data):
         self.name = name
@@ -128,11 +122,8 @@ class GatingNode(Node):
         """
         return self.parent.view()[self.data]
         
-class Tree(HasTraits):
+class Tree(object):
     '''Tree of data for FCMdata object.'''
-    nodes = Dict(key_trait=String, value_trait=Instance(Node))
-    root = Instance(RootNode)
-    current = Instance(Node)
 
     def __init__(self, pnts, channels):
         self.nodes = {}

@@ -4,7 +4,6 @@ Created on Oct 30, 2009
 @author: jolly
 '''
 
-from enthought.traits.api import HasTraits
 from numpy import zeros, outer, sum, eye, array
 from numpy.random import multivariate_normal as mvn
 from scipy.cluster import vq
@@ -14,7 +13,7 @@ from dp_cluster import DPCluster, DPMixture
 from kmeans import KMeans
 
 
-class DPMixtureModel(HasTraits):
+class DPMixtureModel(object):
     '''
     Fits a DP Mixture model to a fcm dataset.
     
@@ -322,7 +321,7 @@ class DPMixtureModel(HasTraits):
             
             
 
-class KMeansModel(HasTraits):
+class KMeansModel(object):
     '''
     KmeansModel(data, k, iter=20, tol=1e-5)
     kmeans clustering model

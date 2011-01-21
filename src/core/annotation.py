@@ -1,13 +1,10 @@
 """FCM annotation and annotation sets for FCM data and files
 """
 
-from enthought.traits.api import HasTraits, DictStrAny
-
-class Annotation(HasTraits):
+class Annotation(object):
     """
     Annotation object for storing metadata about FCM data
     """
-    annotations = DictStrAny()
     
     def __init__(self, annotations=None):
         """
@@ -27,17 +24,27 @@ class Annotation(HasTraits):
             self.__dict__[name] = self._mydict[name]
             return self._mydict[name]
         else:
-            return getattr(self._mydict, name)
+            try:
+                return self._mydict.__getattribute__(name)
+            except:
+                raise AttributeError("'%s' has no attribue '%s'" %(str(self.__class__), name))
         
-        
+    def __getstate__(self):
+        return self._mydict
+    
+    def __setstate__(self, dict):
+        self.__dict__['_mydict'] = dict
+        for i in dict.keys():
+            self.__dict__[i] = dict[i]
+       
     def __setattr__(self, name, value):
         """
         allow usage of annotation.foo  = x or annotation[foo] =x to set the
         intendede value
         """
         #return setattr(self._mydict, name, value)
-        self._mydict[name] = value
-        self.__dict__[name] = self._mydict[name]
+        Annotation.__getattribute__(self,'_mydict')[name] = value
+        self.__dict__[name] = value
         
     def __setitem__(self, name, value):
         """

@@ -3,15 +3,14 @@ A python object representing flow cytomoetry data
 """
 from __future__ import division
 from numpy import array, median, mean, std, log
-from enthought.traits.api import HasTraits, String, Instance, List
 from annotation import Annotation
 from fcmexceptions import BadFCMPointDataTypeError
 from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
 from transforms import log_transform as _log
-from util import Tree, RootNode, fcmlog
+from util import Tree, RootNode, fcmlog, Node
 
-class FCMdata(HasTraits):
+class FCMdata(object):
     """
     Object representing flow cytometry data
     FCMdata.pnts : a numpy array of data points
@@ -20,14 +19,8 @@ class FCMdata(HasTraits):
     FCMdata.scatters : a list of which indexes in fcmdata.channels are scatters
 
     """
-    
-    name = String()
-    tree = Instance(Tree)
-    scatters = List()
-    markers = List()
-    notes = Instance(Annotation)
 
-    @fcmlog
+    #@fcmlog
     def __init__(self, name, pnts, channels, scatters=None, notes=None):
         """
         fcmdata(name, pnts, channels, scatters=None)
@@ -82,10 +75,27 @@ class FCMdata(HasTraits):
             return self.tree.view()[item]
 
     def __getattr__(self, name):
-        if name == 'channels':
-            return self.current_node().channels
-        else:
-            return self.tree.view().__getattribute__(name)
+            if name == 'channels':
+                return Node.__getattribute__(self.current_node(),'channels')
+            elif name in dir(Node.__getattribute__(self.current_node(),'view')()):
+                return Node.__getattribute__(self.current_node(),'view')().__getattribute__(name)
+            else:
+                raise AttributeError("'%s' has no attribue '%s'" %(str(self.__class__), name))
+
+    def __getstate__(self):
+#        tmp = {}
+#        tmp['name'] = self.name
+#        tmp['tree'] = self.tree
+#        tmp['markers'] = self.markers
+#        tmp['scatters'] = self.scatters
+#        tmp['notes'] = self.notes
+#        return tmp
+        return self.__dict__
+    
+    def __setstate__(self, dict):
+        for i in dict.keys():
+            self.__dict__[i] = dict[i]
+
                 
     def name_to_index(self, channels):
         """Return the channel indexes for the named channels"""
@@ -112,12 +122,12 @@ class FCMdata(HasTraits):
         except KeyError:
             return None
     
-    @fcmlog
+#    @fcmlog
     def view(self):
         """return the current view of the data"""
         return self.tree.view()
     
-    @fcmlog
+#    @fcmlog
     def visit(self, name):
         """Switch current view of the data"""
         self.tree.visit(name)
@@ -138,29 +148,29 @@ class FCMdata(HasTraits):
         tmarkers = self.markers[:]
         return FCMdata(tpnts, tchannels, tmarkers, tnotes)
     
-    @fcmlog
+#    @fcmlog
     def logicle(self, channels=None, T=262144, m=4.5*log(10), r=None, order=2, intervals=1000.0, scale_max=1e5, scale_min=0):
         """return logicle transformed channels"""
         if channels is None:
             channels = self.markers
         return _logicle(self, channels, T, m, r, order, intervals, scale_max, scale_min)
         
-    @fcmlog
+#    @fcmlog
     def hyperlog(self, channels, b, d, r, order=2, intervals=1000.0):
         """return hyperlog transformed channels"""
         return _hyperlog(self, channels, b, d, r, order, intervals)
     
-    @fcmlog
+#    @fcmlog
     def log(self, channels):
         """return log base 10 transformed channels"""
         return _log(self, channels)
     
-    @fcmlog
+#    @fcmlog
     def gate(self, g, chan=None):
         """return gated region of fcm data"""
         return g.gate(self, chan)
     
-    @fcmlog
+#    @fcmlog
     def subsample(self, s):
         """return subsampled/sliced fcm data"""
         return s.subsample(self)
