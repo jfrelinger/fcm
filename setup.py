@@ -28,7 +28,7 @@ mvnpdf_extension = Extension('fcm.statistics._mvnpdf',
                                     'src/statistics/cdp_ext/matrix',
                                     'src/statistics/cdp_ext/random',
                                     'src/statistics/mvnpdf_ext'],
-                            libraries = ['m', 'stdc++']
+                            #libraries = ['m', 'stdc++']
                             )
                                         
 
@@ -86,7 +86,7 @@ cdp_extension = Extension('fcm.statistics._cdp',
                                 'src/statistics/cdp_ext/cdp', 
                                 'src/statistics/cdp_ext/wrapper',
                                 'src/statistics/cdp_ext/munkres'],
-                            libraries = ['m', 'stdc++'],
+                            #libraries = ['m', 'stdc++'],
                             define_macros = [('PYWRAP', 1)]
                             )
 

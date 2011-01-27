@@ -31,6 +31,9 @@ class FCMdataTestCase(unittest.TestCase):
         assert self.fcm[a,b] == self.pnts[a,b], '__getitem__ returned wrong value'
         assert self.fcm['fsc','ssc'][a,0] == self.pnts[a,0], '__getitem__ with multiple strings failed'
     
+    def testDeligate(self):
+        assert self.fcm.mean() == self.pnts.mean(), "deligation of mean failed"
+        
 #    def testSubSample(self):
 #        self.fcm.subsample([2])
 #        assert self.fcm.view()[0] == self.pnts[0,2], "subsample failed"

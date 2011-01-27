@@ -10,17 +10,14 @@ from numpy.random import multivariate_normal as mvn
 from numpy.random import multinomial
 from component import Component
 from util import modesearch
-from enthought.traits.api import HasTraits, List, Float, Array, Dict, Int
 from warnings import warn
 
 
-class DPCluster(HasTraits, Component):
+class DPCluster(Component):
     '''
     Single component cluster in mixture model
     '''
-    pi = Float()
-    mu = Array()
-    sigma = Array()
+
     def __init__(self, pi, mu, sig):
         '''
         DPCluster(pi,mu,sigma)
@@ -47,13 +44,11 @@ class DPCluster(HasTraits, Component):
         return mvn(self.mu, self.sigma, n)
 
 
-class DPMixture(HasTraits):
+class DPMixture(object):
     '''
     collection of compoents that describe a mixture model
     '''
-    clusters = List(DPCluster)
-    m = Array
-    s = Array
+
     def __init__(self, clusters, m = False, s = False):
         '''
         DPMixture(clusters)
@@ -150,15 +145,11 @@ class DPMixture(HasTraits):
         
     
 
-class ModalDPMixture(DPMixture, HasTraits):
+class ModalDPMixture(DPMixture):
     '''
     collection of modal compoents that describe a mixture model
     '''
-    clusters = List(DPCluster)
-    cmap = Dict(Int, List(Int))
-    modes = Dict(Int, Array)
-    m = Array
-    s = Array
+
     def __init__(self, clusters, cmap, modes, m=False, s=False):
         '''
         DPMixture(clusters)

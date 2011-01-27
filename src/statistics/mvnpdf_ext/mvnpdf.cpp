@@ -75,11 +75,11 @@ void wmvnpdf(int xd, int xp, double* px,
 	int sk, int sd, int sp, double* sigma,
 	int outd, double* out)
 	{
-		if ((xp != mp) or 
-		(mp != sd) or
-		(sd != sp) or
-		(pd != md) or
-		(md != sk) or
+		if ((xp != mp) || 
+		(mp != sd) ||
+		(sd != sp) ||
+		(pd != md) ||
+		(md != sk) ||
 		(outd != xd*pd)) {
 			throw invalid_argument("objects are not aligned");
 		} 

@@ -2,12 +2,9 @@ import numpy
 from matplotlib.nxutils import points_inside_poly
 from util import GatingNode
 
-from enthought.traits.api import HasTraits, List, ListInt, Array
 
-class Gate(HasTraits):
+class Gate(object):
     """An object representing a gatable region"""
-    vert = Array()
-    chan = ListInt
 
     def __init__(self, vert, channels):
         """
