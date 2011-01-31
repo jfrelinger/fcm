@@ -3,12 +3,14 @@
 #include "newmatap.h"
 #include "specialfunctions2.h"
 #include "mvnpdf.h"
+#include <math.h>
 
 #include <stdexcept>
 
 #if defined(CDP_CUDA)
-#include "CDPBaseCUDA.h"
-#include "CDPBaseCUDA_kernel.h"
+#include "cuda_mvnpdf.h"
+#define PAD_MULTIPLE  16
+#define HALF_WARP  16
 #endif
 
 double mvnpdf(int xd, double* px,
@@ -87,17 +89,17 @@ void wmvnpdf(int xd, int xp, double* px,
 			int k = pd; // k components
 			int n = xd; // n events
 			int d = xp; // d dimensions
-/*
+
 #if defined(CDP_CUDA)
 		cuda_wmvnpdf(n, d, k, px, pi, mu, sigma, out);
 #else
-*/
+
 			for(int j = 0; j < xd; ++j) {
 				for(int i = 0; i< pd; ++i){
 					out[pd*j+i] = pi[i] * mvnpdf(xp, &px[j*xp], mp, &mu[mp*i], sd, sp, &sigma[sd*sp*i]);
 				};
 			};
-//#endif
+#endif
 		};
 	};
 
@@ -107,116 +109,104 @@ void cuda_wmvnpdf(int n, int d, int k,
 		double* px, double* pi, double* mu, double* sigma,
 		double* out)
 {
-	int outd = k*n;
-	//DIM = d;
-	// load data
-	REAL* cx = cuda_load_data(n, d, px);
-	// load pi mu sigma
-	REAL* param = cuda_load_param(k, d, pi, mu, sigma);
-	// call cuda_pdf
-	REAL* result;
-	REAL* tmp= new REAL[outd];
-//	for (int i=0;i<outd;i++)
-//	{
-//		tmp[i] = 0;
-//	}
-	cudaMalloc( (void**)&result, n*k*SIZE_REAL);
-	gpuMvNormalPDF(cx, param, result, n, d, k);
-	cudaMemcpy(tmp, result, n*k*SIZE_REAL, cudaMemcpyDeviceToHost);
-	for (int i=0;i<n*k;i++)
+	int pad = pad_data_dim(n,d);
+	float data[n*pad];
+	float param[pack_size(k,d)*k];
+        float nout[n*k];
+	pack_param(d, k, mu, sigma, param);
+	load_data(n,d,pad,px,data);
+	CUDAmvnpdf(data, param, nout, d,n,k,pack_size(k,d), pad);
+	for(int i=0; i<n;++i)
 	{
-		out[i] = (double) tmp[i];
-		//std::cout << out[i] << " ";
-		//std::cout << tmp[i] << " ";
+		for(int j=0; j<k;++j)
+		{
+			out[i*k+j] = pi[j] * exp(nout[j*n+i]);
+		}
 	}
-	std::cout << std::endl;
-	// cleanup
-	delete [] tmp;
-	cudaFree(cx);
-	cudaFree(param);
-	cudaFree(result);
 
 };
 
-REAL * cuda_load_data(int n, int d, double* px)
+void pack_param(int d, int k, double* mu, double* sigma, float* out)
 {
-	REAL * hx = new REAL[n*d];
-	REAL * cx;
-	for(int i=0;i<(n*d);i++)
-	{
-		hx[i] = (REAL)px[i];
-	}
-	cudaMalloc( (void**)&cx, n*d*SIZE_REAL);
-	cudaMemcpy(cx, hx, n*d*SIZE_REAL, cudaMemcpyHostToDevice);
-	delete [] hx;
-	return cx;
-};
+	SpecialFunctions2 msf; // used to find logdet
+	int icsize = k * (k + 1) / 2;
+	//int pad_stride = k + icsize + 2;
+	int pad_stride = pack_size(k,d);
+	int sigma_offset = d*d;
 
-REAL * cuda_load_param(int k, int d,
-		double* pi, double* mu, double* sigma)
-{
-	// clac number of elements
-	int LTS = ((d*(d+1))/2) ; // also used in filling matrix Sigma
-	int size = k*d+k*LTS+k+k;// #mu*mu.dim + #sig*sig.size+#p + #logdet
-	// band of mu, inv_chol (lower triangular), p, logdet
-	REAL * hp = new REAL[size];
-	REAL * cp;
-
-	//convert sigmas to inv_chols
-	vector<LowerTriangularMatrix> InvChol;
-	vector<REAL> logdet;
-	SpecialFunctions2 msf;
-	;
-	for(int m=0; m<k; m++)
+	for (int i=0;i<k;++i)
 	{
+		// pack mu
+		for (int j=0; j<d;++j)
+		{
+			out[pad_stride*i+j] = mu[j];
+		}
+		// pack inv chol of sigma...
 		SymmetricMatrix Sigma(d);
 		LowerTriangularMatrix L;
-
-		for(int i = 0; i<d;++i)
-		{
-			for(int j=0; j<=i; ++j)
-			{
-				int pos = m*d*d+i*d+j;
-				Sigma(i+1,j+1) = sigma[pos];
+		LowerTriangularMatrix InvChol;
+		for(int l = 0; l<d;++l){
+			for(int j=0; j<=l; ++j){
+				int pos = l*d+j;
+				Sigma(l+1,j+1) = sigma[pos+(l*sigma_offset)];
 			};
 		};
-
+		
 		L = Cholesky(Sigma);
-
-		InvChol.push_back(L.i());
-		logdet.push_back( (REAL) msf.logdet(L));
-
-	}
-
-	// load up hp
-	REAL* hTmpPtr = hp;
-	for(int i=0; i<k;i++)
-	{
-		for(int j=0;j<d;j++)
-		{
-			*hTmpPtr++ = (REAL) mu[i*d+j];
-			//std::cout << mu[i*D+j] << ' ';
-
+		
+		InvChol = L.i();
+		Real *s = InvChol.data();
+		for(int j = 0; j <icsize; ++j){
+			out[(pad_stride*i)+k+j] = (float) s[j];
 		}
-		double* tInvChol = InvChol[i].Store();
-		for(int j=0;j<LTS;j++)
-		{
-			*hTmpPtr++ = (REAL) tInvChol[j];
-			//std::cout << tInvChol[j] << ' ';
-		}
-		*hTmpPtr++ = (REAL) pi[i];
-		*hTmpPtr++ = (REAL) logdet[i];
-		//std::cout << pi[i] << ' ' << logdet[i] << std::endl;
+		out[(pad_stride*i)+k+icsize] = 1;
+		out[(pad_stride*i)+k+icsize+1] = msf.logdet(L);
+		
+		L.ReleaseAndDelete();
+		Sigma.ReleaseAndDelete();
+		InvChol.ReleaseAndDelete();
 	}
-//	for(int i = 0; i < size; i++)
-//	{
-//		std::cout << hp[i] << " ";
-//	}
-//	std::cout << std::endl;
-	cudaMalloc( (void**)&cp, size*SIZE_REAL);
-	cudaMemcpy(cp, hp, size*SIZE_REAL, cudaMemcpyHostToDevice);
-	delete [] hp;
-	return cp;
 };
+
+int next_mult(int k, int p) {
+	if (k % p) {
+		return k + (p - (k % p));
+	}
+	else
+	{
+		return k;
+	}
+};
+
+int pack_size(int n, int d) {
+	int k = n*d;
+	int icsize = (k * ((k + 1) / 2));
+	int pad_dim = k + icsize; // # mu + # sigma * size of inv chol of sigma
+	pad_dim = next_mult( pad_dim + 2, PAD_MULTIPLE);
+	return pad_dim;	
+};
+
+int pad_data_dim(int n, int d) {
+	if (d % HALF_WARP)
+	{
+		return d;
+	}
+	else
+	{
+		return d+1;
+	}
+};
+
+void load_data(int n, int d, int pad, double *x, float *out)
+{
+	for(int i = 0;i<n;++i)
+	{
+		for(int j = 0; j<d;++j)
+		{
+			out[i*pad+j] = (float) x[i*d+j];
+		}
+	}
+};
+
 
 #endif

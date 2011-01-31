@@ -49,6 +49,7 @@ ifdef CUDA
 			obj/CUDASharedFunctions_kernel.cu_o \
 			obj/shiftMeasure_kernel.cu_o  \
 			obj/argMaxMeasure_kernel.cu_o
+	CUDA_MVN_OBJS = obj/cuda_mvnpdf.cu_o
 
 	CUDA_HEADERS = CUDA/CDPBaseCUDA.h \
 			CUDA/EMCDPBaseCUDA.h \
@@ -103,7 +104,7 @@ munkres_obj = obj/Munkres.o
 py_cdp_obj = obj/cdpcluster.o obj/cdpcluster_wrap.o obj/cdpemcluster.o
 py_mvn_obj = obj/mvnpdf.o obj/mvnpdf_wrap.o
 
-OBJ = $(cdp_obj) $(rand_obj) $(matrix_obj) $(py_cdp_obj) $(py_mvn_obj) $(CUDA_OBJS) $(munkres_obj)
+OBJ = $(cdp_obj) $(rand_obj) $(matrix_obj) $(py_cdp_obj) $(py_mvn_obj) $(CUDA_OBJS) $(munkres_obj) $(CUDA_MVN_OBJS)
 ### Python files
 
 all: _cdp.so _mvnpdf.so
@@ -112,7 +113,7 @@ _cdp.so: $(py_cdp_obj) $(cdp_obj) $(CUDA_OBJS) $(rand_obj) $(matrix_obj) $(munkr
 	$(CXX) $(LDFLAGS) -shared $(cdp_obj) $(matrix_obj) $(rand_obj) $(munkres_obj) $(CUDA_OBJS) $(py_cdp_obj) $(INCPATH) $(LIBPATH) $(PYTHONINC) -L. $(CUDA_LIB) -lstdc++ -o _cdp.so
 
 _mvnpdf.so: $(py_mvn_obj) $(CUDA_MVN_OBJS) $(rand_obj) $(matrix_obj) 
-	$(CXX) $(LDFLAGS) -shared $(py_mvn_obj) $(matrix_obj) $(rand_obj) $(INCPATH) $(LIBPATH) $(PYTHONINC) -L. $(CUDA_LIB) -lstdc++ -o _mvnpdf.so
+	$(CXX) $(LDFLAGS) -shared $(py_mvn_obj) $(matrix_obj) $(rand_obj) $(CUDA_MVN_OBJS) $(INCPATH) $(LIBPATH) $(PYTHONINC) -L. $(CUDA_LIB) -lstdc++ -o _mvnpdf.so
 
 obj/cdpcluster.o:	../src/statistics/cdp_ext/wrapper/cdpcluster.cpp ../src/statistics/cdp_ext/wrapper/cdpcluster.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCPATH) $(CUDA_INC) $(CUDA_SDK_INC)
@@ -121,7 +122,7 @@ obj/cdpemcluster.o:	../src/statistics/cdp_ext/wrapper/cdpemcluster.cpp ../src/st
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCPATH) $(CUDA_INC) $(CUDA_SDK_INC)
 
 obj/mvnpdf.o: ../src/statistics/mvnpdf_ext/mvnpdf.cpp ../src/statistics/mvnpdf_ext/mvnpdf.h
-	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCPATH) $(CUDA_INC) $(CUDA_SDK_INC)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCPATH) $(CUDA_INC) $(CUDA_SDK_INC) -I./CUDA_mvnpdf
 
 obj/mvnpdf_wrap.o: ../src/statistics/mvnpdf_ext/mvnpdf_wrap.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCPATH) $(PYTHONINC) $(CUDA_INC) $(CUDA_SDK_INC)
@@ -173,6 +174,8 @@ obj/%.cpp_o : CUDA/%.cpp
 obj/%.cu_o : CUDA/%.cu $(CUDA_HEADERS)
 	$(NVCC) $(NVCC_DBG_FLAGS) -c $< -o $@ -I. $(INCPATH) $(LOCAL_INC) $(CUDA_INC) $(CUDA_SDK_INC) -DUNIX
 
+obj/%.cu_o : CUDA_mvnpdf/%.cu $(CUDA_HEADERS)
+	$(NVCC) $(NVCC_DBG_FLAGS) -c $< -o $@ -I. $(INCPATH) $(LOCAL_INC) $(CUDA_INC) $(CUDA_SDK_INC) -DUNIX
 ### Random
 obj/%.o:           	../src/statistics/cdp_ext/random/%.cpp
 		$(CXX) $(CXXFLAGS) -c ../src/statistics/cdp_ext/random/$*.cpp -o $@ $(INCPATH) $(CUDA_INC) $(CUDA_SDK_INC)
@@ -185,11 +188,12 @@ obj/%.o:           	../src/statistics/cdp_ext/matrix/%.cpp
 ### clean
 .PHONY : clean
 clean :
-	$(RM) $(OBJ)
+	$(RM) $(OBJ) 
 	$(RM) _cdp.so
 	$(RM) _mvnpdf.so
 
 
 ### install
-install : _cdp.so
+install : _cdp.so _mvnpdf.so
 	$(INSTALL) _cdp.so `$(PYTHON) -c 'from fcm.statistics import _cdp; print _cdp.__file__'`
+	$(INSTALL) _mvnpdf.so `$(PYTHON) -c 'from fcm.statistics import _mvnpdf; print _mvnpdf.__file__'`

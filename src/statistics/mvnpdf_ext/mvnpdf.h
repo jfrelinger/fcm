@@ -5,11 +5,6 @@
 #include "newmat.h"
 #include "specialfunctions2.h"
 
-#if defined(CDP_CUDA)
-#include "CDPBaseCUDA.h"
-#endif
-
-
 
 double mvnpdf(int xd, double* px,
 	 int md, double* mu,
@@ -41,8 +36,13 @@ void wmvnpdf(int xd, int xp, double* px,
 void cuda_wmvnpdf(int n, int d, int k,
 		double* px, double* pi, double* mu, double* sigma,
 		double* out);
-REAL * cuda_load_data(int n, int d, double* px);
-REAL * cuda_load_param(int k, int d,
-				double* pi, double* mu, double* sigma);
-#endif
+void load_data(int n, int d, int pad, double *x, float *out);
+void pack_param(int d, int k, double* mu, double* sigma, float *out);
+int next_mult(int k, int p);
+int pack_size(int n, int d);
+int pad_data_dim(int n, int d);
+void load_data(int n, int d, int pad, double *x, double *out);
+
+
+#endif /*cuda*/
 #endif /*MVNDPF_H_*/
