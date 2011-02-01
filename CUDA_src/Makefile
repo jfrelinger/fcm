@@ -1,14 +1,14 @@
 CXX = g++
 
-#C_DEBUG = -g
+C_DEBUG = -g
 
 INSTALL = /usr/bin/install -SC
 
 PYTHON = /usr/bin/python2.6
 PYCONFIG = $(PYTHON)-config
 
-CXXFLAGS = $(C_DEBUG) -fPIC -DPYWRAP `$(PYCONFIG) --cflags` -Dmain=oldmain
-LDFLAGS = $(C_DEBUG) -fPIC -DPYWRAP  `$(PYCONFIG) --ldflags`
+CXXFLAGS = $(C_DEBUG) -fPIC -DPYWRAP `$(PYCONFIG) --cflags` -Dmain=oldmain -O0
+LDFLAGS = $(C_DEBUG) -fPIC -DPYWRAP  `$(PYCONFIG) --ldflags` -O0
 INCPATH = -I../src/statistics/cdp_ext/matrix -I../src/statistics/cdp_ext/random -I../src/statistics/cdp_ext/hoomd -I../src/statistics/cdp_ext/cdp `$(PYCONFIG) --includes`
 LIBPATH = `$(PYCONFIG) --libs`
 
@@ -166,7 +166,7 @@ obj/cdpresultem.o:	../src/statistics/cdp_ext/cdp/cdpresultem.cpp ../src/statisti
 #### CUDA files
 
 obj/%.c_o : CUDA/%.c
-	$(GCC) $(PROFILE) -c $< -o $@ $(LOCAL_INC)
+	$(CXX) $(CXXFLAGS) $(PROFILE) -c $< -o $@ $(LOCAL_INC)
 
 obj/%.cpp_o : CUDA/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCPATH) $(LOCAL_INC) $(CUDA_INC) $(CUDA_SDK_INC) $(PROFILE) -c $< -o $@

@@ -110,9 +110,10 @@ void cuda_wmvnpdf(int n, int d, int k,
 		double* out)
 {
 	int pad = pad_data_dim(n,d);
-	float data[n*pad];
-	float param[pack_size(k,d)*k];
-        float nout[n*k];
+	int ps = pack_size(k,d);
+	float *data = new float[n*pad];
+	float *param = new float[ps*k];
+        float *nout = new float[n*k];
 	pack_param(d, k, mu, sigma, param);
 	load_data(n,d,pad,px,data);
 	CUDAmvnpdf(data, param, nout, d,n,k,pack_size(k,d), pad);
@@ -123,6 +124,9 @@ void cuda_wmvnpdf(int n, int d, int k,
 			out[i*k+j] = pi[j] * exp(nout[j*n+i]);
 		}
 	}
+	delete [] data;
+	delete [] param;
+	delete [] nout;
 
 };
 
@@ -133,7 +137,10 @@ void pack_param(int d, int k, double* mu, double* sigma, float* out)
 	//int pad_stride = k + icsize + 2;
 	int pad_stride = pack_size(k,d);
 	int sigma_offset = d*d;
-
+	SymmetricMatrix Sigma (d);
+	LowerTriangularMatrix L;
+	LowerTriangularMatrix InvChol;
+	Real *s;
 	for (int i=0;i<k;++i)
 	{
 		// pack mu
@@ -142,30 +149,27 @@ void pack_param(int d, int k, double* mu, double* sigma, float* out)
 			out[pad_stride*i+j] = mu[j];
 		}
 		// pack inv chol of sigma...
-		SymmetricMatrix Sigma(d);
-		LowerTriangularMatrix L;
-		LowerTriangularMatrix InvChol;
 		for(int l = 0; l<d;++l){
 			for(int j=0; j<=l; ++j){
 				int pos = l*d+j;
-				Sigma(l+1,j+1) = sigma[pos+(l*sigma_offset)];
+				Sigma.element(l,j) = sigma[pos+(l*sigma_offset)];
 			};
 		};
 		
 		L = Cholesky(Sigma);
 		
-		InvChol = L.i();
-		Real *s = InvChol.data();
+		InvChol =  L.i();
+		s = InvChol.data();
 		for(int j = 0; j <icsize; ++j){
 			out[(pad_stride*i)+k+j] = (float) s[j];
 		}
 		out[(pad_stride*i)+k+icsize] = 1;
 		out[(pad_stride*i)+k+icsize+1] = msf.logdet(L);
 		
-		L.ReleaseAndDelete();
-		Sigma.ReleaseAndDelete();
-		InvChol.ReleaseAndDelete();
 	}
+	L.Release();
+	Sigma.Release();
+	InvChol.Release();
 };
 
 int next_mult(int k, int p) {
@@ -180,7 +184,7 @@ int next_mult(int k, int p) {
 
 int pack_size(int n, int d) {
 	int k = n*d;
-	int icsize = (k * ((k + 1) / 2));
+	int icsize = n*(d * ((d + 1) / 2));
 	int pad_dim = k + icsize; // # mu + # sigma * size of inv chol of sigma
 	pad_dim = next_mult( pad_dim + 2, PAD_MULTIPLE);
 	return pad_dim;	
@@ -189,11 +193,11 @@ int pack_size(int n, int d) {
 int pad_data_dim(int n, int d) {
 	if (d % HALF_WARP)
 	{
-		return d;
+		return d+1;
 	}
 	else
 	{
-		return d+1;
+		return d;
 	}
 };
 
