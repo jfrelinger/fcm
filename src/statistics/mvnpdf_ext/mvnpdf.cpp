@@ -137,10 +137,10 @@ void pack_param(int d, int k, double* mu, double* sigma, float* out)
 	//int pad_stride = k + icsize + 2;
 	int pad_stride = pack_size(k,d);
 	int sigma_offset = d*d;
-	SymmetricMatrix Sigma (d);
+	SymmetricMatrix Sigma;
 	LowerTriangularMatrix L;
 	LowerTriangularMatrix InvChol;
-	Real *s;
+	Real const * s;
 	for (int i=0;i<k;++i)
 	{
 		// pack mu
@@ -149,6 +149,7 @@ void pack_param(int d, int k, double* mu, double* sigma, float* out)
 			out[pad_stride*i+j] = mu[j];
 		}
 		// pack inv chol of sigma...
+		Sigma.resize(d);
 		for(int l = 0; l<d;++l){
 			for(int j=0; j<=l; ++j){
 				int pos = l*d+j;
@@ -159,17 +160,15 @@ void pack_param(int d, int k, double* mu, double* sigma, float* out)
 		L = Cholesky(Sigma);
 		
 		InvChol =  L.i();
-		s = InvChol.data();
+		s = InvChol.const_data();
 		for(int j = 0; j <icsize; ++j){
 			out[(pad_stride*i)+k+j] = (float) s[j];
 		}
 		out[(pad_stride*i)+k+icsize] = 1;
 		out[(pad_stride*i)+k+icsize+1] = msf.logdet(L);
 		
-	}
-	L.Release();
-	Sigma.Release();
-	InvChol.Release();
+		s = 0;
+	};
 };
 
 int next_mult(int k, int p) {
@@ -184,7 +183,7 @@ int next_mult(int k, int p) {
 
 int pack_size(int n, int d) {
 	int k = n*d;
-	int icsize = n*(d * ((d + 1) / 2));
+	int icsize = (k * ((k + 1) / 2));
 	int pad_dim = k + icsize; // # mu + # sigma * size of inv chol of sigma
 	pad_dim = next_mult( pad_dim + 2, PAD_MULTIPLE);
 	return pad_dim;	
