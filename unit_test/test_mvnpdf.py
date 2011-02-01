@@ -79,7 +79,7 @@ class mvnpdfTestCase(unittest.TestCase):
             sigma = array([eye(2)+a, eye(2)+b])
             #x = array([[1,0],[1,1]])
             #mu = array([[1,1],[1,1]])
-            #sigma = array([eye(2)]*2)
+            sigma = array([eye(2)]*2)
        
             presult = array([[float(pmvnormpdf(x[0,:],mu[0,:],sigma[0,:,:])),float(pmvnormpdf(x[0,:],mu[1,:],sigma[1,:,:]))],[float(pmvnormpdf(x[1,:],mu[0,:],sigma[0,:,:])),float(pmvnormpdf(x[1,:],mu[1,:],sigma[1,:,:]))]])
             cresult = compmixnormpdf(x,pi,mu,sigma)
