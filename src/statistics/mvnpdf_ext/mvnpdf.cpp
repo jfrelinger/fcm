@@ -114,32 +114,13 @@ void cuda_wmvnpdf(int n, int d, int k,
 	float *data = new float[n*pad];
 	float *param = new float[ps*k];
         float *nout = new float[n*k];
-//	for(int i=0; i<k;++i){
-//		for(int j=0;j<d*d;++j) {
-//			std::cout << sigma[i*d+j] << " ";
-//		}
-//		std::cout << std::endl;
-//	};
 	pack_param(d, k, mu, sigma, param);
 	load_data(n,d,pad,px,data);
-//	for(int i=0; i<n;++i){
-//		for(int j; j<d;++j) {
-//		std::cout << data[i*pad+j] << " ";
-//	}
-//	}
-//	std::cout << std::endl;
-//	for(int i=0; i<ps*k; ++i) {
-//		if(i%ps == 0) {
-//			std::cout << std::endl;
-//		}
-//		std::cout << param[i] << " ";
-//	}
 	CUDAmvnpdf(data, param, nout, d,n,k,ps, pad);
 	for(int i=0; i<n;++i)
 	{
 		for(int j=0; j<k;++j)
 		{
-			//std::cout << "(" << i << "," << j << "):" << nout[j*n+i] << std::endl;
 			out[i*k+j] = pi[j] * exp(nout[j*n+i]);
 		}
 	}
@@ -152,7 +133,7 @@ void cuda_wmvnpdf(int n, int d, int k,
 void pack_param(int d, int k, double* mu, double* sigma, float* out)
 {
 	SpecialFunctions2 msf; // used to find logdet
-	int icsize = (d * ((d + 1) / 2));
+	int icsize = ((d * (d + 1)) / 2);
 	//int pad_stride = k + icsize + 2;
 	int pad_stride = pack_size(k,d);
 	int sigma_offset = d*d;
@@ -201,7 +182,7 @@ int next_mult(int k, int p) {
 };
 
 int pack_size(int n, int d) {
-	int icsize = (d * ((d + 1) / 2));
+	int icsize = ((d * (d + 1)) / 2);
 	int pad_dim = d + icsize; // # mu + # sigma * size of inv chol of sigma
 	pad_dim = next_mult( pad_dim + 2, PAD_MULTIPLE);
 	return pad_dim;	
