@@ -114,13 +114,32 @@ void cuda_wmvnpdf(int n, int d, int k,
 	float *data = new float[n*pad];
 	float *param = new float[ps*k];
         float *nout = new float[n*k];
+//	for(int i=0; i<k;++i){
+//		for(int j=0;j<d*d;++j) {
+//			std::cout << sigma[i*d+j] << " ";
+//		}
+//		std::cout << std::endl;
+//	};
 	pack_param(d, k, mu, sigma, param);
 	load_data(n,d,pad,px,data);
-	CUDAmvnpdf(data, param, nout, d,n,k,pack_size(k,d), pad);
+//	for(int i=0; i<n;++i){
+//		for(int j; j<d;++j) {
+//		std::cout << data[i*pad+j] << " ";
+//	}
+//	}
+//	std::cout << std::endl;
+//	for(int i=0; i<ps*k; ++i) {
+//		if(i%ps == 0) {
+//			std::cout << std::endl;
+//		}
+//		std::cout << param[i] << " ";
+//	}
+	CUDAmvnpdf(data, param, nout, d,n,k,ps, pad);
 	for(int i=0; i<n;++i)
 	{
 		for(int j=0; j<k;++j)
 		{
+			//std::cout << "(" << i << "," << j << "):" << nout[j*n+i] << std::endl;
 			out[i*k+j] = pi[j] * exp(nout[j*n+i]);
 		}
 	}
@@ -133,7 +152,7 @@ void cuda_wmvnpdf(int n, int d, int k,
 void pack_param(int d, int k, double* mu, double* sigma, float* out)
 {
 	SpecialFunctions2 msf; // used to find logdet
-	int icsize = k * (k + 1) / 2;
+	int icsize = (d * ((d + 1) / 2));
 	//int pad_stride = k + icsize + 2;
 	int pad_stride = pack_size(k,d);
 	int sigma_offset = d*d;
@@ -146,14 +165,14 @@ void pack_param(int d, int k, double* mu, double* sigma, float* out)
 		// pack mu
 		for (int j=0; j<d;++j)
 		{
-			out[pad_stride*i+j] = mu[j];
+			out[pad_stride*i+j] = mu[i*d+j];
 		}
 		// pack inv chol of sigma...
 		Sigma.resize(d);
 		for(int l = 0; l<d;++l){
 			for(int j=0; j<=l; ++j){
 				int pos = l*d+j;
-				Sigma.element(l,j) = sigma[pos+(l*sigma_offset)];
+				Sigma.element(l,j) = sigma[pos+(i*sigma_offset)];
 			};
 		};
 		
@@ -162,10 +181,10 @@ void pack_param(int d, int k, double* mu, double* sigma, float* out)
 		InvChol =  L.i();
 		s = InvChol.const_data();
 		for(int j = 0; j <icsize; ++j){
-			out[(pad_stride*i)+k+j] = (float) s[j];
+			out[(pad_stride*i)+d+j] = (float) s[j];
 		}
-		out[(pad_stride*i)+k+icsize] = 1;
-		out[(pad_stride*i)+k+icsize+1] = msf.logdet(L);
+		out[(pad_stride*i)+d+icsize] = 1;
+		out[(pad_stride*i)+d+icsize+1] = msf.logdet(L);
 		
 		s = 0;
 	};
@@ -182,9 +201,8 @@ int next_mult(int k, int p) {
 };
 
 int pack_size(int n, int d) {
-	int k = n*d;
-	int icsize = (k * ((k + 1) / 2));
-	int pad_dim = k + icsize; // # mu + # sigma * size of inv chol of sigma
+	int icsize = (d * ((d + 1) / 2));
+	int pad_dim = d + icsize; // # mu + # sigma * size of inv chol of sigma
 	pad_dim = next_mult( pad_dim + 2, PAD_MULTIPLE);
 	return pad_dim;	
 };
@@ -192,11 +210,11 @@ int pack_size(int n, int d) {
 int pad_data_dim(int n, int d) {
 	if (d % HALF_WARP)
 	{
-		return d+1;
+		return d;
 	}
 	else
 	{
-		return d;
+		return d+1;
 	}
 };
 
@@ -206,7 +224,7 @@ void load_data(int n, int d, int pad, double *x, float *out)
 	{
 		for(int j = 0; j<d;++j)
 		{
-			out[i*pad+j] = (float) x[i*d+j];
+			out[i*pad+j] = (float) x[i*d+j]; 
 		}
 	}
 };
