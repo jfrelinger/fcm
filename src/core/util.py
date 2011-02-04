@@ -67,6 +67,12 @@ class TransformNode(Node):
         self.data = data
         self.prefix = 't'
         
+    def __getattr__(self, name):
+        if name == 'channels':
+            return self.parent.channels
+        else:
+            raise AttributeError("'%s' has no attribue '%s'" %(str(self.__class__), name))
+        
 class SubsampleNode(Node):
     """
     Node of subsampled data
@@ -121,6 +127,12 @@ class GatingNode(Node):
         return the view of the data associated with this node
         """
         return self.parent.view()[self.data]
+    
+    def __getattr__(self, name):
+        if name == 'channels':
+            return self.parent.channels
+        else:
+            raise AttributeError("'%s' has no attribue '%s'" %(str(self.__class__), name))
         
 class Tree(object):
     '''Tree of data for FCMdata object.'''
@@ -208,33 +220,6 @@ class Tree(object):
         return tmp
         
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
-    t = Tree(RootNode('root',[0,0,0]))
-    t.add_child('gate1', RootNode('gate1',[1,2,3]))
-    t.add_child('gate11', RootNode('gate11',[4,5,6]))
-    t.visit('root')
-    t.add_child('gate2', RootNode('gate2',[2,3,4]))
-    t.add_child('gate21', RootNode('gate21',[3,4,5]))
-    t.add_child('gate211', RootNode('gate211',[4,5,6]))
-
-    parent = t.parent()
-    print t.current
-    print t.parent()
-    t.visit(t.parent())
-    print t.current
-    print t.parent()
-    t.visit('root')
-    print t.current
-    print t.children()
-    print t.view()
-    t.visit('gate2')
-    print t.view()
-    
-    t.rename_node('gate1', 'foo')
-    t.visit('foo')
-    print t.current
-    print t.view()
-
-    
+    pass
     
     
