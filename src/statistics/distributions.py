@@ -5,7 +5,8 @@ Distributions used in FCS analysis
 from numpy import pi, exp, dot, ones, array, sqrt, fabs, tile, sum, prod, diag, zeros, cumsum, reshape
 from numpy.linalg import inv, det, cholesky
 from numpy.random import random, multivariate_normal
-from mvnpdf import mvnpdf, wmvnpdf
+from mvnpdf import mvnpdf as _mvnpdf
+from mvnpdf import wmvnpdf as _wmvnpdf
 #def mvnormpdf(x, mu, va):
 #    """
 #    multi variate normal pdf, derived from David Cournapeau's em package
@@ -33,9 +34,9 @@ def mvnormpdf(x, mu, va):
         n = x.shape
         p = 0
     if p > 0:
-        results = mvnpdf(x,mu,va,n)
+        results = _mvnpdf(x,mu,va,n)
     else:
-        results = mvnpdf(x,mu,va)
+        results = _mvnpdf(x,mu,va)
     
     return results
 
@@ -55,12 +56,12 @@ def compmixnormpdf(x, prop, mu, Sigma):
         c = 1
 
     if c == 1: 
-        tmp = wmvnpdf(x,prop,mu,Sigma,n)
+        tmp = _wmvnpdf(x,prop,mu,Sigma,n)
         if n == 1:
             tmp = tmp[0]
     
     else:
-        tmp = wmvnpdf(x,prop,mu,Sigma,n*c)
+        tmp = _wmvnpdf(x,prop,mu,Sigma,n*c)
         tmp = reshape(tmp, (n,c))
         #tmp = sum(tmp,1)
         if n == 1:
