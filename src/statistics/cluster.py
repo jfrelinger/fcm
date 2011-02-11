@@ -53,7 +53,7 @@ class DPMixtureModel(object):
             # if the above passed we're cuda enabled...
             if self.nclusts % 16: 
                 tmp = self.nclusts + (16 - (self.nclusts % 16))
-                warn("Number of clusters, %d, is not a multiple of 16, increasing it to %d" % (self.nclust, tmp))
+                warn("Number of clusters, %d, is not a multiple of 16, increasing it to %d" % (self.nclusts, tmp))
                 self.nclusts = tmp
         except RuntimeError:
             pass 
