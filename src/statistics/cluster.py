@@ -51,7 +51,7 @@ class DPMixtureModel(object):
         try:
             self.cdp.getdevice()
             # if the above passed we're cuda enabled...
-            if not self.nclusts % 16: 
+            if self.nclusts % 16: 
                 tmp = self.nclusts + (16 - (self.nclusts % 16))
                 warn("Number of clusters, %d, is not a multiple of 16, increasing it to %d" % (self.nclust, tmp))
                 self.nclusts = tmp
