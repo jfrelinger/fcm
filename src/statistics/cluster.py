@@ -4,6 +4,7 @@ Created on Oct 30, 2009
 @author: jolly
 '''
 
+from warnings import warn
 from numpy import zeros, outer, sum, eye, array
 from numpy.random import multivariate_normal as mvn
 from scipy.cluster import vq
@@ -34,7 +35,7 @@ class DPMixtureModel(object):
         self.m = pnts.mean(0)
         self.s = pnts.std(0)
         self.data = (pnts-self.m)/self.s
-
+        
         self.nclusts = nclusts
         self.iter = iter
         self.burnin = burnin
@@ -46,10 +47,20 @@ class DPMixtureModel(object):
             raise ValueError("pnts is the wrong shape")
         self.n, self.d = self.data.shape
         
+        self.cdp = cdpcluster(self.data)
+        try:
+            self.cdp.getdevice()
+            # if the above passed we're cuda enabled...
+            if not self.nclusts % 16: 
+                tmp = self.nclusts + (16 - (self.nclusts % 16))
+                warn("Number of clusters, %d, is not a multiple of 16, increasing it to %d" % (self.nclust, tmp))
+                self.nclusts = tmp
+        except RuntimeError:
+            pass 
         self.pi = zeros((nclusts*last))
         self.mus = zeros((nclusts*last, self.d))
         self.sigmas = zeros((nclusts*last, self.d, self.d))
-        self.cdp = cdpcluster(self.data)
+        
         # self.cdp.setphi0(0.5)
         # self.cdp.setgamma(5)
         # self.cdp.setaa(5)
