@@ -1,6 +1,6 @@
 import unittest
 from fcm.statistics import DPCluster, ModalDPMixture
-from numpy import array, eye, argmax
+from numpy import array, eye, argmax, all
 
 
 class ModalDp_clusterTestCase(unittest.TestCase):
@@ -20,6 +20,9 @@ class ModalDp_clusterTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def testModes(self):
+        assert all(self.mix.modes()[0] == self.mu1)
+        assert all(self.mix.modes()[1] == self.mu2) 
 
     def testprob(self):
         pnt = array([1,1,1])
