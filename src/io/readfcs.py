@@ -34,7 +34,7 @@ class FCSreader(object):
         self.spill = spill
         self.sidx = sidx
         
-    def get_FCMdata(self, auto_comp=True):
+    def get_FCMdata(self, auto_comp=True, **kwargs):
         """Return the next FCM data set stored in a FCS file"""
         
         # parse headers
@@ -116,12 +116,28 @@ class FCSreader(object):
                 data[:,idx] = c
 
             if self.transform == 'logicle':
-                T = 262144
-                m = 4.5
-                scale_max, scale_min = (1e5, 0)
+                if 'T' in kwargs.keys():
+                    T = kwargs['T']
+                else:
+                    T = 262144
+                if 'm' in kwargs.keys():
+                    m = kwargs['m']
+                else:
+                    m = 4.5
+                if 'scale_max' in kwargs.keys():
+                    scale_max = kwargs['scale_max']
+                else:
+                    scale_max = 1e5
+                if 'scale_min' in kwargs.keys():
+                    scale_min = kwargs['scale_min']
+                else:
+                    scale_min = 0
                 for i in to_transform:
                     dj = data[:,i]
-                    r = quantile(dj[dj < 0], 0.05)
+                    if 'r' in kwargs.keys():
+                        r = kwargs['r']
+                    else:
+                        r = quantile(dj[dj < 0], 0.05)
                     lmin, lmax = _logicle([0,T], T, m, r) # is this needed as lmax is now always 1?
                     tmp = scale_max/lmax*_logicle(dj, T, m, r)
                     #tmp[tmp<scale_min]=scale_min
@@ -132,16 +148,7 @@ class FCSreader(object):
             
             elif self.transform == "hyperlog":
                 pass # TODO figure out good default parameters for hyperlog transform
-                    
 
-                # # log transform as alternative
-                # for i in to_logicle:
-                #     dj = data[:,i]
-                #     dj[dj < 1] = 1
-                #     lmin, lmax = numpy.log10([0,T])
-                #     tmp = scale_max/lmax*numpy.log10(dj)
-                #     tmp[tmp<scale_min]=scale_min
-                #     data[:,i] = tmp
             
         path, name = os.path.split(self.filename)
         name, ext = os.path.splitext(name)
@@ -338,11 +345,11 @@ def log_factory(base):
 
 log2 = log_factory(2)
 
-def loadFCS(filename, transform='logicle', auto_comp=True, spill=None, sidx=None):
+def loadFCS(filename, transform='logicle', auto_comp=True, spill=None, sidx=None, **kwargs):
     """Load and return a FCM data object from an FCS file"""
     
     tmp = FCSreader(filename, transform, spill=spill, sidx=sidx)
-    return tmp.get_FCMdata(auto_comp)
+    return tmp.get_FCMdata(auto_comp, **kwargs)
 
 def is_fl_channel(name):
     """
