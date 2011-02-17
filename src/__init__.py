@@ -7,7 +7,7 @@ from core import PolyGate, points_in_poly, QuadGate, IntervalGate
 from core import BadFCMPointDataTypeError, UnimplementedFcsDataMode
 from core import CompensationError
 from core import load_compensate_matrix, compensate
-from io import FCSreader, loadFCS
+from io import FCSreader, loadFCS, loadMultipleFCS
 from core import Subsample, SubsampleFactory, DropChannel
 from core  import logicle, hyperlog
 

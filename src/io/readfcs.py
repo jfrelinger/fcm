@@ -116,6 +116,8 @@ class FCSreader(object):
                 data[:,idx] = c
 
             if self.transform == 'logicle':
+                self.r = numpy.zeros(data.shape[1])
+                
                 if 'T' in kwargs.keys():
                     T = kwargs['T']
                 else:
@@ -134,10 +136,12 @@ class FCSreader(object):
                     scale_min = 0
                 for i in to_transform:
                     dj = data[:,i]
-                    if 'r' in kwargs.keys():
-                        r = kwargs['r']
-                    else:
+                    try:
+                        r = kwargs['r'][i]
+                    except KeyError:
                         r = quantile(dj[dj < 0], 0.05)
+                    self.r[i] = r
+                    
                     lmin, lmax = _logicle([0,T], T, m, r) # is this needed as lmax is now always 1?
                     tmp = scale_max/lmax*_logicle(dj, T, m, r)
                     #tmp[tmp<scale_min]=scale_min
@@ -157,8 +161,10 @@ class FCSreader(object):
                         'header': header,
                         'analysis': analysis,
                         }))
-        # update cur_offset for multidata files
-        # return fcm object
+        try:
+            tmpfcm._r = self.r
+        except NameError:
+            pass
         return tmpfcm
         
     
@@ -350,6 +356,17 @@ def loadFCS(filename, transform='logicle', auto_comp=True, spill=None, sidx=None
     
     tmp = FCSreader(filename, transform, spill=spill, sidx=sidx)
     return tmp.get_FCMdata(auto_comp, **kwargs)
+
+def loadMultipleFCS(files, transform='logicle', auto_comp=True, spill=None, sidx=None, **kwargs):
+    for filename in files:
+        tmp = loadFCS(filename, transform, auto_comp, spill, sidx, **kwargs)
+        try:
+            if 'r' not in kwargs.keys():
+                kwargs['r'] = tmp._r
+        except NameError:
+            pass
+        yield tmp
+        
 
 def is_fl_channel(name):
     """

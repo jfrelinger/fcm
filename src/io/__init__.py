@@ -1,1 +1,1 @@
-from readfcs import FCSreader, loadFCS
+from readfcs import FCSreader, loadFCS, loadMultipleFCS
