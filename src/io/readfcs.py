@@ -163,7 +163,7 @@ class FCSreader(object):
                         }))
         try:
             tmpfcm._r = self.r
-        except NameError:
+        except AttributeError:
             pass
         return tmpfcm
         
