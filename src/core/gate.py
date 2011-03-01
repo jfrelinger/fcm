@@ -35,7 +35,7 @@ class PolyGate(Gate):
         
         if invert:
             idxs = numpy.invert(idxs)
-        
+
         node = GatingNode("", fcm.get_cur_node(), idxs)
         fcm.add_view(node)
         return fcm

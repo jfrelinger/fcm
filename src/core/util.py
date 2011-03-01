@@ -2,6 +2,7 @@ import re
 import logging
 import os
 from warnings import warn
+import numpy as np
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s: %(message)s',
@@ -126,6 +127,8 @@ class GatingNode(Node):
         """
         return the view of the data associated with this node
         """
+        if self.parent.view().shape[0] == 0:
+            return np.array([]).reshape(self.parent.view().shape)
         return self.parent.view()[self.data]
     
     def __getattr__(self, name):

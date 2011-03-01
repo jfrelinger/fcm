@@ -4,6 +4,7 @@ from random import randint
 
 from fcm import FCMdata
 from fcm import PolyGate, IntervalGate
+from numpy.testing.utils import assert_array_equal
 
 
 class FCMdataTestCase(unittest.TestCase):
@@ -67,14 +68,40 @@ class FCMdataTestCase(unittest.TestCase):
         assert 'g2' in nodes, 'gating name mangled'
         assert 'g1' in nodes, 'gating name mangled'
         
+    def testEmptyPolyGate(self):
+        verts =  array([[10,10],[10,11],[11,11], [11,10]])
+        cols = [0,1]
+        g = PolyGate(verts, cols)
+        self.fcm.gate(g)
+        assert_array_equal(self.fcm.view(),array([]).reshape((0,3)), 'gated region not empty')
+
+        self.fcm.gate(g)
+        assert_array_equal(self.fcm.view(),array([]).reshape((0,3)), 'gated region not empty')
+
+        nodes = self.fcm.tree.nodes.keys()
+        assert 'g2' in nodes, 'gating name mangled'
+        assert 'g1' in nodes, 'gating name mangled'
+        
     def testIntervalGate(self):
         verts =  array([1.5,4.5])
         cols = [0]
         g = IntervalGate(verts, cols)
         self.fcm.gate(g)
-        assert all(self.fcm.view() == array([[3,4,5]])), 'gate excluded wrong points'
+        assert_array_equal(self.fcm.view(),array([[3,4,5]]), 'gate excluded wrong points')
         self.fcm.visit('root')
         self.fcm.gate(g)
+        nodes = self.fcm.tree.nodes.keys()
+        assert 'g2' in nodes, 'gating name mangled'
+        assert 'g1' in nodes, 'gating name mangled'
+
+    def testEmptyIntervalGate(self):
+        verts =  array([10.5,40.5])
+        cols = [0]
+        g = IntervalGate(verts, cols)
+        self.fcm.gate(g)
+        assert_array_equal(self.fcm.view(),array([]).reshape((0,3)), 'gate excluded wrong points')
+        self.fcm.gate(g)
+        assert_array_equal(self.fcm.view(),array([]).reshape((0,3)), 'gate excluded wrong points')
         nodes = self.fcm.tree.nodes.keys()
         assert 'g2' in nodes, 'gating name mangled'
         assert 'g1' in nodes, 'gating name mangled'
