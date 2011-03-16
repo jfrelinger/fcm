@@ -34,6 +34,8 @@ class FCSreader(object):
         self.spill = spill
         self.sidx = sidx
         
+    
+        
     def get_FCMdata(self, auto_comp=True, **kwargs):
         """Return the next FCM data set stored in a FCS file"""
         
@@ -134,16 +136,23 @@ class FCSreader(object):
                     scale_min = kwargs['scale_min']
                 else:
                     scale_min = 0
+                if 'w' in kwargs.keys():
+                    w = kwargs['w']
+                else:
+                    w = None
                 for i in to_transform:
                     dj = data[:,i]
-                    try:
-                        r = kwargs['r'][i]
-                    except KeyError:
-                        r = quantile(dj[dj < 0], 0.05)
-                    self.r[i] = r
-                    
-                    lmin, lmax = _logicle([0,T], T, m, r) # is this needed as lmax is now always 1?
-                    tmp = scale_max/lmax*_logicle(dj, T, m, r)
+                    if w is None:
+                        try:
+                            r = kwargs['r'][i]
+                        except KeyError:
+                            r = quantile(dj[dj < 0], 0.05)
+                        self.r[i] = r
+                    else:
+                        r = None
+                        
+                    lmin, lmax = _logicle([0,T], T, m, r, w) # is this needed as lmax is now always 1?
+                    tmp = scale_max/lmax*_logicle(dj, T, m, r, w)
                     #tmp[tmp<scale_min]=scale_min
                     data[:,i] = tmp
             elif self.transform == 'log':
@@ -165,14 +174,20 @@ class FCSreader(object):
             tmpfcm._r = self.r
         except AttributeError:
             pass
+        try:
+            tmpfcm._w = self.w
+        except AttributeError:
+            pass
         return tmpfcm
         
     
     def read_bytes(self, offset, start, stop):
         """Read in bytes from start to stop inclusive."""
+
         self._fh.seek(offset+start)
         
         return self._fh.read(stop-start+1)
+
     
     def parse_header(self, offset):
         """

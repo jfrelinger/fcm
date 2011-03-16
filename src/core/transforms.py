@@ -33,24 +33,25 @@ def S(x, y, T, m, w):
     xw = sgn*(x-w)
     return sgn*T*exp(-(m-w))*(exp(xw)-p**2*exp(-xw/p)+p**2-1) - y
 
-def _logicle(y, T, m, r):
+def _logicle(y, T, m, r, w):
     y = array(y, dtype='double')
-    if r == 0:
-        w = 1 # don't like this but it works... FIX!
-    else:
-        w = (m - log10(T/abs(r)))/2.0
+    if w is None:
+        if r == 0:
+            w = 1 # don't like this but it works... FIX!
+        else:
+            w = (m - log10(T/abs(r)))/2.0
 
     clogicle.logicle_scale(T, w, m, 0, y)
     return y
 
-def logicle(fcm, channels, T, m, r=None, scale_max=1e5, scale_min=0):
+def logicle(fcm, channels, T, m, r=None, scale_max=1e5, scale_min=0, w = None):
     """return logicle transformed points in fcm data for channels listed"""
     npnts = fcm.view().copy()
     for i in channels:
-        if r is None:
+        if r is None and w is not None:
             tmp = npnts[:,i]
             r = quantile(tmp[tmp<0], 0.05)
-        lmin, lmax =  _logicle([0,T], T, m,r) # Do we need this as lmax is always 1?
+        lmin, lmax =  _logicle([0,T], T, m, r, w) # Do we need this as lmax is always 1?
         tmp = scale_max/lmax*_logicle(npnts[:, i].T, T, m, r)
         #tmp[tmp<scale_min] = scale_min
         npnts.T[i] = tmp
