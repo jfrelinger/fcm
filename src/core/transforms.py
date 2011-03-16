@@ -48,7 +48,7 @@ def logicle(fcm, channels, T, m, r=None, scale_max=1e5, scale_min=0, w = None):
     """return logicle transformed points in fcm data for channels listed"""
     npnts = fcm.view().copy()
     for i in channels:
-        if r is None and w is not None:
+        if r is None and w is None:
             tmp = npnts[:,i]
             r = quantile(tmp[tmp<0], 0.05)
         lmin, lmax =  _logicle([0,T], T, m, r, w) # Do we need this as lmax is always 1?
