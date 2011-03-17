@@ -1,4 +1,4 @@
-from numpy import array, reshape, max, dot, loadtxt
+from numpy import array, reshape, max, dot, loadtxt, zeros
 from numpy.linalg import solve, inv
 from fcmexceptions import CompensationError
 from util import TransformNode
@@ -47,6 +47,15 @@ def _compensate(data, spill, comp=False, scale=False):
     # return solve(spill,data.T).T
 
     return solve(spill.T, data.T).T
+
+def gen_spill_matrix(tubes):
+    sidx = tubes.keys()       
+    spill = zeros((len(sidx),len(sidx)))
+    for k,j in enumerate(tubes.keys()):
+        data = tubes[j]       
+        norm = data[j].mean() 
+        spill[k,:] = (data[:,data.markers].mean(0))/norm
+    return sidx, spill
 
 def load_compensate_matrix(file_name):
     """
