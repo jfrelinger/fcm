@@ -59,7 +59,7 @@ ifdef CUDA
 	CUDA_INC = -I$(CUDA_PATH)/include -I$(BOOST_INC_PATH)
 	CUDA_SDK_COMMONDIR = $(CUDA_SDK_PATH)/common
 	CUDA_SDK_INC = -I$(CUDA_SDK_COMMONDIR)/inc
-	CUDA_LIB  = -L$(CUDA_PATH)/lib64 -L$(CUDA_SDK_PATH)/lib -L$(CUDA_SDK_COMMONDIR)/lib -lcuda -lcudart -lcutil -lcublas \
+	CUDA_LIB  = -L$(CUDA_PATH)/lib64 -L$(CUDA_SDK_PATH)/lib -L$(CUDA_SDK_COMMONDIR)/lib -lcuda -lcudart -lcublas \
 		-L$(BOOST_LIB_PATH) 
 	INCPATH += -ICUDA  $(CUDA_INC)
 

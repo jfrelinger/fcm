@@ -6,7 +6,9 @@
  */
 
 #include "stdafx.h"
+#if !defined(PYWRAP)
 #include <cutil_inline.h>
+#endif
 #include <cuda_runtime_api.h>
 #include <cuda.h>
 
@@ -21,12 +23,13 @@
 	using namespace boost;
 #endif
 	
-static CUT_THREADPROC WKSamplerThread(TGPUplan *plan){
-	
-	bool multigpu = plan->Multithread && plan->NumDevices> 1;
-	if (multigpu) {
+//static CUT_THREADPROC WKSamplerThread(TGPUplan *plan){
+static 	void WKSamplerThread(TGPUplan *plan){
+	//bool multigpu = plan->Multithread && plan->NumDevices> 1;
+	bool multigpu = 0;
+	/*if (multigpu) {
 		cutilSafeCall( cudaSetDevice(plan->device));
-	}
+	} */
 
 	int N = plan->N;
 	int nchunksize = N;
@@ -47,12 +50,6 @@ static CUT_THREADPROC WKSamplerThread(TGPUplan *plan){
 		plan->dIndices = allocateGPUIntMemory(plan->N);
 #endif
 	}
-/*
-	unsigned int hTimer;
-	cutilCheckError(cutCreateTimer(&hTimer));
-	cutilCheckError(cutResetTimer(hTimer));
-	cutilCheckError(cutStartTimer(hTimer));
-*/	
 	int kCumN = 0;
 	for (int iChunk = 0; iChunk * nchunksize < N; iChunk++) {	//added layer to reduce GPU memory usage
 		kCumN += nchunksize;
@@ -79,10 +76,6 @@ static CUT_THREADPROC WKSamplerThread(TGPUplan *plan){
 	}
 	
 	cudaMemcpy(plan->h_Component,plan->dComponent,N * SIZE_INT, cudaMemcpyDeviceToHost);
-/*
-	cutilCheckError(cutStopTimer(hTimer));
-	printf("GPU Processing time: %f (ms) \n", cutGetTimerValue(hTimer));
-*/
 #if defined(CDP_MEANCOV)	
 	gpuMvUpdateMeanCov(plan->dX,
 		plan->h_Component,
@@ -130,7 +123,7 @@ static CUT_THREADPROC WKSamplerThread(TGPUplan *plan){
 	  */
 
 	}
-	CUT_THREADEND;
+	//CUT_THREADEND;
 }
 
 CDPBaseCUDA::CDPBaseCUDA() {
@@ -551,9 +544,9 @@ int CDPBaseCUDA::sampleWK(
 	uploadMeanAndSigma(iP[0], iMu,iSigma,iLogDet);
 	uploadRandomNumbers(mt);
 	
-	if (!plans[0].Multithread) {
+	// if (!plans[0].Multithread) {
 		WKSamplerThread(&plans[0]); //no new thread
-	} else {
+	/* } else {
 		#if defined(MULTI_GPU)
 			int plan;
 			for (plan = 0; plan < kDeviceCount; plan++) {
@@ -602,7 +595,7 @@ int CDPBaseCUDA::sampleWK(
 			}
 			cutWaitForThreads(threadID, kDeviceCount);
 		#endif
-	}
+	} */
 	memcpy(oK, hComponent, kN * SIZE_INT);
 	memcpy(oZ, hZ, kN * SIZE_INT);
 #if defined(CDP_MEANCOV)	

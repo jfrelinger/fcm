@@ -6,7 +6,6 @@
 
 #if defined(CDP_CUDA)
 #include "CDPBaseCUDA.h"
-#include <cutil_inline.h>
 #include <cuda_runtime_api.h>
 #endif
 
@@ -117,17 +116,7 @@ void cdpemcluster::run(){
 	}
 
 	
-#if defined(CDP_CUDA)
-	
-	unsigned int hTimer;
-	
-	cutilCheckError(cutCreateTimer(&hTimer));
-	
-	cutilCheckError(cutResetTimer(hTimer));
-	
-    cutilCheckError(cutStartTimer(hTimer));
-	
-#else
+
 	
 	time_t tStart, tEnd;
 	
@@ -136,8 +125,7 @@ void cdpemcluster::run(){
 	//tStart = clock();
 	
 	time(&tStart);
-	
-#endif
+
 	// main EM loop
 	errTol = log(1.0 + model.mnErrorPerTol);
 	
@@ -151,17 +139,7 @@ void cdpemcluster::run(){
 		}
 		cdp.iterateEM((*param),printout);	
 	}
-	
- if (verbose) {
-	#if defined(CDP_CUDA)
-		cutilCheckError(cutStopTimer(hTimer));
-		printf("GPU Processing time: %f (ms) \n", cutGetTimerValue(hTimer));
-	#else
-		//tEnd = clock();
-		time(&tEnd);
-		cout << "time lapsed:" << difftime(tEnd,tStart)  << "seconds"<< endl;
-	#endif	
-  }
+
 	
 	
 	
