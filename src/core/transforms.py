@@ -49,10 +49,9 @@ def logicle(fcm, channels, T, m, r=None, scale_max=1e5, scale_min=0, w = None):
     npnts = fcm.view().copy()
     for i in channels:
         if r is None and w is None:
-            tmp = npnts[:,i]
-            r = quantile(tmp[tmp<0], 0.05)
+            w = .5
         lmin, lmax =  _logicle([0,T], T, m, r, w) # Do we need this as lmax is always 1?
-        tmp = scale_max/lmax*_logicle(npnts[:, i].T, T, m, r)
+        tmp = scale_max/lmax*_logicle(npnts[:, i].T, T, m, r, w)
         #tmp[tmp<scale_min] = scale_min
         npnts.T[i] = tmp
     node = TransformNode('', fcm.get_cur_node(), npnts)

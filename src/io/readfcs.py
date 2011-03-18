@@ -9,6 +9,7 @@ from fcm import UnimplementedFcsDataMode
 
 from operator import and_
 from math import log
+from numbers import Number
 from struct import calcsize, unpack
 import re
 import numpy
@@ -118,8 +119,13 @@ class FCSreader(object):
                 data[:,idx] = c
 
             if self.transform == 'logicle':
-                self.r = numpy.zeros(data.shape[1])
-                
+                try:
+                    if isinstance(kwargs['r'], Number):
+                        self.r = kwargs['r']
+                    elif numpy.all(numpy.isreal(kwargs['r'])):
+                        self.r = numpy.zeros(data.shape[1])
+                except KeyError:
+                    pass
                 if 'T' in kwargs.keys():
                     T = kwargs['T']
                 else:
@@ -144,10 +150,15 @@ class FCSreader(object):
                     dj = data[:,i]
                     if w is None:
                         try:
-                            r = kwargs['r'][i]
+                            if isinstance(kwargs['r'], Number):
+                                r = kwargs['r']
+                            elif numpy.all(numpy.isreal(kwargs['r'])):
+                                r = kwargs['r'][i]
+                                self.r[i] = r
                         except KeyError:
-                            r = quantile(dj[dj < 0], 0.05)
-                        self.r[i] = r
+                            r = None
+                            w = .5
+                        
                     else:
                         r = None
                         
@@ -378,7 +389,7 @@ def loadMultipleFCS(files, transform='logicle', auto_comp=True, spill=None, sidx
         try:
             if 'r' not in kwargs.keys():
                 kwargs['r'] = tmp._r
-        except NameError:
+        except AttributeError:
             pass
         yield tmp
         
