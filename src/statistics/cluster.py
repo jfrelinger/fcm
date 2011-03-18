@@ -81,7 +81,9 @@ class DPMixtureModel(object):
         self.lambda0 = self.cdp.getlambda0()
         self.phi0 = self.cdp.getphi0()
         self.nu0 = self.cdp.getnu0()
-        self.gamma = self.cdp.getgamma()
+        #self.gamma = self.cdp.getgamma()
+        # per cliburn: override the default gamma to be 3
+        self.gamma = 3
         self.nu = self.cdp.getnu()
         self.e0 = self.cdp.gete0()
         self.f0 = self.cdp.getf0()

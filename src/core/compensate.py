@@ -52,7 +52,7 @@ def gen_spill_matrix(tubes):
     sidx = tubes.keys()       
     spill = zeros((len(sidx),len(sidx)))
     for k,j in enumerate(tubes.keys()):
-        data = tubes[j]       
+        data = tubes[j]
         norm = data[j].mean() 
         spill[k,:] = (data[:,data.markers].mean(0))/norm
     return sidx, spill
