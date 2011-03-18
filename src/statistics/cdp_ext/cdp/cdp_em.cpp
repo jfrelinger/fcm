@@ -36,7 +36,9 @@
 
 #if defined(CDP_CUDA)
 	#include "CDPBaseCUDA.h"
+#if !defined(PYWRAP)
 	#include <cutil_inline.h>
+#endif
 	#include <cuda_runtime_api.h>
 #endif
 
@@ -640,7 +642,7 @@ void CDP_EM::EMAlgorithm(Model& model, MTRand& mt){
 	}
 
 	
-#if defined(CDP_CUDA)
+#if defined(CDP_CUDA) && !defined(PYWRAP)
 	
 	unsigned int hTimer;
 	
@@ -696,7 +698,7 @@ void CDP_EM::EMAlgorithm(Model& model, MTRand& mt){
 	
 	
  if (model.mnPrintout >0) {
-	#if defined(CDP_CUDA)
+	#if defined(CDP_CUDA) && !defined(PYWRAP)
 		cutilCheckError(cutStopTimer(hTimer));
 		printf("GPU Processing time: %f (ms) \n", cutGetTimerValue(hTimer));
 	#else

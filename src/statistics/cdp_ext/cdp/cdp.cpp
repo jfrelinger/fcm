@@ -24,7 +24,9 @@
 
 #if defined(CDP_CUDA)
 	#include "CDPBaseCUDA.h"
+#if !defined(PYWRAP)
 	#include <cutil_inline.h>
+#endif
 	#include <cuda_runtime_api.h>
 #endif
 int DIM,MEAN_CHD_DIM,PACK_DIM,CHD_DIM,LOGDET_OFFSET,DATA_PADDED_DIM,NCHUNKSIZE;
@@ -590,9 +592,10 @@ int main(int argc,char* argv[]) {
 	  // see if we're dealing with a special case of J==1
 	  cdp.CheckSpecialCases(model,result);
 
-	  #if defined(CDP_CUDA)
-		unsigned int hTimer;
+	  #if defined(CDP_CUDA) && !defined(PYWRAP)
+	    unsigned int hTimer;
 		unsigned int hRelabelTimer;
+
 		cutilCheckError(cutCreateTimer(&hRelabelTimer));
 		cutilCheckError(cutResetTimer(hRelabelTimer));
 		cutilCheckError(cutCreateTimer(&hTimer));
@@ -615,11 +618,11 @@ int main(int argc,char* argv[]) {
 		cdp.iterate(result,mt);
 
 		  if (model.Zrelabel) {
-			#if defined(CDP_CUDA)
+			#if defined(CDP_CUDA) && !defined(PYWRAP)
 				cutilCheckError(cutStartTimer(hRelabelTimer));
 			#endif
 			cdp.ComponentRelabel(result);
-			#if defined(CDP_CUDA)
+			#if defined(CDP_CUDA) && !defined(PYWRAP)
 				cutilCheckError(cutStopTimer(hRelabelTimer));
 			#endif
 		  }
@@ -630,7 +633,7 @@ int main(int argc,char* argv[]) {
 		}
 	  }
 	  if (model.mnPrintout >0) {
-		  #if defined(CDP_CUDA)
+		  #if defined(CDP_CUDA) && !defined(PYWRAP)
 			cutilCheckError(cutStopTimer(hTimer));
 			printf("GPU Processing time: %f (ms) \n", cutGetTimerValue(hTimer));
 			printf("Relabeling Processing time: %f (ms) \n", cutGetTimerValue(hRelabelTimer));
