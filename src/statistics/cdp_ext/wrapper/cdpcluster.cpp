@@ -8,7 +8,6 @@
 
 #if defined(CDP_CUDA)
 #include "CDPBaseCUDA.h"
-#include <cutil_inline.h>
 #include <cuda_runtime_api.h>
 #endif
 
@@ -20,11 +19,8 @@ cdpcluster::~cdpcluster() {
 	};
 };
 
-//cdpcluster::cdpcluster(int d, int n, double** x, int iter, int burn) {
 cdpcluster::cdpcluster(int n, int d, double* x) {
-//  Model model;
-//  CDP cdp;
-//  MTRand mt;
+
 
   model.mnN = n;
   model.mnD = d;
@@ -122,20 +118,10 @@ void cdpcluster::run() {
   // see if we're dealing with a special case of J==1
   cdp.CheckSpecialCases(model,(*param));
 
-#if defined(CDP_CUDA)
-	unsigned int hTimer;
-	unsigned int hRelabelTimer;
-	cutilCheckError(cutCreateTimer(&hRelabelTimer));
-	cutilCheckError(cutResetTimer(hRelabelTimer));
-	cutilCheckError(cutCreateTimer(&hTimer));
-	cutilCheckError(cutResetTimer(hTimer));
-	cutilCheckError(cutStartTimer(hTimer));
-#else
-    time_t tStart, tEnd;
+    //time_t tStart, tEnd;
     //long tStart, tEnd;
     //tStart = clock();
-    time(&tStart);
-#endif
+    //time(&tStart);
 
 
   // main mcmc loop
@@ -145,13 +131,7 @@ void cdpcluster::run() {
     }
     cdp.iterate((*param),mt);
 	if (model.Zrelabel) {
-#if defined(CDP_CUDA)
-		cutilCheckError(cutStartTimer(hRelabelTimer));
-#endif
 		cdp.ComponentRelabel((*param));
-#if defined(CDP_CUDA)
-		cutilCheckError(cutStopTimer(hRelabelTimer));
-#endif
 	  }
 
 
@@ -163,23 +143,6 @@ void cdpcluster::run() {
     
   }
 
-  if(verbose) {
-    #if defined(CDP_CUDA)
-      cutilCheckError(cutStopTimer(hTimer));
-      printf("GPU Processing time: %f (ms) \n", cutGetTimerValue(hTimer));
-    #else
-      //tEnd = clock();
-      time(&tEnd);
-      cout << "time lapsed:" << difftime(tEnd,tStart)  << "seconds"<< endl;
-    #endif
-  }
-  
-  // save final parameter values
-  //(*param).SaveFinal();
-  // save posterior means for mixture component parameters
-  //if(model.mnIter>0){
-    //result.SaveBar();
-  //}
 
   
 };
