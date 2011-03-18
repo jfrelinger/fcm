@@ -3,7 +3,7 @@ from matplotlib.nxutils import points_inside_poly
 from util import GatingNode
 
 
-class Gate(object):
+class Filter(object):
     """An object representing a gatable region"""
 
     def __init__(self, vert, channels):
@@ -18,7 +18,7 @@ class Gate(object):
         """do the actual gating here."""
         pass
         
-class PolyGate(Gate):
+class PolyGate(Filter):
     """An object representing a polygonal gatable region"""
         
     def gate(self, fcm, chan = None, invert = False):
@@ -40,7 +40,7 @@ class PolyGate(Gate):
         fcm.add_view(node)
         return fcm
         
-class QuadGate(Gate):
+class QuadGate(Filter):
     """
     An object to divide a region to four quadrants
     """
@@ -67,7 +67,7 @@ class QuadGate(Gate):
                 fcm.add_view(node)
         return fcm
 
-class IntervalGate(Gate):
+class IntervalGate(Filter):
     """
     An objeect to return events within an interval in any one channel.
     """
