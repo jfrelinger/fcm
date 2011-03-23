@@ -28,7 +28,7 @@ class DPCluster(Component):
         self.pi = pi
         self.mu = mu
         self.sigma = sig
-        
+
     def prob(self, x):
         '''
         DPCluster.prob(x):
@@ -36,7 +36,7 @@ class DPCluster(Component):
         '''
         #return self.pi * mvnormpdf(x, self.mu, self.sigma)
         return compmixnormpdf(x, self.pi, self.mu, self.sigma)
-    
+
     def draw(self, n=1):
         '''
         draw a random sample of size n form this cluster
@@ -49,7 +49,7 @@ class DPMixture(object):
     collection of compoents that describe a mixture model
     '''
 
-    def __init__(self, clusters, m = False, s = False):
+    def __init__(self, clusters, m=False, s=False):
         '''
         DPMixture(clusters)
         cluster = list of DPCluster objects
@@ -59,15 +59,15 @@ class DPMixture(object):
             self.m = m
         if s is not False:
             self.s = s
-        
+
     def prob(self, x):
         '''
         DPMixture.prob(x)
         returns an array of probabilities of x being in each component of the mixture
         '''
         #return array([i.prob(x) for i in self.clusters])
-        return compmixnormpdf(x,self.pis(), self.mus(), self.sigmas())
-    
+        return compmixnormpdf(x, self.pis(), self.mus(), self.sigmas())
+
     def classify(self, x):
         '''
         DPMixture.classify(x):
@@ -75,12 +75,12 @@ class DPMixture(object):
         '''
         probs = self.prob(x)
         try:
-            unused_n,unused_j = x.shape 
+            unused_n, unused_j = x.shape
             #return array([i.argmax(0) for i in probs])
             return probs.argmax(1)
         except ValueError:
             return probs.argmax(0)
-    
+
     def mus(self, normed=False):
         '''
         DPMixture.mus():
@@ -90,7 +90,7 @@ class DPMixture(object):
             return array([i.nmu for i in self.clusters])
         else:
             return array([i.mu for i in self.clusters])
-    
+
     def sigmas(self, normed=False):
         '''
         DPMixture.sigmas():
@@ -100,30 +100,30 @@ class DPMixture(object):
             return array([i.nsigma for i in self.clusters])
         else:
             return array([i.sigma for i in self.clusters])
-    
+
     def pis(self):
         '''
         DPMixture.pis()
         return an array of all cluster weights/proportions
         '''
         return array([i.pi for i in self.clusters])
-    
+
     def make_modal(self, tol=1e-5, maxiter=20):
         """
         find the modes and return a modal dp mixture
         """
         try:
-            modes,cmap = modesearch(self.pis(), self.mus(True), self.sigmas(True), tol, maxiter)
+            modes, cmap = modesearch(self.pis(), self.mus(True), self.sigmas(True), tol, maxiter)
             return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s)
 
         except AttributeError:
             warn("trying to make modal of a mixture I'm not sure is normalized.\nThe mode finding algorithm is designed for normalized data.\nResults may be unexpected")
-            modes,cmap = modesearch(self.pis(), self.mus(), self.sigmas(), tol, maxiter)
-            return ModalDPMixture(self.clusters, cmap, modes)   
-        
+            modes, cmap = modesearch(self.pis(), self.mus(), self.sigmas(), tol, maxiter)
+            return ModalDPMixture(self.clusters, cmap, modes)
+
     def log_likelihood(self, x):
-        return sum(log(sum(self.prob(x),axis=0)))
-    
+        return sum(log(sum(self.prob(x), axis=0)))
+
     def draw(self, n):
         '''
         draw n samples from the represented mixture model
@@ -133,17 +133,17 @@ class DPMixture(object):
         for index, count in enumerate(d):
             if count > 0:
                 try:
-                    results = concatenate((results, self.clusters[index].draw(count)),0)
+                    results = concatenate((results, self.clusters[index].draw(count)), 0)
                 except ValueError:
                     results = self.clusters[index].draw(count)
-                    
+
         return results
-                
-            
-            
-        
-        
-    
+
+
+
+
+
+
 
 class ModalDPMixture(DPMixture):
     '''
@@ -164,22 +164,22 @@ class ModalDPMixture(DPMixture):
             self.m = m
         if s is not False:
             self.s = s
-        
-    def prob(self,x):
+
+    def prob(self, x):
         '''
         ModalDPMixture.prob(x)
         returns  an array of probabilities of x being in each mode of the modal mixture
         '''
-        probs = compmixnormpdf(x,self.pis(), self.mus(), self.sigmas())
-        
+        probs = compmixnormpdf(x, self.pis(), self.mus(), self.sigmas())
+
         try:
-            n,j = x.shape # check we're more then 1 point
+            n, j = x.shape # check we're more then 1 point
             rslt = zeros((n, len(self.cmap.keys())))
             for j in self.cmap.keys():
-                rslt[:,j] = sum([probs[:,i] for i in self.cmap[j]],0)
-                
+                rslt[:, j] = sum([probs[:, i] for i in self.cmap[j]], 0)
 
-        
+
+
         except ValueError:
             #single point
             rslt = zeros((len(self.cmap.keys())))
@@ -187,7 +187,7 @@ class ModalDPMixture(DPMixture):
                 rslt[j] = sum([self.clusters[i].prob(x) for i in self.cmap[j]])
 
         return rslt
-    
+
     def modes(self):
         '''
         ModalDPMixture.modes():
@@ -196,11 +196,11 @@ class ModalDPMixture(DPMixture):
         lst = []
         for i in self.modemap.itervalues():
             try:
-                lst.append((array(i)*self.s)+self.m)
+                lst.append((array(i) * self.s) + self.m)
             except AttributeError:
                 lst.append(i)
         return array(lst)
-    
+
     def classify(self, x):
         '''
         ModalDPMixture.classify(x):
@@ -208,7 +208,7 @@ class ModalDPMixture(DPMixture):
         '''
         probs = self.prob(x)
         try:
-            unused_n,unused_j = x.shape 
+            unused_n, unused_j = x.shape
             #return array([i.argmax(0) for i in probs])
             return probs.argmax(1)
         except ValueError:

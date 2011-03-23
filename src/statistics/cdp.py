@@ -6,7 +6,7 @@
 # This file is compatible with both classic and new-style classes.
 
 from sys import version_info
-if version_info >= (2,6,0):
+if version_info >= (2, 6, 0):
     def swig_import_helper():
         from os.path import dirname
         import imp
@@ -27,25 +27,25 @@ if version_info >= (2,6,0):
 else:
     import _cdp
 del version_info
-def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
+def _swig_setattr_nondynamic(self, class_type, name, value, static=1):
     if (name == "thisown"): return self.this.own(value)
     if (name == "this"):
         if type(value).__name__ == 'SwigPyObject':
             self.__dict__[name] = value
             return
-    method = class_type.__swig_setmethods__.get(name,None)
-    if method: return method(self,value)
-    if (not static) or hasattr(self,name):
+    method = class_type.__swig_setmethods__.get(name, None)
+    if method: return method(self, value)
+    if (not static) or hasattr(self, name):
         self.__dict__[name] = value
     else:
         raise AttributeError("You cannot add attributes to %s" % self)
 
-def _swig_setattr(self,class_type,name,value):
-    return _swig_setattr_nondynamic(self,class_type,name,value,0)
+def _swig_setattr(self, class_type, name, value):
+    return _swig_setattr_nondynamic(self, class_type, name, value, 0)
 
-def _swig_getattr(self,class_type,name):
+def _swig_getattr(self, class_type, name):
     if (name == "thisown"): return self.this.own()
-    method = class_type.__swig_getmethods__.get(name,None)
+    method = class_type.__swig_getmethods__.get(name, None)
     if method: return method(self)
     raise AttributeError(name)
 
@@ -60,7 +60,7 @@ class cdpcluster:
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, cdpcluster, name)
     __repr__ = _swig_repr
-    def __init__(self, *args): 
+    def __init__(self, *args):
         this = _cdp.new_cdpcluster(*args)
         try: self.this.append(this)
         except: self.this = this
@@ -149,7 +149,7 @@ class cdpemcluster:
     __repr__ = _swig_repr
     __swig_destroy__ = _cdp.delete_cdpemcluster
     __del__ = lambda self : None;
-    def __init__(self, *args): 
+    def __init__(self, *args):
         this = _cdp.new_cdpemcluster(*args)
         try: self.this.append(this)
         except: self.this = this

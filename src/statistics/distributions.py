@@ -28,25 +28,25 @@ def mvnormpdf(x, mu, va):
     D(x, mu, sigma) -> float
     """
     try:
-        n,p = x.shape
+        n, p = x.shape
     except ValueError:
         n = x.shape
         p = 0
     if p > 0:
-        results = _mvnpdf(x,mu,va,n)
+        results = _mvnpdf(x, mu, va, n)
     else:
-        results = _mvnpdf(x,mu,va)
-    
+        results = _mvnpdf(x, mu, va)
+
     return results
 
 def compmixnormpdf(x, prop, mu, Sigma):
     """Component mixture multivariate normal pdfs"""
     try:
-        n,d = x.shape
+        n, d = x.shape
     except ValueError:
         d = x.shape[0]
         n = 1
-        x = x.reshape((1,d))
+        x = x.reshape((1, d))
     try:
         c = prop.shape[0]
     except AttributeError:
@@ -54,14 +54,14 @@ def compmixnormpdf(x, prop, mu, Sigma):
     except IndexError:
         c = 1
 
-    if c == 1: 
-        tmp = _wmvnpdf(x,prop,mu,Sigma,n)
+    if c == 1:
+        tmp = _wmvnpdf(x, prop, mu, Sigma, n)
         if n == 1:
             tmp = tmp[0]
-    
+
     else:
-        tmp = _wmvnpdf(x,prop,mu,Sigma,n*c)
-        tmp = reshape(tmp, (n,c))
+        tmp = _wmvnpdf(x, prop, mu, Sigma, n * c)
+        tmp = reshape(tmp, (n, c))
         #tmp = sum(tmp,1)
         if n == 1:
             tmp = tmp[0]
@@ -76,36 +76,36 @@ def mixnormpdf(x, prop, mu, Sigma):
 #    return tmp
     tmp = compmixnormpdf(x, prop, mu, Sigma)
     try:
-        return sum(tmp,1)
+        return sum(tmp, 1)
     except ValueError:
-        return sum(tmp,0)
-        
+        return sum(tmp, 0)
+
 
 def mixnormrnd(pi, mu, sigma, k):
     """Generate random variables from mixture of Guassians"""
     xs = []
     for unused in range(k):
         j = sum(random() > cumsum(pi))
-        xs.append(multivariate_normal(mu[j],sigma[j]))
-    return array(xs)  
+        xs.append(multivariate_normal(mu[j], sigma[j]))
+    return array(xs)
 
 if __name__ == '__main__':
-    x = array([1,0])
-    mu = array([5,5])
-    sig = array([[1,0],[0, 1]])
+    x = array([1, 0])
+    mu = array([5, 5])
+    sig = array([[1, 0], [0, 1]])
 
-    print 'new:', mvnormpdf(x,mu,sig)
-    x = array([1,0])
-    mu = array([0,0])
-    sig = array([[1,.75],[.75, 1]])
+    print 'new:', mvnormpdf(x, mu, sig)
+    x = array([1, 0])
+    mu = array([0, 0])
+    sig = array([[1, .75], [.75, 1]])
 
-    print 'new:', mvnormpdf(x,mu,sig)
-    print 'array:', mvnormpdf(array([x,x-2]), mu, sig)
-    
-    x = array([[1,0],[5,5],[0,0]])
-    mu = array([[0,0],[5,5]])
-    sig = array([[[1,.75],[.75, 1]],[[1,0],[0,1]]])
-    p = array([.5,.5])
-    print 'mix:', mixnormpdf(x,p,mu,sig)
+    print 'new:', mvnormpdf(x, mu, sig)
+    print 'array:', mvnormpdf(array([x, x - 2]), mu, sig)
+
+    x = array([[1, 0], [5, 5], [0, 0]])
+    mu = array([[0, 0], [5, 5]])
+    sig = array([[[1, .75], [.75, 1]], [[1, 0], [0, 1]]])
+    p = array([.5, .5])
+    print 'mix:', mixnormpdf(x, p, mu, sig)
     #print 'mix:', mixnormpdf(x[0],p,mu,sig)
-    
+

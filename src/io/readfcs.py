@@ -20,10 +20,10 @@ class FCSreader(object):
     class to hold object to read and parse fcs files.  main usage is to get 
     a FCMdata object out of a fcs file
     """
-    def __init__(self, filename, transform = 'logicle', sidx = None, spill=None):
+    def __init__(self, filename, transform='logicle', sidx=None, spill=None):
         #self.filename = filename
         if type(filename) == str:
-            self.filename=filename
+            self.filename = filename
             self._fh = open(filename, 'rb')
         else: # we should have gotten a filehandle then
             self.filename = filename.name
@@ -34,18 +34,18 @@ class FCSreader(object):
         self.cur_offset = 0
         self.spill = spill
         self.sidx = sidx
-        
-    
-        
+
+
+
     def get_FCMdata(self, auto_comp=True, **kwargs):
         """Return the next FCM data set stored in a FCS file"""
-        
+
         # parse headers
         header = self.parse_header(self.cur_offset)
-        
+
         # parse text 
         text = self.parse_text(self.cur_offset, header['text_start'], header['text_stop'])
-        
+
         # parse annalysis
         try:
             astart = text['beginanalysis']
@@ -65,10 +65,10 @@ class FCSreader(object):
             dstop = int(text['enddata'])
         except KeyError:
             dstop = header['data_end']
-        
+
         #account for LMD reporting the wrong values for the size of the data segment
-        lmd = self.fix_lmd(self.cur_offset,header['text_start'], header['text_stop'] )
-        dstop = dstop+lmd
+        lmd = self.fix_lmd(self.cur_offset, header['text_start'], header['text_stop'])
+        dstop = dstop + lmd
         data = self.parse_data(self.cur_offset, dstart, dstop, text)
         # build fcmdata object
         channels = []
@@ -76,22 +76,22 @@ class FCSreader(object):
         scchannel_indexes = []
         to_transform = []
         base_chan_name = []
-        for i in range(1,int(text['par'])+1):
-            base_chan_name.append( text['p%dn' % i])
+        for i in range(1, int(text['par']) + 1):
+            base_chan_name.append(text['p%dn' % i])
             try:
-                name = text['p%ds' %i]
+                name = text['p%ds' % i]
             except KeyError:
-                name= text['p%dn' %i]
+                name = text['p%dn' % i]
             channels.append(name)
             #if not name.lower().startswith('fl'):
             if not is_fl_channel(name):
                 scchannels.append(name)
                 if name != 'Time':
-                    scchannel_indexes.append(i-1)
+                    scchannel_indexes.append(i - 1)
             else: # we're a FL channel
                 try:
-                    if text['p%dr' % i] == '262144':   
-                        to_transform.append(i-1)
+                    if text['p%dr' % i] == '262144':
+                        to_transform.append(i - 1)
                 except KeyError:
                     pass
 
@@ -104,7 +104,7 @@ class FCSreader(object):
 #            for k in scchannel_indexes:
 #                idx |= data[:,k] <= 0
 #            data = data[~idx, :]
-                
+
         if auto_comp:
             if self.spill is None:
                 try:
@@ -115,8 +115,8 @@ class FCSreader(object):
                 idx = []
                 for si in self.sidx:
                     idx.append(base_chan_name.index(si))
-                c = _compensate(data[:,idx], self.spill)
-                data[:,idx] = c
+                c = _compensate(data[:, idx], self.spill)
+                data[:, idx] = c
 
             if self.transform == 'logicle':
                 try:
@@ -147,7 +147,7 @@ class FCSreader(object):
                 else:
                     w = None
                 for i in to_transform:
-                    dj = data[:,i]
+                    dj = data[:, i]
                     if w is None:
                         try:
                             if isinstance(kwargs['r'], Number):
@@ -158,22 +158,22 @@ class FCSreader(object):
                         except KeyError:
                             r = None
                             w = .5
-                        
+
                     else:
                         r = None
-                        
-                    
-                    tmp = scale_max*_logicle(dj, T, m, r, w)
+
+
+                    tmp = scale_max * _logicle(dj, T, m, r, w)
                     #tmp[tmp<scale_min]=scale_min
-                    data[:,i] = tmp
+                    data[:, i] = tmp
             elif self.transform == 'log':
                 for i in to_transform:
-                    data[:,i] = _log_transform(data[:,i])
-            
+                    data[:, i] = _log_transform(data[:, i])
+
             elif self.transform == "hyperlog":
                 pass # TODO figure out good default parameters for hyperlog transform
 
-            
+
         unused_path, name = os.path.split(self.filename)
         name, unused_ext = os.path.splitext(name)
         tmpfcm = FCMdata(name, data, channels, scchannels,
@@ -190,23 +190,23 @@ class FCSreader(object):
         except AttributeError:
             pass
         return tmpfcm
-        
-    
+
+
     def read_bytes(self, offset, start, stop):
         """Read in bytes from start to stop inclusive."""
 
-        self._fh.seek(offset+start)
-        
-        return self._fh.read(stop-start+1)
+        self._fh.seek(offset + start)
 
-    
+        return self._fh.read(stop - start + 1)
+
+
     def parse_header(self, offset):
         """
         Parse the FCM data in fcs file at the offset (supporting multiple 
         data segments in a file
         
         """
-        
+
         header = {}
         header['version'] = float(self.read_bytes(offset, 3, 5))
         header['text_start'] = int(self.read_bytes(offset, 10, 17))
@@ -221,58 +221,58 @@ class FCSreader(object):
             header['analysis_end'] = int(self.read_bytes(offset, 50, 57))
         except ValueError:
             header['analysis_end'] = -1
-        
+
         return header
-        
-    
+
+
     def fix_lmd(self, offset, start, stop):
         """function to handle lmd counting differently then most other FCS data"""
         text = self.read_bytes(offset, start, stop)
-        for j in range(0,-10,-1):
-            if text[0] == text[j-1]:
+        for j in range(0, -10, -1):
+            if text[0] == text[j - 1]:
                 return j
         return 255 #TODO raise error
-     
+
     def parse_text(self, offset, start, stop):
         """return parsed text segment of fcs file"""
-        
+
         text = self.read_bytes(offset, start, stop)
         #TODO: add support for suplement text segment
         return parse_pairs(text)
-    
+
     def parse_analysis(self, offset, start, stop):
         """return parsed analysis segment of fcs file"""
-        
+
         if start == stop:
             return {}
         else:
             text = self.read_bytes(offset, start, stop)
             return parse_pairs(text)
-    
+
     def parse_data(self, offset, start, stop, text):
         """return numpy.array of data segment of fcs file"""
-        
+
         dtype = text['datatype']
         mode = text['mode']
         tot = int(text['tot'])
         if mode == 'c' or mode == 'u':
             raise UnimplementedFcsDataMode(mode)
-        
+
         if text['byteord'] == '1,2,3,4' or text['byteord'] == '1,2':
             order = '<'
         elif text['byteord'] == '4,3,2,1' or text['byteord'] == '2,1':
             order = '>'
         else:
-            warn("unsupported byte order %s , using default @" % text['byteord'] )
+            warn("unsupported byte order %s , using default @" % text['byteord'])
             order = '@'
         # from here on out we assume mode l (list)
-        
+
         bitwidth = []
         drange = []
-        for i in range(1,int(text['par'])+1):
-            bitwidth.append(int(text['p%db' %i]))
-            drange.append(int(text['p%dr' %i]))
-        
+        for i in range(1, int(text['par']) + 1):
+            bitwidth.append(int(text['p%db' % i]))
+            drange.append(int(text['p%dr' % i]))
+
         if dtype.lower() == 'i':
             data = self.parse_int_data(offset, start, stop, bitwidth, drange, tot, order)
         elif dtype.lower() == 'f' or dtype.lower() == 'd':
@@ -280,18 +280,18 @@ class FCSreader(object):
         else: # ascii
             data = self.parse_ascii_data(offset, start, stop, bitwidth, dtype, tot, order)
         return data
-    
+
     def parse_int_data(self, offset, start, stop, bitwidth, drange, tot, order):
         """Parse out and return integer list data from fcs file"""
-        
+
         if reduce(and_, [item in [8, 16, 32] for item in bitwidth]):
             if len(set(bitwidth)) == 1: # uniform size for all parameters
                 # calculate how much data to read in.
-                num_items = (stop-start+1)/calcsize(fmt_integer(bitwidth[0]))
+                num_items = (stop - start + 1) / calcsize(fmt_integer(bitwidth[0]))
                 #unpack into a list
-                tmp = unpack('%s%d%s' % (order, num_items, fmt_integer(bitwidth[0])), 
+                tmp = unpack('%s%d%s' % (order, num_items, fmt_integer(bitwidth[0])),
                                     self.read_bytes(offset, start, stop))
-                
+
 
             else: # parameter sizes are different e.g. 8, 8, 16,8, 32 ... do one at a time
                 unused_bitwidths = map(int, map(log2, drange))
@@ -300,8 +300,8 @@ class FCSreader(object):
                 while cur < stop:
                     for i, curwidth in enumerate(bitwidth):
                         bitmask = mask_integer(curwidth, unused_bitwidths[i])
-                        nbytes = curwidth/8
-                        bin_string = self.read_bytes(offset, cur, cur+nbytes-1)
+                        nbytes = curwidth / 8
+                        bin_string = self.read_bytes(offset, cur, cur + nbytes - 1)
                         cur += nbytes
                         val = bitmask & unpack('%s%s' % (order, fmt_integer(curwidth)), bin_string)[0]
                         tmp.append(val)
@@ -309,24 +309,24 @@ class FCSreader(object):
             warn('Non-standard bitwidths for data segments')
             return None
         return numpy.array(tmp).reshape((tot, len(bitwidth)))
-    
+
     def parse_float_data(self, offset, start, stop, dtype, tot, order):
         """Parse out and return float list data from fcs file"""
-        
+
         #count up how many to read in
-        num_items = (stop-start+1)/calcsize(dtype) 
+        num_items = (stop - start + 1) / calcsize(dtype)
 
         tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
-        return numpy.array(tmp).reshape((tot, len(tmp)/tot))
-    
+        return numpy.array(tmp).reshape((tot, len(tmp) / tot))
+
     def parse_ascii_data(self, offset, start, stop, bitwidth, dtype, tot, order):
         """Parse out ascii encoded data from fcs file"""
-        
-        num_items = (stop-start+1)/calcsize(dtype) 
+
+        num_items = (stop - start + 1) / calcsize(dtype)
         tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
-        return numpy.array(tmp).reshape((tot, len(tmp)/tot))
-            
-        
+        return numpy.array(tmp).reshape((tot, len(tmp) / tot))
+
+
 def parse_pairs(text):
     """return key/value pairs from a delimited string"""
     delim = text[0]
@@ -336,15 +336,15 @@ def parse_pairs(text):
         delim = '\\\\' # regex will require it to be \\
     if delim != text[-1]:
         warn("text in segment does not start and end with delimiter")
-    tmp = text[1:-1].replace('$','')
+    tmp = text[1:-1].replace('$', '')
     # match the delimited character unless it's doubled
     regex = re.compile('(?<=[^%s])%s(?!%s)' % (delim, delim, delim))
     tmp = regex.split(tmp)
     return dict(zip([ x.lower() for x in tmp[::2]], tmp[1::2]))
-    
+
 def fmt_integer(b):
     """return binary format of an integer"""
-    
+
     if b == 8:
         return 'B'
     elif b == 16:
@@ -357,20 +357,20 @@ def fmt_integer(b):
 
 def mask_integer(b, ub):
     """return bitmask of an integer and a bitwitdh"""
-    
+
     if b == 8:
-        return (0xFF >> (b-ub))
+        return (0xFF >> (b - ub))
     elif b == 16:
-        return (0xFFFF >> (b-ub))
+        return (0xFFFF >> (b - ub))
     elif b == 32:
-        return (0xFFFFFFFF >> (b-ub))
+        return (0xFFFFFFFF >> (b - ub))
     else:
         print "Cannot handle integers of bit size %d" % b
         return None
 
 def log_factory(base):
     """constructor of various log based functions"""
-    
+
     def f(x):
         return log(x, base)
     return f
@@ -379,7 +379,7 @@ log2 = log_factory(2)
 
 def loadFCS(filename, transform='logicle', auto_comp=True, spill=None, sidx=None, **kwargs):
     """Load and return a FCM data object from an FCS file"""
-    
+
     tmp = FCSreader(filename, transform, spill=spill, sidx=sidx)
     return tmp.get_FCMdata(auto_comp, **kwargs)
 
@@ -392,7 +392,7 @@ def loadMultipleFCS(files, transform='logicle', auto_comp=True, spill=None, sidx
         except AttributeError:
             pass
         yield tmp
-        
+
 
 def is_fl_channel(name):
     """

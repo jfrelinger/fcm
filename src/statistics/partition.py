@@ -29,7 +29,7 @@ class Partition(object):
         """Returns array of indicator values."""
         if z is None:
             try:
-                self.z = numpy.argmax(self.p, 1) 
+                self.z = numpy.argmax(self.p, 1)
             except:
                 raise(Warning("Neither p nor z is defined"))
         return self.z
@@ -41,7 +41,7 @@ class Partition(object):
         if self.z is None:
             return numpy.array([])
         else:
-            return numpy.nonzero((self.z==k) & numpy.any(self.p>theta,1))[0]
+            return numpy.nonzero((self.z == k) & numpy.any(self.p > theta, 1))[0]
 
 if __name__ == '__main__':
     pass

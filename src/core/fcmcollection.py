@@ -27,7 +27,7 @@ class FCMcollection(DictMixin):
             for fcm in fcms:
                 self.fcmdict[fcm.name] = fcm
         if notes is not None:
-            self.notes =Annotation()
+            self.notes = Annotation()
         else:
             self.notes = notes
 
@@ -54,7 +54,7 @@ class FCMcollection(DictMixin):
         if name in self.fcmdict.keys():
             return self.fcmdict[name]
         else:
-            AttributeError("'%s' has no attribue '%s'" %(str(self.__class__), name))
+            AttributeError("'%s' has no attribue '%s'" % (str(self.__class__), name))
 
     def check_names(self):
         """Checks for channel name consistency. 

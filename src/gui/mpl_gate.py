@@ -48,7 +48,7 @@ class DraggableVertex(object):
         x0, y0, xpress, ypress = self.press
         dx = event.xdata - xpress
         dy = event.ydata - ypress
-        self.circle.center = (x0+dx, y0+dy)
+        self.circle.center = (x0 + dx, y0 + dy)
         self.parent.update()
 
     def on_release(self, event):
@@ -77,10 +77,10 @@ class Gate(object):
     def __init__(self, fcm, idxs, ax):
         self.fcm = fcm
         self.idxs = idxs
-        ax.scatter(fcm[:,idxs[0]], fcm[:,idxs[1]], 
-                   s=1, c= 'b', edgecolors='none')
+        ax.scatter(fcm[:, idxs[0]], fcm[:, idxs[1]],
+                   s=1, c='b', edgecolors='none')
 
-        self.gate=None
+        self.gate = None
         self.canvas = ax.figure.canvas
         self.ax = ax
         self.vertices = []
@@ -99,9 +99,9 @@ class Gate(object):
         self.ax.add_patch(vertex)
         dv = DraggableVertex(vertex, self)
         dv.connect()
-        self.vertices.append(dv)  
+        self.vertices.append(dv)
         self.update()
-        
+
     def update_background(self, event):
         self.background = self.canvas.copy_from_bbox(self.ax.bbox)
 
@@ -113,7 +113,7 @@ class Gate(object):
             # bug in matplotlib? patch is not closed without this
             xy = numpy.concatenate([xy, [xy[0]]])
             if self.poly is None:
-                self.poly = Polygon(xy, closed=True, alpha=0.5, 
+                self.poly = Polygon(xy, closed=True, alpha=0.5,
                                     facecolor='pink')
                 self.ax.add_patch(self.poly)
             else:
@@ -127,7 +127,7 @@ class Gate(object):
             self.ax.draw_artist(vertex.circle)
 
         # print ">>>", self.ax.bbox
-            
+
         self.canvas.blit(self.ax.bbox)
 
     def onclick(self, event):
@@ -135,15 +135,15 @@ class Gate(object):
         w = xmax - xmin
 
         if event.button == 3:
-            vertex = Circle((event.xdata, event.ydata), radius=0.01*w)
+            vertex = Circle((event.xdata, event.ydata), radius=0.01 * w)
             self.add_vertex(vertex)
 
         # double left click triggers gating
         xy = numpy.array([v.circle.center for v in self.vertices])
         xypoints = numpy.array([[event.xdata, event.ydata]])
-        
+
         if self.poly:
-            if (event.button == 1 and 
+            if (event.button == 1 and
                 points_inside_poly(xypoints, xy)):
                 if (time.time() - self.t < self.double_click_t):
                     self.zoom_to_gate(event)
@@ -160,9 +160,9 @@ class Gate(object):
 
         # get rid of old points and plot new
         del self.ax.collections[0]
-        unused_points = self.ax.scatter(self.fcm[:,self.idxs[0]], 
-                                 self.fcm[:,self.idxs[1]], 
-                                 s=1, c= 'b', edgecolors='none')
+        unused_points = self.ax.scatter(self.fcm[:, self.idxs[0]],
+                                 self.fcm[:, self.idxs[1]],
+                                 s=1, c='b', edgecolors='none')
 
         xmin, ymin = numpy.min(xy, 0)
         xmax, ymax = numpy.max(xy, 0)
@@ -191,7 +191,7 @@ if __name__ == '__main__':
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    idxs = [2,3]
+    idxs = [2, 3]
     gate = Gate(fcm, idxs, ax)
 
     plt.show()

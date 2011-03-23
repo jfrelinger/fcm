@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO,
                     filename=os.path.join('.', 'fcm.log'),
                     filemode='a')
 
-        
+
 class Node(object):
     """
     base node object
@@ -18,24 +18,24 @@ class Node(object):
         self.name = name
         self.parent = parent
         self.data = data
-        self.prefix= 'n'
-    
+        self.prefix = 'n'
+
     def view(self):
         """
         return the view of the data associated with this node
         """
-        
+
         return self.data
-    
+
     def pprint(self, depth):
-        return "  "*depth + self.name + "\n"
-    
+        return "  " * depth + self.name + "\n"
+
     def __getattr__(self, name):
         if name == 'channels':
             return self.parent.channels
         else:
-            raise AttributeError("'%s' has no attribue '%s'" %(str(self.__class__), name))
-    
+            raise AttributeError("'%s' has no attribue '%s'" % (str(self.__class__), name))
+
 class RootNode(Node):
     """
     Root Node
@@ -45,30 +45,30 @@ class RootNode(Node):
         self.parent = None
         self.data = data
         self.channels = channels
-        self.prefix='root'
-        
+        self.prefix = 'root'
+
 class TransformNode(Node):
     """
     Transformed Data Node
     """
-    
-    def __init__(self, name, parent,  data):
+
+    def __init__(self, name, parent, data):
         self.name = name
         self.parent = parent
         self.data = data
         self.prefix = 't'
-        
+
     def __getattr__(self, name):
         if name == 'channels':
             return self.parent.channels
         else:
-            raise AttributeError("'%s' has no attribue '%s'" %(str(self.__class__), name))
-        
+            raise AttributeError("'%s' has no attribue '%s'" % (str(self.__class__), name))
+
 class SubsampleNode(Node):
     """
     Node of subsampled data
     """
-    
+
     def __init__(self, name, parent, param):
         self.name = name
         self.parent = parent
@@ -76,43 +76,43 @@ class SubsampleNode(Node):
         self.prefix = 's'
         if type(param) == tuple:
             self.channels = self.parent.channels[param[1]]
-        
+
     def view(self):
         """
         return the view of the data associated with this node
         """
         return self.parent.view().__getitem__(self.param)
-    
+
 class DropChannelNode(Node):
     """
     Node of data removing specific channels
     """
-    
+
     def __init__(self, name, parent, param, channels):
         self.name = name
         self.parent = parent
         self.param = param
         self.prefix = 'd'
         self.channels = channels
-    
+
     def view(self):
         """
         return the view of the data associated with this node
         """
-        return self.parent.view()[:,self.param]
-    
-    
+        return self.parent.view()[:, self.param]
+
+
 class GatingNode(Node):
     """
     Node of gated data
     """
-    
+
     def __init__(self, name, parent, data):
         self.name = name
         self.parent = parent
         self.data = data
         self.prefix = 'g'
-        
+
     def view(self):
         """
         return the view of the data associated with this node
@@ -120,13 +120,13 @@ class GatingNode(Node):
         if self.parent.view().shape[0] == 0:
             return np.array([]).reshape(self.parent.view().shape)
         return self.parent.view()[self.data]
-    
+
     def __getattr__(self, name):
         if name == 'channels':
             return self.parent.channels
         else:
-            raise AttributeError("'%s' has no attribue '%s'" %(str(self.__class__), name))
-        
+            raise AttributeError("'%s' has no attribue '%s'" % (str(self.__class__), name))
+
 class Tree(object):
     '''Tree of data for FCMdata object.'''
 
@@ -140,7 +140,7 @@ class Tree(object):
         '''return the parent of a node'''
         return self.current.parent
 
-    def children(self , node =None):
+    def children(self , node=None):
         '''return the children of a node'''
         if node == None:
             node = self.current
@@ -150,10 +150,10 @@ class Tree(object):
         '''visit a node in the tree'''
         if type(name) is type(''):
             self.current = self.nodes[name]
-        else: 
+        else:
             self.current = name
 
-    def get(self, name = None):
+    def get(self, name=None):
         '''return the current node object'''
         if name is None:
             return self.current
@@ -162,7 +162,7 @@ class Tree(object):
                 return self.nodes[name]
             else:
                 raise KeyError, 'No node named %s' % name
-    
+
     def view(self):
         '''Return a view of the current data'''
         return self.current.view()
@@ -176,7 +176,7 @@ class Tree(object):
             matches = [i for i in matches if i is not None]
             if len(matches) is not 0:
                 n = max([ int(i.group(1)) for i in matches])
-                name = prefix + str(n+1)
+                name = prefix + str(n + 1)
             else:
                 name = prefix + '1'
         if name in self.nodes.keys():
@@ -186,7 +186,7 @@ class Tree(object):
             self.nodes[name] = node
             node.parent = self.current
             self.current = self.nodes[name]
-        
+
     def rename_node(self, old_name, new_name):
         """
         Rename a node name
@@ -201,18 +201,18 @@ class Tree(object):
             self.nodes[new_name] = self.nodes[old_name] # move node
             self.nodes[new_name].name = new_name # fix it's name
             del self.nodes[old_name] # remove old node.
-                
+
 
     def pprint(self):
         return self._rpprint(self.root, 0)
-        
+
     def _rpprint(self, n, d):
         tmp = n.pprint(d)
         for i in self.children(n):
-            tmp+= self._rpprint(i,d+1)
+            tmp += self._rpprint(i, d + 1)
         return tmp
-        
+
 if __name__ == '__main__':
     pass
-    
-    
+
+

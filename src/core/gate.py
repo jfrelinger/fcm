@@ -14,50 +14,50 @@ class Filter(object):
         self.vert = vert
         self.chan = channels
 
-    def gate(self, fcm, chan = None):
+    def gate(self, fcm, chan=None):
         """do the actual gating here."""
         pass
-        
+
 class PolyGate(Filter):
     """An object representing a polygonal gatable region"""
-        
-    def gate(self, fcm, chan = None, invert = False):
+
+    def gate(self, fcm, chan=None, invert=False):
         """
         return gated region of FCM data
         """
         if chan is None:
             chan = self.chan
         #idxs = points_in_poly(self.vert, fcm.view()[:, chan])
-        
+
         # matplotlib has points in poly routine in C
         # no faster than our numpy version
         idxs = points_inside_poly(fcm.view()[:, chan], self.vert)
-        
+
         if invert:
             idxs = numpy.invert(idxs)
 
         node = GatingNode("", fcm.get_cur_node(), idxs)
         fcm.add_view(node)
         return fcm
-        
+
 class QuadGate(Filter):
     """
     An object to divide a region to four quadrants
     """
-    def gate(self, fcm, chan = None):
+    def gate(self, fcm, chan=None):
         """
         return gated region
         """
         if chan is None:
             chan = self.chan
         # I (+,+), II (-,+), III (-,-), and IV (+,-)
-        x = fcm.view()[:,chan[0]]
-        y = fcm.view()[:,chan[1]]
+        x = fcm.view()[:, chan[0]]
+        y = fcm.view()[:, chan[1]]
         quad = {}
-        quad[1] = (x>self.vert[0]) & (y>self.vert[1]) # (+,+)
-        quad[2] = (x<self.vert[0]) & (y>self.vert[1]) # (-,+)
-        quad[3] = (x<self.vert[0]) & (y<self.vert[1]) # (-,-)
-        quad[4] = (x>self.vert[0]) & (y<self.vert[1]) # (+,-)
+        quad[1] = (x > self.vert[0]) & (y > self.vert[1]) # (+,+)
+        quad[2] = (x < self.vert[0]) & (y > self.vert[1]) # (-,+)
+        quad[3] = (x < self.vert[0]) & (y < self.vert[1]) # (-,-)
+        quad[4] = (x > self.vert[0]) & (y < self.vert[1]) # (+,-)
         root = fcm.get_cur_node()
         name = root.name
         for i in quad.keys():
@@ -77,13 +77,13 @@ class IntervalGate(Filter):
         """
         if chan is None:
             chan = self.chan
-            
-        assert(len(self.chan)==1)
-        assert(len(self.vert)==2)
+
+        assert(len(self.chan) == 1)
+        assert(len(self.vert) == 2)
         assert(self.vert[1] >= self.vert[0])
 
-        x = fcm.view()[:,chan[0]]
-        idxs = numpy.logical_and(x>self.vert[0], x<self.vert[1])
+        x = fcm.view()[:, chan[0]]
+        idxs = numpy.logical_and(x > self.vert[0], x < self.vert[1])
 
         node = GatingNode("", fcm.get_cur_node(), idxs)
         fcm.add_view(node)
@@ -109,19 +109,19 @@ def points_in_poly(vs, ps):
     inPoly = numpy.zeros((len(vs), len(ps)), 'bool')
 
     for i, v in enumerate(vs):
-        inPoly[i,:] |= ((v[0] < ps[:,0]) & (vs[j,0] >= ps[:,0])) | ((vs[j,0] < ps[:,0]) & (v[0] >= ps[:,0]))
-        inPoly[i,:] &= (v[1] + (ps[:,0] - v[0])/(vs[j,0] - v[0])*(vs[j,1] - v[1]) < ps[:,1])
+        inPoly[i, :] |= ((v[0] < ps[:, 0]) & (vs[j, 0] >= ps[:, 0])) | ((vs[j, 0] < ps[:, 0]) & (v[0] >= ps[:, 0]))
+        inPoly[i, :] &= (v[1] + (ps[:, 0] - v[0]) / (vs[j, 0] - v[0]) * (vs[j, 1] - v[1]) < ps[:, 1])
         j = i
 
     return numpy.bitwise_or.reduce(inPoly, 0)
 
 if __name__ == '__main__':
-    vertices = numpy.array([[2,2],[10,2],[10,10],[2,10]], 'd')
+    vertices = numpy.array([[2, 2], [10, 2], [10, 10], [2, 10]], 'd')
     points = numpy.random.uniform(0, 10, (10000000, 2))
 
     import time
     start = time.clock()
-    inside =  points_in_poly(vertices, points)
+    inside = points_in_poly(vertices, points)
     print "Time elapsed: ", time.clock() - start
     print numpy.sum(inside)
 

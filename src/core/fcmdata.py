@@ -55,10 +55,10 @@ class FCMdata(object):
 
     def __repr__(self):
         return self.name
-        
+
     def __getitem__(self, item):
         """return FCMdata.pnts[i] by name or by index"""
-        
+
         if type(item) == type(''):
             try:
                 return self.get_channel_by_name(item)
@@ -80,7 +80,7 @@ class FCMdata(object):
                 #return Node.__getattribute__(self.current_node(),'view')().__getattribute__(name)
                 return self.current_node().view().__getattribute__(name)
             else:
-                raise AttributeError("'%s' has no attribue '%s'" %(str(self.__class__), name))
+                raise AttributeError("'%s' has no attribue '%s'" % (str(self.__class__), name))
 
     def __getstate__(self):
 #        tmp = {}
@@ -91,49 +91,49 @@ class FCMdata(object):
 #        tmp['notes'] = self.notes
 #        return tmp
         return self.__dict__
-    
+
     def __setstate__(self, dict):
         for i in dict.keys():
             self.__dict__[i] = dict[i]
 
-                
+
     def name_to_index(self, channels):
         """Return the channel indexes for the named channels"""
-        
+
         if type(channels) == type(''):
             channels = [channels]
         to_return = [ self.channels.index(i) for i in channels]
         return to_return
-    
+
     def get_channel_by_name(self, channels):
         """Return the data associated with specific channel names"""
-        
+
         return self.tree.view()[:, self.name_to_index(channels)]
-    
+
     def get_markers(self):
         """return the data associated with all the markers"""
-        
+
         return self.view()[:, self.markers]
-    
+
     def get_spill(self):
-        """return the spillover matrix from the original fcs used in compisating""" 
+        """return the spillover matrix from the original fcs used in compisating"""
         try:
             return self.notes.text['spill']
         except KeyError:
             return None
-    
+
     def view(self):
         """return the current view of the data"""
         return self.tree.view()
-    
+
     def visit(self, name):
         """Switch current view of the data"""
         self.tree.visit(name)
-        
+
     def current_node(self):
         """return the current node"""
         return self.tree.current
-    
+
     def copy(self, npnts=None):
         #TODO rewrite so the tree is copied...
         """return a copy of fcm data object"""
@@ -145,34 +145,34 @@ class FCMdata(object):
         tchannels = self.channels[:]
         tmarkers = self.markers[:]
         return FCMdata(tpnts, tchannels, tmarkers, tnotes)
-    
-    def logicle(self, channels=None, T=262144, m=4.5*log(10), r=None, scale_max=1e5, scale_min=0):
+
+    def logicle(self, channels=None, T=262144, m=4.5 * log(10), r=None, scale_max=1e5, scale_min=0):
         """return logicle transformed channels"""
         if channels is None:
             channels = self.markers
         return _logicle(self, channels, T, m, r, scale_max, scale_min)
-        
+
     def hyperlog(self, channels, b, d, r, order=2, intervals=1000.0):
         """return hyperlog transformed channels"""
         return _hyperlog(self, channels, b, d, r, order, intervals)
-    
+
     def log(self, channels):
         """return log base 10 transformed channels"""
         return _log(self, channels)
-    
+
     def gate(self, g, chan=None):
         """return gated region of fcm data"""
         return g.gate(self, chan)
-    
+
     def subsample(self, s):
         """return subsampled/sliced fcm data"""
         return s.subsample(self)
-    
+
     def get_cur_node(self):
         return self.tree.get()
-    
+
     def add_view(self, node):
-        """add a new node to the view tree"""        
+        """add a new node to the view tree"""
         self.tree.add_child(node.name, node)
         return self
 
@@ -194,13 +194,13 @@ class FCMdata(object):
             summary = summary + "    min: " + str(mins[i]) + "\n"
             summary = summary + "    std: " + str(stds[i]) + "\n"
         return summary
-            
+
     def boundary_events(self):
         """returns dictionary of fraction of events in first and last
         channel for each channel"""
         boundary_dict = {}
         for k, chan in enumerate(self.channels):
-            col = self.view()[:,k]
+            col = self.view()[:, k]
             boundary_dict[chan] = \
-                sum((col==min(col)) | (col==max(col)))/len(col) 
+                sum((col == min(col)) | (col == max(col))) / len(col)
         return boundary_dict

@@ -11,10 +11,10 @@ def get_spill(text):
     """
     spill = text.split(',')
     n = int(spill[0])
-    markers = spill[1:(n+1)]
+    markers = spill[1:(n + 1)]
     markers = [item.strip().replace('\n', '') for item in markers]
-    items = [item.strip().replace('\n','') for item in spill[n+1:]]
-    S = reshape(map(float, items), (n, n))        
+    items = [item.strip().replace('\n', '') for item in spill[n + 1:]]
+    S = reshape(map(float, items), (n, n))
     return S, markers
 
 def compensate(fcm, S=None, markers=None, comp=False, scale=False):
@@ -30,16 +30,16 @@ def compensate(fcm, S=None, markers=None, comp=False, scale=False):
             markers = m
     idx = fcm.name_to_index(markers)
 
-    c = _compensate(fcm.view()[:,idx], S, comp, scale)
+    c = _compensate(fcm.view()[:, idx], S, comp, scale)
     new = fcm.view()[:]
-    new[:,idx] = c
+    new[:, idx] = c
     node = TransformNode('', fcm.get_cur_node, new)
     fcm.add_view(node)
     return new
 
 def _compensate(data, spill, comp=False, scale=False):
     if scale and not comp:
-        spill = spill/max(spill)
+        spill = spill / max(spill)
     if comp:
         spill = inv(spill)
 
@@ -49,12 +49,12 @@ def _compensate(data, spill, comp=False, scale=False):
     return solve(spill.T, data.T).T
 
 def gen_spill_matrix(tubes):
-    sidx = tubes.keys()       
-    spill = zeros((len(sidx),len(sidx)))
-    for k,j in enumerate(tubes.keys()):
+    sidx = tubes.keys()
+    spill = zeros((len(sidx), len(sidx)))
+    for k, j in enumerate(tubes.keys()):
         data = tubes[j]
-        norm = data[j].mean() 
-        spill[k,:] = (data[:,data.markers].mean(0))/norm
+        norm = data[j].mean()
+        spill[k, :] = (data[:, data.markers].mean(0)) / norm
     return sidx, spill
 
 def load_compensate_matrix(file_name):
@@ -63,7 +63,7 @@ def load_compensate_matrix(file_name):
     Returns a list of markers and a compensation matrix
     
     """
-    
+
     file = open(file_name, mode='Ur')
     unused = file.readline()
     file.readline() # skip <\t>\n line
@@ -72,5 +72,5 @@ def load_compensate_matrix(file_name):
     mat = ''
     for unused in range(size):
         mat = mat + file.readline()
-    
+
     return(markers, loadtxt(StringIO(mat)))
