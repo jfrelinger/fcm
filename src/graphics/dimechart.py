@@ -47,8 +47,8 @@ def dimechart(indicators, values, labels,
     xmin = min(axs[:, 0])
     xmax = max(axs[:, 1])
     xr = xmax - xmin
-    ymin = min(axs[:, 2])
-    ymax = max(axs[:, 3])
+    unused_ymin = min(axs[:, 2])
+    unused_ymax = max(axs[:, 3])
 
     for _k in range(k + 1):
         pylab.subplot(k + 1, 1, _k + 1)

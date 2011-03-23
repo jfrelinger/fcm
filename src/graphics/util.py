@@ -12,7 +12,7 @@ def bilinear_interpolate(x, y, bins=None):
     if bins is None:
         bins = int(numpy.sqrt(len(x)))
 
-    z, xedge, yedge = numpy.histogram2d(y, x, bins=[bins, bins],
+    z, unused_xedge, unused_yedge = numpy.histogram2d(y, x, bins=[bins, bins],
                                         range=[(numpy.min(y), numpy.max(y)),
                                                (numpy.min(x), numpy.max(x))]
                                         )
@@ -49,7 +49,7 @@ def trilinear_interpolate(x, y, z, bins=None):
     vals[:, 1] = y
     vals[:, 2] = z
 
-    h, edges = numpy.histogramdd(vals,
+    h, unused_edges = numpy.histogramdd(vals,
                                  bins=[bins, bins, bins]
                                  )
     xfrac, xint = numpy.modf((x - numpy.min(x)) /
@@ -94,21 +94,21 @@ def color_map(nclusts):
     return [ floatRgb(i, 0, nclusts + 1) for i in range(nclusts + 1)]
 
 def floatRgb(mag, cmin, cmax, alpha=1.0):
-       """
-       Return a tuple of floats between 0 and 1 for the red, green and
-       blue amplitudes.
-       """
+    """
+    Return a tuple of floats between 0 and 1 for the red, green and
+    blue amplitudes.
+    """
 
-       try:
-              # normalize to [0,1]
-              x = float(mag - cmin) / float(cmax - cmin)
-       except:
-              # cmax = cmin
-              x = 0.5
-       blue = min((max((4 * (0.75 - x), 0.)), 1.))
-       red = min((max((4 * (x - 0.25), 0.)), 1.))
-       green = min((max((4 * math.fabs(x - 0.5) - 1., 0.)), 1.))
-       return (red, green, blue, alpha)
+    try:
+        # normalize to [0,1]
+        x = float(mag - cmin) / float(cmax - cmin)
+    except:
+        # cmax = cmin
+        x = 0.5
+    blue = min((max((4 * (0.75 - x), 0.)), 1.))
+    red = min((max((4 * (x - 0.25), 0.)), 1.))
+    green = min((max((4 * math.fabs(x - 0.5) - 1., 0.)), 1.))
+    return (red, green, blue, alpha)
 
 
 def plot_mu_labels(mu, colors, dims):
@@ -119,7 +119,6 @@ def plot_mu_labels(mu, colors, dims):
                                                   va='center', ha='center')
 
 if __name__ == '__main__':
-    import pylab
     import sys
     sys.path.append('../')
     from io import FCSreader

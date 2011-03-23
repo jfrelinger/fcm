@@ -57,10 +57,10 @@ def _swig_repr(self):
 
 
 def mvnpdf(*args):
-  return _mvnpdf.mvnpdf(*args)
+    return _mvnpdf.mvnpdf(*args)
 mvnpdf = _mvnpdf.mvnpdf
 
 def wmvnpdf(*args):
-  return _mvnpdf.wmvnpdf(*args)
+    return _mvnpdf.wmvnpdf(*args)
 wmvnpdf = _mvnpdf.wmvnpdf
 

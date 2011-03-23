@@ -12,14 +12,11 @@ from fcm.statistics.distributions import compmixnormpdf, mixnormpdf, mvnormpdf, 
 
 def modesearch(pis, mus, sigmas, tol=1e-6, maxiter=20):
     """find the modes of a mixture of guassians"""
-    n = mus.shape[0]
 
-    mdict, sm, spm = _mode_search(pis, mus, sigmas, nk=0, tol=tol, maxiter=maxiter)
+    mdict, sm, unused_spm = _mode_search(pis, mus, sigmas, nk=0, tol=tol, maxiter=maxiter)
 
     m = numpy.array([i[0] for i in mdict.values()])
-    pm = numpy.array([i[1] for i in mdict.values()])
     sm = numpy.array(sm)
-    #tm, tpm = check_mode(m, pm, pis, mus, sigmas)
     tmp = {}
 
     # use stored index as dict items are not ordered
@@ -44,7 +41,7 @@ def modesearch(pis, mus, sigmas, tol=1e-6, maxiter=20):
 
 def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
     """Search for modes in mixture of Gaussians"""
-    k, p = mu.shape
+    k, unused_p = mu.shape
     omega = numpy.copy(sigma)
     a = numpy.copy(mu)
 

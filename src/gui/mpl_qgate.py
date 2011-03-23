@@ -2,8 +2,6 @@
 Graphical quadrant gating
 '''
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-from matplotlib.patches import Circle
 import time
 from fcm import QuadGate
 

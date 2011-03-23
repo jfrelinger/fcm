@@ -16,7 +16,7 @@ def hist(fcms, index, savefile=None, display=True, **kwargs):
         y = fcm[:, index]
         h, b = histogram(y, bins=200, new=True, **kwargs)
         b = (b[:-1] + b[1:]) / 2.0
-        x = pylab.linspace(min(y), max(y), 100)
+        unused_x = pylab.linspace(min(y), max(y), 100)
         pylab.plot(b, h, label=fcm.name)
         pylab.legend()
 

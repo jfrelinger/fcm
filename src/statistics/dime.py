@@ -1,6 +1,6 @@
 from __future__ import division
-from distributions import mvnormpdf, mixnormpdf
-from numpy import array, dot, log2, zeros, sum, diag, ones, identity
+from distributions import mvnormpdf
+from numpy import array, zeros, sum
 
 class Dime(object):
     """
