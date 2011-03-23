@@ -1,9 +1,9 @@
 """Base functions for various transforms to be used on FCM data
 """
 
-from scipy.optimize import fsolve, brentq
+from scipy.optimize import brentq
 from scipy import interpolate
-from numpy import array, abs, arange, exp, log, log10, min, max, sign, concatenate, zeros, vectorize, where
+from numpy import array, abs, arange, exp, log, log10, min, max, sign, concatenate, vectorize, where
 
 from util import TransformNode
 
@@ -50,8 +50,7 @@ def logicle(fcm, channels, T, m, r=None, scale_max=1e5, scale_min=0, w = None):
     for i in channels:
         if r is None and w is None:
             w = .5
-        lmin, lmax =  _logicle([0,T], T, m, r, w) # Do we need this as lmax is always 1?
-        tmp = scale_max/lmax*_logicle(npnts[:, i].T, T, m, r, w)
+        tmp = scale_max*_logicle(npnts[:, i].T, T, m, r, w)
         #tmp[tmp<scale_min] = scale_min
         npnts.T[i] = tmp
     node = TransformNode('', fcm.get_cur_node(), npnts)
@@ -95,10 +94,10 @@ def _log_transform(npnts):
     return where(npnts <= 1, 0, log10(npnts))
 
 if __name__ == '__main__':
-    from numpy.random import normal, lognormal, shuffle
+    from numpy.random import normal, lognormal
     import numpy
     import pylab
-    import time
+
 
     d1 = normal(0, 50, (50000))
     d2 = lognormal(8, 1, (50000))

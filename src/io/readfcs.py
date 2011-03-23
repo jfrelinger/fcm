@@ -3,7 +3,7 @@
 from warnings import warn
 from fcm import FCMdata
 from fcm.core import Annotation
-from fcm.core.transforms import _logicle, quantile, _log_transform
+from fcm.core.transforms import _logicle, _log_transform
 from fcm.core.compensate import _compensate, get_spill
 from fcm import UnimplementedFcsDataMode
 
@@ -138,10 +138,10 @@ class FCSreader(object):
                     scale_max = kwargs['scale_max']
                 else:
                     scale_max = 1e5
-                if 'scale_min' in kwargs.keys():
-                    scale_min = kwargs['scale_min']
-                else:
-                    scale_min = 0
+#                if 'scale_min' in kwargs.keys():
+#                    scale_min = kwargs['scale_min']
+#                else:
+#                    scale_min = 0
                 if 'w' in kwargs.keys():
                     w = kwargs['w']
                 else:
@@ -162,8 +162,8 @@ class FCSreader(object):
                     else:
                         r = None
                         
-                    lmin, lmax = _logicle([0,T], T, m, r, w) # is this needed as lmax is now always 1?
-                    tmp = scale_max/lmax*_logicle(dj, T, m, r, w)
+                    
+                    tmp = scale_max*_logicle(dj, T, m, r, w)
                     #tmp[tmp<scale_min]=scale_min
                     data[:,i] = tmp
             elif self.transform == 'log':
@@ -174,8 +174,8 @@ class FCSreader(object):
                 pass # TODO figure out good default parameters for hyperlog transform
 
             
-        path, name = os.path.split(self.filename)
-        name, ext = os.path.splitext(name)
+        unused_path, name = os.path.split(self.filename)
+        name, unused_ext = os.path.splitext(name)
         tmpfcm = FCMdata(name, data, channels, scchannels,
             Annotation({'text': text,
                         'header': header,

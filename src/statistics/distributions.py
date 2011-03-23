@@ -2,8 +2,7 @@
 Distributions used in FCS analysis
 """
 
-from numpy import pi, exp, dot, ones, array, sqrt, fabs, tile, sum, prod, diag, zeros, cumsum, reshape
-from numpy.linalg import inv, det, cholesky
+from numpy import array, sum, cumsum, reshape
 from numpy.random import random, multivariate_normal
 from mvnpdf import mvnpdf as _mvnpdf
 from mvnpdf import wmvnpdf as _wmvnpdf
@@ -85,7 +84,7 @@ def mixnormpdf(x, prop, mu, Sigma):
 def mixnormrnd(pi, mu, sigma, k):
     """Generate random variables from mixture of Guassians"""
     xs = []
-    for i in range(k):
+    for unused in range(k):
         j = sum(random() > cumsum(pi))
         xs.append(multivariate_normal(mu[j],sigma[j]))
     return array(xs)  

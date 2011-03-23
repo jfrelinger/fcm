@@ -56,7 +56,8 @@ def _swig_repr(self):
 
 
 def logicle_scale(*args):
-  return _logicle.logicle_scale(*args)
+    return _logicle.logicle_scale(*args)
+
 logicle_scale = _logicle.logicle_scale
 
 

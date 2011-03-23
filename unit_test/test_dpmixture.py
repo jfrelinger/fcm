@@ -4,8 +4,8 @@ Created on Oct 30, 2009
 @author: Jacob Frelinger
 '''
 import unittest
-from fcm.statistics import DPCluster, DPMixture, ModalDPMixture
-from numpy import array, eye, argmax
+from fcm.statistics import DPCluster, DPMixture
+from numpy import array, eye
 
 
 class Dp_clusterTestCase(unittest.TestCase):

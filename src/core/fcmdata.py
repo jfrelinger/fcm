@@ -2,13 +2,12 @@
 A python object representing flow cytomoetry data
 """
 from __future__ import division
-from numpy import array, median, mean, std, log
+from numpy import median, log
 from annotation import Annotation
-from fcmexceptions import BadFCMPointDataTypeError
 from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
 from transforms import log_transform as _log
-from util import Tree, RootNode, fcmlog, Node
+from util import Tree
 
 class FCMdata(object):
     """
@@ -20,7 +19,6 @@ class FCMdata(object):
 
     """
 
-    #@fcmlog
     def __init__(self, name, pnts, channels, scatters=None, notes=None):
         """
         fcmdata(name, pnts, channels, scatters=None)
@@ -124,12 +122,10 @@ class FCMdata(object):
         except KeyError:
             return None
     
-#    @fcmlog
     def view(self):
         """return the current view of the data"""
         return self.tree.view()
     
-#    @fcmlog
     def visit(self, name):
         """Switch current view of the data"""
         self.tree.visit(name)
@@ -150,29 +146,24 @@ class FCMdata(object):
         tmarkers = self.markers[:]
         return FCMdata(tpnts, tchannels, tmarkers, tnotes)
     
-#    @fcmlog
     def logicle(self, channels=None, T=262144, m=4.5*log(10), r=None, scale_max=1e5, scale_min=0):
         """return logicle transformed channels"""
         if channels is None:
             channels = self.markers
         return _logicle(self, channels, T, m, r, scale_max, scale_min)
         
-#    @fcmlog
     def hyperlog(self, channels, b, d, r, order=2, intervals=1000.0):
         """return hyperlog transformed channels"""
         return _hyperlog(self, channels, b, d, r, order, intervals)
     
-#    @fcmlog
     def log(self, channels):
         """return log base 10 transformed channels"""
         return _log(self, channels)
     
-#    @fcmlog
     def gate(self, g, chan=None):
         """return gated region of fcm data"""
         return g.gate(self, chan)
     
-#    @fcmlog
     def subsample(self, s):
         """return subsampled/sliced fcm data"""
         return s.subsample(self)
@@ -193,7 +184,7 @@ class FCMdata(object):
         mins = pnts.min(0)
         maxs = pnts.max(0)
         medians = median(pnts, 0)
-        n, dim = pnts.shape
+        dim = pnts.shape[1]
         summary = ''
         for i in range(dim):
             summary = summary + self.channels[i] + ":\n"

@@ -1,4 +1,4 @@
-from numpy import array, reshape, max, dot, loadtxt, zeros
+from numpy import reshape, max, loadtxt, zeros
 from numpy.linalg import solve, inv
 from fcmexceptions import CompensationError
 from util import TransformNode
@@ -65,12 +65,12 @@ def load_compensate_matrix(file_name):
     """
     
     file = open(file_name, mode='Ur')
-    name = file.readline()
+    unused = file.readline()
     file.readline() # skip <\t>\n line
     markers = file.readline().strip('\n').split('\t')
     size = len(markers)
     mat = ''
-    for i in range(size):
+    for unused in range(size):
         mat = mat + file.readline()
     
     return(markers, loadtxt(StringIO(mat)))

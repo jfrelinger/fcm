@@ -13,8 +13,8 @@ class FCSreaderTestCase(unittest.TestCase):
         self.assertEqual(self.fcm.notes.text['cyt'], 'FACScan')
         
     def testMultiLoad(self):
-        for i in range(100):
-            x = loadFCS('../sample_data/3FITC_4PE_004.fcs', transform=None)
+        for unused in range(100):
+            unused_x = loadFCS('../sample_data/3FITC_4PE_004.fcs', transform=None)
 
 if __name__ == '__main__':
     suite1 = unittest.makeSuite(FCSreaderTestCase,'test')

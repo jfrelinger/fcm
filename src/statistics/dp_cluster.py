@@ -4,8 +4,8 @@ Created on Oct 30, 2009
 @author: Jacob Frelinger
 '''
 
-from distributions import mvnormpdf, compmixnormpdf
-from numpy import array, log, sum, exp, zeros, concatenate
+from distributions import compmixnormpdf
+from numpy import array, log, sum, zeros, concatenate
 from numpy.random import multivariate_normal as mvn
 from numpy.random import multinomial
 from component import Component
@@ -75,7 +75,7 @@ class DPMixture(object):
         '''
         probs = self.prob(x)
         try:
-            n,j = x.shape 
+            unused_n,unused_j = x.shape 
             #return array([i.argmax(0) for i in probs])
             return probs.argmax(1)
         except ValueError:
@@ -208,7 +208,7 @@ class ModalDPMixture(DPMixture):
         '''
         probs = self.prob(x)
         try:
-            n,j = x.shape 
+            unused_n,unused_j = x.shape 
             #return array([i.argmax(0) for i in probs])
             return probs.argmax(1)
         except ValueError:

@@ -6,7 +6,6 @@ All operations will be performed on each FCMData in the collection.
 from UserDict import DictMixin
 from annotation import Annotation
 import numpy
-from util import fcmlog
 
 class FCMcollection(DictMixin):
     """
@@ -16,8 +15,6 @@ class FCMcollection(DictMixin):
     tree = tree of operations
     """
 
-
-    #@fcmlog
     def __init__(self, name, fcms=None, notes=None):
         """
         Initialize with fcm collection and notes.
@@ -44,7 +41,6 @@ class FCMcollection(DictMixin):
         """return fcmcollection.fcmdict[item]"""
         return self.fcmdict[item]
 
-    @fcmlog
     def __setitem__(self, key, value):
         """set fcmcollection.fcmdict[key] = value."""
         self.fcmdict[key] = value

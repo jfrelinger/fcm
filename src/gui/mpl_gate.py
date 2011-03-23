@@ -32,7 +32,7 @@ class DraggableVertex(object):
         'on button press we will see if the mouse is over us and store some data'
         if event.inaxes != self.circle.axes: return
         if DraggableVertex.lock is not None: return
-        contains, attrd = self.circle.contains(event)
+        contains, unused = self.circle.contains(event)
         if not contains: return
         # print 'event contains', self.circle.center
         x0, y0 = self.circle.center
@@ -131,8 +131,7 @@ class Gate(object):
         self.canvas.blit(self.ax.bbox)
 
     def onclick(self, event):
-        xmin, xmax, ymin, ymax = self.ax.axis()
-        h = ymax - ymin
+        xmin, xmax, unused_ymin, unused_ymax = self.ax.axis()
         w = xmax - xmin
 
         if event.button == 3:
@@ -152,20 +151,16 @@ class Gate(object):
 
     def zoom_to_gate(self, event):
         xy = numpy.array([v.circle.center for v in self.vertices])
-        data = self.fcm.view()[:,[self.idxs[0],self.idxs[1]]]
-        #idx = points_in_poly(xy, data)
-        #args = (self.idxs[0], self.idxs[1])
         gate = g(xy, self.idxs)
         gate.gate(self.fcm)
         self.gate = gate
-        #self.fcm.note['gate_%d_%d' % args] = idx
         self.vertices = []
         self.poly = None
         self.ax.patches = []
 
         # get rid of old points and plot new
         del self.ax.collections[0]
-        points = self.ax.scatter(self.fcm[:,self.idxs[0]], 
+        unused_points = self.ax.scatter(self.fcm[:,self.idxs[0]], 
                                  self.fcm[:,self.idxs[1]], 
                                  s=1, c= 'b', edgecolors='none')
 

@@ -1,6 +1,6 @@
 import unittest
 from fcm.statistics import DPCluster, ModalDPMixture
-from numpy import array, eye, argmax, all
+from numpy import array, eye, all
 
 
 class ModalDp_clusterTestCase(unittest.TestCase):

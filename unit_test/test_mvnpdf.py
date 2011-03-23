@@ -1,7 +1,7 @@
 from fcm.statistics.distributions import mvnormpdf, compmixnormpdf, mixnormpdf
 import unittest
 from numpy import array, eye, pi, fabs, sqrt, dot, ones, exp, sum
-from numpy.linalg import inv, det, cholesky
+from numpy.linalg import inv, det
 from random import uniform
 
 def pmvnormpdf(x, mu, va):

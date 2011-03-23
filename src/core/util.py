@@ -1,7 +1,6 @@
 import re
 import logging
 import os
-from warnings import warn
 import numpy as np
 
 logging.basicConfig(level=logging.INFO,
@@ -9,15 +8,6 @@ logging.basicConfig(level=logging.INFO,
                     filename=os.path.join('.', 'fcm.log'),
                     filemode='a')
 
-def fcmlog(func):
-    """This decorator logs call to methods with full argument list."""
-    def g(*args, **kwargs):
-        argnames = func.func_code.co_varnames[:func.func_code.co_argcount]
-        logging.info(func.func_name + '(' + ', '.join(
-                '%s=%r' % entry
-                for entry in zip(argnames,args) + kwargs.items()) + ')')
-        return func(*args, **kwargs)
-    return g
         
 class Node(object):
     """

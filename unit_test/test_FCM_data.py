@@ -137,7 +137,7 @@ class FCMdataTestCase(unittest.TestCase):
         buffer.seek(0)
         tmp = pickle.load(buffer)
         self.assertTrue(all(self.fcm[:] == tmp[:]))
-        for i in range(3):
+        for unused in range(3):
             buffer = StringIO.StringIO()
             pickle.dump(tmp, buffer)
             buffer.seek(0)
