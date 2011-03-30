@@ -158,18 +158,10 @@ class Gate(object):
         self.poly = None
         self.ax.patches = []
 
-        # get rid of old points and plot new
+        # get rid of old points
         del self.ax.collections[0]
-        unused_points = self.ax.scatter(self.fcm[:, self.idxs[0]],
-                                 self.fcm[:, self.idxs[1]],
-                                 s=1, c='b', edgecolors='none')
-
-        xmin, ymin = numpy.min(xy, 0)
-        xmax, ymax = numpy.max(xy, 0)
-        self.ax.axis([xmin, xmax, ymin, ymax])
-        self.update_background(event)
-        self.canvas.draw()
-
+        plt.close()
+        
     def disconnect(self):
         'disconnect all the stored connection ids'
         self.canvas.mpl_disconnect(self.cid_press)
