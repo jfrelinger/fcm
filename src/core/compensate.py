@@ -50,7 +50,7 @@ def _compensate(data, spill, comp=False, scale=False):
 
 def gen_spill_matrix(tubes, unstained):
     """
-    Generates spill matrix and indexs capabale of being passed to loadFCS
+    Generates spill matrix and indexes capabale of being passed to loadFCS
     takes a dictionary of FCMData objects with keys corresponding to the 
     channel short name, and a FCMData object corresponding to the unstained
     beads.
@@ -64,7 +64,7 @@ def gen_spill_matrix(tubes, unstained):
         d = None
         try:
             #look up which channel we actually are.
-            for m,n in data.notes.text.viewitems():
+            for m,n in data.notes.text.iteritems():
                 if m.startswith('p') and m.endswith('n'):
                     if j == n:
                         d = int(m[1:-1])-1
