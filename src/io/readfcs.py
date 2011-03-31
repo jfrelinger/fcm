@@ -115,6 +115,7 @@ class FCSreader(object):
                 idx = []
                 for si in self.sidx:
                     idx.append(base_chan_name.index(si))
+
                 c = _compensate(data[:, idx], self.spill)
                 data[:, idx] = c
 

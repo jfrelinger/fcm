@@ -1,12 +1,5 @@
 import re
-import logging
-import os
 import numpy as np
-
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s: %(message)s',
-                    filename=os.path.join('.', 'fcm.log'),
-                    filemode='a')
 
 
 class Node(object):

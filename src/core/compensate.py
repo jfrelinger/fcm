@@ -1,4 +1,4 @@
-from numpy import reshape, max, loadtxt, zeros
+from numpy import reshape, max, loadtxt, eye
 from numpy.linalg import solve, inv
 from fcmexceptions import CompensationError
 from util import TransformNode
@@ -48,14 +48,47 @@ def _compensate(data, spill, comp=False, scale=False):
 
     return solve(spill.T, data.T).T
 
-def gen_spill_matrix(tubes):
-    sidx = tubes.keys()
-    spill = zeros((len(sidx), len(sidx)))
-    for k, j in enumerate(tubes.keys()):
+def gen_spill_matrix(tubes, unstained):
+    
+    names = {}
+    files = {}
+    for j in tubes.keys():
         data = tubes[j]
-        norm = data[j].mean()
-        spill[k, :] = (data[:, data.markers].mean(0)) / norm
-    return sidx, spill
+        files[j] = data
+        d = None
+        try:
+            #look up which channel we actually are.
+            for m,n in data.notes.text.viewitems():
+                if m.startswith('p') and m.endswith('n'):
+                    if j == n:
+                        d = int(m[1:-1])-1
+                        names[d] = j
+                elif m.startswith('p') and m.endswith('s'):
+                    if j == n:
+                        d = int(m[1:-1])-1
+                        names[d] = j
+        except KeyError:
+            pass
+        except AttributeError:
+            pass
+
+        if d is None:
+            raise ValueError('Cant look up the channel name')
+    
+    
+    idxs = names.keys()
+    idxs.sort()
+    base = unstained[:,idxs].mean(0)
+    spill = eye(len(idxs))
+    for k,d in enumerate(idxs):
+        
+        data = files[names[d]]
+        norm = (data[:, idxs].mean(0)-base)[k]
+        
+        spill[k, :] = (data[:, idxs].mean(0)-base) / norm
+        
+    return [names[i] for i in idxs], spill
+
 
 def load_compensate_matrix(file_name):
     """

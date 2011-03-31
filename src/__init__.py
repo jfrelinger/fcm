@@ -25,6 +25,5 @@ __all__ = [
             #functions
             'logicle',
             'hyperlog',
-            'points_in_poly',
             'loadFCS'
             ]
