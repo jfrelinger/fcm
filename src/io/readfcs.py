@@ -22,14 +22,15 @@ class FCSreader(object):
     """
     def __init__(self, filename, transform='logicle', sidx=None, spill=None):
         #self.filename = filename
-        if type(filename) == str:
-            self.filename = filename
-            self._fh = open(filename, 'rb')
-        else: # we should have gotten a filehandle then
-            self.filename = filename.name
-            self._fh = filename
+        #if type(filename) == str:
+        #    self.filename = filename
+        #    self._fh = open(filename, 'rb')
+        #else: # we should have gotten a filehandle then
+        #    self.filename = filename.name
+        #    self._fh = filename
         self.transform = transform
         #self._fh = cStringIO.StringIO(open(filename, 'rb').read())
+        self.filename = filename
         
         self.cur_offset = 0
         self.spill = spill
@@ -40,157 +41,158 @@ class FCSreader(object):
     def get_FCMdata(self, auto_comp=True, **kwargs):
         """Return the next FCM data set stored in a FCS file"""
 
-        # parse headers
-        header = self.parse_header(self.cur_offset)
-
-        # parse text 
-        text = self.parse_text(self.cur_offset, header['text_start'], header['text_stop'])
-
-        # parse annalysis
-        try:
-            astart = text['beginanalysis']
-        except KeyError:
-            astart = header['analysis_start']
-        try:
-            astop = text['endanalysis']
-        except KeyError:
-            astop = header['analysis_end']
-        analysis = self.parse_analysis(self.cur_offset, astart, astop)
-        # parse data
-        try:
-            dstart = int(text['begindata'])
-        except KeyError:
-            dstart = header['data_start']
-        try:
-            dstop = int(text['enddata'])
-        except KeyError:
-            dstop = header['data_end']
-
-        #account for LMD reporting the wrong values for the size of the data segment
-        lmd = self.fix_lmd(self.cur_offset, header['text_start'], header['text_stop'])
-        dstop = dstop + lmd
-        data = self.parse_data(self.cur_offset, dstart, dstop, text)
-        # build fcmdata object
-        channels = []
-        scchannels = []
-        scchannel_indexes = []
-        to_transform = []
-        base_chan_name = []
-        for i in range(1, int(text['par']) + 1):
-            base_chan_name.append(text['p%dn' % i])
+        with open(self.filename,'rb') as self._fh:
+            # parse headers
+            header = self.parse_header(self.cur_offset)
+    
+            # parse text 
+            text = self.parse_text(self.cur_offset, header['text_start'], header['text_stop'])
+    
+            # parse annalysis
             try:
-                name = text['p%ds' % i]
+                astart = text['beginanalysis']
             except KeyError:
-                name = text['p%dn' % i]
-            channels.append(name)
-            #if not name.lower().startswith('fl'):
-            if not is_fl_channel(name):
-                scchannels.append(name)
-                if name != 'Time':
-                    scchannel_indexes.append(i - 1)
-            else: # we're a FL channel
+                astart = header['analysis_start']
+            try:
+                astop = text['endanalysis']
+            except KeyError:
+                astop = header['analysis_end']
+            analysis = self.parse_analysis(self.cur_offset, astart, astop)
+            # parse data
+            try:
+                dstart = int(text['begindata'])
+            except KeyError:
+                dstart = header['data_start']
+            try:
+                dstop = int(text['enddata'])
+            except KeyError:
+                dstop = header['data_end']
+    
+            #account for LMD reporting the wrong values for the size of the data segment
+            lmd = self.fix_lmd(self.cur_offset, header['text_start'], header['text_stop'])
+            dstop = dstop + lmd
+            data = self.parse_data(self.cur_offset, dstart, dstop, text)
+            # build fcmdata object
+            channels = []
+            scchannels = []
+            scchannel_indexes = []
+            to_transform = []
+            base_chan_name = []
+            for i in range(1, int(text['par']) + 1):
+                base_chan_name.append(text['p%dn' % i])
                 try:
-                    if text['p%dr' % i] == '262144':
-                        to_transform.append(i - 1)
+                    name = text['p%ds' % i]
                 except KeyError:
-                    pass
-
-        # cliburn 27 Aug 2010
-        # filter out events with negative scatter
-        # BREAKS UNIT TESTS: pointy hat to cliburn
-#        clean = True
-#        if clean:
-#            idx = numpy.zeros(data.shape[0], 'bool')
-#            for k in scchannel_indexes:
-#                idx |= data[:,k] <= 0
-#            data = data[~idx, :]
-
-        if auto_comp:
-            if self.spill is None:
-                try:
-                    self.spill, self.sidx = get_spill(text['spill'])
-                except KeyError:
-                    pass
-            if self.spill is not None and self.sidx is not None:
-                idx = []
-                for si in self.sidx:
-                    idx.append(base_chan_name.index(si))
-
-                c = _compensate(data[:, idx], self.spill)
-                data[:, idx] = c
-
-            if self.transform == 'logicle':
-                try:
-                    if isinstance(kwargs['r'], Number):
-                        self.r = kwargs['r']
-                    elif numpy.all(numpy.isreal(kwargs['r'])):
-                        self.r = numpy.zeros(data.shape[1])
-                except KeyError:
-                    pass
-                if 'T' in kwargs.keys():
-                    T = kwargs['T']
-                else:
-                    T = 262144
-                if 'm' in kwargs.keys():
-                    m = kwargs['m']
-                else:
-                    m = 4.5
-                if 'scale_max' in kwargs.keys():
-                    scale_max = kwargs['scale_max']
-                else:
-                    scale_max = 1e5
-#                if 'scale_min' in kwargs.keys():
-#                    scale_min = kwargs['scale_min']
-#                else:
-#                    scale_min = 0
-                if 'w' in kwargs.keys():
-                    w = kwargs['w']
-                else:
-                    w = None
-                for i in to_transform:
-                    dj = data[:, i]
-                    if w is None:
-                        try:
-                            if isinstance(kwargs['r'], Number):
-                                r = kwargs['r']
-                            elif numpy.all(numpy.isreal(kwargs['r'])):
-                                r = kwargs['r'][i]
-                                self.r[i] = r
-                        except KeyError:
-                            r = None
-                            w = .5
-
+                    name = text['p%dn' % i]
+                channels.append(name)
+                #if not name.lower().startswith('fl'):
+                if not is_fl_channel(name):
+                    scchannels.append(name)
+                    if name != 'Time':
+                        scchannel_indexes.append(i - 1)
+                else: # we're a FL channel
+                    try:
+                        if text['p%dr' % i] == '262144':
+                            to_transform.append(i - 1)
+                    except KeyError:
+                        pass
+    
+            # cliburn 27 Aug 2010
+            # filter out events with negative scatter
+            # BREAKS UNIT TESTS: pointy hat to cliburn
+    #        clean = True
+    #        if clean:
+    #            idx = numpy.zeros(data.shape[0], 'bool')
+    #            for k in scchannel_indexes:
+    #                idx |= data[:,k] <= 0
+    #            data = data[~idx, :]
+    
+            if auto_comp:
+                if self.spill is None:
+                    try:
+                        self.spill, self.sidx = get_spill(text['spill'])
+                    except KeyError:
+                        pass
+                if self.spill is not None and self.sidx is not None:
+                    idx = []
+                    for si in self.sidx:
+                        idx.append(base_chan_name.index(si))
+    
+                    c = _compensate(data[:, idx], self.spill)
+                    data[:, idx] = c
+    
+                if self.transform == 'logicle':
+                    try:
+                        if isinstance(kwargs['r'], Number):
+                            self.r = kwargs['r']
+                        elif numpy.all(numpy.isreal(kwargs['r'])):
+                            self.r = numpy.zeros(data.shape[1])
+                    except KeyError:
+                        pass
+                    if 'T' in kwargs.keys():
+                        T = kwargs['T']
                     else:
-                        r = None
-
-
-                    tmp = scale_max * _logicle(dj, T, m, r, w)
-                    #tmp[tmp<scale_min]=scale_min
-                    data[:, i] = tmp
-            elif self.transform == 'log':
-                for i in to_transform:
-                    data[:, i] = _log_transform(data[:, i])
-
-            elif self.transform == "hyperlog":
-                pass # TODO figure out good default parameters for hyperlog transform
-
-
-        unused_path, name = os.path.split(self.filename)
-        name, unused_ext = os.path.splitext(name)
-        tmpfcm = FCMdata(name, data, channels, scchannels,
-            Annotation({'text': text,
-                        'header': header,
-                        'analysis': analysis,
-                        }))
-        try:
-            tmpfcm._r = self.r
-        except AttributeError:
-            pass
-        try:
-            tmpfcm._w = self.w
-        except AttributeError:
-            pass
-        return tmpfcm
+                        T = 262144
+                    if 'm' in kwargs.keys():
+                        m = kwargs['m']
+                    else:
+                        m = 4.5
+                    if 'scale_max' in kwargs.keys():
+                        scale_max = kwargs['scale_max']
+                    else:
+                        scale_max = 1e5
+    #                if 'scale_min' in kwargs.keys():
+    #                    scale_min = kwargs['scale_min']
+    #                else:
+    #                    scale_min = 0
+                    if 'w' in kwargs.keys():
+                        w = kwargs['w']
+                    else:
+                        w = None
+                    for i in to_transform:
+                        dj = data[:, i]
+                        if w is None:
+                            try:
+                                if isinstance(kwargs['r'], Number):
+                                    r = kwargs['r']
+                                elif numpy.all(numpy.isreal(kwargs['r'])):
+                                    r = kwargs['r'][i]
+                                    self.r[i] = r
+                            except KeyError:
+                                r = None
+                                w = .5
+    
+                        else:
+                            r = None
+    
+    
+                        tmp = scale_max * _logicle(dj, T, m, r, w)
+                        #tmp[tmp<scale_min]=scale_min
+                        data[:, i] = tmp
+                elif self.transform == 'log':
+                    for i in to_transform:
+                        data[:, i] = _log_transform(data[:, i])
+    
+                elif self.transform == "hyperlog":
+                    pass # TODO figure out good default parameters for hyperlog transform
+    
+    
+            unused_path, name = os.path.split(self.filename)
+            name, unused_ext = os.path.splitext(name)
+            tmpfcm = FCMdata(name, data, channels, scchannels,
+                Annotation({'text': text,
+                            'header': header,
+                            'analysis': analysis,
+                            }))
+            try:
+                tmpfcm._r = self.r
+            except AttributeError:
+                pass
+            try:
+                tmpfcm._w = self.w
+            except AttributeError:
+                pass
+            return tmpfcm
 
 
     def read_bytes(self, offset, start, stop):
