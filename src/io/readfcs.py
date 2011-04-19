@@ -30,7 +30,7 @@ class FCSreader(object):
             self._fh = filename
         self.transform = transform
         #self._fh = cStringIO.StringIO(open(filename, 'rb').read())
-        self._fh = open(filename, 'rb')
+        
         self.cur_offset = 0
         self.spill = spill
         self.sidx = sidx
@@ -382,7 +382,9 @@ def loadFCS(filename, transform='logicle', auto_comp=True, spill=None, sidx=None
     """Load and return a FCM data object from an FCS file"""
 
     tmp = FCSreader(filename, transform, spill=spill, sidx=sidx)
-    return tmp.get_FCMdata(auto_comp, **kwargs)
+    data = tmp.get_FCMdata(auto_comp, **kwargs)
+    tmp._fh.close()
+    return data
 
 def loadMultipleFCS(files, transform='logicle', auto_comp=True, spill=None, sidx=None, **kwargs):
     for filename in files:
