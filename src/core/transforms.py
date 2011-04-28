@@ -44,10 +44,14 @@ def _logicle(y, T, m, r, w):
     clogicle.logicle_scale(T, w, m, 0, y)
     return y
 
-def logicle(fcm, channels, T, m, r=None, scale_max=1e5, scale_min=0, w=None):
+def logicle(fcm, channels, T, m, r=None, scale_max=1e5, scale_min=0, w=None, rquant=None):
     """return logicle transformed points in fcm data for channels listed"""
     npnts = fcm.view().copy()
     for i in channels:
+        if rquant is not None:
+            w = None
+            tmp = npnts[:,i]
+            r = quantile(tmp[tmp<0], 0.05)
         if r is None and w is None:
             w = .5
         tmp = scale_max * _logicle(npnts[:, i].T, T, m, r, w)

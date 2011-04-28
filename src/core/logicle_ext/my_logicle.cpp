@@ -13,5 +13,6 @@ void logicle_scale(double t, double w, double m, double a, double* x, int n) {
 	for(int j=0;j<n;j++) {
 		x[j] = l->scale(x[j]);
 	}
+	delete l;
 }
 

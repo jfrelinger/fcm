@@ -3,7 +3,7 @@
 from warnings import warn
 from fcm import FCMdata
 from fcm.core import Annotation
-from fcm.core.transforms import _logicle, _log_transform
+from fcm.core.transforms import _logicle, _log_transform, quantile
 from fcm.core.compensate import _compensate, get_spill
 from fcm import UnimplementedFcsDataMode
 
@@ -149,6 +149,11 @@ class FCSreader(object):
                         w = kwargs['w']
                     else:
                         w = None
+                        
+                    if 'rquant' in kwargs.keys():
+                        rquant = kwargs['rquant']
+                    else:
+                        rquant = None
                     for i in to_transform:
                         dj = data[:, i]
                         if w is None:
@@ -164,6 +169,9 @@ class FCSreader(object):
     
                         else:
                             r = None
+                        if rquant is not None:
+                            w = None
+                            r = quantile(dj[dj<0], 0.05)
     
     
                         tmp = scale_max * _logicle(dj, T, m, r, w)
