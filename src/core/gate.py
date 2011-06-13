@@ -89,6 +89,44 @@ class IntervalGate(Filter):
         fcm.add_view(node)
         return fcm
 
+class ThresholdGate(Filter):
+    """
+    an object to return events above or below a threshold in any one channel
+    """
+    def __init__(self, vert, channels, op = 'g'):
+        """
+        vert = boundry region
+        channels = indices of channel to gate on.
+        op = 'g' (greater) or 'l' (less) 
+        """
+        self.vert = vert
+        self.chan = channels
+        self.op = op
+        
+        
+    def gate(self, fcm, chan=None, op=None):
+        """
+        return all events greater (or less) than a threshold
+        allowed op are 'g' (greater) or 'l' (less)
+        """
+        if chan is None:
+            chan = self.chan
+            
+        x = fcm.view()[:, chan]
+        if op is None:
+            op = self.op
+            
+        if op == 'g':
+            idxs = numpy.greater(x,self.vert)
+        elif op == 'l':
+            idxs = numpy.less(x,self.vert)
+        else:
+            raise ValueError('op should be "g" or "l", received "%s"' % str(op))
+            
+        node = GatingNode("", fcm.get_cur_node(), idxs)
+        fcm.add_view(node)
+        return fcm
+
 def points_in_poly(vs, ps):
     """Return boolean index of events from ps that are inside polygon with vertices vs.
 

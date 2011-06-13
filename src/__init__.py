@@ -3,7 +3,7 @@
 
 from core import FCMdata, FCMcollection
 from core import Annotation
-from core import PolyGate, points_in_poly, QuadGate, IntervalGate
+from core import PolyGate, points_in_poly, QuadGate, IntervalGate, ThresholdGate
 from core import BadFCMPointDataTypeError, UnimplementedFcsDataMode
 from core import CompensationError
 from core import load_compensate_matrix, compensate, gen_spill_matrix
