@@ -1,5 +1,5 @@
 import unittest
-from fcm.core.util import Tree, RootNode
+from fcm.core.tree import Tree, RootNode
 
 
 class TreeTestCase(unittest.TestCase):
