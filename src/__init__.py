@@ -14,8 +14,11 @@ from core  import logicle, hyperlog
 __all__ = [
             #Objects
             'FCMdata',
-            'Gate',
+            'FCMcollection'
+            'PolyGate',
             'QuadGate',
+            'IntervalGate',
+            'ThresholdGate',
             'FCSreader',
             'Annotation',
             #Exceptions
@@ -25,5 +28,8 @@ __all__ = [
             #functions
             'logicle',
             'hyperlog',
-            'loadFCS'
+            'loadFCS',
+            'loadMultipleFCS',
+            'load_compensate_matrix'
+            
             ]
