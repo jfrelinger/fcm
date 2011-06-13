@@ -7,7 +7,7 @@ from annotation import Annotation
 from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
 from transforms import log_transform as _log
-from util import Tree
+from tree import Tree
 
 class FCMdata(object):
     """

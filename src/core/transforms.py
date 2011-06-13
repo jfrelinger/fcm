@@ -5,7 +5,7 @@ from scipy.optimize import brentq
 from scipy import interpolate
 from numpy import array, abs, arange, exp, log, log10, min, max, sign, concatenate, vectorize, where
 
-from util import TransformNode
+from tree import TransformNode
 
 import logicle as clogicle
 

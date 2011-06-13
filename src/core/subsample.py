@@ -3,8 +3,8 @@ Created on Aug 27, 2009
 
 @author: jolly
 '''
-from util import SubsampleNode
-from util import DropChannelNode
+from tree import SubsampleNode, DropChannelNode
+
 
 
 class Subsample(object):

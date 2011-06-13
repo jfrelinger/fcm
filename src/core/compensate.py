@@ -1,7 +1,7 @@
 from numpy import reshape, max, loadtxt, eye
 from numpy.linalg import solve, inv
 from fcmexceptions import CompensationError
-from util import TransformNode
+from tree import TransformNode
 from StringIO import StringIO
 
 def get_spill(text):

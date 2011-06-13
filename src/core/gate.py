@@ -1,6 +1,6 @@
 import numpy
 from matplotlib.nxutils import points_inside_poly
-from util import GatingNode
+from tree import GatingNode
 
 
 class Filter(object):
