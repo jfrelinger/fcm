@@ -21,7 +21,7 @@ class DPMixtureModel(object):
     '''
 
 
-    def __init__(self, fcmdata, nclusts, iter=1000, burnin=100, last=5):
+    def __init__(self, nclusts, iter=1000, burnin=100, last=5):
         '''
         DPMixtureModel(fcmdata, nclusts, iter=1000, burnin= 100, last= 5)
         fcmdata = a fcm data object
@@ -31,35 +31,13 @@ class DPMixtureModel(object):
         last = number of mcmc itterations to draw samples from
         
         '''
-        pnts = fcmdata.view()
-        self.m = pnts.mean(0)
-        self.s = pnts.std(0)
-        self.data = (pnts - self.m) / self.s
+        
 
         self.nclusts = nclusts
         self.iter = iter
         self.burnin = burnin
         self.last = last
-        if len(self.data.shape) == 1:
-            self.data = self.data.reshape((self.data.shape[0], 1))
-
-        if len(self.data.shape) != 2:
-            raise ValueError("pnts is the wrong shape")
-        self.n, self.d = self.data.shape
-
-        self.cdp = cdpcluster(self.data)
-        try:
-            self.cdp.getdevice()
-            # if the above passed we're cuda enabled...
-            if self.nclusts % 16:
-                tmp = self.nclusts + (16 - (self.nclusts % 16))
-                warn("Number of clusters, %d, is not a multiple of 16, increasing it to %d" % (self.nclusts, tmp))
-                self.nclusts = tmp
-        except RuntimeError:
-            pass
-        self.pi = zeros((nclusts * last))
-        self.mus = zeros((nclusts * last, self.d))
-        self.sigmas = zeros((nclusts * last, self.d, self.d))
+        
 
         # self.cdp.setphi0(0.5)
         # self.cdp.setgamma(5)
@@ -78,19 +56,26 @@ class DPMixtureModel(object):
         self.samplealpha = True
 
         #load hyper paramters
-        self.lambda0 = self.cdp.getlambda0()
-        self.phi0 = self.cdp.getphi0()
-        self.nu0 = self.cdp.getnu0()
-        #self.gamma = self.cdp.getgamma()
-        # per cliburn: override the default gamma to be 3
+#        self.lambda0 = self.cdp.getlambda0()
+#        self.phi0 = self.cdp.getphi0()
+#        self.nu0 = self.cdp.getnu0()
+#        #self.gamma = self.cdp.getgamma()
+#        self.nu = self.cdp.getnu()
+#        self.e0 = self.cdp.gete0()
+#        self.f0 = self.cdp.getf0()
+#        self.ee = self.cdp.getee()
+#        self.aa = self.cdp.getaa()
+#        self.ff = self.cdp.getff()
+        self.lambda0 = 1.0
+        self.phi0 = 1.0
+        self.nu0 = 1.0
         self.gamma = 3
-        self.nu = self.cdp.getnu()
-        self.e0 = self.cdp.gete0()
-        self.f0 = self.cdp.getf0()
-        self.ee = self.cdp.getee()
-        self.aa = self.cdp.getaa()
-        self.ff = self.cdp.getff()
-
+        self.nu = 1
+        self.e0 = 0.1
+        self.f0 = 0.1
+        self.ee = 0.1
+        self.ff = 0.1
+        self.aa = -1.0
 
 
         self._prerun = False
@@ -111,19 +96,26 @@ class DPMixtureModel(object):
             d = mu.shape[0]
         if n > self.nclusts:
             raise ValueError('number of proposed Mus grater then number of clusters')
-        elif d != self.d:
-            raise ValueError('Dimension mismatch between Mus and Data')
-        elif n < self.nclusts:
-            self._prior_mu = zeros((self.nclusts, self.d))
-            self._prior_mu[0:n, :] = (mu.copy() - self.m) / self.s
-            self._prior_mu[n:, :] = mvn(zeros((self.d,)), eye(self.d), self.nclusts - n)
-        else:
-            self._prior_mu = (mu.copy() - self.m) / self.s
 
+        
+        self.prior_mu = mu
+        self.mu_d = d
         self._load_mu = True
 
-
+    def _load_mu_at_fit(self):
+        (n,d) = self.prior_mu.shape
+        if d != self.d:
+            raise ValueError('Dimension mismatch between Mus and Data')
+        
+        elif n < self.nclusts:
+            self._prior_mu = zeros((self.nclusts, self.d))
+            self._prior_mu[0:n, :] = (self.prior_mu.copy() - self.m) / self.s
+            self._prior_mu[n:, :] = mvn(zeros((self.d,)), eye(self.d), self.nclusts - n)
+        else:
+            self._prior_mu = (self.prior_mu.copy() - self.m) / self.s
+        
     def load_sigma(self, sigma):
+        n, d = sigma.shape[0:2]
         if len(sigma.shape) > 3:
             raise ValueError('Shape of Sigma is wrong')
 
@@ -132,24 +124,28 @@ class DPMixtureModel(object):
 
         if sigma.shape[1] != sigma.shape[2]:
             raise ValueError("Sigmas must be square matricies")
-
-        n, d = sigma.shape[0:2]
-
+        
+        
         if n > self.nclusts:
             raise ValueError('number of proposed Sigmass grater then number of clusters')
+
+        self._load_sigma = True
+        self.prior_sigma = sigma
+    
+    def _load_sigma_at_fit(self):
+        n, d = self.prior_sigma.shape[0:2]
 
         if d != self.d:
             raise ValueError('Dimension mismatch between Sigmas and Data')
 
         elif n < self.nclusts:
             self._prior_sigma = zeros((self.nclusts, self.d, self.d))
-            self._prior_sigma[0:n, :, :] = (sigma.copy()) / outer(self.s, self.s)
+            self._prior_sigma[0:n, :, :] = (self.prior_sigma.copy()) / outer(self.s, self.s)
             for i in range(n, self.nclusts):
                 self._prior_sigma[i, :, :] = eye(self.d)
         else:
-            self._prior_sigma = (sigma.copy()) / outer(self.s, self.s)
-
-        self._load_sigma = True
+            self._prior_sigma = (self.prior_sigma.copy()) / outer(self.s, self.s)
+        
 
     def load_pi(self, pi):
         tmp = array(pi)
@@ -220,9 +216,11 @@ class DPMixtureModel(object):
             if verbose:
                 self.cdp.setVerbose(True)
             if self._load_mu:
+                self._load_mu_at_fit()
                 self.cdp.loadMu(self._prior_mu)
 
             if self._load_sigma:
+                self._load_sigma_at_fit()
                 self.cdp.loadSigma(self._prior_sigma)
 
             if self._load_pi:
@@ -238,11 +236,38 @@ class DPMixtureModel(object):
             self._prerun = True
 
 
-    def fit(self, verbose=False):
+    def fit(self, fcmdata,  verbose=False):
         """
         fit the mixture model to the data
         use get_results() to get the fitted model
         """
+        pnts = fcmdata.view()
+        self.m = pnts.mean(0)
+        self.s = pnts.std(0)
+        self.data = (pnts - self.m) / self.s
+        
+        if len(self.data.shape) == 1:
+            self.data = self.data.reshape((self.data.shape[0], 1))
+
+        if len(self.data.shape) != 2:
+            raise ValueError("pnts is the wrong shape")
+        self.n, self.d = self.data.shape
+
+        self.cdp = cdpcluster(self.data)
+        try:
+            self.cdp.getdevice()
+            # if the above passed we're cuda enabled...
+            if self.nclusts % 16:
+                tmp = self.nclusts + (16 - (self.nclusts % 16))
+                warn("Number of clusters, %d, is not a multiple of 16, increasing it to %d" % (self.nclusts, tmp))
+                self.nclusts = tmp
+        except RuntimeError:
+            pass
+        self.pi = zeros((self.nclusts * self.last))
+        self.mus = zeros((self.nclusts * self.last, self.d))
+        self.sigmas = zeros((self.nclusts * self.last, self.d, self.d))
+        
+        
         self._setup(verbose)
         self.cdp.run()
 
@@ -262,6 +287,8 @@ class DPMixtureModel(object):
                 print "it = %d" % (n + i)
         if verbose:
             print "Done"
+            
+        return self.get_results()
 
     def step(self, verbose=False):
         self._setup(verbose)

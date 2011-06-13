@@ -154,6 +154,7 @@ class FCSreader(object):
                         rquant = kwargs['rquant']
                     else:
                         rquant = None
+                    
                     for i in to_transform:
                         dj = data[:, i]
                         if w is None:
