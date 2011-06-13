@@ -128,6 +128,11 @@ class ThresholdGate(Filter):
         return fcm
 
 def generate_f_score_gate(neg_smaple, pos_sample, chan, beta = 1, theta = 2, high=True):
+    '''
+    given a negative and a positive sample, calculate the 'optimal' threshold gate
+    position from aproximate f-score calculation
+    '''
+    
     neg_hist, bins = numpy.histogram(neg_smaple[:,chan], 1000, normed=True)
     pos_hist, bins = numpy.histogram(pos_sample[:,chan], bins, normed=True)
     
