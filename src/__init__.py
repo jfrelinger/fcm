@@ -4,6 +4,7 @@
 from core import FCMdata, FCMcollection
 from core import Annotation
 from core import PolyGate, points_in_poly, QuadGate, IntervalGate, ThresholdGate
+from core import generate_f_score_gate
 from core import BadFCMPointDataTypeError, UnimplementedFcsDataMode
 from core import CompensationError
 from core import load_compensate_matrix, compensate, gen_spill_matrix
@@ -26,6 +27,7 @@ __all__ = [
             'UnimplementedFcsDataMode',
             'CompensationError',
             #functions
+            'generate_f_score_gate'
             'logicle',
             'hyperlog',
             'loadFCS',

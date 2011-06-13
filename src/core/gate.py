@@ -127,6 +127,69 @@ class ThresholdGate(Filter):
         fcm.add_view(node)
         return fcm
 
+def generate_f_score_gate(neg_smaple, pos_sample, chan, beta = 1, theta = 2, high=True):
+    neg_hist, bins = numpy.histogram(neg_smaple[:,chan], 1000, normed=True)
+    pos_hist, bins = numpy.histogram(pos_sample[:,chan], bins, normed=True)
+    
+    xs = (bins[1:] + bins[:-1])/2.0
+    
+    x0 = numpy.argmax(neg_hist)
+    
+    dfa = diff_pseudo_f1(neg_hist[x0:], pos_hist[x0:], beta=beta)
+    
+    f_cutoff = xs[x0+numpy.argmax(dfa)]
+    print f_cutoff
+    
+    if high:
+        return ThresholdGate(f_cutoff, chan, 'g')
+    else:
+        return ThresholdGate(f_cutoff, chan, 'l')
+    
+    
+    
+def diff_pseudo_f(neg_pdf, pos_pdf, beta=1, theta=2, full=False):
+    n = len(neg_pdf)
+    c1 = numpy.array([numpy.sum(pos_pdf[i:]) for i in range(n)])
+    c2 = numpy.array([numpy.sum(neg_pdf[i:]) for i in range(n)])
+    c3 = numpy.where(pos_pdf > theta*neg_pdf, pos_pdf-neg_pdf, 0)
+    while numpy.all(c3==0):
+        theta -= 0.01
+        c3 = numpy.where(pos_pdf > theta*neg_pdf, pos_pdf-neg_pdf, 0)
+    c4 = numpy.array([numpy.sum(c3[i:]) for i in range(n)])
+    precision = c1/(c1+c2)
+    # recall = c1/numpy.sum(pos_pdf)
+    recall = c4/numpy.sum(c3)
+    diff = (1+beta*beta)*(precision*recall)/(beta*beta*precision + recall)
+    if full:
+        return precision, recall, diff
+    else:
+        return diff
+    
+def diff_pseudo_f1(neg_pdf, pos_pdf, beta=1, theta=2, full=False):
+    n = len(neg_pdf)
+    fpos = numpy.where(pos_pdf > theta*neg_pdf, pos_pdf-neg_pdf, 0)
+    tp = numpy.array([numpy.sum(fpos[i:]) for i in range(n)])
+    fn = numpy.array([numpy.sum(fpos[:i]) for i in range(n)])
+    fp = numpy.array([numpy.sum(neg_pdf[i:]) for i in range(n)])
+    precision = tp/(tp+fp)
+    precision[tp==0]=0
+    recall = tp/(tp+fn)
+    recall[recall==0]=0
+    diff = (1+beta*beta)*(precision*recall)/(beta*beta*precision + recall)
+
+    if full:
+        return precision, recall, diff
+    else:
+        return diff
+
+    
+def scale(k=1):
+    """Closure to generate rescaling function with min=0 and max=k."""
+    def f(x):
+        _x = numpy.array(x)
+        return k * (_x - numpy.min(_x))/(numpy.max(_x) - numpy.min(_x))
+    return f
+
 def points_in_poly(vs, ps):
     """Return boolean index of events from ps that are inside polygon with vertices vs.
 
