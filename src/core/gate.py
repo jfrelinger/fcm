@@ -6,13 +6,17 @@ from tree import GatingNode
 class Filter(object):
     """An object representing a gatable region"""
 
-    def __init__(self, vert, channels):
+    def __init__(self, vert, channels, name=None):
         """
         vert = vertices of gating region
         channels = indices of channels to gate on.
         """
         self.vert = vert
         self.chan = channels
+        if name is None:
+            self.name = ""
+        else:
+            self.name = name 
 
     def gate(self, fcm, chan=None):
         """do the actual gating here."""
@@ -21,12 +25,15 @@ class Filter(object):
 class PolyGate(Filter):
     """An object representing a polygonal gatable region"""
 
-    def gate(self, fcm, chan=None, invert=False):
+    def gate(self, fcm, chan=None, invert=False, name=None):
         """
         return gated region of FCM data
         """
         if chan is None:
             chan = self.chan
+        
+        if name is None:
+            name = self.name
         #idxs = points_in_poly(self.vert, fcm.view()[:, chan])
 
         # matplotlib has points in poly routine in C
@@ -36,7 +43,7 @@ class PolyGate(Filter):
         if invert:
             idxs = numpy.invert(idxs)
 
-        node = GatingNode("", fcm.get_cur_node(), idxs)
+        node = GatingNode(name, fcm.get_cur_node(), idxs)
         fcm.add_view(node)
         return fcm
 
@@ -44,12 +51,20 @@ class QuadGate(Filter):
     """
     An object to divide a region to four quadrants
     """
-    def gate(self, fcm, chan=None):
+    def gate(self, fcm, chan=None, name=None):
         """
         return gated region
         """
         if chan is None:
             chan = self.chan
+        
+        if name is None:
+            name = self.name
+            
+        if name is not "" and len(name) != 4:
+            raise ValueError('name must be empty or contain 4 items: name is %s' % str(name))
+            
+        
         # I (+,+), II (-,+), III (-,-), and IV (+,-)
         x = fcm.view()[:, chan[0]]
         y = fcm.view()[:, chan[1]]
@@ -59,11 +74,15 @@ class QuadGate(Filter):
         quad[3] = (x < self.vert[0]) & (y < self.vert[1]) # (-,-)
         quad[4] = (x > self.vert[0]) & (y < self.vert[1]) # (+,-)
         root = fcm.get_cur_node()
-        name = root.name
+        cname = root.name
+        
+        if name is "" :
+            name = ["q%d"% i  for i in quad.keys()]
+            
         for i in quad.keys():
             if True in quad[i]:
-                fcm.tree.visit(name)
-                node = GatingNode("q%d" % i, root, quad[i])
+                fcm.tree.visit(cname)
+                node = GatingNode(name[i], root, quad[i])
                 fcm.add_view(node)
         return fcm
 
@@ -71,12 +90,15 @@ class IntervalGate(Filter):
     """
     An objeect to return events within an interval in any one channel.
     """
-    def gate(self, fcm, chan=None):
+    def gate(self, fcm, chan=None, name=None):
         """
         return interval region.
         """
         if chan is None:
             chan = self.chan
+            
+        if name is None:
+            name = self.name
 
         assert(len(self.chan) == 1)
         assert(len(self.vert) == 2)
@@ -85,7 +107,7 @@ class IntervalGate(Filter):
         x = fcm.view()[:, chan[0]]
         idxs = numpy.logical_and(x > self.vert[0], x < self.vert[1])
 
-        node = GatingNode("", fcm.get_cur_node(), idxs)
+        node = GatingNode(name, fcm.get_cur_node(), idxs)
         fcm.add_view(node)
         return fcm
 
@@ -93,7 +115,7 @@ class ThresholdGate(Filter):
     """
     an object to return events above or below a threshold in any one channel
     """
-    def __init__(self, vert, channels, op = 'g'):
+    def __init__(self, vert, channels, op = 'g', name=None):
         """
         vert = boundry region
         channels = indices of channel to gate on.
@@ -103,8 +125,13 @@ class ThresholdGate(Filter):
         self.chan = channels
         self.op = op
         
+        if name is None:
+            self.name = ""
+        else:
+            self.name = name
         
-    def gate(self, fcm, chan=None, op=None):
+        
+    def gate(self, fcm, chan=None, op=None, name=None):
         """
         return all events greater (or less) than a threshold
         allowed op are 'g' (greater) or 'l' (less)
@@ -122,8 +149,11 @@ class ThresholdGate(Filter):
             idxs = numpy.less(x,self.vert)
         else:
             raise ValueError('op should be "g" or "l", received "%s"' % str(op))
+        
+        if name is None:
+            name = self.name
             
-        node = GatingNode("", fcm.get_cur_node(), idxs)
+        node = GatingNode(name, fcm.get_cur_node(), idxs)
         fcm.add_view(node)
         return fcm
 

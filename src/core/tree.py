@@ -141,9 +141,9 @@ class Tree(object):
 
     def visit(self, name):
         '''visit a node in the tree'''
-        if type(name) is type(''):
+        if isinstance(name, str):
             self.current = self.nodes[name]
-        else:
+        else: # in this case we assume we're a node type.
             self.current = name
 
     def get(self, name=None):
@@ -151,7 +151,7 @@ class Tree(object):
         if name is None:
             return self.current
         else:
-            if name in self.nodes.keys():
+            if name in self.nodes:
                 return self.nodes[name]
             else:
                 raise KeyError, 'No node named %s' % name
@@ -165,9 +165,9 @@ class Tree(object):
         if name == '':
             prefix = node.prefix
             pat = re.compile(prefix + "(\d+)")
-            matches = [pat.search(i) for i in self.nodes.keys()]
+            matches = [pat.search(i) for i in self.nodes]
             matches = [i for i in matches if i is not None]
-            if len(matches) is not 0:
+            if len(matches): # len > 0
                 n = max([ int(i.group(1)) for i in matches])
                 name = prefix + str(n + 1)
             else:
