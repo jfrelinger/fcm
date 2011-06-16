@@ -253,6 +253,14 @@ class DPMixtureModel(object):
             raise ValueError("pnts is the wrong shape")
         self.n, self.d = self.data.shape
 
+        if self._run: 
+            # code needs to be refactored to fix this
+            # These should no longer be nessiscary as all the
+            # initalization has been moved to the fit set.
+            self._run = False
+            self._prerun= False
+            
+
         self.cdp = cdpcluster(self.data)
         try:
             self.cdp.setdevice(self.device)
