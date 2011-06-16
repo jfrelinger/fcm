@@ -76,7 +76,7 @@ class DPMixtureModel(object):
         self.ee = 0.1
         self.ff = 0.1
         self.aa = -1.0
-
+        self.device = 0
 
         self._prerun = False
         self._run = False
@@ -255,7 +255,7 @@ class DPMixtureModel(object):
 
         self.cdp = cdpcluster(self.data)
         try:
-            self.cdp.getdevice()
+            self.cdp.setdevice(self.device)
             # if the above passed we're cuda enabled...
             if self.nclusts % 16:
                 tmp = self.nclusts + (16 - (self.nclusts % 16))
@@ -287,7 +287,7 @@ class DPMixtureModel(object):
                 print "it = %d" % (n + i)
         if verbose:
             print "Done"
-            
+        
         return self.get_results()
 
     def step(self, verbose=False):
