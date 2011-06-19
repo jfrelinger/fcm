@@ -55,7 +55,7 @@ def heatmap(fcm, indices, nrows=1, ncols=1, s=1, edgecolors='none',
         if (idx[0] != idx[1]):
             x = fcm[:, idx[0]]
             y = fcm[:, idx[1]]
-            if not kwargs.has_key('c'):
+            if 'c' not in kwargs:
                 z = bilinear_interpolate(x, y)
                 pylab.scatter(x, y, c=z, s=s, edgecolors=edgecolors, **kwargs)
             else:
