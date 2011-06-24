@@ -72,136 +72,127 @@ class FCSreader(object):
             lmd = self.fix_lmd(self.cur_offset, header['text_start'], header['text_stop'])
             dstop = dstop + lmd
             data = self.parse_data(self.cur_offset, dstart, dstop, text)
-            # build fcmdata object
-            channels = []
-            scchannels = []
-            scchannel_indexes = []
-            to_transform = []
-            base_chan_name = []
-            for i in range(1, int(text['par']) + 1):
-                base_chan_name.append(text['p%dn' % i])
+        # build fcmdata object
+        channels = []
+        scchannels = []
+        scchannel_indexes = []
+        to_transform = []
+        base_chan_name = []
+        for i in range(1, int(text['par']) + 1):
+            base_chan_name.append(text['p%dn' % i])
+            try:
+                name = text['p%ds' % i]
+            except KeyError:
+                name = text['p%dn' % i]
+            channels.append(name)
+            #if not name.lower().startswith('fl'):
+            if not is_fl_channel(name):
+                scchannels.append(name)
+                if name != 'Time':
+                    scchannel_indexes.append(i - 1)
+            else: # we're a FL channel
                 try:
-                    name = text['p%ds' % i]
+                    if text['p%dr' % i] == '262144':
+                        to_transform.append(i - 1)
                 except KeyError:
-                    name = text['p%dn' % i]
-                channels.append(name)
-                #if not name.lower().startswith('fl'):
-                if not is_fl_channel(name):
-                    scchannels.append(name)
-                    if name != 'Time':
-                        scchannel_indexes.append(i - 1)
-                else: # we're a FL channel
-                    try:
-                        if text['p%dr' % i] == '262144':
-                            to_transform.append(i - 1)
-                    except KeyError:
-                        pass
-    
-            # cliburn 27 Aug 2010
-            # filter out events with negative scatter
-            # BREAKS UNIT TESTS: pointy hat to cliburn
-    #        clean = True
-    #        if clean:
-    #            idx = numpy.zeros(data.shape[0], 'bool')
-    #            for k in scchannel_indexes:
-    #                idx |= data[:,k] <= 0
-    #            data = data[~idx, :]
-    
-            if auto_comp:
-                if self.spill is None:
-                    try:
-                        self.spill, self.sidx = get_spill(text['spill'])
-                    except KeyError:
-                        pass
-                if self.spill is not None and self.sidx is not None:
-                    idx = []
-                    for si in self.sidx:
-                        idx.append(base_chan_name.index(si))
-    
-                    c = _compensate(data[:, idx], self.spill)
-                    data[:, idx] = c
-    
-                if self.transform == 'logicle':
-                    try:
-                        if isinstance(kwargs['r'], Number):
-                            self.r = kwargs['r']
-                        elif numpy.all(numpy.isreal(kwargs['r'])):
-                            self.r = numpy.zeros(data.shape[1])
-                    except KeyError:
-                        pass
-                    if 'T' in kwargs.keys():
-                        T = kwargs['T']
-                    else:
-                        T = 262144
-                    if 'm' in kwargs.keys():
-                        m = kwargs['m']
-                    else:
-                        m = 4.5
-                    if 'scale_max' in kwargs.keys():
-                        scale_max = kwargs['scale_max']
-                    else:
-                        scale_max = 1e5
-    #                if 'scale_min' in kwargs.keys():
-    #                    scale_min = kwargs['scale_min']
-    #                else:
-    #                    scale_min = 0
-                    if 'w' in kwargs.keys():
-                        w = kwargs['w']
-                    else:
-                        w = None
-                        
-                    if 'rquant' in kwargs.keys():
-                        rquant = kwargs['rquant']
-                    else:
-                        rquant = None
+                    pass
+
+
+        if auto_comp:
+            if self.spill is None:
+                try:
+                    self.spill, self.sidx = get_spill(text['spill'])
+                except KeyError:
+                    pass
+            if self.spill is not None and self.sidx is not None:
+                idx = []
+                for si in self.sidx:
+                    idx.append(base_chan_name.index(si))
+
+                c = _compensate(data[:, idx], self.spill)
+                data[:, idx] = c
+
+            if self.transform == 'logicle':
+                try:
+                    if isinstance(kwargs['r'], Number):
+                        self.r = kwargs['r']
+                    elif numpy.all(numpy.isreal(kwargs['r'])):
+                        self.r = numpy.zeros(data.shape[1])
+                except KeyError:
+                    pass
+                if 'T' in kwargs.keys():
+                    T = kwargs['T']
+                else:
+                    T = 262144
+                if 'm' in kwargs.keys():
+                    m = kwargs['m']
+                else:
+                    m = 4.5
+                if 'scale_max' in kwargs.keys():
+                    scale_max = kwargs['scale_max']
+                else:
+                    scale_max = 1e5
+#                if 'scale_min' in kwargs.keys():
+#                    scale_min = kwargs['scale_min']
+#                else:
+#                    scale_min = 0
+                if 'w' in kwargs.keys():
+                    w = kwargs['w']
+                else:
+                    w = None
                     
-                    for i in to_transform:
-                        dj = data[:, i]
-                        if w is None:
-                            try:
-                                if isinstance(kwargs['r'], Number):
-                                    r = kwargs['r']
-                                elif numpy.all(numpy.isreal(kwargs['r'])):
-                                    r = kwargs['r'][i]
-                                    self.r[i] = r
-                            except KeyError:
-                                r = None
-                                w = .5
-    
-                        else:
+                if 'rquant' in kwargs.keys():
+                    rquant = kwargs['rquant']
+                else:
+                    rquant = None
+                
+                for i in to_transform:
+                    dj = data[:, i]
+                    if w is None:
+                        try: # can this be replaced with if r in kwargs?
+                            if isinstance(kwargs['r'], Number):
+                                r = kwargs['r']
+                            elif numpy.all(numpy.isreal(kwargs['r'])):
+                                r = kwargs['r'][i]
+                                self.r[i] = r
+                        except KeyError:
                             r = None
-                        if rquant is not None:
-                            w = None
-                            r = quantile(dj[dj<0], 0.05)
-    
-    
-                        tmp = scale_max * _logicle(dj, T, m, r, w)
-                        #tmp[tmp<scale_min]=scale_min
-                        data[:, i] = tmp
-                elif self.transform == 'log':
-                    for i in to_transform:
-                        data[:, i] = _log_transform(data[:, i])
-    
-                elif self.transform == "hyperlog":
-                    pass # TODO figure out good default parameters for hyperlog transform
-    
-    
-            unused_path, name = os.path.split(self.filename)
-            name, unused_ext = os.path.splitext(name)
-            tmpfcm = FCMdata(name, data, channels, scchannels,
-                Annotation({'text': text,
-                            'header': header,
-                            'analysis': analysis,
-                            }))
-            try:
-                tmpfcm._r = self.r
-            except AttributeError:
-                pass
-            try:
-                tmpfcm._w = self.w
-            except AttributeError:
-                pass
-            return tmpfcm
+                            w = .5
+
+                    else:
+                        r = None
+                    if rquant is not None:
+                        w = None
+                        r = quantile(dj[dj<0], 0.05)
+
+
+                    tmp = scale_max * _logicle(dj, T, m, r, w)
+                    #tmp[tmp<scale_min]=scale_min
+                    data[:, i] = tmp
+            elif self.transform == 'log':
+                for i in to_transform:
+                    data[:, i] = _log_transform(data[:, i])
+
+            elif self.transform == "hyperlog":
+                pass # TODO figure out good default parameters for hyperlog transform
+
+
+        unused_path, name = os.path.split(self.filename)
+        name, unused_ext = os.path.splitext(name)
+        tmpfcm = FCMdata(name, data, channels, scchannels,
+            Annotation({'text': text,
+                        'header': header,
+                        'analysis': analysis,
+                        }))
+        try:
+            tmpfcm._r = self.r
+        except AttributeError:
+            pass
+        try:
+            tmpfcm._w = self.w
+        except AttributeError:
+            pass
+        return tmpfcm
 
 
     def read_bytes(self, offset, start, stop):
@@ -395,6 +386,7 @@ def loadFCS(filename, transform='logicle', auto_comp=True, spill=None, sidx=None
     tmp = FCSreader(filename, transform, spill=spill, sidx=sidx)
     data = tmp.get_FCMdata(auto_comp, **kwargs)
     tmp._fh.close()
+    del tmp
     return data
 
 def loadMultipleFCS(files, transform='logicle', auto_comp=True, spill=None, sidx=None, **kwargs):
