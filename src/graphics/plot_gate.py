@@ -92,8 +92,13 @@ def plot_threshold_hist(data, gate, ax, chan=None, name=None, **kwargs):
     if 'normed' not in kwargs:
         kwargs['normed'] = True
         
-    if 'edgecolor' not in kwargs:
-        kwargs['edgecolor'] = 'none'
+#    if 'edgecolor' not in kwargs:
+#        kwargs['edgecolor'] = 'none'
+        
+    
+        
+    if 'histtype' not in kwargs:
+        kwargs['histtype'] = 'step'
 
 
     
@@ -102,15 +107,15 @@ def plot_threshold_hist(data, gate, ax, chan=None, name=None, **kwargs):
     
     
     
-    count, bins, patch = ax.hist(data[:,chan], color=bgc, alpha=bga, **kwargs)
+    count, bins, patch = ax.hist(data[:,chan], edgecolor=bgc, alpha=bga, **kwargs)
     
     gate.gate(data, name=name)
     
     if 'bins' in kwargs:
         del kwargs['bins']
 
-    count, bins, patch = ax.hist(data[:,chan], bins=bins, color=z, alpha=alpha, **kwargs)
-    
+    count, bins, patch = ax.hist(data[:,chan], bins=bins, edgecolor=z, alpha=alpha, **kwargs)
+    ax.axvline(gate.vert)
 
 
 def plot_poly_gate(data, gate, ax, chan=None, name=None, **kwargs):
@@ -172,7 +177,7 @@ if __name__ == '__main__':
     
     x.visit('root')
     ax = fig.add_subplot(2,2,3)
-    plot_gate(x,g2,ax, name='thirdgate')
+    plot_gate(x,g2,ax, name='thirdgate', color='blue')
     print x.tree.pprint()
     plt.show()
     
