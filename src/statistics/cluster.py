@@ -77,6 +77,7 @@ class DPMixtureModel(object):
         self.ff = 0.1
         self.aa = -1.0
         self.device = 0
+        self.chunk_size = None
 
         self._prerun = False
         self._run = False
@@ -265,6 +266,8 @@ class DPMixtureModel(object):
         try:
             self.cdp.setdevice(self.device)
             # if the above passed we're cuda enabled...
+            if self.chunk_size is not None:
+                self.cdp.setgpunchunksize(self.chunk_size)
             if self.nclusts % 16:
                 tmp = self.nclusts + (16 - (self.nclusts % 16))
                 warn("Number of clusters, %d, is not a multiple of 16, increasing it to %d" % (self.nclusts, tmp))
