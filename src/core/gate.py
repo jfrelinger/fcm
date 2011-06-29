@@ -173,7 +173,6 @@ def generate_f_score_gate(neg_smaple, pos_sample, chan, beta = 1, theta = 2, hig
     dfa = diff_pseudo_f1(neg_hist[x0:], pos_hist[x0:], beta=beta)
     
     f_cutoff = xs[x0+numpy.argmax(dfa)]
-    print f_cutoff
     
     if high:
         return ThresholdGate(f_cutoff, chan, 'g')
