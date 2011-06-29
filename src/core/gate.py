@@ -51,7 +51,7 @@ class QuadGate(Filter):
     """
     An object to divide a region to four quadrants
     """
-    def gate(self, fcm, chan=None, name=None):
+    def gate(self, fcm, chan=None, name=None, _full=False):
         """
         return gated region
         """
@@ -59,7 +59,11 @@ class QuadGate(Filter):
             chan = self.chan
         
         if name is None:
-            name = self.name
+            if self.name is not '':
+                name = self.name
+            else:
+                name = ''
+
             
         if name is not "" and len(name) != 4:
             raise ValueError('name must be empty or contain 4 items: name is %s' % str(name))
@@ -79,12 +83,19 @@ class QuadGate(Filter):
         if name is "" :
             name = ["q%d"% i  for i in quad.keys()]
             
+        if _full:
+            nodes = []
         for i in quad.keys():
             if True in quad[i]:
                 fcm.tree.visit(cname)
                 node = GatingNode(name[i], root, quad[i])
                 fcm.add_view(node)
-        return fcm
+                if _full:
+                    nodes.append(node)
+        if _full:
+            return nodes
+        else:
+            return fcm
 
 class IntervalGate(Filter):
     """
