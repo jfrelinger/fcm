@@ -170,7 +170,7 @@ def generate_f_score_gate(neg_smaple, pos_sample, chan, beta = 1, theta = 2, hig
     
     x0 = numpy.argmax(neg_hist)
     
-    dfa = diff_pseudo_f1(neg_hist[x0:], pos_hist[x0:], beta=beta)
+    dfa = diff_pseudo_f1(neg_hist[x0:], pos_hist[x0:], beta=beta, theta = theta)
     
     f_cutoff = xs[x0+numpy.argmax(dfa)]
     print f_cutoff

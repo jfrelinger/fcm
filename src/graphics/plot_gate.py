@@ -50,10 +50,11 @@ def plot_threshold_gate(data, gate, ax, chan=None, name=None, **kwargs):
     
     #has to be set after gating...
 
-    if calc_z:
-        z = bilinear_interpolate(data[:, chan[0]], data[:, chan[1]])  
+    if data.shape[0] > 0:
+        if calc_z:
+            z = bilinear_interpolate(data[:, chan[0]], data[:, chan[1]])  
 
-    ax.scatter(data[:,chan[0]],data[:,chan[1]], c=z, s=1, edgecolor='none', alpha=alpha, **kwargs)
+        ax.scatter(data[:,chan[0]],data[:,chan[1]], c=z, s=1, edgecolor='none', alpha=alpha, **kwargs)
     
     if chan[0] == gate.chan:
         ax.axvline(gate.vert)
@@ -157,7 +158,8 @@ def plot_poly_gate(data, gate, ax, chan=None, name=None, **kwargs):
     if calc_z:
         z = bilinear_interpolate(data[:, chan[0]], data[:, chan[1]])  
 
-    ax.scatter(data[:,chan[0]],data[:,chan[1]], c=z, s=1, edgecolor='none', alpha=alpha, **kwargs)
+    if data.shape[0] > 0:
+        ax.scatter(data[:,chan[0]],data[:,chan[1]], c=z, s=1, edgecolor='none', alpha=alpha, **kwargs)
     ax.fill(gate.vert.T[0], gate.vert.T[1], edgecolor='black', facecolor='none') 
     
     
