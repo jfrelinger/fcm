@@ -88,7 +88,7 @@ class QuadGate(Filter):
         for i in quad.keys():
             if True in quad[i]:
                 fcm.tree.visit(cname)
-                node = GatingNode(name[i], root, quad[i])
+                node = GatingNode(name[i-1], root, quad[i])
                 fcm.add_view(node)
                 if _full:
                     nodes.append(node)
