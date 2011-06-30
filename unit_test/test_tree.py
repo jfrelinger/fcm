@@ -22,6 +22,11 @@ class TreeTestCase(unittest.TestCase):
         assert self.t.view() == [1,2,3], 'rename gate1 to foo failed'
         self.assertRaises(KeyError, self.t.rename_node, 'foo', 'gate2')
         
+    def testVisitError(self):
+        self.t.visit('root')
+        self.assertRaises(KeyError, self.t.visit, 2)
+        self.assertRaises(KeyError, self.t.visit, 'this node does not exist')
+        
 if __name__ == '__main__':
     suite1 = unittest.makeSuite(TreeTestCase,'test')
 

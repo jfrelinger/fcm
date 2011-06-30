@@ -143,8 +143,10 @@ class Tree(object):
         '''visit a node in the tree'''
         if isinstance(name, str):
             self.current = self.nodes[name]
-        else: # in this case we assume we're a node type.
+        elif isinstance(name, Node): # in this case we assume we're a node type.
             self.current = name
+        else:
+            raise KeyError("No such Node %s" % str(name))
 
     def get(self, name=None):
         '''return the current node object'''
