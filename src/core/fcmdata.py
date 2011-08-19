@@ -72,13 +72,14 @@ class FCMdata(object):
         else:
             return self.tree.view()[item]
 
+    @property
+    def channels(self):
+        return self.current_node.channels
+    
     def __getattr__(self, name):
-            if name == 'channels':
-                #return Node.__getattribute__(self.current_node(),'channels')
-                return self.current_node().channels
-            elif name in dir(self.current_node().view()):
-                #return Node.__getattribute__(self.current_node(),'view')().__getattribute__(name)
-                return self.current_node().view().__getattribute__(name)
+            if name in dir(self.current_node.view()):
+                #return Node.__getattribute__(self.current_node,'view')().__getattribute__(name)
+                return self.current_node.view().__getattribute__(name)
             else:
                 raise AttributeError("'%s' has no attribue '%s'" % (str(self.__class__), name))
 
@@ -130,6 +131,7 @@ class FCMdata(object):
         """Switch current view of the data"""
         self.tree.visit(name)
 
+    @property
     def current_node(self):
         """return the current node"""
         return self.tree.current

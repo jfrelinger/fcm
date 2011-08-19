@@ -263,9 +263,13 @@ class DPMixtureModel(object):
             
 
         self.cdp = cdpcluster(self.data)
+
         try:
-            self.cdp.setdevice(self.device)
+            self.cdp.getdevice()
             # if the above passed we're cuda enabled...
+            
+            self.cdp.setdevice(self.device)
+            
             if self.chunk_size is not None:
                 self.cdp.setgpunchunksize(self.chunk_size)
             if self.nclusts % 16:
@@ -274,12 +278,13 @@ class DPMixtureModel(object):
                 self.nclusts = tmp
         except RuntimeError:
             pass
+        self._setup(verbose)
         self.pi = zeros((self.nclusts * self.last))
         self.mus = zeros((self.nclusts * self.last, self.d))
         self.sigmas = zeros((self.nclusts * self.last, self.d, self.d))
         
         
-        self._setup(verbose)
+        
         self.cdp.run()
 
 

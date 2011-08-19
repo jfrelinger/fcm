@@ -182,14 +182,18 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     x = fcm.loadFCS('../../sample_data/3FITC_4PE_004.fcs')
     g = PolyGate(numpy.array([[0,0],[500,0],[500,500],[0,500]]), [0,1])
-    g2 = ThresholdGate(500,2)
+    
     g3 = QuadGate([250,300],(2,3))
     fig = plt.figure()
     ax = fig.add_subplot(2,2,1)
     plot_gate(x,g,ax, name="firstgate", alpha=.5, bgalpha=.5)
     ax = fig.add_subplot(2,2,2)
-    plot_gate(x,g2,ax, name="secondgate", chan=(2,3), alpha=.5, bgc='red', c='green')
-    
+    mx = x[:,2].max()
+    print mx
+    g2 = ThresholdGate(mx-1,2)
+    plot_gate(x,g2,ax, name="secondgate", chan=(2,3), alpha=.5)#, bgc='red', c='green')
+    print x.shape
+    print x[:]
     x.visit('root')
     ax = fig.add_subplot(2,2,3)
     plot_gate(x,g3,ax, name=['a','b','c','d'])

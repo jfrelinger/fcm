@@ -12,6 +12,9 @@ class FCMdataTestCase(unittest.TestCase):
         self.pnts = array([[0,1,2],[3,4,5]])
         self.fcm = FCMdata('test_fcm', self.pnts, ['fsc','ssc','cd3'], [0,1])
         
+    def testChannels(self):
+        assert self.fcm.channels[0] == 'fsc', "channel property fails"
+        
     def testGetPnts(self):
         a = randint(0,1)
         b = randint(0,2)
