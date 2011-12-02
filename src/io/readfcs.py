@@ -5,7 +5,7 @@ from fcm import FCMdata
 from fcm.core import Annotation
 from fcm.core.transforms import _logicle, _log_transform, quantile
 from fcm.core.compensate import _compensate, get_spill
-from fcm import UnimplementedFcsDataMode
+from fcm import UnimplementedFcsDataMode, CompensationError
 
 from operator import and_
 from math import log
@@ -78,7 +78,7 @@ class FCSreader(object):
         scchannel_indexes = []
         to_transform = []
         base_chan_name = []
-        for i in range(1, int(text['par']) + 1):
+        for i in range(1, int(text['par']) + 1):    
             base_chan_name.append(text['p%dn' % i])
             try:
                 name = text['p%ds' % i]
@@ -96,6 +96,7 @@ class FCSreader(object):
                         to_transform.append(i - 1)
                 except KeyError:
                     pass
+        
 
 
         if auto_comp:
@@ -106,11 +107,26 @@ class FCSreader(object):
                     pass
             if self.spill is not None and self.sidx is not None:
                 idx = []
-                for si in self.sidx:
-                    idx.append(base_chan_name.index(si))
+                skip = []
+                for j,si in enumerate(self.sidx):
+                    if si in base_chan_name:
+                        idx.append(base_chan_name.index(si))
 
-                c = _compensate(data[:, idx], self.spill)
-                data[:, idx] = c
+                    elif '<%s>' % si in base_chan_name:
+                        skip.append(j)
+                    else:
+                        raise CompensationError('spillover ask for channel (%s) that does not exist' % si)
+                        
+
+                if skip:
+                    spill = numpy.delete(numpy.delete(self.spill, skip,0), skip,1)
+                else:
+                    spill = self.spill
+
+                if spill:
+                    c = _compensate(data[:, idx], spill)
+                    data[:, idx] = c
+
 
             if self.transform == 'logicle':
                 try:
@@ -165,10 +181,13 @@ class FCSreader(object):
                         w = None
                         r = quantile(dj[dj<0], 0.05)
 
-
-                    tmp = scale_max * _logicle(dj, T, m, r, w)
-                    #tmp[tmp<scale_min]=scale_min
-                    data[:, i] = tmp
+                    try:
+                        tmp = scale_max * _logicle(dj, T, m, r, w)
+                        #tmp[tmp<scale_min]=scale_min
+                        data[:, i] = tmp
+                    except RuntimeError:
+                        warn("logicle transform failed, is data already transformed?")
+                        pass # didn't work, what to do?
             elif self.transform == 'log':
                 for i in to_transform:
                     data[:, i] = _log_transform(data[:, i])

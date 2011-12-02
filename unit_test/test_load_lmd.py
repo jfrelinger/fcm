@@ -1,5 +1,5 @@
 import unittest
-from io import FCSreader
+from fcm  import FCSreader
 
 class FCSreaderLMDTestCase(unittest.TestCase):
     def setUp(self):
