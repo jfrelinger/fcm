@@ -81,7 +81,10 @@ class FCSreader(object):
         for i in range(1, int(text['par']) + 1):    
             base_chan_name.append(text['p%dn' % i])
             try:
-                name = text['p%ds' % i]
+                if text['p%ds' % i] not in ['',' ']:
+                    name = text['p%ds' % i]
+                else:
+                    name = text['p%dn' % i]
             except KeyError:
                 name = text['p%dn' % i]
             channels.append(name)
@@ -115,7 +118,7 @@ class FCSreader(object):
                     elif '<%s>' % si in base_chan_name:
                         skip.append(j)
                     else:
-                        raise CompensationError('spillover ask for channel (%s) that does not exist' % si)
+                        raise CompensationError('spillover ask for channel (%s) that does not exist [%s]' % (si, ', '.join(base_chan_name)))
                         
 
                 if skip:
