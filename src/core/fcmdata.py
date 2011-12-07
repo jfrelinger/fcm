@@ -150,36 +150,47 @@ class FCMdata(object):
 
     def logicle(self, channels=None, T=262144, m=4.5, r=None, scale_max=1e5, scale_min=0):
         """return logicle transformed channels"""
+        
         if channels is None:
             channels = self.markers
         return _logicle(self, channels, T, m, r, scale_max, scale_min)
 
     def hyperlog(self, channels, b, d, r, order=2, intervals=1000.0):
         """return hyperlog transformed channels"""
+        
         return _hyperlog(self, channels, b, d, r, order, intervals)
 
-    def log(self, channels):
+    def log(self, channels=None):
         """return log base 10 transformed channels"""
+
+        if channels is None:
+            channels = self.markers        
         return _log(self, channels)
 
     def gate(self, g, chan=None):
         """return gated region of fcm data"""
+        
         return g.gate(self, chan)
 
     def subsample(self, s):
         """return subsampled/sliced fcm data"""
+        
         return s.subsample(self)
 
     def get_cur_node(self):
-        return self.tree.get()
+        """ get current node """
+        
+        return self.current_node()
 
     def add_view(self, node):
         """add a new node to the view tree"""
+        
         self.tree.add_child(node.name, node)
         return self
 
     def summary(self):
         """returns summary of current view"""
+        
         pnts = self.view()
         means = pnts.mean(0)
         stds = pnts.std(0)
@@ -200,6 +211,7 @@ class FCMdata(object):
     def boundary_events(self):
         """returns dictionary of fraction of events in first and last
         channel for each channel"""
+        
         boundary_dict = {}
         for k, chan in enumerate(self.channels):
             col = self.view()[:, k]
