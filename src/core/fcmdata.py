@@ -148,7 +148,7 @@ class FCMdata(object):
         tmarkers = self.markers[:]
         return FCMdata(tpnts, tchannels, tmarkers, tnotes)
 
-    def logicle(self, channels=None, T=262144, m=4.5 * log(10), r=None, scale_max=1e5, scale_min=0):
+    def logicle(self, channels=None, T=262144, m=4.5, r=None, scale_max=1e5, scale_min=0):
         """return logicle transformed channels"""
         if channels is None:
             channels = self.markers
