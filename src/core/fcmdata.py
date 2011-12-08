@@ -180,7 +180,7 @@ class FCMdata(object):
     def get_cur_node(self):
         """ get current node """
         
-        return self.current_node()
+        return self.current_node
 
     def add_view(self, node):
         """add a new node to the view tree"""
