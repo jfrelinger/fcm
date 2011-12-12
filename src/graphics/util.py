@@ -2,6 +2,7 @@ from __future__ import division
 import numpy
 import math
 import pylab
+from fcm.core.transforms import _logicle as logicle
 # from scipy.interpolate import interp2d
 
 def bilinear_interpolate(x, y, bins=None):
@@ -117,6 +118,25 @@ def plot_mu_labels(mu, colors, dims):
         pylab.text(mu[j, x], mu[j, y], str(j), fontsize=12, weight='bold',
                                                   bbox=dict(facecolor=colors[j], alpha=0.5),
                                                   va='center', ha='center')
+
+def set_logicle(ax, xy, T =262144, m=4.5, w=0.5):
+    scale = T*logicle(numpy.array([0, 100, 10**3, 10**4, 10**5]), T, m, None, w)
+    labels = ['0', '10^2', '10^3', '10^4', '10^5']
+    
+    minorraw = numpy.hstack([numpy.linspace(10**i,10**(i+1), 10) for i in range(2,5)])
+    minorvalues = T*logicle(minorraw, T, m, None, w)
+    if xy == 'x':
+        ax.set_xticks(scale)
+        ax.set_xticklabels(labels)
+        ax.set_xticks(minorvalues, minor=True)
+    elif xy == 'y':
+        ax.set_yticks(scale)
+        ax.set_yticklabels(labels)
+        ax.set_yticks(minorvalues, minor=True)
+        
+    else:
+        raise TypeError('Unknown axis to label "%s"' % str(xy))
+    
 
 if __name__ == '__main__':
     import sys

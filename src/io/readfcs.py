@@ -126,7 +126,7 @@ class FCSreader(object):
                 else:
                     spill = self.spill
 
-                if spill:
+                if spill.size:
                     c = _compensate(data[:, idx], spill)
                     data[:, idx] = c
 
