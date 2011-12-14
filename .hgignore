@@ -20,6 +20,7 @@ sample_data/treg/*
 .*\.log
 scratch/*
 build/*
+docs/build/*
 .*setuptools*
 .*egg*
 
