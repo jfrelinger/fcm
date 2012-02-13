@@ -8,7 +8,7 @@ from core import generate_f_score_gate
 from core import BadFCMPointDataTypeError, UnimplementedFcsDataMode
 from core import CompensationError
 from core import load_compensate_matrix, compensate, gen_spill_matrix
-from io import FCSreader, loadFCS, loadMultipleFCS
+from io import FCSreader, loadFCS, loadMultipleFCS, FlowjoWorkspace, load_flowjo_xml
 from core import Subsample, SubsampleFactory, DropChannel
 from core  import logicle, hyperlog
 
@@ -22,6 +22,7 @@ __all__ = [
             'ThresholdGate',
             'FCSreader',
             'Annotation',
+            'FlowjoWorksapce',
             #Exceptions
             'BadFCMPointDataTypeError',
             'UnimplementedFcsDataMode',
@@ -32,6 +33,7 @@ __all__ = [
             'hyperlog',
             'loadFCS',
             'loadMultipleFCS',
-            'load_compensate_matrix'
+            'load_compensate_matrix',
+            'load_flowjo_xml'
             
             ]
