@@ -8,6 +8,8 @@ from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
 from transforms import log_transform as _log
 from tree import Tree
+from io import export_fcs
+
 
 class FCMdata(object):
     """
@@ -136,17 +138,19 @@ class FCMdata(object):
         """return the current node"""
         return self.tree.current
 
-    def copy(self, npnts=None):
+    def copy(self):
         #TODO rewrite so the tree is copied...
         """return a copy of fcm data object"""
-        if npnts is None:
-            tpnts = self.view().copy()
-        else:
-            tpnts = npnts
+        tname = self.name
+        tpnts = self.tree.root.data
         tnotes = self.notes.copy()
         tchannels = self.channels[:]
         tmarkers = self.markers[:]
-        return FCMdata(tpnts, tchannels, tmarkers, tnotes)
+        tscchannels = self.scatters[:]
+        tmp = FCMdata(tname, tpnts, tchannels, tscchannels, tnotes)
+        from copy import deepcopy
+        tmp.tree = deepcopy(self.tree)
+        return tmp
 
     def logicle(self, channels=None, T=262144, m=4.5, r=None, scale_max=1e5, scale_min=0):
         """return logicle transformed channels"""
@@ -218,3 +222,6 @@ class FCMdata(object):
             boundary_dict[chan] = \
                 sum((col == min(col)) | (col == max(col))) / len(col)
         return boundary_dict
+
+    def export(self, file_name):
+        export_fcs(file_name, self.view(), self.channels, self.notes.text)
