@@ -340,7 +340,6 @@ class FCSreader(object):
 
         #count up how many to read in
         num_items = (stop - start + 1) / calcsize(dtype)
-
         tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
         return numpy.array(tmp).reshape((tot, len(tmp) / tot))
 
