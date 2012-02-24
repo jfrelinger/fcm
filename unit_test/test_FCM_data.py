@@ -147,7 +147,21 @@ class FCMdataTestCase(unittest.TestCase):
             tmp = pickle.load(buffer)
         self.assertTrue(all(self.fcm[:] == tmp[:]))
         
+    def testCopy(self):
+        cpy = self.fcm.copy()
+        self.assertFalse(cpy is self.fcm, "copy reproduced the exact same object")
+        self.assertTrue(cpy.tree.pprint() == self.fcm.tree.pprint(), "copy failed to reproduce the view tree")
         
+        # make sure changes to object self.fcm don't show up on cpy
+        verts =  array([[-.1,-.1],[-.1,1.1],[1.1,1.1], [1.1,-.1]])
+        cols = [0,1]
+        g = PolyGate(verts, cols)
+        self.fcm.gate(g)
+        self.assertFalse(cpy.tree.pprint() == self.fcm.tree.pprint(), "copy failed to reproduce the view tree")
+        
+        #make sure tree is actually copied
+        cpy = self.fcm.copy()
+        self.assertTrue(cpy.tree.pprint() == self.fcm.tree.pprint(), "copy failed to reproduce the view tree")
 if __name__ == '__main__':
     suite1 = unittest.makeSuite(FCMdataTestCase,'test')
 

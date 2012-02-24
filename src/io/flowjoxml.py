@@ -27,7 +27,7 @@ class PopulationNode(object):
         return a
     
 
-    def pprint(self, depth):
+    def pprint(self, depth=0):
         j = "  " * depth + self.name + "\n"
         if self.subpops is not None:
             for i in self.subpops:
@@ -53,7 +53,7 @@ class xmlfcsfile(object):
             a.append(self.pops[i].gates)
         return a
     
-    def pprint(self, depth):
+    def pprint(self, depth=0):
         j = "  " * depth + self.name + "\n"
         for i in self.pops:
             j += self.pops[i].pprint(depth+1)
@@ -196,8 +196,8 @@ if __name__ == "__main__":
 #        pass
     
     a = load_flowjo_xml('/home/jolly/Projects/fcm/scratch/flowjoxml/pretty.xml')
-#    print a.file_names
-#    print a.gates
+    print a.file_names
+    print a.gates
     print a.comp.keys(), '\n', a.comp['Comp Matrix']
-    print a.tubes['Specimen_001_A1_A01.fcs'].comp
-#    print a.pprint()
+    print a.tubes['Specimen_001_A1_A01.fcs'].comp[1] - a.comp['Comp Matrix'][1]
+    print a.pprint()
