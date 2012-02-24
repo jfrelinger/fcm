@@ -8,6 +8,8 @@ from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
 from transforms import log_transform as _log
 from tree import Tree
+from io import export_fcs
+
 
 class FCMdata(object):
     """
@@ -220,3 +222,6 @@ class FCMdata(object):
             boundary_dict[chan] = \
                 sum((col == min(col)) | (col == max(col))) / len(col)
         return boundary_dict
+
+    def export(self, file_name):
+        export_fcs(file_name, self.view(), self.channels, self.notes.text)
