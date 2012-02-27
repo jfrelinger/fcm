@@ -1,7 +1,7 @@
 """Provide access to data stored in FCS files"""
 
 from warnings import warn
-from fcm import FCMdata
+from fcm.core import FCMdata
 from fcm.core import Annotation
 from fcm.core.transforms import _logicle, _log_transform, quantile
 from fcm.core.compensate import _compensate, get_spill

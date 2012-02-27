@@ -8,7 +8,7 @@ from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
 from transforms import log_transform as _log
 from tree import Tree
-from io import export_fcs
+#from fcm.io.export_to_fcs import export_fcs
 
 
 class FCMdata(object):
@@ -224,4 +224,8 @@ class FCMdata(object):
         return boundary_dict
 
     def export(self, file_name):
+        '''
+        export out current view to a fcs file
+        '''
+        from fcm.io import export_fcs
         export_fcs(file_name, self.view(), self.channels, self.notes.text)

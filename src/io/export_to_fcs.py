@@ -4,7 +4,6 @@ Created on Feb 24, 2012
 @author: Jacob Frelinger
 '''
 
-import struct
 
 def text_size(dict,delim):
     rslt = delim
