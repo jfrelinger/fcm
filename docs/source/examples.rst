@@ -1,10 +1,12 @@
+.. py:currentmodule:: fcm
+
 Examples using fcm
 ==================
 
 Loading fcs data
 ----------------
 
-fcm provides the loadFCS function to load fcs files:
+fcm provides the :py:func:`loadFCS` function to load fcs files:
 
 .. code-block:: python
 
@@ -18,8 +20,9 @@ fcm provides the loadFCS function to load fcs files:
     (94569, 4)
 
 
-Since the FCMData object returned by loadFCS delegates to underlying numpy
-array, you can pass the FCMData object to most numpy functions
+Since the :py:class:`FCMdata` object returned by :py:func:`loadFCS` delegates to
+underlying numpy array, you can pass the :py:class:`FCMdata` object
+to most numpy functions
 
 .. code-block:: python
 
@@ -41,6 +44,22 @@ array, you can pass the FCMData object to most numpy functions
     plt.scatter(data[:,0],data[:,1], s=1, edgecolors='none')
     plt.show()
 
-foo
-bar
+:py:class:`FCMdata` objects also provide some basic QA via the
+:py:meth:`FCMdata.summary` method which shows the means, and standard
+deviations of each channel, along with the :py:meth:`FCMdata.boundary_events`
+method to inspect the number of events along the boundaries.
 
+Gating and working withe the view tree
+--------------------------------------
+Typical flow analysis focuses on finding cell subsets of interest via gating.
+fcm has objects representing several types of gates, :py:class:`PolyGate`, 
+:py:class:`QuadGate`, :py:class:`IntervalGate`, and :py:class:`ThresholdGate`,
+in addition to gate like filter objects, :py:class:`Subsample`, and
+:py:class:`DropChannel`
+
+The view :py:class:`Tree` manages the subsets of the original fcs file data as
+we define new subsets by gating or filtering.  To look at the structure of the
+tree, you can get the current node by the :py:meth:`FCMdata.current_node` and
+to view the layout of the tree use the :py:meth:`FCMdata.tree.pprint` method,
+and to move to different nodes in the tree use either the
+:py:meth:`FCMdata.visit` or :py:meth:`FCMdata.tree.visit` methods. 

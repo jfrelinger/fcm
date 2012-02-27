@@ -15,25 +15,24 @@ from core  import logicle, hyperlog
 __all__ = [
             #Objects
             'FCMdata',
-            'FCMcollection'
+            'FCMcollection',
             'PolyGate',
             'QuadGate',
             'IntervalGate',
             'ThresholdGate',
             'FCSreader',
             'Annotation',
-            'FlowjoWorksapce',
+            'FlowjoWorkspace',
             #Exceptions
             'BadFCMPointDataTypeError',
             'UnimplementedFcsDataMode',
             'CompensationError',
             #functions
-            'generate_f_score_gate'
+            'generate_f_score_gate',
             'logicle',
             'hyperlog',
             'loadFCS',
             'loadMultipleFCS',
             'load_compensate_matrix',
             'load_flowjo_xml',
-            'export_fcs'
             ]

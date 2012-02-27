@@ -120,6 +120,7 @@ class FCMdata(object):
 
     def get_spill(self):
         """return the spillover matrix from the original fcs used in compisating"""
+        
         try:
             return self.notes.text['spill']
         except KeyError:
@@ -127,25 +128,28 @@ class FCMdata(object):
 
     def view(self):
         """return the current view of the data"""
+        
         return self.tree.view()
 
     def visit(self, name):
         """Switch current view of the data"""
+        
         self.tree.visit(name)
 
     @property
     def current_node(self):
         """return the current node"""
+        
         return self.tree.current
 
     def copy(self):
-        #TODO rewrite so the tree is copied...
         """return a copy of fcm data object"""
+        
         tname = self.name
         tpnts = self.tree.root.data
         tnotes = self.notes.copy()
         tchannels = self.channels[:]
-        tmarkers = self.markers[:]
+        
         tscchannels = self.scatters[:]
         tmp = FCMdata(tname, tpnts, tchannels, tscchannels, tnotes)
         from copy import deepcopy

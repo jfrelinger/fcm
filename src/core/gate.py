@@ -22,9 +22,11 @@ class Filter(object):
         """do the actual gating here."""
         pass
 
-class PolyGate(Filter):
-    """An object representing a polygonal gatable region"""
 
+class PolyGate(Filter):
+    """
+    An object representing a polygonal gatable region
+    """
     def gate(self, fcm, chan=None, invert=False, name=None):
         """
         return gated region of FCM data
