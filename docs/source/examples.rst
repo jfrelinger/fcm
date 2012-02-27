@@ -63,3 +63,7 @@ tree, you can get the current node by the :py:meth:`FCMdata.current_node` and
 to view the layout of the tree use the :py:meth:`FCMdata.tree.pprint` method,
 and to move to different nodes in the tree use either the
 :py:meth:`FCMdata.visit` or :py:meth:`FCMdata.tree.visit` methods. 
+
+
+.. plot:: example_scripts/gate_example.py
+   :include-source:
