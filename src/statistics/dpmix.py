@@ -179,7 +179,7 @@ class DPNormalMixture(object):
             densities = gpustats.mvnpdf_multi(self.data, mu, Sigma, weights=weights.flatten(), get=True, logged=True)
             #return gpustats.sampler.sample_discrete(densities, logged=True)
             #return  gpustats.sampler.sample_discrete(densities, logged=True)
-            return sample_discrete(densities, logged=False).squeeze()
+            return sample_discrete(densities, logged=True).squeeze()
 
         else:
             densities = compmixnormpdf(self.data,weights.flatten(),mu,Sigma)

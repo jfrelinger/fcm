@@ -168,7 +168,7 @@ class DPMixtureModel(object):
         #TODO move hyperparameter settings here
         try:
             if _has_gpu and self.device is not None:
-                os.environ['CUDA_DEVICE'] = self.device
+                os.environ['CUDA_DEVICE'] = str(self.device)
         except AttributeError:
             pass
         self.cdp = DPNormalMixture(self.data,ncomp=self.nclusts,
