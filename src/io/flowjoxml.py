@@ -63,7 +63,8 @@ class xmlfcsfile(object):
     
 class FlowjoWorkspace(object):
     '''
-    Doccument to handle opening flowjow workspaces
+    Object representing the files, gates, and compensation matricies from a 
+    flowjo xml worksapce
     '''
 
 

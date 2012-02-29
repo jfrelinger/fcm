@@ -83,7 +83,39 @@ class FCMcollection(DictMixin):
                 reduce(numpy.logical_and, bits))
         result_dict[self.name] = results
         return result_dict
+    
+    def log(self, *args, **kwargs):
+        #TODO make it atomic?
+        for i in self.fcmdict:
+            self.fcmdict[i].log(*args,**kwargs)
+        return self
+    
+    def logicle(self, *args, **kwargs):
+        #TODO make it atomic?
+        for i in self.fcmdict:
+            self.fcmdict[i].logicle(*args, **kwargs)
+        return self
+    
+    def gate(self, *args, **kwargs):
+        for i in self.fcmdict:
+            self.fcmdict[i].gate(*args, **kwargs)
+        return self
+    
+    def summary(self):
+        return '\n'.join(['%s:\n%s' % (i,self.fcmdict[i].summary()) for i in self.fcmdict])
 
+    def classify(self, mixture):
+        rslt = {}
+        for i in self.fcmdict:
+            rslt[i] = mixture.classify(self.fcmdict[i])
+        return rslt
+    
+    def fit(self, model, *args, **kwargs):
+        rslt = {}
+        for i in self.fcmdict:
+            rslt[i] = model.fit(self.fcmdict[i], *args, **kwargs)
+        return rslt
+    
 if __name__ == '__main__':
     from io import loadFCS
     f1 = loadFCS('../../sample_data/3FITC_4PE_004.fcs')
