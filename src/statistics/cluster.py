@@ -9,7 +9,9 @@ from numpy import zeros, outer, sum, eye, array
 from numpy.random import multivariate_normal as mvn
 from scipy.cluster import vq
 
-from dpmix import DPNormalMixture
+from dpmix import DPNormalMixture, _has_gpu
+if _has_gpu:
+    import os
 from dp_cluster import DPCluster, DPMixture
 from kmeans import KMeans
 
@@ -164,6 +166,11 @@ class DPMixtureModel(object):
             self._load_sigma_at_fit()
         
         #TODO move hyperparameter settings here
+        try:
+            if _has_gpu and self.device is not None:
+                os.environ['CUDA_DEVICE'] = self.device
+        except AttributeError:
+            pass
         self.cdp = DPNormalMixture(self.data,ncomp=self.nclusts,
                                     alpha0=self.alpha0, nu0=self.nu0,
                                     Phi0=self.Phi0,
