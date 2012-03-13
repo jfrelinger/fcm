@@ -61,13 +61,13 @@ class FCMdata(object):
     def __getitem__(self, item):
         """return FCMdata.pnts[i] by name or by index"""
 
-        if type(item) == type(''):
+        if isinstance(item,str):
             try:
                 return self.get_channel_by_name(item)
             except:
                 raise ValueError('field named a not found')
-        elif type(item) == tuple:
-            if type(item[0]) == type(''):
+        elif isinstance(item,tuple):
+            if isinstance(item[0],str):
                 return self.get_channel_by_name(list(item))
             else:
                 return self.tree.view()[item]
@@ -103,14 +103,27 @@ class FCMdata(object):
     def name_to_index(self, channels):
         """Return the channel indexes for the named channels"""
 
-        if type(channels) == type(''):
+        if isinstance(channels,str):
             channels = [channels]
-        to_return = [ self.channels.index(i) for i in channels]
-        return to_return
+        idx = []
+        for i in channels:
+            try:
+                idx.append(self.channels.index(i))
+            except ValueError:
+                try:
+                    for j in range(1,int(self.notes.text['par'])+1):
+                        if i == self.notes.text['p%dn' % j]:
+                            idx.append(self.channels.index(self.notes.text['p%ds' % j]))
+                except ValueError:
+                    raise ValueError('%s is not in list' % i)
+        if idx:
+            return idx
+        else:
+            raise ValueError('field named a not found: %s' % str(channels))
 
     def get_channel_by_name(self, channels):
         """Return the data associated with specific channel names"""
-
+        
         return self.tree.view()[:, self.name_to_index(channels)]
 
     def get_markers(self):
