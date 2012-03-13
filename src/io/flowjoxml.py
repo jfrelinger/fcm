@@ -133,7 +133,7 @@ def load_flowjo_xml(fh):
         for mat in mats.iter('CompensationMatrix'):
             prefix = mat.attrib['prefix']
             suffix = mat.attrib['suffix']
-            print prefix, suffix
+            
             a = len([ i for i in mat.iter('Channel')])
             comp = numpy.zeros((a,a))
             chans = []
