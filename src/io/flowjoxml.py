@@ -3,8 +3,8 @@ Created on Feb 11, 2012
 
 @author: Jacob Frelinger
 '''
-import xml.etree.ElementTree as xml
-import sys
+
+import xml.etree.cElementTree as xml
 import numpy
 from fcm import PolyGate
 
@@ -13,10 +13,13 @@ class PopulationNode(object):
     '''
     node for gates in xml tree
     '''
-    def __init__(self, name, gate):
+    def __init__(self, name, gate, subpops = None):
         self.name = name
         self.gate = gate
-        self.subpops = {}
+        if subpops is None:
+            self.subpops = {}
+        else:
+            self.subpops = subpops
         
     @property
     def gates(self):
@@ -29,22 +32,30 @@ class PopulationNode(object):
 
     def pprint(self, depth=0):
         j = "  " * depth + self.name + "\n"
-        if self.subpops is not None:
-            for i in self.subpops:
-                j += self.subpops[i].pprint(depth+1)
-            
+        for i in self.subpops:
+            j += self.subpops[i].pprint(depth+1)            
         return j    
+    
+    def apply_gates(self, file):
+        self.gate.gate(file)
+        node = file.current_node
+        for i in self.subpops:
+            file.visit(node)
+            self.subpops[i].apply_gates(file)
+        
+    
 class xmlfcsfile(object):
     '''
     container object for fcs file defined in a flowjo xml file
     '''
     def __init__(self, name, comp=None, pops = None):
         self.name = name
-        if pops is not None:
+        if pops is None:
             self.pops = {}
         else:
             self.pops = pops
         self.comp = comp
+        
     
     @property
     def gates(self):
@@ -55,11 +66,17 @@ class xmlfcsfile(object):
     
     def pprint(self, depth=0):
         j = "  " * depth + self.name + "\n"
-        for i in self.pops:
-            j += self.pops[i].pprint(depth+1)
+        if self.pops is not None:
+            for i in self.pops:
+                j += self.pops[i].pprint(depth+1)
             
         return j
     
+    def apply_gates(self, file):
+        node = file.current_node
+        for i in self.pops:
+            file.visit(node)
+            self.pops[i].apply_gates(file)
     
 class FlowjoWorkspace(object):
     '''
@@ -136,7 +153,7 @@ def load_flowjo_xml(fh):
         else:
             fcsfile = xmlfcsfile(sample.attrib['name'])                      
         # find gates
-        fcsfile.pops = find_pops(node)
+        fcsfile.pops = find_pops(sample)
         files[fcsfile.name] = fcsfile
                             
     if len(comps) > 0:
@@ -146,59 +163,56 @@ def load_flowjo_xml(fh):
  
  
 def find_pops(node):
-    subpops= {}
-    for pop in node.iter('Population'):
-        
-        for popgate in pop.iter('PolygonGate'):
-            rect = popgate.find('PolyRect')
-            if rect is not None:
-                verts = []
-                axis = (rect.attrib['xAxisName'], rect.attrib['yAxisName'])
-                for vert in rect.iter('Vertex'):
-                    verts.append((float(vert.attrib['x']), float(vert.attrib['y'])))
-                gate = PolyGate(verts, axis, rect.attrib['name'])
-                subpop = PopulationNode(rect.attrib['name'], gate)
-                a = pop.find('Population')
-                if a is not None:
-
-                    subpop.subgates = find_pops(a)
-                subpops[rect.attrib['name']] = subpop
-            poly = popgate.find('Polygon')
-            if poly is not None:
-                verts = []
-                axis = (poly.attrib['xAxisName'], poly.attrib['yAxisName'])
-                for vert in poly.iter('Vertex'):
-                    verts.append((float(vert.attrib['x']), float(vert.attrib['y'])))
-                gate = PolyGate(verts, axis, poly.attrib['name'])
-                subpop = PopulationNode(poly.attrib['name'], gate)
-                a = pop.find('Population')
-                if a is not None:
-                    subpop.subgates = find_pops(a)
-                subpops[poly.attrib['name']] = subpop
-            elip = popgate.find('Ellipse')
-            if elip is not None:
-                pass # TODO implement ellipse gate
-#                verts = []
-#                axis = (elip.attrib['xAxisName'], elip.attrib['yAxisName'])
-#                for vert in poly.iter('Vertex'):
-#                    verts.append(float(vert.attrib['x']), float(vert.attrib['y']))
-#                files[node.attrib['name']][elip.attrib['name']] = PolyGate(verts, axis, rect.attrib['name'])   
-    if subpops:
-        return subpops
-    else:
+    pops = {}
+    for i in node:
+        if i.tag == 'Population':
+            pops[i.attrib['name']] = build_pops(i)
+    return pops
+    
+    
+def build_pops(node, depth=1):
+    #print "*"*depth, node.tag, node.attrib['name']
+    name = node.attrib['name']
+    
+    children = {}
+    for i in node:
+        if i.tag == 'Population':
+            tmp = build_pops(i, depth+1)
+            if tmp is not None:
+                children[i.attrib['name']] = tmp
+            
+        elif i.tag == 'PolygonGate':
+            for j in i:
+                if j.tag == 'PolyRect':
+                    g = build_Polygon(j)
+                elif j.tag == 'Polygon':
+                    g = build_Polygon(j)
+    try:
+        return  PopulationNode(name, g, children)
+    except UnboundLocalError:
         return None
     
-if __name__ == "__main__":
-#    a = FlowjoWorkspace({"a":0})
-#    print a.files
-#    try:
-#        a.files = 'bar'
-#    except AttributeError:
-#        pass
+
+def build_Polygon(rect):
+    verts = []
+    axis = (rect.attrib['xAxisName'], rect.attrib['yAxisName'])
+    for vert in rect.iter('Vertex'):
+        verts.append((float(vert.attrib['x']), float(vert.attrib['y'])))
+    return PolyGate(verts, axis, rect.attrib['name'])
+
+                    
+        
+    return None
     
+if __name__ == "__main__":
+    import fcm
     a = load_flowjo_xml('/home/jolly/Projects/fcm/scratch/flowjoxml/pretty.xml')
     print a.file_names
     print a.gates
     print a.comp.keys(), '\n', a.comp['Comp Matrix']
     print a.tubes['Specimen_001_A1_A01.fcs'].comp[1] - a.comp['Comp Matrix'][1]
-    print a.pprint()
+    print a.tubes['Specimen_001_A1_A01.fcs'].pprint()
+    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A01.fcs')
+    print x.channels
+    a.tubes['Specimen_001_A1_A01.fcs'].apply_gates(x)
+    print x.tree.pprint()
