@@ -228,12 +228,12 @@ if __name__ == "__main__":
     a = load_flowjo_xml('/home/jolly/Projects/fcm/scratch/flowjoxml/pretty.xml')
     print a.file_names
     print a.gates
-#    print a.comp.keys(), '\n', a.comp['Comp Matrix']
-#    print a.tubes['Specimen_001_A1_A01.fcs'].comp[1] - a.comp['Comp Matrix'][1]
-#    print a.tubes['Specimen_001_A1_A01.fcs'].pprint()
-#    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A01.fcs')
-#    print x.channels
-#    a.tubes['Specimen_001_A1_A01.fcs'].apply_gates(x)
-#    print x.tree.pprint()
-#    x.visit('foo1')
-#    print x.current_node.name, x.shape
+    print a.comp.keys(), '\n', a.comp['Comp Matrix']
+    print a.tubes['Specimen_001_A1_A01.fcs'].comp[1] - a.comp['Comp Matrix'][1]
+    print a.tubes['Specimen_001_A1_A01.fcs'].pprint()
+    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A01.fcs')
+    print x.channels
+    a.tubes['Specimen_001_A1_A01.fcs'].apply_gates(x)
+    print x.tree.pprint()
+    x.visit('foo1')
+    print x.current_node.name, x.shape
