@@ -24,10 +24,12 @@ class PopulationNode(object):
     @property
     def gates(self):
         a = [self.gate]
-        if self.subpops:
-            for i in self.subpops:
-                a.extend(self.subpops[i].gates)
-        return a
+        for i in self.subpops:
+            a.extend([self.subpops[i].gates])
+        if len(a) == 1:
+            return a[0]
+        else:
+            return a
     
 
     def pprint(self, depth=0):
@@ -126,8 +128,14 @@ def load_flowjo_xml(fh):
     files = {}
     chans = []
     comps = {}
+    prefix = ''
+    suffix = ''
+    psdict = {}
     for mats in root.iter('CompensationMatrices'):
         for mat in mats.iter('CompensationMatrix'):
+            prefix = mat.attrib['prefix']
+            suffix = mat.attrib['suffix']
+            
             a = len([ i for i in mat.iter('Channel')])
             comp = numpy.zeros((a,a))
             chans = []
@@ -136,6 +144,7 @@ def load_flowjo_xml(fh):
                 for j,sub in enumerate(chan.iter('ChannelValue')):
                     comp[i,j] = float(sub.attrib['value'])
             comps[mat.attrib['name']] = (chans,comp)
+            psdict[mat.attrib['name']] = (prefix, suffix)
     
     for node in root.iter('Sample'):
         # pull out comp matrix
@@ -146,14 +155,15 @@ def load_flowjo_xml(fh):
             for keyword in keywords.iter('Keyword'):
                 if 'name' in keyword.attrib:
                     if keyword.attrib['name'] == 'FJ_CompMatrixName':
-                        comp_matrix = comps[keyword.attrib['value']] 
+                        comp_matrix = comps[keyword.attrib['value']]
+                        prefix, suffix = psdict[keyword.attrib['value']]
         sample = node.find('SampleNode')
         if comp_matrix: 
             fcsfile = xmlfcsfile(sample.attrib['name'], comp = comp_matrix)
         else:
             fcsfile = xmlfcsfile(sample.attrib['name'])                      
         # find gates
-        fcsfile.pops = find_pops(sample)
+        fcsfile.pops = find_pops(sample, prefix, suffix)
         files[fcsfile.name] = fcsfile
                             
     if len(comps) > 0:
@@ -162,40 +172,49 @@ def load_flowjo_xml(fh):
         return FlowjoWorkspace(files)
  
  
-def find_pops(node):
+def find_pops(node, prefix=None, suffix=None):
     pops = {}
     for i in node:
         if i.tag == 'Population':
-            pops[i.attrib['name']] = build_pops(i)
+            pops[i.attrib['name']] = build_pops(i, prefix, suffix)
     return pops
     
     
-def build_pops(node, depth=1):
+def build_pops(node,prefix=None, suffix=None):
     #print "*"*depth, node.tag, node.attrib['name']
     name = node.attrib['name']
     
     children = {}
     for i in node:
         if i.tag == 'Population':
-            tmp = build_pops(i, depth+1)
+            tmp = build_pops(i, prefix, suffix)
             if tmp is not None:
                 children[i.attrib['name']] = tmp
             
         elif i.tag == 'PolygonGate':
             for j in i:
                 if j.tag == 'PolyRect':
-                    g = build_Polygon(j)
+                    g = build_Polygon(j, prefix, suffix)
                 elif j.tag == 'Polygon':
-                    g = build_Polygon(j)
+                    g = build_Polygon(j, prefix, suffix)
     try:
         return  PopulationNode(name, g, children)
     except UnboundLocalError:
         return None
     
 
-def build_Polygon(rect):
+def build_Polygon(rect, prefix=None, suffix=None):
     verts = []
-    axis = (rect.attrib['xAxisName'], rect.attrib['yAxisName'])
+    axis = [rect.attrib['xAxisName'], rect.attrib['yAxisName']]
+    if prefix is not None:
+        for i,j in enumerate(axis):
+            if j.startswith(prefix):
+                axis[i] = j.replace(prefix,'')
+    if suffix is not None:
+        for i,j in enumerate(axis):
+            if j.endswith(suffix):
+                axis[i] = j[:-(len(suffix))]
+    axis = tuple(axis)
     for vert in rect.iter('Vertex'):
         verts.append((float(vert.attrib['x']), float(vert.attrib['y'])))
     return PolyGate(verts, axis, rect.attrib['name'])
@@ -216,3 +235,5 @@ if __name__ == "__main__":
     print x.channels
     a.tubes['Specimen_001_A1_A01.fcs'].apply_gates(x)
     print x.tree.pprint()
+    x.visit('foo1')
+    print x.current_node.name, x.shape

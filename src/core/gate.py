@@ -23,6 +23,7 @@ class Filter(object):
         pass
 
 
+
 class PolyGate(Filter):
     """
     An object representing a polygonal gatable region
@@ -38,7 +39,7 @@ class PolyGate(Filter):
         for i,j in enumerate(chan):
             if isinstance(j,str):
                 chan[i] = fcm.name_to_index(j)[0]
-        print chan
+        
         if name is None:
             name = self.name
         #idxs = points_in_poly(self.vert, fcm.view()[:, chan])
@@ -53,6 +54,12 @@ class PolyGate(Filter):
         node = GatingNode(name, fcm.get_cur_node(), idxs)
         fcm.add_view(node)
         return fcm
+    
+    def __repr__(self):
+        if self.name:
+            return '<fcm.core.gate.PolyGate "%s" object>' % self.name
+        else:
+            return '<fcm.core.gate.PolyGate "%s">'
 
 class QuadGate(Filter):
     """

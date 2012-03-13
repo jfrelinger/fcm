@@ -67,7 +67,7 @@ class SubsampleNode(Node):
         self.parent = parent
         self.param = param
         self.prefix = 's'
-        if type(param) == tuple:
+        if isinstance(param,tuple):
             self.channels = self.parent.channels[param[1]]
 
     def view(self):
