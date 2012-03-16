@@ -123,6 +123,32 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         #print diffs
         print 'MCMC fitting took %0.3f' % (end)
         
+    def testRefernce(self):
+        print "starting mcmc"
+        true, data = self.generate_data()
+        m = data.mean(0)
+        s = data.std(0)
+#        true_mean = {}
+#        for i in gen_mean:
+#            true_mean[i] = (gen_mean[i]-m)/s
+        
+        model = DPMixtureModel(3,100,100,1)
+        model.seed = 1
+        model.load_ref(array(true))
+        start = time()
+        r = model.fit(data, verbose=False)
+        end = time() - start
+        
+        diffs = {}
+        #print 'r.mus:', r.mus()
+        for i in gen_mean:
+            #diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
+            diffs[i] = np.abs(r.mus()[i]-gen_mean[i])
+            #print i, gen_mean[i],r.mus()[i], diffs[i], np.vdot(diffs[i],diffs[i])
+            assert( np.vdot(diffs[i],diffs[i]) < 1)
+        #print diffs
+        print 'MCMC fitting took %0.3f' % (end)
+        
     def setUp(self):
         self.mu = array([0,0])
         self.sig = eye(2)

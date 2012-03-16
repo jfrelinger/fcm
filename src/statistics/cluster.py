@@ -5,7 +5,7 @@ Created on Oct 30, 2009
 '''
 
 from warnings import warn
-from numpy import zeros, outer, sum, eye, array
+from numpy import zeros, outer, sum, eye, array, mean, cov
 from numpy.random import multivariate_normal as mvn
 from numpy.random import seed
 from scipy.cluster import vq
@@ -55,6 +55,7 @@ class DPMixtureModel(object):
         self._prior_mu = None
         self._prior_pi = None
         self._prior_sigma = None
+        self._ref = None
         
         self.type = type
         self.seed = None
@@ -144,8 +145,18 @@ class DPMixtureModel(object):
         self._load_pi = True
 
     def load_ref(self, ref):
-        raise Exception("load_ref not implemented yet")
+        self._ref = ref
 
+    def _load_ref_at_fit(self, pnts):
+        
+        self.prior_mu = array([mean(pnts[self._ref==i],0) for i in range(self.nclusts)])
+        
+        self.prior_sigma = zeros((self.nclusts, pnts.shape[1], pnts.shape[1]))
+        for i in range(self.nclusts):
+            self.prior_sigma[i,:,:] = cov(pnts[self._ref==i],rowvar=0)
+        
+        tot = float(pnts.shape[0])
+        self.prior_pi = array([pnts[self._ref==i].shape[0]/tot for i in range(self.nclusts)])
     
     def fit(self, fcmdata,  verbose=False):
         """
@@ -164,7 +175,11 @@ class DPMixtureModel(object):
             raise ValueError("pnts is the wrong shape")
         self.n, self.d = self.data.shape
         
-        
+        if self._ref is not None:
+            ident = True
+            self._load_ref_at_fit(pnts)
+        else:
+            ident = False
         if self.prior_mu is not None:
             self._load_mu_at_fit()
         if self.prior_sigma is not None:
@@ -194,7 +209,7 @@ class DPMixtureModel(object):
                                            mu0=self._prior_mu, Sigma0=self._prior_sigma, 
                                            weights0=self._prior_pi, alpha0=self.alpha0,
                                            gpu=None)
-            self.cdp.sample(niter=self.iter, nburn=self.burnin, thin=1)
+            self.cdp.sample(niter=self.iter, nburn=self.burnin, thin=1, ident=ident)
                 
         self.pi = zeros((self.nclusts * self.last))
         self.mus = zeros((self.nclusts * self.last, self.d))
