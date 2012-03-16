@@ -41,6 +41,7 @@ logicle_extension = Extension('fcm.core._logicle',
                               )
 setup(name='fcm',
       version='0.8',
+      url='http://code.google.com/p/py-fcm/',
       packages=['fcm', 'fcm.core', 'fcm.graphics', 'fcm.gui', 'fcm.io', 'fcm.statistics' ],
       package_dir = {'fcm': 'src'},
       package_data= {'': ['data/*']},

@@ -54,12 +54,7 @@ class PolyGate(Filter):
         node = GatingNode(name, fcm.get_cur_node(), idxs)
         fcm.add_view(node)
         return fcm
-    
-    def __repr__(self):
-        if self.name:
-            return '<fcm.core.gate.PolyGate "%s" object>' % self.name
-        else:
-            return '<fcm.core.gate.PolyGate "%s">'
+
 
 class QuadGate(Filter):
     """
