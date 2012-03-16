@@ -10,12 +10,10 @@ from numpy.random import multivariate_normal
 from fcm.statistics.dp_cluster import DPMixture
 from time import time
 
-
-
 gen_mean = {
     0 : [0, 5],
-    1 : [-10, 0],
-    2 : [-10, 10]
+    1 : [-5, 0],
+    2 : [5,0]
 }
 
 gen_sd = {
@@ -30,10 +28,30 @@ gen_corr = {
     2 : 0
 }
 
-group_weights = [0.6, 0.3, 0.1]
+group_weights = [0.4, 0.3, 0.3]
+
+#gen_mean = {
+#    0 : [0, 5],
+#    1 : [-10, 0],
+#    2 : [-10, 10]
+#}
+#
+#gen_sd = {
+#    0 : [0.5, 0.5],
+#    1 : [.5, 1],
+#    2 : [1, .25]
+#}
+#
+#gen_corr = {
+#    0 : 0.5,
+#    1 : -0.5,
+#    2 : 0
+#}
+#
+#group_weights = [0.6, 0.3, 0.1]
 
 class DPMixtureModel_TestCase(unittest.TestCase):
-    def generate_data(self,n=1e6, k=2, ncomps=3, seed=1):
+    def generate_data(self,n=1e4, k=2, ncomps=3, seed=1):
         
         npr.seed(seed)
         data_concat = []
@@ -57,8 +75,32 @@ class DPMixtureModel_TestCase(unittest.TestCase):
     
         return (np.concatenate(labels_concat),
                 np.concatenate(data_concat, axis=0))
+
+    def testBEMFitting(self):
+        print 'starting BEM'
+        true, data = self.generate_data()
+        m = data.mean(0)
+        s = data.std(0)
+#        true_mean = {}
+#        for i in gen_mean:
+#            true_mean[i] = (gen_mean[i]-m)/s
         
-    def testFitting(self):
+        model = DPMixtureModel(3,2000,100,1, type='BEM')
+        model.seed = 1
+        start = time()
+        r = model.fit(data, verbose=False)
+        print 'r', r.mus()
+        end = time() - start
+        
+        diffs = {}
+        for i in gen_mean:
+            diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
+            #print i, gen_mean[i], diffs[i], np.vdot(diffs[i],diffs[i])
+            assert( np.vdot(diffs[i],diffs[i]) < 1)
+        print 'BEM fitting took %0.3f' % (end)
+#        
+    def testMCMCFitting(self):
+        print "starting mcmc"
         true, data = self.generate_data()
         m = data.mean(0)
         s = data.std(0)
@@ -67,17 +109,19 @@ class DPMixtureModel_TestCase(unittest.TestCase):
 #            true_mean[i] = (gen_mean[i]-m)/s
         
         model = DPMixtureModel(3,100,100,1)
-        
+        model.seed = 1
         start = time()
         r = model.fit(data, verbose=False)
         end = time() - start
         
         diffs = {}
+        #print 'r.mus:', r.mus()
         for i in gen_mean:
             diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
+            #print i, gen_mean[i], diffs[i], np.vdot(diffs[i],diffs[i])
             assert( np.vdot(diffs[i],diffs[i]) < 1)
         #print diffs
-        print 'fitting took %0.3f' % (end)
+        print 'MCMC fitting took %0.3f' % (end)
         
     def setUp(self):
         self.mu = array([0,0])

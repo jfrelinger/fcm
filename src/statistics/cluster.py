@@ -7,11 +7,11 @@ Created on Oct 30, 2009
 from warnings import warn
 from numpy import zeros, outer, sum, eye, array
 from numpy.random import multivariate_normal as mvn
+from numpy.random import seed
 from scipy.cluster import vq
 
-from dpmix import DPNormalMixture, _has_gpu
-if _has_gpu:
-    import os
+from dpmix import DPNormalMixture, BEM_DPNormalMixture
+
 from dp_cluster import DPCluster, DPMixture
 from kmeans import KMeans
 
@@ -23,7 +23,7 @@ class DPMixtureModel(object):
     '''
 
 
-    def __init__(self, nclusts, iter=1000, burnin=100, last=5):
+    def __init__(self, nclusts, iter=1000, burnin=100, last=5, type='mcmc'):
         '''
         DPMixtureModel(fcmdata, nclusts, iter=1000, burnin= 100, last= 5)
         fcmdata = a fcm data object
@@ -41,19 +41,24 @@ class DPMixtureModel(object):
         self.last = last
         
 
+        self.gamma0=10
+        self.m0 = None
         self.alpha0=1
         self.nu0=None
         self.Phi0=None
         self.prior_mu=None
         self.prior_sigma=None
         self.prior_pi=None
-        self.alpha_a0=1
-        self.alpha_b0=1
+        self.e0=1
+        self.f0=1
         
         self._prior_mu = None
         self._prior_pi = None
         self._prior_sigma = None
-
+        
+        self.type = type
+        self.seed = None
+        
     def load_mu(self, mu):
         if len(mu.shape) > 2:
             raise ValueError('Shape of Mu is wrong')
@@ -165,29 +170,36 @@ class DPMixtureModel(object):
         if self.prior_sigma is not None:
             self._load_sigma_at_fit()
         
+        if self.seed is not None:
+            seed(self.seed)
+        else:
+            from datetime import datetime
+            seed(datetime.now().microsecond)
+            
         #TODO move hyperparameter settings here
-        try:
-            if _has_gpu and self.device is not None:
-                os.environ['CUDA_DEVICE'] = str(self.device)
-        except AttributeError:
-            pass
-        self.cdp = DPNormalMixture(self.data,ncomp=self.nclusts,
-                                    alpha0=self.alpha0, nu0=self.nu0,
-                                    Phi0=self.Phi0,
-                                    mu0=self._prior_mu, Sigma0=self._prior_sigma,
-                                    weights0=self._prior_pi, alpha_a0=1,
-                                    alpha_b0=self.alpha_b0, gpu=None)
-        
-
-        
-        
+        if self.type.lower() == 'bem':
+            self.cdp = BEM_DPNormalMixture(self.data,ncomp=self.nclusts,
+                                           gamma0=self.gamma0, m0=self.m0,
+                                           nu0=self.nu0, Phi0=self.Phi0, 
+                                           e0=self.e0, f0=self.f0,
+                                           mu0=self._prior_mu, Sigma0=self._prior_sigma, 
+                                           weights0=self._prior_pi, alpha0=self.alpha0,
+                                           gpu=None)
+            self.cdp.optimize(self.iter)
+        else:
+            self.cdp = DPNormalMixture(self.data,ncomp=self.nclusts,
+                                           gamma0=self.gamma0, m0=self.m0,
+                                           nu0=self.nu0, Phi0=self.Phi0, 
+                                           e0=self.e0, f0=self.f0,
+                                           mu0=self._prior_mu, Sigma0=self._prior_sigma, 
+                                           weights0=self._prior_pi, alpha0=self.alpha0,
+                                           gpu=None)
+            self.cdp.sample(niter=self.iter, nburn=self.burnin, thin=1)
+                
         self.pi = zeros((self.nclusts * self.last))
         self.mus = zeros((self.nclusts * self.last, self.d))
         self.sigmas = zeros((self.nclusts * self.last, self.d, self.d))
-        
-        
-        
-        self.cdp.sample(self.iter, self.burnin, 1)
+           
 
         self._run = True #we've fit the mixture model
 
@@ -206,15 +218,24 @@ class DPMixtureModel(object):
         """
         
         if self._run:
-            #pi = self.cdp.weights[-self.last] / sum(self.cdp.weight[-self.last])
-            rslts = []
-            for i in range(self.last):
+            if self.type.lower() == 'bem':
+                rslts = []
                 for j in range(self.nclusts):
-                    tmp = DPCluster(self.cdp.weights[-i,j], (self.cdp.mu[-i,j] * self.s) + self.m, self.cdp.Sigma[-i,j] * outer(self.s, self.s))
-                    tmp.nmu = self.cdp.mu[-i,j]
-                    tmp.nsigma = self.cdp.Sigma[-i,j]
+                    tmp = DPCluster(self.cdp.weights[j], (self.cdp.mu[j] * self.s) + self.m, self.cdp.Sigma[j] * outer(self.s, self.s))
+                    tmp.nmu = self.cdp.mu[j]
+                    tmp.nsigma = self.cdp.Sigma[j]
                     rslts.append(tmp)
-            tmp = DPMixture(rslts, self.m, self.s)
+                tmp = DPMixture(rslts, self.m, self.s)                
+            else:
+                #pi = self.cdp.weights[-self.last] / sum(self.cdp.weight[-self.last])
+                rslts = []
+                for i in range(self.last):
+                    for j in range(self.nclusts):
+                        tmp = DPCluster(self.cdp.weights[-i,j], (self.cdp.mu[-i,j] * self.s) + self.m, self.cdp.Sigma[-i,j] * outer(self.s, self.s))
+                        tmp.nmu = self.cdp.mu[-i,j]
+                        tmp.nsigma = self.cdp.Sigma[-i,j]
+                        rslts.append(tmp)
+                tmp = DPMixture(rslts, self.m, self.s)
             return tmp
         else:
             return None # TODO raise exception
