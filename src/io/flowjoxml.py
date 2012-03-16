@@ -155,8 +155,13 @@ def load_flowjo_xml(fh):
             for keyword in keywords.iter('Keyword'):
                 if 'name' in keyword.attrib:
                     if keyword.attrib['name'] == 'FJ_CompMatrixName':
-                        comp_matrix = comps[keyword.attrib['value']]
-                        prefix, suffix = psdict[keyword.attrib['value']]
+                        if keyword.attrib['value'] in comps:
+                            comp_matrix = comps[keyword.attrib['value']]
+                            
+                        else:
+                            comp_matrix = None
+                        if keyword.attrib['value'] in psdict:
+                            prefix, suffix = psdict[keyword.attrib['value']]
         sample = node.find('SampleNode')
         if comp_matrix: 
             fcsfile = xmlfcsfile(sample.attrib['name'], comp = comp_matrix)
