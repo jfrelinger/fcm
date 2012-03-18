@@ -1,7 +1,7 @@
 from numpy import reshape, max, loadtxt, eye
 from numpy.linalg import solve, inv
 from fcmexceptions import CompensationError
-from tree import TransformNode
+from tree import CompensationNode
 from StringIO import StringIO
 
 def get_spill(text):
@@ -25,7 +25,7 @@ def compensate(fcm, S=None, markers=None, comp=False, scale=False):
         msg = 'Attempted compnesation on markers without spillover matrix'
         raise CompensationError(msg)
     if S is None:
-        S, m = get_spill(fcm.annotate.text['SPILL'])
+        S, m = get_spill(fcm.notes.text['spill'])
         if markers is None:
             markers = m
     idx = fcm.name_to_index(markers)
@@ -33,7 +33,7 @@ def compensate(fcm, S=None, markers=None, comp=False, scale=False):
     c = _compensate(fcm.view()[:, idx], S, comp, scale)
     new = fcm.view()[:]
     new[:, idx] = c
-    node = TransformNode('', fcm.get_cur_node, new)
+    node = CompensationNode('', fcm.get_cur_node, new, m,S)
     fcm.add_view(node)
     return new
 

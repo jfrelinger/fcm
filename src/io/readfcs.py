@@ -102,103 +102,6 @@ class FCSreader(object):
         
 
 
-        if auto_comp:
-            if self.spill is None:
-                try:
-                    self.spill, self.sidx = get_spill(text['spill'])
-                except KeyError:
-                    pass
-            if self.spill is not None and self.sidx is not None:
-                idx = []
-                skip = []
-                for j,si in enumerate(self.sidx):
-                    if si in base_chan_name:
-                        idx.append(base_chan_name.index(si))
-
-                    elif '<%s>' % si in base_chan_name:
-                        skip.append(j)
-                    else:
-                        raise CompensationError('spillover ask for channel (%s) that does not exist [%s]' % (si, ', '.join(base_chan_name)))
-                        
-
-                if skip:
-                    spill = numpy.delete(numpy.delete(self.spill, skip,0), skip,1)
-                else:
-                    spill = self.spill
-
-                if spill.size:
-                    c = _compensate(data[:, idx], spill)
-                    data[:, idx] = c
-
-
-            if self.transform == 'logicle':
-                try:
-                    if isinstance(kwargs['r'], Number):
-                        self.r = kwargs['r']
-                    elif numpy.all(numpy.isreal(kwargs['r'])):
-                        self.r = numpy.zeros(data.shape[1])
-                except KeyError:
-                    pass
-                if 'T' in kwargs.keys():
-                    T = kwargs['T']
-                else:
-                    T = 262144
-                if 'm' in kwargs.keys():
-                    m = kwargs['m']
-                else:
-                    m = 4.5
-                if 'scale_max' in kwargs.keys():
-                    scale_max = kwargs['scale_max']
-                else:
-                    scale_max = 1e5
-#                if 'scale_min' in kwargs.keys():
-#                    scale_min = kwargs['scale_min']
-#                else:
-#                    scale_min = 0
-                if 'w' in kwargs.keys():
-                    w = kwargs['w']
-                else:
-                    w = None
-                    
-                if 'rquant' in kwargs.keys():
-                    rquant = kwargs['rquant']
-                else:
-                    rquant = None
-                
-                for i in to_transform:
-                    dj = data[:, i]
-                    if w is None:
-                        try: # can this be replaced with if r in kwargs?
-                            if isinstance(kwargs['r'], Number):
-                                r = kwargs['r']
-                            elif numpy.all(numpy.isreal(kwargs['r'])):
-                                r = kwargs['r'][i]
-                                self.r[i] = r
-                        except KeyError:
-                            r = None
-                            w = .5
-
-                    else:
-                        r = None
-                    if rquant is not None:
-                        w = None
-                        r = quantile(dj[dj<0], 0.05)
-
-                    try:
-                        tmp = scale_max * _logicle(dj, T, m, r, w)
-                        #tmp[tmp<scale_min]=scale_min
-                        data[:, i] = tmp
-                    except RuntimeError:
-                        warn("logicle transform failed, is data already transformed?")
-                        pass # didn't work, what to do?
-            elif self.transform == 'log':
-                for i in to_transform:
-                    data[:, i] = _log_transform(data[:, i])
-
-            elif self.transform == "hyperlog":
-                pass # TODO figure out good default parameters for hyperlog transform
-
-
         unused_path, name = os.path.split(self.filename)
         name, unused_ext = os.path.splitext(name)
         tmpfcm = FCMdata(name, data, channels, scchannels,
@@ -206,6 +109,50 @@ class FCSreader(object):
                         'header': header,
                         'analysis': analysis,
                         }))
+        if self.transform == 'logicle':
+            try:
+                if isinstance(kwargs['r'], Number):
+                    self.r = kwargs['r']
+                elif numpy.all(numpy.isreal(kwargs['r'])):
+                    self.r = numpy.zeros(data.shape[1])
+            except KeyError:
+                self.r = None
+            if 'T' in kwargs.keys():
+                T = kwargs['T']
+            else:
+                T = 262144
+                
+            if 'm' in kwargs.keys():
+                m = kwargs['m']
+            else:
+                m = 4.5
+                
+            if 'scale_max' in kwargs.keys():
+                scale_max = kwargs['scale_max']
+            else:
+                scale_max = 1e5
+
+#            if 'w' in kwargs.keys():
+#                w = kwargs['w']
+#            else:
+#                w = None
+
+            
+            tmpfcm.logicle(to_transform, T, m, self.r, scale_max)
+            
+        elif self.transform == 'log':
+            tmpfcm.log(to_transform)
+            
+            
+        if auto_comp:
+            if self.sidx is None and self.spill is None:
+                if tmpfcm.get_spill():
+                    sidx, spill = get_spill(tmpfcm.get_spill())
+                    tmpfcm.compensate(sidx=sidx, spill=spill)
+            else:
+                tmpfcm.compensate(sidx=self.sidx, spill=self.spill)
+
+            
         try:
             tmpfcm._r = self.r
         except AttributeError:

@@ -8,6 +8,7 @@ from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
 from transforms import log_transform as _log
 from tree import Tree
+from fcm.core.compensate import compensate
 #from fcm.io.export_to_fcs import export_fcs
 
 
@@ -197,6 +198,11 @@ class FCMdata(object):
         """return subsampled/sliced fcm data"""
         
         return s.subsample(self)
+    
+    def compensate(self, sidx=None, spill=None):
+        '''Compensate the fcm data'''
+        compensate(self,S=spill, markers=sidx)
+        return self
 
     def get_cur_node(self):
         """ get current node """

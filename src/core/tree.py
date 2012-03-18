@@ -56,6 +56,20 @@ class TransformNode(Node):
             return self.parent.channels
         else:
             raise AttributeError("'%s' has no attribue '%s'" % (str(self.__class__), name))
+        
+class CompensationNode(TransformNode):
+    '''
+    Compensated Data Node
+    '''
+
+    def __init__(self, name, parent, data, sidx, spill):
+        self.name = name
+        self.parent = parent
+        self.data = data
+        self.sidx = sidx
+        self.spill = spill
+        self.prefix = 'c'
+        
 
 class SubsampleNode(Node):
     """
