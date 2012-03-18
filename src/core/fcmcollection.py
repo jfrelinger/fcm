@@ -96,6 +96,11 @@ class FCMcollection(DictMixin):
             self.fcmdict[i].logicle(*args, **kwargs)
         return self
     
+    def compensate(self, *args, **kwargs):
+        for i in self.fcmdict:
+            self.fcmdict[i].compensate(*args, **kwargs)
+        return self
+    
     def gate(self, *args, **kwargs):
         for i in self.fcmdict:
             self.fcmdict[i].gate(*args, **kwargs)
