@@ -20,8 +20,12 @@ class Node(object):
 
         return self.data
 
-    def pprint(self, depth):
-        return "  " * depth + self.name + "\n"
+    def pprint(self, depth, size):
+        tmp = "  " * depth + self.name
+        if size:
+            tmp = tmp + " " + str(self.view().shape[0])
+    
+        return tmp + "\n"
 
     def __getattr__(self, name):
         if name == 'channels':
@@ -212,13 +216,13 @@ class Tree(object):
             del self.nodes[old_name] # remove old node.
 
 
-    def pprint(self):
-        return self._rpprint(self.root, 0)
+    def pprint(self, size=False):
+        return self._rpprint(self.root, 0, size)
 
-    def _rpprint(self, n, d):
-        tmp = n.pprint(d)
+    def _rpprint(self, n, d, size=False):
+        tmp = n.pprint(d, size)
         for i in self.children(n):
-            tmp += self._rpprint(i, d + 1)
+            tmp += self._rpprint(i, d + 1, size)
         return tmp
 
 if __name__ == '__main__':
