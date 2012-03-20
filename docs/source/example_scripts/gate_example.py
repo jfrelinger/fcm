@@ -2,7 +2,7 @@ import fcm
 import matplotlib.pyplot as plt
 
 #load FCS data
-data = fcm.loadFCS('../../sample_data/3FITC_4PE_004.fcs')
+data = fcm.loadFCS('3FITC_4PE_004.fcs')
 
 #define a gate
 gate1 = fcm.PolyGate([(400,100),(400,300),(600,300),(600,100)], (0,1))
@@ -12,7 +12,8 @@ gate1.gate(data)
 
 # outputs:
 # root
-#  g1
+#  t1
+#    g1
 print data.tree.pprint()
 
 # g1 isn't and informative name, so lets rename it events
@@ -20,11 +21,12 @@ current_node = data.current_node
 data.tree.rename_node(current_node.name, 'events')
 # outputs:
 # root
-#  events
+#  t1
+#    events
 print data.tree.pprint()
 
-#return to the root node and plot
-data.tree.visit('root')
+#return to the transformed node and plot
+data.tree.visit('t1')
 plt.scatter(data[:,0],data[:,1], s=1, edgecolors='none', c='grey')
 
 #and visit the subset of interest to plot

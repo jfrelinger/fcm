@@ -33,6 +33,8 @@ to most numpy functions
     array([ 538.76464803,  421.57733507,  340.03599488,  341.17367213])
     >>> import pylab
     >>> pylab.scatter(data[:,0],data[:,1], s=1, edgecolors='none')
+    >>> pylab.xlabel(data.channels[0])
+    >>> pylab.ylabel(data.channels[1])
     >>> pylab.show()
     
 
@@ -42,6 +44,8 @@ to most numpy functions
     from fcm import loadFCS
     data = loadFCS('../sample_data/3FITC_4PE_004.fcs')
     plt.scatter(data[:,0],data[:,1], s=1, edgecolors='none')
+    plt.xlabel(data.channels[0])
+    plt.ylabel(data.channels[1])
     plt.show()
 
 :py:class:`FCMdata` objects also provide some basic QA via the
@@ -67,5 +71,17 @@ and to move to different nodes in the tree use either the
 
 .. plot:: example_scripts/gate_example.py
    :include-source:
+
+
+Chaining Commands
+*****************
+TODO
+
+Working with collections
+************************
+Since often the same analysis is applied to several fcs files, fcm has a
+collections object with methods that apply to each file in the collection.
+Below is an example of loading several files, and applying a common gate to
+each of them.
 
 
