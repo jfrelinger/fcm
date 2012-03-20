@@ -111,7 +111,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         model = DPMixtureModel(3,100,100,1)
         model.seed = 1
         start = time()
-        r = model.fit(data, verbose=False)
+        r = model.fit(data, verbose=10)
         end = time() - start
         
         diffs = {}
@@ -136,7 +136,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         model.seed = 1
         model.load_ref(array(true))
         start = time()
-        r = model.fit(data, verbose=False)
+        r = model.fit(data, verbose=True)
         end = time() - start
         
         diffs = {}

@@ -60,6 +60,7 @@ class DPMixtureModel(object):
         self.type = type
         self.seed = None
         
+        
     def load_mu(self, mu):
         if len(mu.shape) > 2:
             raise ValueError('Shape of Mu is wrong')
@@ -199,7 +200,7 @@ class DPMixtureModel(object):
                                            e0=self.e0, f0=self.f0,
                                            mu0=self._prior_mu, Sigma0=self._prior_sigma, 
                                            weights0=self._prior_pi, alpha0=self.alpha0,
-                                           gpu=None)
+                                           gpu=None, verbose=verbose)
             self.cdp.optimize(self.iter)
         else:
             self.cdp = DPNormalMixture(self.data,ncomp=self.nclusts,
@@ -208,7 +209,7 @@ class DPMixtureModel(object):
                                            e0=self.e0, f0=self.f0,
                                            mu0=self._prior_mu, Sigma0=self._prior_sigma, 
                                            weights0=self._prior_pi, alpha0=self.alpha0,
-                                           gpu=None)
+                                           gpu=None, verbose=verbose)
             self.cdp.sample(niter=self.iter, nburn=self.burnin, thin=1, ident=ident)
                 
         self.pi = zeros((self.nclusts * self.last))
