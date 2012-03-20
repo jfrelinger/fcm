@@ -239,6 +239,6 @@ if __name__ == "__main__":
     x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A01.fcs')
     print x.channels
     a.tubes['Specimen_001_A1_A01.fcs'].apply_gates(x)
-    print x.tree.pprint()
+    print x.tree.pprint(size=True)
     x.visit('foo1')
     print x.current_node.name, x.shape

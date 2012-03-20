@@ -147,7 +147,7 @@ class FCSreader(object):
         if auto_comp:
             if self.sidx is None and self.spill is None:
                 if tmpfcm.get_spill():
-                    sidx, spill = get_spill(tmpfcm.get_spill())
+                    spill, sidx = get_spill(tmpfcm.get_spill())
                     tmpfcm.compensate(sidx=sidx, spill=spill)
             else:
                 tmpfcm.compensate(sidx=self.sidx, spill=self.spill)

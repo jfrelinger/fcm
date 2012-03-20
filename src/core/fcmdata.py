@@ -201,6 +201,7 @@ class FCMdata(object):
     
     def compensate(self, sidx=None, spill=None):
         '''Compensate the fcm data'''
+        
         compensate(self,S=spill, markers=sidx)
         return self
 
