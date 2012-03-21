@@ -172,7 +172,7 @@ class FCMdata(object):
 
     def logicle(self, channels=None, T=262144, m=4.5, r=None, scale_max=1e5, scale_min=0):
         """return logicle transformed channels"""
-        
+        print "LOGICLE:", T, m, r, scale_max
         if channels is None:
             channels = self.markers
         return _logicle(self, channels, T, m, r, scale_max, scale_min)
@@ -201,7 +201,7 @@ class FCMdata(object):
     
     def compensate(self, sidx=None, spill=None):
         '''Compensate the fcm data'''
-        
+        print spill, sidx
         compensate(self,S=spill, markers=sidx)
         return self
 

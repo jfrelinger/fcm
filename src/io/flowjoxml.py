@@ -145,7 +145,12 @@ def load_flowjo_xml(fh):
                     comp[i,j] = float(sub.attrib['value'])
             comps[mat.attrib['name']] = (chans,comp)
             psdict[mat.attrib['name']] = (prefix, suffix)
+
+    table = root.find('CalibrationTables')
+    if table:
+        table = parse_table(table[0])
     
+        
     for node in root.iter('Sample'):
         # pull out comp matrix
         keywords = node.find('Keywords')
@@ -168,7 +173,7 @@ def load_flowjo_xml(fh):
         else:
             fcsfile = xmlfcsfile(sample.attrib['name'])                      
         # find gates
-        fcsfile.pops = find_pops(sample, prefix, suffix)
+        fcsfile.pops = find_pops(sample, prefix, suffix, table)
         files[fcsfile.name] = fcsfile
                             
     if len(comps) > 0:
@@ -177,56 +182,73 @@ def load_flowjo_xml(fh):
         return FlowjoWorkspace(files)
  
  
-def find_pops(node, prefix=None, suffix=None):
+def find_pops(node, prefix=None, suffix=None, table=None):
     pops = {}
     for i in node:
         if i.tag == 'Population':
-            pops[i.attrib['name']] = build_pops(i, prefix, suffix)
+            pops[i.attrib['name']] = build_pops(i, prefix, suffix, table)
     return pops
     
     
-def build_pops(node,prefix=None, suffix=None):
+def build_pops(node,prefix=None, suffix=None, table=None):
     #print "*"*depth, node.tag, node.attrib['name']
     name = node.attrib['name']
     
     children = {}
     for i in node:
         if i.tag == 'Population':
-            tmp = build_pops(i, prefix, suffix)
+            tmp = build_pops(i, prefix, suffix, table)
             if tmp is not None:
                 children[i.attrib['name']] = tmp
             
         elif i.tag == 'PolygonGate':
             for j in i:
                 if j.tag == 'PolyRect':
-                    g = build_Polygon(j, prefix, suffix)
+                    g = build_Polygon(j, prefix, suffix, table)
                 elif j.tag == 'Polygon':
-                    g = build_Polygon(j, prefix, suffix)
+                    g = build_Polygon(j, prefix, suffix, table)
     try:
         return  PopulationNode(name, g, children)
     except UnboundLocalError:
         return None
     
 
-def build_Polygon(rect, prefix=None, suffix=None):
+def build_Polygon(rect, prefix=None, suffix=None, table=None):
     verts = []
     axis = [rect.attrib['xAxisName'], rect.attrib['yAxisName']]
+
+    replaced = [False, False]
     if prefix is not None:
         for i,j in enumerate(axis):
             if j.startswith(prefix):
                 axis[i] = j.replace(prefix,'')
+                #replaced[i] = True
     if suffix is not None:
         for i,j in enumerate(axis):
             if j.endswith(suffix):
                 axis[i] = j[:-(len(suffix))]
+                #replaced[i] = True
     axis = tuple(axis)
     for vert in rect.iter('Vertex'):
-        verts.append((float(vert.attrib['x']), float(vert.attrib['y'])))
+        if replaced[0]:
+            x = table[(float(vert.attrib['x']))]
+        else:
+            x = float(vert.attrib['x'])
+        if replaced[1]:
+            y = table[(float(vert.attrib['y']))]
+        else:
+            y = float(vert.attrib['y'])
+        verts.append((x,y))
     return PolyGate(verts, axis, rect.attrib['name'])
 
                     
-        
-    return None
+def parse_table(table):
+    tmp = table.text.split(',')
+    count = len(tmp)/2
+    transform = {}
+    for i in range(count):
+        transform[int(tmp[i*2])] = float(tmp[i*2+1])
+    return transform
     
 if __name__ == "__main__":
     import fcm
