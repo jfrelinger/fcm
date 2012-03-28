@@ -6,8 +6,26 @@ Created on Feb 11, 2012
 
 import xml.etree.cElementTree as xml
 import numpy
+import bisect
 from fcm import PolyGate
 
+class InterpTable(object):
+    '''
+    a look up table that linearly interperlates between values
+    '''
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        
+    def __getitem__(self, v):
+        j = bisect.bisect_left(self.x, v)
+        i = j-1
+        if i < 0 :
+            return self.y[0]
+        if j >= len(self.x) :
+            return self.y[ -1 ]
+        return self.y[i] + (v-self.x[i])*(self.y[j]-self.y[i])/(self.x[j]-self.x[i])
+        
 
 class PopulationNode(object):
     '''
@@ -39,6 +57,7 @@ class PopulationNode(object):
         return j    
     
     def apply_gates(self, file):
+        #print self.gate.name, self.gate.chan
         self.gate.gate(file)
         node = file.current_node
         for i in self.subpops:
@@ -145,7 +164,7 @@ def load_flowjo_xml(fh):
                     comp[i,j] = float(sub.attrib['value'])
             comps[mat.attrib['name']] = (chans,comp)
             psdict[mat.attrib['name']] = (prefix, suffix)
-
+    
     table = root.find('CalibrationTables')
     if table:
         table = parse_table(table[0])
@@ -167,6 +186,8 @@ def load_flowjo_xml(fh):
                             comp_matrix = None
                         if keyword.attrib['value'] in psdict:
                             prefix, suffix = psdict[keyword.attrib['value']]
+                        else:
+                            prefix, suffix = (None, None)
         sample = node.find('SampleNode')
         if comp_matrix: 
             fcsfile = xmlfcsfile(sample.attrib['name'], comp = comp_matrix)
@@ -205,9 +226,11 @@ def build_pops(node,prefix=None, suffix=None, table=None):
             for j in i:
                 if j.tag == 'PolyRect':
                     g = build_Polygon(j, prefix, suffix, table)
+                    #print g.chan
                 elif j.tag == 'Polygon':
                     g = build_Polygon(j, prefix, suffix, table)
-    try:
+                    #print g.chan
+    try:            
         return  PopulationNode(name, g, children)
     except UnboundLocalError:
         return None
@@ -216,7 +239,7 @@ def build_pops(node,prefix=None, suffix=None, table=None):
 def build_Polygon(rect, prefix=None, suffix=None, table=None):
     verts = []
     axis = [rect.attrib['xAxisName'], rect.attrib['yAxisName']]
-
+    #print axis, prefix, suffix, 
     replaced = [False, False]
     if prefix is not None:
         for i,j in enumerate(axis):
@@ -229,25 +252,32 @@ def build_Polygon(rect, prefix=None, suffix=None, table=None):
                 axis[i] = j[:-(len(suffix))]
                 #replaced[i] = True
     axis = tuple(axis)
+    #print axis
     for vert in rect.iter('Vertex'):
         if replaced[0]:
+            print 'reversing x'
             x = table[(float(vert.attrib['x']))]
         else:
             x = float(vert.attrib['x'])
         if replaced[1]:
+            print 'reversing y'
             y = table[(float(vert.attrib['y']))]
         else:
             y = float(vert.attrib['y'])
         verts.append((x,y))
+    print rect.attrib['name'], axis, verts
     return PolyGate(verts, axis, rect.attrib['name'])
 
                     
 def parse_table(table):
     tmp = table.text.split(',')
     count = len(tmp)/2
-    transform = {}
+    xs = []
+    ys = []
     for i in range(count):
-        transform[int(tmp[i*2])] = float(tmp[i*2+1])
+        ys.append(float(tmp[i*2]))
+        xs.append(float(tmp[i*2+1]))
+    transform = InterpTable(xs,ys)
     return transform
     
 if __name__ == "__main__":
@@ -256,11 +286,16 @@ if __name__ == "__main__":
     print a.file_names
     print a.gates
     print a.comp.keys(), '\n', a.comp['Comp Matrix']
+    sidx, spill = a.comp['Comp Matrix']
     print a.tubes['Specimen_001_A1_A01.fcs'].comp[1] - a.comp['Comp Matrix'][1]
     print a.tubes['Specimen_001_A1_A01.fcs'].pprint()
-    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A01.fcs')
+    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A01.fcs', auto_comp=False, transform=None)#, sidx=sidx, spill=spill, transform='logicle')
+    x.logicle()
+    x.compensate(sidx=sidx,spill=spill)
     print x.channels
     a.tubes['Specimen_001_A1_A01.fcs'].apply_gates(x)
     print x.tree.pprint(size=True)
     x.visit('foo1')
-    print x.current_node.name, x.shape
+    print x.current_node.name, x.shape, 238712
+    x.visit('cd4')
+    print x.current_node.name, x.shape, 43880

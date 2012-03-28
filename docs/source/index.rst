@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to fcm's documentation!
-===============================
+###############################
 
 Contents:
 
@@ -13,10 +13,12 @@ Contents:
 
    Home <self>
    examples
+   clustering
    documentation
+   
 
 Indices and tables
-==================
+##################
 
 * :ref:`genindex`
 * :ref:`modindex`

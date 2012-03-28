@@ -137,11 +137,12 @@ class FCSreader(object):
 #            else:
 #                w = None
 
-            
-            tmpfcm.logicle(to_transform, T, m, self.r, scale_max)
+            if to_transform:
+                tmpfcm.logicle(to_transform, T, m, self.r, scale_max)
             
         elif self.transform == 'log':
-            tmpfcm.log(to_transform)
+            if to_transform:
+                tmpfcm.log(to_transform)
             
             
         if auto_comp:
