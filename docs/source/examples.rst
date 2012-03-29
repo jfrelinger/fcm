@@ -75,13 +75,43 @@ and to move to different nodes in the tree use either the
 
 Chaining Commands
 *****************
-TODO
+Since most methods on :py:class:`FCMdata` return itself you can chain commands
+together one after another. for example
+
+.. code-block:: python
+
+    >>> data.gate(g1).gate(g2).gate(g3)
+    
 
 Working with collections
 ************************
 Since often the same analysis is applied to several fcs files, fcm has a
-collections object with methods that apply to each file in the collection.
+:py:class:`FCMcollection` object with methods that apply to each file in the collection.
 Below is an example of loading several files, and applying a common gate to
 each of them.
+
+.. code-block:: python
+
+   >>> data1 = loadFCS('file1.fcs')
+   >>> data2 = loadFCS('file2.fcs')
+   >>> data3 = loadFCS('file3.fcs')
+   >>> collection = FCMcollection('test',[data1, data2, data3])
+   >>> print collection.keys()
+   ['file1','file2','file3']  
+   >>> collection.gate(g1) 
+   >>> print collection['file2'].tree.pprint()
+   root
+     t1
+       c1
+         g1
+   >>> print collection['file1'].tree.pprint()
+   root
+     t1
+       c1
+         g1
+
+you can use the :py:func:`loadMultipleFCS` function to load several fcs files to help
+with building collections.
+
 
 
