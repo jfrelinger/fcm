@@ -1,4 +1,4 @@
 .. py:currentmodule:: fcm
 
-Gallery
+Example gallery
 ##################
