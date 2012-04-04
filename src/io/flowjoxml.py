@@ -6,25 +6,9 @@ Created on Feb 11, 2012
 
 import xml.etree.cElementTree as xml
 import numpy
-import bisect
 from fcm import PolyGate
 
-class InterpTable(object):
-    '''
-    a look up table that linearly interperlates between values
-    '''
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        
-    def __getitem__(self, v):
-        j = bisect.bisect_left(self.x, v)
-        i = j-1
-        if i < 0 :
-            return self.y[0]
-        if j >= len(self.x) :
-            return self.y[ -1 ]
-        return self.y[i] + (v-self.x[i])*(self.y[j]-self.y[i])/(self.x[j]-self.x[i])
+
         
 
 class PopulationNode(object):
@@ -64,6 +48,11 @@ class PopulationNode(object):
             file.visit(node)
             self.subpops[i].apply_gates(file)
         
+    def logicle(self, T=262144, m=4.5, r=None, scale_max=1e5, scale_min=0):
+        '''
+        convert gate cordinates to logicle scale from linear scale
+        '''
+        pass #TODO: implement
     
 class xmlfcsfile(object):
     '''
@@ -98,7 +87,15 @@ class xmlfcsfile(object):
         for i in self.pops:
             file.visit(node)
             self.pops[i].apply_gates(file)
-    
+            
+    def logicle(self, T=262144, m=4.5, r=None, scale_max=1e5, scale_min=0):
+        '''
+        convert gate cordinates to logicle scale from linear scale
+        '''
+        for i in self.gates:
+            i.logicle(T,m,r,scale_max,scale_min)
+            
+            
 class FlowjoWorkspace(object):
     '''
     Object representing the files, gates, and compensation matricies from a 
@@ -133,6 +130,13 @@ class FlowjoWorkspace(object):
             j += self.tubes[i].pprint(0)
         
         return j
+    
+    def logicle(self, T=262144, m=4.5, r=None, scale_max=1e5, scale_min=0):
+        '''
+        convert gate cordinates for all tubes into logicle scale from linear scale
+        '''
+        for i in self.tubes:
+            i._logicle(T,m,r,scale_max,scale_min)
             
 def load_flowjo_xml(fh):
     '''
@@ -164,12 +168,7 @@ def load_flowjo_xml(fh):
                     comp[i,j] = float(sub.attrib['value'])
             comps[mat.attrib['name']] = (chans,comp)
             psdict[mat.attrib['name']] = (prefix, suffix)
-    
-    table = root.find('CalibrationTables')
-    if table:
-        table = parse_table(table[0])
-    
-        
+           
     for node in root.iter('Sample'):
         # pull out comp matrix
         keywords = node.find('Keywords')
@@ -194,7 +193,7 @@ def load_flowjo_xml(fh):
         else:
             fcsfile = xmlfcsfile(sample.attrib['name'])                      
         # find gates
-        fcsfile.pops = find_pops(sample, prefix, suffix, table)
+        fcsfile.pops = find_pops(sample, prefix, suffix)
         files[fcsfile.name] = fcsfile
                             
     if len(comps) > 0:
@@ -203,33 +202,33 @@ def load_flowjo_xml(fh):
         return FlowjoWorkspace(files)
  
  
-def find_pops(node, prefix=None, suffix=None, table=None):
+def find_pops(node, prefix=None, suffix=None):
     pops = {}
     for i in node:
         if i.tag == 'Population':
-            pops[i.attrib['name']] = build_pops(i, prefix, suffix, table)
+            pops[i.attrib['name']] = build_pops(i, prefix, suffix)
     return pops
     
     
-def build_pops(node,prefix=None, suffix=None, table=None):
-    #print "*"*depth, node.tag, node.attrib['name']
+def build_pops(node,prefix=None, suffix=None):
+    
     name = node.attrib['name']
     
     children = {}
     for i in node:
         if i.tag == 'Population':
-            tmp = build_pops(i, prefix, suffix, table)
+            tmp = build_pops(i, prefix, suffix)
             if tmp is not None:
                 children[i.attrib['name']] = tmp
             
         elif i.tag == 'PolygonGate':
             for j in i:
                 if j.tag == 'PolyRect':
-                    g = build_Polygon(j, prefix, suffix, table)
-                    #print g.chan
+                    g = build_Polygon(j, prefix, suffix)
+                    
                 elif j.tag == 'Polygon':
-                    g = build_Polygon(j, prefix, suffix, table)
-                    #print g.chan
+                    g = build_Polygon(j, prefix, suffix)
+                    
     try:            
         return  PopulationNode(name, g, children)
     except UnboundLocalError:
@@ -239,63 +238,134 @@ def build_pops(node,prefix=None, suffix=None, table=None):
 def build_Polygon(rect, prefix=None, suffix=None, table=None):
     verts = []
     axis = [rect.attrib['xAxisName'], rect.attrib['yAxisName']]
-    #print axis, prefix, suffix, 
-    replaced = [False, False]
-    if prefix is not None:
+
+    if prefix is not None and prefix is not '':
         for i,j in enumerate(axis):
             if j.startswith(prefix):
                 axis[i] = j.replace(prefix,'')
-                #replaced[i] = True
-    if suffix is not None:
+                
+    if suffix is not None and suffix is not '':
         for i,j in enumerate(axis):
             if j.endswith(suffix):
                 axis[i] = j[:-(len(suffix))]
                 #replaced[i] = True
     axis = tuple(axis)
-    #print axis
+
     for vert in rect.iter('Vertex'):
-        if replaced[0]:
-            print 'reversing x'
-            x = table[(float(vert.attrib['x']))]
-        else:
-            x = float(vert.attrib['x'])
-        if replaced[1]:
-            print 'reversing y'
-            y = table[(float(vert.attrib['y']))]
-        else:
-            y = float(vert.attrib['y'])
+        x = float(vert.attrib['x'])
+        y = float(vert.attrib['y'])
         verts.append((x,y))
-    print rect.attrib['name'], axis, verts
+    
     return PolyGate(verts, axis, rect.attrib['name'])
 
                     
-def parse_table(table):
-    tmp = table.text.split(',')
-    count = len(tmp)/2
-    xs = []
-    ys = []
-    for i in range(count):
-        ys.append(float(tmp[i*2]))
-        xs.append(float(tmp[i*2+1]))
-    transform = InterpTable(xs,ys)
-    return transform
     
 if __name__ == "__main__":
     import fcm
+    import sys
     a = load_flowjo_xml('/home/jolly/Projects/fcm/scratch/flowjoxml/pretty.xml')
-    print a.file_names
-    print a.gates
-    print a.comp.keys(), '\n', a.comp['Comp Matrix']
+    #print a.file_names
+    #print a.gates
+    foogate = a.gates['Specimen_001_A1_A01.fcs'][0][0]
+    cdfgate = a.gates['Specimen_001_A1_A01.fcs'][0][3]
+    cdegate = a.gates['Specimen_001_A1_A01.fcs'][0][6]
+    
+    #print a.comp.keys(), '\n', a.comp['Comp Matrix']
     sidx, spill = a.comp['Comp Matrix']
-    print a.tubes['Specimen_001_A1_A01.fcs'].comp[1] - a.comp['Comp Matrix'][1]
-    print a.tubes['Specimen_001_A1_A01.fcs'].pprint()
+    #print a.tubes['Specimen_001_A1_A01.fcs'].comp[1] - a.comp['Comp Matrix'][1]
+    #print a.tubes['Specimen_001_A1_A01.fcs'].pprint()
     x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A01.fcs', auto_comp=False, transform=None)#, sidx=sidx, spill=spill, transform='logicle')
-    x.logicle()
+    #x.logicle()
     x.compensate(sidx=sidx,spill=spill)
-    print x.channels
+    #print x.channels
     a.tubes['Specimen_001_A1_A01.fcs'].apply_gates(x)
-    print x.tree.pprint(size=True)
+    #print x.tree.pprint(size=True)
     x.visit('foo1')
     print x.current_node.name, x.shape, 238712
     x.visit('cd4')
     print x.current_node.name, x.shape, 43880
+    
+    x.visit('c1')
+#    import pylab
+#    pylab.subplot(2,2,1)
+#    xx,yy = foogate.chan
+#    pylab.xlabel(xx)
+#    pylab.ylabel(yy)
+#    pylab.scatter(x[xx],x[yy], s=1, edgecolor='none', c='grey')
+
+#    z = numpy.array(foogate.vert)
+#    pylab.fill(z[:,0], z[:,1], alpha=.2)
+#    for vert in foogate.vert:
+#        pylab.scatter(vert[0],vert[1], c='r')
+#    x.visit('foo1')
+#    pylab.scatter(x[xx],x[yy], s=1, edgecolor='none', c='blue')
+        
+#    pylab.subplot(2,2,2)
+#    xx,yy = cdfgate.chan
+#    pylab.xlabel(xx)
+#    pylab.ylabel(yy)
+#    pylab.scatter(x[xx],x[yy], s=1, edgecolor='none', c='grey')
+#    z = numpy.array(cdfgate.vert)
+#    pylab.fill(z[:,0], z[:,1], alpha=.2)
+#    for vert in cdfgate.vert:
+#        pylab.scatter(vert[0],vert[1], c='r')
+    x.visit('cd4')
+#    pylab.scatter(x[xx],x[yy], s=1, edgecolor='none', c='blue')
+    
+    from fcm.core.transforms import _logicle
+    x.visit('foo1')
+#    nxx = 10**5*_logicle(x[xx][:,0],262144,4.5,None,0.5)
+#    nyy = 10**5*_logicle(x[yy][:,0],262144,4.5,None,0.5)
+    #nxx[nxx<0] = 0
+    #nyy[nyy<0] = 0
+    verts = cdfgate.vert
+    verts = [10**5*_logicle(numpy.array(i),262144,4.5,None,0.5) for i in verts]
+#    pylab.subplot(2,2,4)
+#    z = numpy.array(verts)
+#    pylab.fill(z[:,0], z[:,1], alpha=.2)
+#    pylab.scatter(nxx,nyy,s=1, edgecolor='none',c='grey')
+#    for i in verts:
+#        pylab.scatter(i[0],i[1], c='r')
+#    
+#    ax = pylab.gca()
+#    import fcm.graphics
+#    fcm.graphics.set_logicle(ax,'x')
+#    fcm.graphics.set_logicle(ax,'y')
+    cdfgate.vert = verts
+    print verts
+    cdfgate.name = 'cd4 transform'
+    x.logicle()
+    x.gate(cdfgate)
+    
+    verts = cdegate.vert
+    print verts
+    verts = [10**5*_logicle(numpy.array(i),262144,4.5,None,0.5) for i in verts]
+    print verts
+    #sys.exit()
+    cdegate.vert = verts
+    cdegate.name = 'cd8 transform'
+    
+    x.visit('t1')
+    x.gate(cdegate)
+    
+#    pylab.show()
+#    
+    print x.tree.pprint(size=True)
+#
+#    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A02.fcs', auto_comp=False, transform=None)#, sidx=sidx, spill=spill, transform='logicle')
+#    #x.logicle()
+#    x.compensate(sidx=sidx,spill=spill)
+#    #print x.channels
+#    a.tubes['Specimen_001_A2_A02.fcs'].apply_gates(x)
+#    #print x.tree.pprint(size=True)
+#    print 'NEW'
+#    x.visit('c1')
+#    
+#    norm = float(x.shape[0])
+#    x.visit('foo1')
+#    print x.current_node.name, x.shape, x.shape[0]/norm
+#    norm = float(x.shape[0])
+#    x.visit('cd4')
+#    print x.current_node.name, x.shape, x.shape[0]/norm
+#    x.visit('cd8')
+#    print x.current_node.name, x.shape, x.shape[0]/norm

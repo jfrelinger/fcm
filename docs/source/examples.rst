@@ -1,10 +1,10 @@
 .. py:currentmodule:: fcm
 
 Examples using fcm
-##################
+==================
 
 Loading fcs data
-****************
+----------------
 
 fcm provides the :py:func:`loadFCS` function to load fcs files:
 
@@ -54,7 +54,7 @@ deviations of each channel, along with the :py:meth:`FCMdata.boundary_events`
 method to inspect the number of events along the boundaries.
 
 Gating and working withe the view tree
-**************************************
+--------------------------------------
 Typical flow analysis focuses on finding cell subsets of interest via gating.
 fcm has objects representing several types of gates, :py:class:`PolyGate`, 
 :py:class:`QuadGate`, :py:class:`IntervalGate`, and :py:class:`ThresholdGate`,
@@ -74,7 +74,7 @@ and to move to different nodes in the tree use either the
 
 
 Chaining Commands
-*****************
+-----------------
 Since most methods on :py:class:`FCMdata` return itself you can chain commands
 together one after another. for example
 
@@ -84,7 +84,7 @@ together one after another. for example
     
 
 Working with collections
-************************
+------------------------
 Since often the same analysis is applied to several fcs files, fcm has a
 :py:class:`FCMcollection` object with methods that apply to each file in the collection.
 Below is an example of loading several files, and applying a common gate to
