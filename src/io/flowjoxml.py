@@ -7,7 +7,8 @@ Created on Feb 11, 2012
 import xml.etree.cElementTree as xml
 import numpy
 from fcm import PolyGate
-
+from fcm.io.readfcs import is_fl_channel
+from fcm.core.transforms import _logicle
 
         
 
@@ -48,11 +49,21 @@ class PopulationNode(object):
             file.visit(node)
             self.subpops[i].apply_gates(file)
         
-    def logicle(self, T=262144, m=4.5, r=None, scale_max=1e5, scale_min=0):
+    def logicle(self, T=262144, m=4.5, r=None, w=0.5, scale_max=1e5):
         '''
         convert gate cordinates to logicle scale from linear scale
         '''
-        pass #TODO: implement
+        x_chan, y_chan = self.gate.chan
+        xs = numpy.array([i[0] for i in self.gate.vert])
+        ys = numpy.array([i[1] for i in self.gate.vert])
+        if is_fl_channel(x_chan):
+            xs = scale_max*_logicle(xs, T, m, r, w)
+        if is_fl_channel(y_chan):
+            ys = scale_max*_logicle(ys, T, m, r, w)
+        self.gate.vert = zip(xs,ys)
+        print zip(xs,ys)
+        for i in self.subpops:
+            self.subpops[i].logicle(T,m,r,w,scale_max)
     
 class xmlfcsfile(object):
     '''
@@ -88,12 +99,12 @@ class xmlfcsfile(object):
             file.visit(node)
             self.pops[i].apply_gates(file)
             
-    def logicle(self, T=262144, m=4.5, r=None, scale_max=1e5, scale_min=0):
+    def logicle(self, T=262144, m=4.5, r=None, w=0.5, scale_max=1e5):
         '''
         convert gate cordinates to logicle scale from linear scale
         '''
-        for i in self.gates:
-            i.logicle(T,m,r,scale_max,scale_min)
+        for i in self.pops:
+            self.pops[i].logicle(T,m,r,w,scale_max)
             
             
 class FlowjoWorkspace(object):
@@ -131,12 +142,12 @@ class FlowjoWorkspace(object):
         
         return j
     
-    def logicle(self, T=262144, m=4.5, r=None, scale_max=1e5, scale_min=0):
+    def logicle(self, T=262144, m=4.5, r=None, w=0.5, scale_max=1e5):
         '''
         convert gate cordinates for all tubes into logicle scale from linear scale
         '''
         for i in self.tubes:
-            i._logicle(T,m,r,scale_max,scale_min)
+            self.tubes[i].logicle(T,m,r,w,scale_max)
             
 def load_flowjo_xml(fh):
     '''
@@ -210,24 +221,26 @@ def find_pops(node, prefix=None, suffix=None):
     return pops
     
     
-def build_pops(node,prefix=None, suffix=None):
-    
-    name = node.attrib['name']
+def build_pops(node,prefix=None, suffix=None, name_prefix=None):
+    if isinstance(name_prefix, str):
+        name = name_prefix + "::" + node.attrib['name']
+    else:  
+        name = node.attrib['name']
     
     children = {}
     for i in node:
         if i.tag == 'Population':
-            tmp = build_pops(i, prefix, suffix)
+            tmp = build_pops(i, prefix, suffix, name_prefix=name)
             if tmp is not None:
                 children[i.attrib['name']] = tmp
             
         elif i.tag == 'PolygonGate':
             for j in i:
                 if j.tag == 'PolyRect':
-                    g = build_Polygon(j, prefix, suffix)
+                    g = build_Polygon(j, prefix, suffix, name_prefix)
                     
                 elif j.tag == 'Polygon':
-                    g = build_Polygon(j, prefix, suffix)
+                    g = build_Polygon(j, prefix, suffix, name_prefix)
                     
     try:            
         return  PopulationNode(name, g, children)
@@ -235,7 +248,12 @@ def build_pops(node,prefix=None, suffix=None):
         return None
     
 
-def build_Polygon(rect, prefix=None, suffix=None, table=None):
+def build_Polygon(rect, prefix=None, suffix=None, name_prefix=None):
+    if isinstance(name_prefix, str):
+        name = name_prefix + "::" + rect.attrib['name']
+    else:  
+        name = rect.attrib['name']
+       
     verts = []
     axis = [rect.attrib['xAxisName'], rect.attrib['yAxisName']]
 
@@ -255,117 +273,128 @@ def build_Polygon(rect, prefix=None, suffix=None, table=None):
         x = float(vert.attrib['x'])
         y = float(vert.attrib['y'])
         verts.append((x,y))
-    
-    return PolyGate(verts, axis, rect.attrib['name'])
+
+    return PolyGate(verts, axis, name)
 
                     
     
 if __name__ == "__main__":
     import fcm
     import sys
-    a = load_flowjo_xml('/home/jolly/Projects/fcm/scratch/flowjoxml/pretty.xml')
-    #print a.file_names
-    #print a.gates
-    foogate = a.gates['Specimen_001_A1_A01.fcs'][0][0]
-    cdfgate = a.gates['Specimen_001_A1_A01.fcs'][0][3]
-    cdegate = a.gates['Specimen_001_A1_A01.fcs'][0][6]
-    
-    #print a.comp.keys(), '\n', a.comp['Comp Matrix']
-    sidx, spill = a.comp['Comp Matrix']
-    #print a.tubes['Specimen_001_A1_A01.fcs'].comp[1] - a.comp['Comp Matrix'][1]
-    #print a.tubes['Specimen_001_A1_A01.fcs'].pprint()
-    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A01.fcs', auto_comp=False, transform=None)#, sidx=sidx, spill=spill, transform='logicle')
-    #x.logicle()
-    x.compensate(sidx=sidx,spill=spill)
-    #print x.channels
-    a.tubes['Specimen_001_A1_A01.fcs'].apply_gates(x)
-    #print x.tree.pprint(size=True)
-    x.visit('foo1')
-    print x.current_node.name, x.shape, 238712
-    x.visit('cd4')
-    print x.current_node.name, x.shape, 43880
-    
-    x.visit('c1')
-#    import pylab
-#    pylab.subplot(2,2,1)
-#    xx,yy = foogate.chan
-#    pylab.xlabel(xx)
-#    pylab.ylabel(yy)
-#    pylab.scatter(x[xx],x[yy], s=1, edgecolor='none', c='grey')
-
-#    z = numpy.array(foogate.vert)
-#    pylab.fill(z[:,0], z[:,1], alpha=.2)
-#    for vert in foogate.vert:
-#        pylab.scatter(vert[0],vert[1], c='r')
-#    x.visit('foo1')
-#    pylab.scatter(x[xx],x[yy], s=1, edgecolor='none', c='blue')
-        
-#    pylab.subplot(2,2,2)
-#    xx,yy = cdfgate.chan
-#    pylab.xlabel(xx)
-#    pylab.ylabel(yy)
-#    pylab.scatter(x[xx],x[yy], s=1, edgecolor='none', c='grey')
-#    z = numpy.array(cdfgate.vert)
-#    pylab.fill(z[:,0], z[:,1], alpha=.2)
-#    for vert in cdfgate.vert:
-#        pylab.scatter(vert[0],vert[1], c='r')
-    x.visit('cd4')
-#    pylab.scatter(x[xx],x[yy], s=1, edgecolor='none', c='blue')
-    
-    from fcm.core.transforms import _logicle
-    x.visit('foo1')
-#    nxx = 10**5*_logicle(x[xx][:,0],262144,4.5,None,0.5)
-#    nyy = 10**5*_logicle(x[yy][:,0],262144,4.5,None,0.5)
-    #nxx[nxx<0] = 0
-    #nyy[nyy<0] = 0
-    verts = cdfgate.vert
-    verts = [10**5*_logicle(numpy.array(i),262144,4.5,None,0.5) for i in verts]
-#    pylab.subplot(2,2,4)
-#    z = numpy.array(verts)
-#    pylab.fill(z[:,0], z[:,1], alpha=.2)
-#    pylab.scatter(nxx,nyy,s=1, edgecolor='none',c='grey')
-#    for i in verts:
-#        pylab.scatter(i[0],i[1], c='r')
+#    a = load_flowjo_xml('/home/jolly/Projects/fcm/scratch/flowjoxml/pretty.xml')
+#    #print a.file_names
+#    #print a.gates
+#    foogate = a.gates['Specimen_001_A1_A01.fcs'][0][0]
+#    cdfgate = a.gates['Specimen_001_A1_A01.fcs'][0][3]
+#    cdegate = a.gates['Specimen_001_A1_A01.fcs'][0][6]
 #    
-#    ax = pylab.gca()
-#    import fcm.graphics
-#    fcm.graphics.set_logicle(ax,'x')
-#    fcm.graphics.set_logicle(ax,'y')
-    cdfgate.vert = verts
-    print verts
-    cdfgate.name = 'cd4 transform'
-    x.logicle()
-    x.gate(cdfgate)
-    
-    verts = cdegate.vert
-    print verts
-    verts = [10**5*_logicle(numpy.array(i),262144,4.5,None,0.5) for i in verts]
-    print verts
-    #sys.exit()
-    cdegate.vert = verts
-    cdegate.name = 'cd8 transform'
-    
-    x.visit('t1')
-    x.gate(cdegate)
-    
-#    pylab.show()
-#    
-    print x.tree.pprint(size=True)
-#
-#    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A02.fcs', auto_comp=False, transform=None)#, sidx=sidx, spill=spill, transform='logicle')
+#    #print a.comp.keys(), '\n', a.comp['Comp Matrix']
+#    sidx, spill = a.comp['Comp Matrix']
+#    #print a.tubes['Specimen_001_A1_A01.fcs'].comp[1] - a.comp['Comp Matrix'][1]
+#    #print a.tubes['Specimen_001_A1_A01.fcs'].pprint()
+#    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A01.fcs', auto_comp=False, transform=None)#, sidx=sidx, spill=spill, transform='logicle')
 #    #x.logicle()
 #    x.compensate(sidx=sidx,spill=spill)
 #    #print x.channels
-#    a.tubes['Specimen_001_A2_A02.fcs'].apply_gates(x)
+#    a.tubes['Specimen_001_A1_A01.fcs'].apply_gates(x)
 #    #print x.tree.pprint(size=True)
-#    print 'NEW'
-#    x.visit('c1')
-#    
-#    norm = float(x.shape[0])
 #    x.visit('foo1')
-#    print x.current_node.name, x.shape, x.shape[0]/norm
-#    norm = float(x.shape[0])
-#    x.visit('cd4')
-#    print x.current_node.name, x.shape, x.shape[0]/norm
-#    x.visit('cd8')
-#    print x.current_node.name, x.shape, x.shape[0]/norm
+#    print x.current_node.name, x.shape, 238712
+#    x.visit('foo1::cd4')
+#    print x.current_node.name, x.shape, 43880
+#    
+#    x.visit('c1')
+##    import pylab
+##    pylab.subplot(2,2,1)
+##    xx,yy = foogate.chan
+##    pylab.xlabel(xx)
+##    pylab.ylabel(yy)
+##    pylab.scatter(x[xx],x[yy], s=1, edgecolor='none', c='grey')
+#
+##    z = numpy.array(foogate.vert)
+##    pylab.fill(z[:,0], z[:,1], alpha=.2)
+##    for vert in foogate.vert:
+##        pylab.scatter(vert[0],vert[1], c='r')
+##    x.visit('foo1')
+##    pylab.scatter(x[xx],x[yy], s=1, edgecolor='none', c='blue')
+#        
+##    pylab.subplot(2,2,2)
+##    xx,yy = cdfgate.chan
+##    pylab.xlabel(xx)
+##    pylab.ylabel(yy)
+##    pylab.scatter(x[xx],x[yy], s=1, edgecolor='none', c='grey')
+##    z = numpy.array(cdfgate.vert)
+##    pylab.fill(z[:,0], z[:,1], alpha=.2)
+##    for vert in cdfgate.vert:
+##        pylab.scatter(vert[0],vert[1], c='r')
+#    x.visit('foo1::cd4')
+##    pylab.scatter(x[xx],x[yy], s=1, edgecolor='none', c='blue')
+#    
+#    from fcm.core.transforms import _logicle
+#    x.visit('foo1')
+##    nxx = 10**5*_logicle(x[xx][:,0],262144,4.5,None,0.5)
+##    nyy = 10**5*_logicle(x[yy][:,0],262144,4.5,None,0.5)
+#    #nxx[nxx<0] = 0
+#    #nyy[nyy<0] = 0
+#    verts = cdfgate.vert
+#    verts = [10**5*_logicle(numpy.array(i),262144,4.5,None,0.5) for i in verts]
+##    pylab.subplot(2,2,4)
+##    z = numpy.array(verts)
+##    pylab.fill(z[:,0], z[:,1], alpha=.2)
+##    pylab.scatter(nxx,nyy,s=1, edgecolor='none',c='grey')
+##    for i in verts:
+##        pylab.scatter(i[0],i[1], c='r')
+##    
+##    ax = pylab.gca()
+##    import fcm.graphics
+##    fcm.graphics.set_logicle(ax,'x')
+##    fcm.graphics.set_logicle(ax,'y')
+#    cdfgate.vert = verts
+#    print verts
+#    cdfgate.name = 'cd4 transform'
+#    x.logicle()
+#    x.gate(cdfgate)
+#    
+#    verts = cdegate.vert
+#    print verts
+#    verts = [10**5*_logicle(numpy.array(i),262144,4.5,None,0.5) for i in verts]
+#    print verts
+#    #sys.exit()
+#    cdegate.vert = verts
+#    cdegate.name = 'cd8 transform'
+#    
+#    x.visit('t1')
+#    x.gate(cdegate)
+#    
+##    pylab.show()
+##    
+#    print x.tree.pprint(size=True)
+##
+##    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A02.fcs', auto_comp=False, transform=None)#, sidx=sidx, spill=spill, transform='logicle')
+##    #x.logicle()
+##    x.compensate(sidx=sidx,spill=spill)
+##    #print x.channels
+##    a.tubes['Specimen_001_A2_A02.fcs'].apply_gates(x)
+##    #print x.tree.pprint(size=True)
+##    print 'NEW'
+##    x.visit('c1')
+##    
+##    norm = float(x.shape[0])
+##    x.visit('foo1')
+##    print x.current_node.name, x.shape, x.shape[0]/norm
+##    norm = float(x.shape[0])
+##    x.visit('cd4')
+##    print x.current_node.name, x.shape, x.shape[0]/norm
+##    x.visit('cd8')
+##    print x.current_node.name, x.shape, x.shape[0]/norm
+
+    print "NEW"
+    a = load_flowjo_xml('/home/jolly/Projects/fcm/scratch/flowjoxml/pretty.xml')
+    a.logicle()
+    sidx, spill = a.comp['Comp Matrix']
+    
+    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A01.fcs', sidx=sidx, spill=spill, transform='logicle')
+
+    
+    a.tubes['Specimen_001_A1_A01.fcs'].apply_gates(x)
+    print x.tree.pprint(size=True)
