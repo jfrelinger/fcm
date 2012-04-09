@@ -51,7 +51,6 @@ setup(name='fcm',
       ext_modules = [logicle_extension, mvnpdf_extension],
       requires=['numpy (>=1.3.0)',
                 'scipy (>=0.6)',
-		'pymc (>=2.1)',
 		'dpmix (>=0.1)',
                 'matplotlib (>=1.0)'], # figure out the rest of what's a required package.
       )
