@@ -12,7 +12,6 @@ gate1.gate(data)
 
 # outputs:
 # root
-#  t1
 #    g1
 print data.tree.pprint()
 
@@ -21,12 +20,11 @@ current_node = data.current_node
 data.tree.rename_node(current_node.name, 'events')
 # outputs:
 # root
-#  t1
 #    events
 print data.tree.pprint()
 
 #return to the transformed node and plot
-data.tree.visit('t1')
+data.tree.visit('root')
 plt.scatter(data[:,0],data[:,1], s=1, edgecolors='none', c='grey')
 
 #and visit the subset of interest to plot
