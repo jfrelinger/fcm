@@ -141,7 +141,6 @@ class DPMixtureModel(object):
         else:
             self._prior_pi = tmp
 
-        self._prior_pi = self._prior_pi.reshape((1, self.nclusts))
 
         self._load_pi = True
 
