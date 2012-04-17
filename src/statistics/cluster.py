@@ -247,9 +247,9 @@ class DPMixtureModel(object):
                 rslts = []
                 for i in range(self.last):
                     for j in range(self.nclusts):
-                        tmp = DPCluster(self.cdp.weights[-i,j], (self.cdp.mu[-i,j] * self.s) + self.m, self.cdp.Sigma[-i,j] * outer(self.s, self.s))
-                        tmp.nmu = self.cdp.mu[-i,j]
-                        tmp.nsigma = self.cdp.Sigma[-i,j]
+                        tmp = DPCluster(self.cdp.weights[-(i+1),j], (self.cdp.mu[-(i+1),j] * self.s) + self.m, self.cdp.Sigma[-i,j] * outer(self.s, self.s))
+                        tmp.nmu = self.cdp.mu[-(i+1),j]
+                        tmp.nsigma = self.cdp.Sigma[-(i+1),j]
                         rslts.append(tmp)
                 tmp = DPMixture(rslts, self.m, self.s)
             return tmp
