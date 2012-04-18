@@ -153,7 +153,7 @@ class DPMixtureModel(object):
         self.prior_sigma = zeros((self.nclusts, pnts.shape[1], pnts.shape[1]))
         for i in range(self.nclusts):
             try:
-                self.prior_mu[i] = mean(pts[self._ref==i], 0)
+                self.prior_mu[i] = mean(pnts[self._ref==i], 0)
                 self.prior_sigma[i] = cov(pnts[self._ref==i],rowvar=0)
             except:
                 self.prior_mu[i] = zeros(pnts.shape[1])
