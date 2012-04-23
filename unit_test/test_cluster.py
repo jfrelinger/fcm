@@ -149,6 +149,20 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         #print diffs
         print 'MCMC fitting took %0.3f' % (end)
         
+        model.load_ref(r)
+        start = time()
+        r = model.fit(data, verbose=True)
+        end = time() - start
+        
+        diffs = {}
+        #print 'r.mus:', r.mus()
+        for i in gen_mean:
+            #diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
+            diffs[i] = np.abs(r.mus()[i]-gen_mean[i])
+            #print i, gen_mean[i],r.mus()[i], diffs[i], np.vdot(diffs[i],diffs[i])
+            assert( np.vdot(diffs[i],diffs[i]) < 1)
+        #print diffs
+        
     def setUp(self):
         self.mu = array([0,0])
         self.sig = eye(2)

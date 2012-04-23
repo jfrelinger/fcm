@@ -148,25 +148,29 @@ class DPMixtureModel(object):
         self._ref = ref
 
     def _load_ref_at_fit(self, pnts):
-
-        self.prior_mu = zeros((self.nclusts, pnts.shape[1]))
-        self.prior_sigma = zeros((self.nclusts, pnts.shape[1], pnts.shape[1]))
-        for i in range(self.nclusts):
-            try:
-                self.prior_mu[i] = mean(pnts[self._ref==i], 0)
-                self.prior_sigma[i] = cov(pnts[self._ref==i],rowvar=0)
-            except:
-                self.prior_mu[i] = zeros(pnts.shape[1])
-                self.prior_sigma[i] = eye(pnts.shape[1])
-
-        # self.prior_mu = array([mean(pnts[self._ref==i],0) for i in range(self.nclusts)])
-        
-        # self.prior_sigma = zeros((self.nclusts, pnts.shape[1], pnts.shape[1]))
-        # for i in range(self.nclusts):
-        #     self.prior_sigma[i,:,:] = cov(pnts[self._ref==i],rowvar=0)
-        
-        tot = float(pnts.shape[0])
-        self.prior_pi = array([pnts[self._ref==i].shape[0]/tot for i in range(self.nclusts)])
+        if isinstance(self._ref, DPMixture):
+            self.prior_mu = self._ref.mus()
+            self.prior_sigma = self._ref.sigmas()
+            self.prior_pi = self._ref.pis()
+        else:
+            self.prior_mu = zeros((self.nclusts, pnts.shape[1]))
+            self.prior_sigma = zeros((self.nclusts, pnts.shape[1], pnts.shape[1]))
+            for i in range(self.nclusts):
+                try:
+                    self.prior_mu[i] = mean(pnts[self._ref==i], 0)
+                    self.prior_sigma[i] = cov(pnts[self._ref==i],rowvar=0)
+                except:
+                    self.prior_mu[i] = zeros(pnts.shape[1])
+                    self.prior_sigma[i] = eye(pnts.shape[1])
+    
+            # self.prior_mu = array([mean(pnts[self._ref==i],0) for i in range(self.nclusts)])
+            
+            # self.prior_sigma = zeros((self.nclusts, pnts.shape[1], pnts.shape[1]))
+            # for i in range(self.nclusts):
+            #     self.prior_sigma[i,:,:] = cov(pnts[self._ref==i],rowvar=0)
+            
+            tot = float(pnts.shape[0])
+            self.prior_pi = array([pnts[self._ref==i].shape[0]/tot for i in range(self.nclusts)])
        
     def fit(self, fcmdata,  verbose=False):
         """
