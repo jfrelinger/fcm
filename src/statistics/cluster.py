@@ -5,12 +5,13 @@ Created on Oct 30, 2009
 '''
 
 from warnings import warn
-from numpy import zeros, outer, sum, eye, array, mean, cov
+from numpy import zeros, outer, sum, eye, array, mean, cov, vstack, std
 from numpy.random import multivariate_normal as mvn
 from numpy.random import seed
 from scipy.cluster import vq
 
-from dpmix import DPNormalMixture, BEM_DPNormalMixture
+from dpmix import DPNormalMixture, BEM_DPNormalMixture, HDPNormalMixture
+from core import FCMcollection
 
 from dp_cluster import DPCluster, DPMixture
 from kmeans import KMeans
@@ -25,8 +26,7 @@ class DPMixtureModel(object):
 
     def __init__(self, nclusts, iter=1000, burnin=100, last=5, type='mcmc'):
         '''
-        DPMixtureModel(fcmdata, nclusts, iter=1000, burnin= 100, last= 5)
-        fcmdata = a fcm data object
+        DPMixtureModel(nclusts, iter=1000, burnin= 100, last= 5)
         nclusts = number of clusters to fit
         itter = number of mcmc itterations
         burning = number of mcmc burnin itterations
@@ -280,8 +280,85 @@ class DPMixtureModel(object):
         else:
             return None # TODO raise exception
 
+class HDPMixtureModel(DPMixtureModel):
+    '''
+    HDPMixtureModel(nclusts, iter=1000, burnin= 100, last= 5)
+    nclusts = number of clusters to fit
+    itter = number of mcmc itterations
+    burning = number of mcmc burnin itterations
+    last = number of mcmc itterations to draw samples from
+     
+    '''
+      
+    def fit(self, datasets, verbose=False, tune_interval=100):
+        if isinstance(datasets, FCMcollection):
+            datasets = datasets.to_list()
+        self.d = datasets[0].shape[1]
+        
+        datasets = [i[:] for i in datasets]
+        self.ndatasets = len(datasets)
+        total_data = vstack(datasets)
+        self.m = mean(total_data, 0)
+        self.s = std(total_data,0)
+        standardized = []
+        for i in datasets:
+            if i.shape[1] != self.d:
+                raise RuntimeError("Datasets shape do not match")
+            standardized.append((i-self.m)/self.s)
+            
+        
+        ident = False
+        
+        if self.prior_mu is not None:
+            self._load_mu_at_fit()
+        if self.prior_sigma is not None:
+            self._load_sigma_at_fit()
+        
+        if self.seed is not None:
+            seed(self.seed)
+        else:
+            from datetime import datetime
+            seed(datetime.now().microsecond)
+            
+        self.hdp = HDPNormalMixture(standardized,ncomp=self.nclusts,
+                                           gamma0=self.gamma0, m0=self.m0,
+                                           nu0=self.nu0, Phi0=self.Phi0, 
+                                           e0=self.e0, f0=self.f0,
+                                           mu0=self._prior_mu, Sigma0=self._prior_sigma, 
+                                           weights0=self._prior_pi, alpha0=self.alpha0,
+                                           gpu=self.device, verbose=verbose)
+        self.hdp.sample(niter=self.iter, nburn=self.burnin, thin=1, ident=ident, tune_interval=tune_interval)
+        
+        self.pi = zeros((self.ndatasets,self.nclusts * self.last))
+        self.mus = zeros((self.ndatasets,self.nclusts * self.last, self.d))
+        self.sigmas = zeros((self.ndatasets,self.nclusts * self.last, self.d, self.d))
+           
 
+        self._run = True #we've fit the mixture model
 
+        
+        
+        return self.get_results()
+    
+    def get_results(self):
+        """
+        get the results of the fitted mixture model
+        """
+        
+        if self._run:
+            #print self.mus
+            allresults = []
+            for k in range(self.ndatasets):
+                rslts = []
+                for i in range(self.last):
+                    for j in range(self.nclusts):
+                        tmp = DPCluster(self.hdp.weights[-(i+1),k,j], (self.hdp.mu[-(i+1),j] * self.s) + self.m, self.hdp.Sigma[-(i+1),j] * outer(self.s, self.s))
+                        tmp.nmu = self.hdp.mu[-(i+1),j]
+                        tmp.nsigma = self.hdp.Sigma[-(i+1),j]
+                        rslts.append(tmp)
+                allresults.append( DPMixture(rslts, self.m, self.s))
+            return allresults
+        
 class KMeansModel(object):
     '''
     KmeansModel(data, k, iter=20, tol=1e-5)

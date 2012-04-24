@@ -146,6 +146,14 @@ class FCMcollection(DictMixin):
             rslt[i] = model.fit(self.fcmdict[i], *args, **kwargs)
         return rslt
     
+    def to_list(self):
+        '''
+        return a list of the fcmdata objects contained in the collection
+        '''
+        
+        return [self.fcmdict[i] for i in self.fcmdict]
+    
+    
 if __name__ == '__main__':
     from io import loadFCS
     f1 = loadFCS('../../sample_data/3FITC_4PE_004.fcs')
