@@ -11,7 +11,7 @@ from numpy.random import seed
 from scipy.cluster import vq
 
 from dpmix import DPNormalMixture, BEM_DPNormalMixture, HDPNormalMixture
-from core import FCMcollection
+from fcm import FCMcollection
 
 from dp_cluster import DPCluster, DPMixture
 from kmeans import KMeans
