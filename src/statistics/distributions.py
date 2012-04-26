@@ -2,10 +2,15 @@
 Distributions used in FCS analysis
 """
 
-from numpy import array, sum, cumsum, reshape
+from numpy import array, sum, cumsum, reshape, exp, ones
 from numpy.random import random, multivariate_normal
-from mvnpdf import mvnpdf as _mvnpdf
-from mvnpdf import wmvnpdf as _wmvnpdf
+
+try:
+    from gpustats import mvnpdf_multi
+    has_gpu = True
+except ImportError:
+    from dpmix.utils import mvn_weighted_logged
+    has_gpu = False
 #def mvnormpdf(x, mu, va):
 #    """
 #    multi variate normal pdf, derived from David Cournapeau's em package
@@ -21,6 +26,25 @@ from mvnpdf import wmvnpdf as _wmvnpdf
 #
 #    y   = fac * exp(y)
 #    return y
+
+def _mvnpdf(x, mu, va, n=1):
+    if len(x.shape) == 1:
+            x = x.reshape((1,x.shape))
+    if len(mu.shape) == 1:
+        mu = mu.reshape((1,mu.shape))
+    if len(va.shape) == 2:
+        va = va.reshape(1,va.shape[0], va.shape[1])
+        
+    if has_gpu:
+        return mvnpdf_multi(x, mu, va, logged=False, order='C')
+    else:
+        return exp(mvn_weighted_logged(x, mu, va, ones(mu.shape[0])))
+
+def _wmvnpdf(x, pi, mu, va, n=1):
+    if has_gpu:
+        return mvnpdf_multi(x, mu, va, weights = pi, logged=False, order='C')
+    else:
+        return exp(mvn_weighted_logged(x, mu, va, pi))
 
 def mvnormpdf(x, mu, va):
     """
