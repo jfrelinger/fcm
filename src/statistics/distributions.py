@@ -36,7 +36,7 @@ def _mvnpdf(x, mu, va, n=1):
         va = va.reshape(1,va.shape[0], va.shape[1])
         
     if has_gpu:
-        return mvnpdf_multi(x, mu, va, weights=ones(mu.shape[0]) logged=False, order='C')
+        return mvnpdf_multi(x, mu, va, weights=ones(mu.shape[0]), logged=False, order='C')
     else:
         return exp(mvn_weighted_logged(x, mu, va, ones(mu.shape[0])))
 
