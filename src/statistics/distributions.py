@@ -48,13 +48,12 @@ def _wmvnpdf(x, pi, mu, va, n=1):
         mu = mu.reshape((1,mu.shape))
     if len(va.shape) == 2:
         va = va.reshape(1,va.shape[0], va.shape[1])
-        
-    print pi
     if isinstance(pi, float) or isinstance(pi, int):
         pi = array([pi])
     elif isinstance(pi, ndarray):
         if len(pi.shape) == 0:
             pi = pi.reshape((1))
+    
     if has_gpu:
         return mvnpdf_multi(x, mu, va, weights = pi, logged=False, order='C')
     else:
