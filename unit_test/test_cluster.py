@@ -9,7 +9,7 @@ import numpy.random as npr
 from numpy.random import multivariate_normal
 from fcm.statistics.dp_cluster import DPMixture
 from time import time
-
+from multiprocessing import Pool
 gen_mean = {
     0 : [0, 5],
     1 : [-5, 0],
@@ -49,6 +49,14 @@ group_weights = [0.4, 0.3, 0.3]
 #}
 #
 #group_weights = [0.6, 0.3, 0.1]
+
+def fit_one(args):
+    x, name = args
+    print "fitting", name, "of size", x.shape
+    m = DPMixtureModel(nclusts=8, iter=100,  burnin=0, last=1)
+    r = m.fit(x, verbose=10)
+    print 'done fitting', name
+    return r
 
 class DPMixtureModel_TestCase(unittest.TestCase):
     def generate_data(self,n=1e4, k=2, ncomps=3, seed=1):
@@ -121,6 +129,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
             #print i, gen_mean[i], diffs[i], np.vdot(diffs[i],diffs[i])
             assert( np.vdot(diffs[i],diffs[i]) < 1)
         #print diffs
+        print r.classify(data)
         print 'MCMC fitting took %0.3f' % (end)
         
     def testRefernce(self):
@@ -186,5 +195,21 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         mus = r.mus()
         assert(mus.shape == (16,2))
         
+#    def testModel_Pool(self):
+#        
+#        _, x1 = self.generate_data()
+#        _, x2 = self.generate_data()
+#        _, x3 = self.generate_data()
+#        _, x4 = self.generate_data()
+#        _, x5 = self.generate_data()
+#        _, x6 = self.generate_data()
+#    
+#        argss = [(x1, 'x1'), (x2, 'x2'), (x3, 'x3'),
+#                 (x4, 'x4'), (x5, 'x5'), (x6, 'x6')]
+#        
+#        p = Pool(3)
+#        r = p.map_async(fit_one, argss)
+#        r.get()
+        
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)

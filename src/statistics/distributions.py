@@ -8,6 +8,7 @@ from numpy.random import random, multivariate_normal
 
 try:
     from gpustats import mvnpdf_multi
+    from gpustats.util import threadSafeInit
     has_gpu = True
 except ImportError:
     from dpmix.utils import mvn_weighted_logged
@@ -37,6 +38,7 @@ def _mvnpdf(x, mu, va, n=1):
         va = va.reshape(1,va.shape[0], va.shape[1])
         
     if has_gpu:
+        threadSafeInit()
         return mvnpdf_multi(x, mu, va, weights=ones(mu.shape[0]), logged=False, order='C')
     else:
         return exp(mvn_weighted_logged(x, mu, va, ones(mu.shape[0])))
@@ -55,6 +57,7 @@ def _wmvnpdf(x, pi, mu, va, n=1):
             pi = pi.reshape((1))
     
     if has_gpu:
+        threadSafeInit()
         return mvnpdf_multi(x, mu, va, weights = pi, logged=False, order='C')
     else:
         return exp(mvn_weighted_logged(x, mu, va, pi))

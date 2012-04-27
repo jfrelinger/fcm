@@ -36,3 +36,6 @@ syntax: regexp
 .pydevproject
 .settings/*
 CUDA_src/obj/*
+
+syntax: regexp
+^sample_data/62851\.fcs$
