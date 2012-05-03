@@ -364,14 +364,15 @@ class KMeansModel(object):
     KmeansModel(data, k, iter=20, tol=1e-5)
     kmeans clustering model
     '''
-    def __init__(self, data, k, iter=20, tol=1e-5):
-        self.data = data.view()
+    def __init__(self, k, iter=20, tol=1e-5):
+        
         self.k = k
         self.iter = iter
         self.tol = tol
 
-    def fit(self):
-        self.r = vq.kmeans(self.data, self.k, iter=self.iter, thresh=self.tol)
+    def fit(self, data):
+        self.r = vq.kmeans(data.view(), self.k, iter=self.iter, thresh=self.tol)
+        return self.get_results()
 
 
     def get_results(self):
