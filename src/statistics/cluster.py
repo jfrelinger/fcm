@@ -174,7 +174,9 @@ class DPMixtureModel(object):
             self.prior_pi = array([pnts[self._ref==i].shape[0]/tot for i in range(self.nclusts)])
        
     def fit(self, fcmdata, verbose=False):
-        if isinstance(fcmdata, FCMcollection) or isinstance(fcmdata, list):
+        if isinstance(fcmdata, FCMcollection):
+            return [self._fit(fcmdata[i], verbose) for i in fcmdata ]
+        elif isinstance(fcmdata, list):
             return [self._fit(i, verbose) for i in fcmdata ]
         else:
             return self._fit(fcmdata, verbose)
@@ -375,8 +377,16 @@ class KMeansModel(object):
         self.k = k
         self.iter = iter
         self.tol = tol
+        
+    def fit(self, fcmdata):
+        if isinstance(fcmdata, FCMcollection):
+            return [self._fit(fcmdata[i]) for i in fcmdata ]
+        elif isinstance(fcmdata, list):
+            return [self._fit(i) for i in fcmdata ]
+        else:
+            return self._fit(fcmdata)
 
-    def fit(self, data):
+    def _fit(self, data):
         self.r = vq.kmeans(data.view(), self.k, iter=self.iter, thresh=self.tol)
         return self.get_results()
 

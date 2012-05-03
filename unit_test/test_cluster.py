@@ -9,7 +9,8 @@ import numpy.random as npr
 from numpy.random import multivariate_normal
 from fcm.statistics.dp_cluster import DPMixture
 from time import time
-from multiprocessing import Pool
+from fcm import FCMdata, FCMcollection
+
 gen_mean = {
     0 : [0, 5],
     1 : [-5, 0],
@@ -83,11 +84,29 @@ class DPMixtureModel_TestCase(unittest.TestCase):
     
         return (np.concatenate(labels_concat),
                 np.concatenate(data_concat, axis=0))
+        
     def testListFitting(self):
         true1, data1 = self.generate_data()
         true2, data2 = self.generate_data()
+        
+
         model = DPMixtureModel(3,2000,100,1, type='BEM')
         rs = model.fit([data1,data2])
+        assert(len(rs) == 2)
+        for r in rs:
+            diffs = {}
+            for i in gen_mean:
+                print 'mu ',r.mus()
+                diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
+                #print i, gen_mean[i], diffs[i], np.vdot(diffs[i],diffs[i])
+                assert( np.vdot(diffs[i],diffs[i]) < 1)
+
+        fcm1 = FCMdata('test_fcm1', data1, ['fsc','ssc'], [0,1])
+        fcm2 = FCMdata('test_fcm2', data2, ['fsc','ssc'], [0,1])
+        
+        c = FCMcollection('fcms', [fcm1, fcm2])
+        
+        rs = model.fit(c)
         assert(len(rs) == 2)
         for r in rs:
             diffs = {}
