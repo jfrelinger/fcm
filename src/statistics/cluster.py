@@ -173,7 +173,13 @@ class DPMixtureModel(object):
             tot = float(pnts.shape[0])
             self.prior_pi = array([pnts[self._ref==i].shape[0]/tot for i in range(self.nclusts)])
        
-    def fit(self, fcmdata,  verbose=False):
+    def fit(self, fcmdata, verbose=False):
+        if isinstance(fcmdata, FCMcollection) or isinstance(fcmdata, list):
+            return [self._fit(i, verbose) for i in fcmdata ]
+        else:
+            return self._fit(fcmdata, verbose)
+        
+    def _fit(self, fcmdata,  verbose=False):
         """
         fit the mixture model to the data
         use get_results() to get the fitted model

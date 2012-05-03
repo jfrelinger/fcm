@@ -83,7 +83,20 @@ class DPMixtureModel_TestCase(unittest.TestCase):
     
         return (np.concatenate(labels_concat),
                 np.concatenate(data_concat, axis=0))
-
+    def testListFitting(self):
+        true1, data1 = self.generate_data()
+        true2, data2 = self.generate_data()
+        model = DPMixtureModel(3,2000,100,1, type='BEM')
+        rs = model.fit([data1,data2])
+        assert(len(rs) == 2)
+        for r in rs:
+            diffs = {}
+            for i in gen_mean:
+                print 'mu ',r.mus()
+                diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
+                #print i, gen_mean[i], diffs[i], np.vdot(diffs[i],diffs[i])
+                assert( np.vdot(diffs[i],diffs[i]) < 1)
+    
     def testBEMFitting(self):
         print 'starting BEM'
         true, data = self.generate_data()
@@ -97,7 +110,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         model.seed = 1
         start = time()
         r = model.fit(data, verbose=False)
-        print 'r', r.mus()
+        
         end = time() - start
         
         diffs = {}
