@@ -199,10 +199,10 @@ class DPMixtureModel(object):
         self.n, self.d = self.data.shape
         
         if self._ref is not None:
-            ident = True
+            self.ident = True
             self._load_ref_at_fit(pnts)
         else:
-            ident = False
+            self.ident = False
         if self.prior_mu is not None:
             self._load_mu_at_fit()
         if self.prior_sigma is not None:
@@ -232,7 +232,7 @@ class DPMixtureModel(object):
                                            mu0=self._prior_mu, Sigma0=self._prior_sigma, 
                                            weights0=self._prior_pi, alpha0=self.alpha0,
                                            gpu=self.device, verbose=verbose)
-            self.cdp.sample(niter=self.niter, nburn=self.burnin, thin=1, ident=ident)
+            self.cdp.sample(niter=self.niter, nburn=self.burnin, thin=1, ident=self.ident)
                 
         self.pi = zeros((self.nclusts * self.last))
         self.mus = zeros((self.nclusts * self.last, self.d))
@@ -276,7 +276,7 @@ class DPMixtureModel(object):
                         tmp.nmu = self.cdp.mu[-(i+1),j]
                         tmp.nsigma = self.cdp.Sigma[-(i+1),j]
                         rslts.append(tmp)
-                tmp = DPMixture(rslts, self.m, self.s)
+                tmp = DPMixture(rslts, self.last, self.m, self.s, self.ident)
             return tmp
         else:
             return None # TODO raise exception

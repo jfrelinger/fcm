@@ -5,7 +5,7 @@ Created on Oct 30, 2009
 '''
 import unittest
 from fcm.statistics import DPCluster, DPMixture
-from numpy import array, eye
+from numpy import array, eye, all
 
 
 class Dp_clusterTestCase(unittest.TestCase):
@@ -54,6 +54,29 @@ class Dp_clusterTestCase(unittest.TestCase):
         assert self.mix.classify(self.mu1) == modal.classify(self.mu1), 'derived modal mixture is wrong'
         assert self.mix.classify(pnt)[0] == modal.classify(pnt)[0], 'derived modal mixture is wrong'
         assert self.mix.classify(pnt)[1] == modal.classify(pnt)[1], 'derived modal mixture is wrong'
+
+    def testAverage(self):
+        clst1 = DPCluster(0.125, self.mu1, self.sig)
+        clst3 = DPCluster(0.125, self.mu1, self.sig)
+        clst5 = DPCluster(0.125, self.mu1, self.sig)
+        clst7 = DPCluster(0.125, self.mu1, self.sig)
+        clst2 = DPCluster(0.125, self.mu2, self.sig)
+        clst4 = DPCluster(0.125, self.mu2, self.sig)
+        clst6 = DPCluster(0.125, self.mu2, self.sig)
+        clst8 = DPCluster(0.125, self.mu2, self.sig)
+        
+        mix = DPMixture([clst1, clst2, clst3, clst4, clst5, clst6, clst7, clst8], niter=4)
+        avg = mix.average()
+        
+        assert len(avg.clusters) == 2
+        assert all(avg.mus()[0] == self.mu1)
+        assert all(avg.mus()[1] == self.mu2)
+        assert all(avg.sigmas()[0] == self.sig)
+        assert all(avg.sigmas()[1] == self.sig)
+        assert avg.pis()[0] == 0.5
+        assert avg.pis()[1] == 0.5
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
+    

@@ -5,7 +5,7 @@ Created on Oct 30, 2009
 '''
 
 from distributions import compmixnormpdf
-from numpy import array, log, sum, zeros, concatenate
+from numpy import array, log, sum, zeros, concatenate, mean
 from numpy.random import multivariate_normal as mvn
 from numpy.random import multinomial
 from component import Component
@@ -49,12 +49,14 @@ class DPMixture(object):
     collection of compoents that describe a mixture model
     '''
 
-    def __init__(self, clusters, m=False, s=False):
+    def __init__(self, clusters, niter=1, m=False, s=False, identified=False):
         '''
         DPMixture(clusters)
         cluster = list of DPCluster objects
         '''
         self.clusters = clusters
+        self.niter = niter
+        self.ident = identified
         if m is not False:
             self.m = m
         if s is not False:
@@ -139,7 +141,26 @@ class DPMixture(object):
 
         return results
 
-
+    def average(self):
+        if not self.ident:
+            warn("model wasn't run with ident=True, therefor these averages are likely"
+                 + "meaningless")
+        
+        k = len(self.clusters)/self.niter
+        rslts = []
+        for i in range(k):
+            mu_avg = []
+            sig_avg = []
+            pi_avg = 0
+            for j in range(self.niter):
+                mu_avg.append(self.clusters[j*k+i].mu)
+                sig_avg.append(self.clusters[j*k+i].sigma)
+                pi_avg+= self.clusters[j*k+i].pi
+            
+            rslts.append(DPCluster(pi_avg, mean(mu_avg, 0), mean(sig_avg, 0)))
+            
+        return DPMixture(rslts)
+            
 
 
 
