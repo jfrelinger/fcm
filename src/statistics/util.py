@@ -53,7 +53,7 @@ def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
         allx = numpy.concatenate([mu, mixnormrnd(pi, mu, sigma, nk)])
     else:
         allx = numpy.copy(mu)
-    allpx = mixnormpdf(allx, pi, mu, sigma)
+    allpx = mixnormpdf(allx, pi, mu, sigma, use_gpu=False)
     nk += k
 
     mdict = {} # modes
@@ -74,11 +74,11 @@ def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
         eps = 1 + etol
 
         while ((h <= maxiter) and (eps > etol)):
-            w = compmixnormpdf(x, pi, mu, sigma)
+            w = compmixnormpdf(x, pi, mu, sigma, use_gpu=False)
             Y = numpy.sum([w[j] * omega[j] for j in range(k)], 0)
             yy = numpy.dot(w, a)
             y = solve(Y, yy)
-            py = mixnormpdf(y, pi, mu, sigma)
+            py = mixnormpdf(y, pi, mu, sigma, use_gpu=False)
             eps = py / px
             x = y
             px = py
@@ -101,7 +101,7 @@ def check_mode(m, pm, pi, mu, sigma):
             eij = _m - mu[j]
             S = numpy.dot(numpy.identity(p) - numpy.outer(eij, eij),
                           omega[j])
-            G += pi[j] * mvnormpdf(eij, z, sigma[j]) * S
+            G += pi[j] * mvnormpdf(eij, z, sigma[j], use_gpu=False) * S
         if numpy.linalg.det(G) > 0:
             tm.append(_m)
             tpm.append(_pm)
