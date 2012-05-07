@@ -24,19 +24,19 @@ class DPMixtureModel(object):
     '''
 
 
-    def __init__(self, nclusts, iter=1000, burnin=100, last=5, type='mcmc'):
+    def __init__(self, nclusts, niter=1000, burnin=100, last=None, type='mcmc'):
         '''
-        DPMixtureModel(nclusts, iter=1000, burnin= 100, last= 5)
+        DPMixtureModel(nclusts, niter=1000, burnin= 100, last= None)
         nclusts = number of clusters to fit
-        itter = number of mcmc itterations
+        niter = number of mcmc itterations
         burning = number of mcmc burnin itterations
-        last = number of mcmc itterations to draw samples from
+        last = number of mcmc itterations to draw samples from, if None last = niter
         
         '''
         
 
         self.nclusts = nclusts
-        self.iter = iter
+        self.niter = niter
         self.burnin = burnin
         self.last = last
         
@@ -223,7 +223,7 @@ class DPMixtureModel(object):
                                            mu0=self._prior_mu, Sigma0=self._prior_sigma, 
                                            weights0=self._prior_pi, alpha0=self.alpha0,
                                            gpu=self.device, verbose=verbose)
-            self.cdp.optimize(self.iter)
+            self.cdp.optimize(self.niter)
         else:
             self.cdp = DPNormalMixture(self.data,ncomp=self.nclusts,
                                            gamma0=self.gamma0, m0=self.m0,
@@ -232,7 +232,7 @@ class DPMixtureModel(object):
                                            mu0=self._prior_mu, Sigma0=self._prior_sigma, 
                                            weights0=self._prior_pi, alpha0=self.alpha0,
                                            gpu=self.device, verbose=verbose)
-            self.cdp.sample(niter=self.iter, nburn=self.burnin, thin=1, ident=ident)
+            self.cdp.sample(niter=self.niter, nburn=self.burnin, thin=1, ident=ident)
                 
         self.pi = zeros((self.nclusts * self.last))
         self.mus = zeros((self.nclusts * self.last, self.d))
@@ -254,6 +254,9 @@ class DPMixtureModel(object):
         """
         get the results of the fitted mixture model
         """
+        if self.last is None:
+            self.last = self.niter
+            
         
         if self._run:
             if self.type.lower() == 'bem':
@@ -290,11 +293,11 @@ class DPMixtureModel(object):
 
 class HDPMixtureModel(DPMixtureModel):
     '''
-    HDPMixtureModel(nclusts, iter=1000, burnin= 100, last= 5)
+    HDPMixtureModel(nclusts, niter=1000, burnin= 100, last= None)
     nclusts = number of clusters to fit
-    itter = number of mcmc itterations
+    niter = number of mcmc itterations
     burning = number of mcmc burnin itterations
-    last = number of mcmc itterations to draw samples from
+    last = number of mcmc itterations to draw samples from. if None last = niter
      
     '''
       
@@ -335,7 +338,7 @@ class HDPMixtureModel(DPMixtureModel):
                                            mu0=self._prior_mu, Sigma0=self._prior_sigma, 
                                            weights0=self._prior_pi, alpha0=self.alpha0,
                                            gpu=self.device, verbose=verbose)
-        self.hdp.sample(niter=self.iter, nburn=self.burnin, thin=1, ident=ident, tune_interval=tune_interval)
+        self.hdp.sample(niter=self.niter, nburn=self.burnin, thin=1, ident=ident, tune_interval=tune_interval)
         
         self.pi = zeros((self.ndatasets,self.nclusts * self.last))
         self.mus = zeros((self.ndatasets,self.nclusts * self.last, self.d))
@@ -353,6 +356,9 @@ class HDPMixtureModel(DPMixtureModel):
         get the results of the fitted mixture model
         """
         
+        if self.last is None:
+            self.last = self.niter
+        
         if self._run:
             #print self.mus
             allresults = []
@@ -369,13 +375,13 @@ class HDPMixtureModel(DPMixtureModel):
         
 class KMeansModel(object):
     '''
-    KmeansModel(data, k, iter=20, tol=1e-5)
+    KmeansModel(data, k, niter=20, tol=1e-5)
     kmeans clustering model
     '''
-    def __init__(self, k, iter=20, tol=1e-5):
+    def __init__(self, k, niter=20, tol=1e-5):
         
         self.k = k
-        self.iter = iter
+        self.niter = niter
         self.tol = tol
         
     def fit(self, fcmdata):
@@ -387,7 +393,7 @@ class KMeansModel(object):
             return self._fit(fcmdata)
 
     def _fit(self, data):
-        self.r = vq.kmeans(data.view(), self.k, iter=self.iter, thresh=self.tol)
+        self.r = vq.kmeans(data.view(), self.k, iter=self.niter, thresh=self.tol)
         return self.get_results()
 
 
