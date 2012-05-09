@@ -62,6 +62,8 @@ class DPMixtureModel(object):
         
         self.device = None
         
+        self.ident = False
+        
     def load_mu(self, mu):
         if len(mu.shape) > 2:
             raise ValueError('Shape of Mu is wrong')
@@ -201,8 +203,7 @@ class DPMixtureModel(object):
         if self._ref is not None:
             self.ident = True
             self._load_ref_at_fit(pnts)
-        else:
-            self.ident = False
+            
         if self.prior_mu is not None:
             self._load_mu_at_fit()
         if self.prior_sigma is not None:
