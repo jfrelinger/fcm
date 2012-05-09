@@ -238,11 +238,6 @@ class DPMixtureModel(object):
         if self.last is None:
             self.last = self.niter
                             
-        self.pi = zeros((self.nclusts * self.last))
-        self.mus = zeros((self.nclusts * self.last, self.d))
-        self.sigmas = zeros((self.nclusts * self.last, self.d, self.d))
-           
-
         self._run = True #we've fit the mixture model
 
         
@@ -343,10 +338,7 @@ class HDPMixtureModel(DPMixtureModel):
                                            gpu=self.device, verbose=verbose)
         self.hdp.sample(niter=self.niter, nburn=self.burnin, thin=1, ident=self.ident, tune_interval=tune_interval)
         
-        self.pi = zeros((self.ndatasets,self.nclusts * self.last))
-        self.mus = zeros((self.ndatasets,self.nclusts * self.last, self.d))
-        self.sigmas = zeros((self.ndatasets,self.nclusts * self.last, self.d, self.d))
-           
+        
 
         self._run = True #we've fit the mixture model
 
