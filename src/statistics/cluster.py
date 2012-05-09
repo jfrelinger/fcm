@@ -365,7 +365,7 @@ class HDPMixtureModel(DPMixtureModel):
                         tmp.nmu = self.hdp.mu[-(i+1),j]
                         tmp.nsigma = self.hdp.Sigma[-(i+1),j]
                         rslts.append(tmp)
-                allresults.append( DPMixture(rslts, self.m, self.s))
+                allresults.append( DPMixture(rslts, self.last, self.m, self.s, self.ident))
             return allresults
         
 class KMeansModel(object):
