@@ -233,7 +233,10 @@ class DPMixtureModel(object):
                                            weights0=self._prior_pi, alpha0=self.alpha0,
                                            gpu=self.device, verbose=verbose)
             self.cdp.sample(niter=self.niter, nburn=self.burnin, thin=1, ident=self.ident)
-                
+        
+        if self.last is None:
+            self.last = self.niter
+                            
         self.pi = zeros((self.nclusts * self.last))
         self.mus = zeros((self.nclusts * self.last, self.d))
         self.sigmas = zeros((self.nclusts * self.last, self.d, self.d))
@@ -254,8 +257,7 @@ class DPMixtureModel(object):
         """
         get the results of the fitted mixture model
         """
-        if self.last is None:
-            self.last = self.niter
+
             
         
         if self._run:
