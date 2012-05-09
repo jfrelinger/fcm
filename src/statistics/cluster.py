@@ -28,7 +28,7 @@ class DPMixtureModel(object):
         '''
         DPMixtureModel(nclusts, niter=1000, burnin= 100, last= None)
         nclusts = number of clusters to fit
-        niter = number of mcmc itterations
+        niter = number of mcmc itterations to sample
         burning = number of mcmc burnin itterations
         last = number of mcmc itterations to draw samples from, if None last = niter
         
@@ -321,7 +321,7 @@ class HDPMixtureModel(DPMixtureModel):
             standardized.append((i-self.m)/self.s)
             
         
-        ident = False
+        
         
         if self.prior_mu is not None:
             self._load_mu_at_fit()
@@ -341,7 +341,7 @@ class HDPMixtureModel(DPMixtureModel):
                                            mu0=self._prior_mu, Sigma0=self._prior_sigma, 
                                            weights0=self._prior_pi, alpha0=self.alpha0,
                                            gpu=self.device, verbose=verbose)
-        self.hdp.sample(niter=self.niter, nburn=self.burnin, thin=1, ident=ident, tune_interval=tune_interval)
+        self.hdp.sample(niter=self.niter, nburn=self.burnin, thin=1, ident=self.ident, tune_interval=tune_interval)
         
         self.pi = zeros((self.ndatasets,self.nclusts * self.last))
         self.mus = zeros((self.ndatasets,self.nclusts * self.last, self.d))
