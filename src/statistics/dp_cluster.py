@@ -29,13 +29,13 @@ class DPCluster(Component):
         self.mu = mu
         self.sigma = sig
 
-    def prob(self, x):
+    def prob(self, x, logged=False):
         '''
         DPCluster.prob(x):
         returns probability of x beloging to this mixture compoent
         '''
         #return self.pi * mvnormpdf(x, self.mu, self.sigma)
-        return compmixnormpdf(x, self.pi, self.mu, self.sigma)
+        return compmixnormpdf(x, self.pi, self.mu, self.sigma, logged=logged)
 
     def draw(self, n=1):
         '''
@@ -62,20 +62,20 @@ class DPMixture(object):
         if s is not False:
             self.s = s
 
-    def prob(self, x):
+    def prob(self, x, logged=False):
         '''
         DPMixture.prob(x)
         returns an array of probabilities of x being in each component of the mixture
         '''
         #return array([i.prob(x) for i in self.clusters])
-        return compmixnormpdf(x, self.pis(), self.mus(), self.sigmas())
+        return compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged)
 
     def classify(self, x):
         '''
         DPMixture.classify(x):
         returns the classification (which mixture) x is a member of
         '''
-        probs = self.prob(x)
+        probs = self.prob(x, logged=True)
         try:
             unused_n, unused_j = x.shape
             #return array([i.argmax(0) for i in probs])
@@ -186,12 +186,12 @@ class ModalDPMixture(DPMixture):
         if s is not False:
             self.s = s
 
-    def prob(self, x):
+    def prob(self, x, logged=False):
         '''
         ModalDPMixture.prob(x)
         returns  an array of probabilities of x being in each mode of the modal mixture
         '''
-        probs = compmixnormpdf(x, self.pis(), self.mus(), self.sigmas())
+        probs = compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged)
 
         try:
             n, j = x.shape # check we're more then 1 point
@@ -227,7 +227,7 @@ class ModalDPMixture(DPMixture):
         ModalDPMixture.classify(x):
         returns the classification (which mixture) x is a member of
         '''
-        probs = self.prob(x)
+        probs = self.prob(x, logged=True)
         try:
             unused_n, unused_j = x.shape
             #return array([i.argmax(0) for i in probs])
