@@ -64,6 +64,8 @@ class DPMixtureModel(object):
         
         self.ident = False
         
+        self.parallel = False
+        
     def load_mu(self, mu):
         if len(mu.shape) > 2:
             raise ValueError('Shape of Mu is wrong')
@@ -223,7 +225,7 @@ class DPMixtureModel(object):
                                            e0=self.e0, f0=self.f0,
                                            mu0=self._prior_mu, Sigma0=self._prior_sigma, 
                                            weights0=self._prior_pi, alpha0=self.alpha0,
-                                           gpu=self.device, verbose=verbose)
+                                           gpu=self.device, parallel = self.parallel, verbose=verbose)
             self.cdp.optimize(self.niter)
         else:
             self.cdp = DPNormalMixture(self.data,ncomp=self.nclusts,
@@ -232,7 +234,7 @@ class DPMixtureModel(object):
                                            e0=self.e0, f0=self.f0,
                                            mu0=self._prior_mu, Sigma0=self._prior_sigma, 
                                            weights0=self._prior_pi, alpha0=self.alpha0,
-                                           gpu=self.device, verbose=verbose)
+                                           gpu=self.device, parallel = self.parallel, verbose=verbose)
             self.cdp.sample(niter=self.niter, nburn=self.burnin, thin=1, ident=self.ident)
         
         if self.last is None:
@@ -335,7 +337,7 @@ class HDPMixtureModel(DPMixtureModel):
                                            e0=self.e0, f0=self.f0,
                                            mu0=self._prior_mu, Sigma0=self._prior_sigma, 
                                            weights0=self._prior_pi, alpha0=self.alpha0,
-                                           gpu=self.device, verbose=verbose)
+                                           gpu=self.device, parallel = self.parallel, verbose=verbose)
         self.hdp.sample(niter=self.niter, nburn=self.burnin, thin=1, ident=self.ident, tune_interval=tune_interval)
         
         
