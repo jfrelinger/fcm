@@ -9,7 +9,7 @@ from numpy.random import random, multivariate_normal
 try:
     from gpustats import mvnpdf_multi
     #from gpustats.util import threadSafeInit
-    from dpmix.utils import gpu_select
+    from dpmix.utils import select_gpu
     has_gpu = True
 except ImportError:
     has_gpu = False
@@ -44,7 +44,7 @@ def _mvnpdf(x, mu, va, n=1, logged=False, use_gpu=True, **kwargs):
             dev = kwargs['device']
         else:
             dev = 0
-        gpu_select(dev)
+        select_gpu(dev)
         return mvnpdf_multi(x, mu, va, weights=ones(mu.shape[0]), logged=logged, order='C')
     else:
         if logged:
@@ -70,7 +70,7 @@ def _wmvnpdf(x, pi, mu, va, n=1, logged=False, use_gpu=True, **kwargs):
             dev = kwargs['device']
         else:
             dev = 0
-        gpu_select(dev)
+        select_gpu(dev)
         return mvnpdf_multi(x, mu, va, weights = pi, logged=logged, order='C')
     else:
         if logged:
