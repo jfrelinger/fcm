@@ -29,13 +29,13 @@ class DPCluster(Component):
         self.mu = mu
         self.sigma = sig
 
-    def prob(self, x, logged=False):
+    def prob(self, x, logged=False, **kwargs):
         '''
         DPCluster.prob(x):
         returns probability of x beloging to this mixture compoent
         '''
         #return self.pi * mvnormpdf(x, self.mu, self.sigma)
-        return compmixnormpdf(x, self.pi, self.mu, self.sigma, logged=logged)
+        return compmixnormpdf(x, self.pi, self.mu, self.sigma, logged=logged, **kwargs)
 
     def draw(self, n=1):
         '''
@@ -62,20 +62,20 @@ class DPMixture(object):
         if s is not False:
             self.s = s
 
-    def prob(self, x, logged=False):
+    def prob(self, x, logged=False, **kwargs):
         '''
         DPMixture.prob(x)
         returns an array of probabilities of x being in each component of the mixture
         '''
         #return array([i.prob(x) for i in self.clusters])
-        return compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged)
+        return compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs)
 
-    def classify(self, x):
+    def classify(self, x, **kwargs):
         '''
         DPMixture.classify(x):
         returns the classification (which mixture) x is a member of
         '''
-        probs = self.prob(x, logged=True)
+        probs = self.prob(x, logged=True, **kwargs)
         try:
             unused_n, unused_j = x.shape
             #return array([i.argmax(0) for i in probs])
@@ -186,12 +186,12 @@ class ModalDPMixture(DPMixture):
         if s is not False:
             self.s = s
 
-    def prob(self, x, logged=False):
+    def prob(self, x, logged=False, **kwargs):
         '''
         ModalDPMixture.prob(x)
         returns  an array of probabilities of x being in each mode of the modal mixture
         '''
-        probs = compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged)
+        probs = compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs)
 
         #can't sum in log prob space
         if logged:
@@ -231,12 +231,12 @@ class ModalDPMixture(DPMixture):
                 lst.append(i)
         return array(lst)
 
-    def classify(self, x):
+    def classify(self, x, **kwargs):
         '''
         ModalDPMixture.classify(x):
         returns the classification (which mixture) x is a member of
         '''
-        probs = self.prob(x, logged=True)
+        probs = self.prob(x, logged=True, **kwargs)
         try:
             unused_n, unused_j = x.shape
             #return array([i.argmax(0) for i in probs])

@@ -8,7 +8,8 @@ from numpy.random import random, multivariate_normal
 
 try:
     from gpustats import mvnpdf_multi
-    from gpustats.util import threadSafeInit
+    #from gpustats.util import threadSafeInit
+    from dpmix.utils import gpu_select
     has_gpu = True
 except ImportError:
     has_gpu = False
@@ -30,7 +31,7 @@ from dpmix.utils import mvn_weighted_logged
 #    y   = fac * exp(y)
 #    return y
 
-def _mvnpdf(x, mu, va, n=1, logged=False, use_gpu=True):
+def _mvnpdf(x, mu, va, n=1, logged=False, use_gpu=True, **kwargs):
     if len(x.shape) == 1:
             x = x.reshape((1,x.shape))
     if len(mu.shape) == 1:
@@ -39,7 +40,11 @@ def _mvnpdf(x, mu, va, n=1, logged=False, use_gpu=True):
         va = va.reshape(1,va.shape[0], va.shape[1])
         
     if has_gpu and use_gpu:
-        threadSafeInit()
+        if 'device' in kwargs:
+            dev = kwargs['device']
+        else:
+            dev = 0
+        gpu_select(dev)
         return mvnpdf_multi(x, mu, va, weights=ones(mu.shape[0]), logged=logged, order='C')
     else:
         if logged:
@@ -47,7 +52,7 @@ def _mvnpdf(x, mu, va, n=1, logged=False, use_gpu=True):
         else:
             return exp(mvn_weighted_logged(x, mu, va, ones(mu.shape[0])))
 
-def _wmvnpdf(x, pi, mu, va, n=1, logged=False, use_gpu=True):
+def _wmvnpdf(x, pi, mu, va, n=1, logged=False, use_gpu=True, **kwargs):
     if len(x.shape) == 1:
             x = x.reshape((1,x.shape))
     if len(mu.shape) == 1:
@@ -61,7 +66,11 @@ def _wmvnpdf(x, pi, mu, va, n=1, logged=False, use_gpu=True):
             pi = pi.reshape((1))
     
     if has_gpu and use_gpu:
-        threadSafeInit()
+        if 'device' in kwargs:
+            dev = kwargs['device']
+        else:
+            dev = 0
+        gpu_select(dev)
         return mvnpdf_multi(x, mu, va, weights = pi, logged=logged, order='C')
     else:
         if logged:
@@ -70,7 +79,7 @@ def _wmvnpdf(x, pi, mu, va, n=1, logged=False, use_gpu=True):
             return exp(mvn_weighted_logged(x, mu, va, pi))
     
 
-def mvnormpdf(x, mu, va, logged=False, use_gpu=True):
+def mvnormpdf(x, mu, va, **kwargs):
     """
     calculate the multi-variate normal pdf 
     D(x, mu, sigma) -> float
@@ -81,13 +90,13 @@ def mvnormpdf(x, mu, va, logged=False, use_gpu=True):
         n = x.shape
         p = 0
     if p > 0:
-        results = _mvnpdf(x, mu, va, n, logged=logged, use_gpu=use_gpu)
+        results = _mvnpdf(x, mu, va, n, **kwargs)
     else:
-        results = _mvnpdf(x, mu, va, logged=logged, use_gpu=use_gpu)
+        results = _mvnpdf(x, mu, va, 1, **kwargs)
 
     return results
 
-def compmixnormpdf(x, prop, mu, Sigma, logged=False, use_gpu=True):
+def compmixnormpdf(x, prop, mu, Sigma, **kwargs):
     """Component mixture multivariate normal pdfs"""
     try:
         n, d = x.shape
@@ -103,26 +112,26 @@ def compmixnormpdf(x, prop, mu, Sigma, logged=False, use_gpu=True):
         c = 1
 
     if c == 1:
-        tmp = _wmvnpdf(x, prop, mu, Sigma, n, logged=logged, use_gpu=use_gpu)
+        tmp = _wmvnpdf(x, prop, mu, Sigma, n, **kwargs)
         if n == 1:
             tmp = tmp[0]
 
     else:
-        tmp = _wmvnpdf(x, prop, mu, Sigma, n * c, logged=logged, use_gpu=use_gpu)
+        tmp = _wmvnpdf(x, prop, mu, Sigma, n * c, **kwargs)
         tmp = reshape(tmp, (n, c))
         #tmp = sum(tmp,1)
         if n == 1:
             tmp = tmp[0]
     return tmp
 
-def mixnormpdf(x, prop, mu, Sigma, logged=False, use_gpu=True):
+def mixnormpdf(x, prop, mu, Sigma, **kwargs):
     """Mixture of multivariate normal pdfs"""
     # print "in mixnormpdf ..."
 #    tmp = 0.0
 #    for i in range(len(prop)):
 #        tmp += prop[i]*mvnormpdf(x, mu[i], Sigma[i])
 #    return tmp
-    tmp = compmixnormpdf(x, prop, mu, Sigma, logged, use_gpu)
+    tmp = compmixnormpdf(x, prop, mu, Sigma, **kwargs)
     try:
         return sum(tmp, 1)
     except ValueError:
