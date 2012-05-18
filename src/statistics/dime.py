@@ -106,7 +106,7 @@ class Dime(object):
                 si = self.sigma[i, :, :][dimm, :][:, dimm]
                 for jj in range(i, self.k):
                     #print self.sigma[jj,:,:][dimm,:][:,dimm]
-                    D[jj, i] = mvnormpdf(self.mu[jj, :][:, dimm], mi, si + self.sigma[jj, :, :][dimm, :][:, dimm])
+                    D[jj, i] = mvnormpdf(self.mu[jj, :][:, dimm], mi, si + self.sigma[jj, :, :][dimm, :][:, dimm], use_gpu=False)
                     D[i, jj] = D[jj, i]
             #print 'd',D[tt,k-1,k-1]       
             for ii in gpj:
