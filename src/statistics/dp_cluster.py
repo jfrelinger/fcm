@@ -35,7 +35,7 @@ class DPCluster(Component):
         returns probability of x beloging to this mixture compoent
         '''
         #return self.pi * mvnormpdf(x, self.mu, self.sigma)
-        return compmixnormpdf(x, self.pi, self.mu, self.sigma, logged=logged, **kwargs).astype('float64')
+        return compmixnormpdf(x, self.pi, self.mu, self.sigma, logged=logged, **kwargs)
 
     def draw(self, n=1):
         '''
@@ -68,7 +68,7 @@ class DPMixture(object):
         returns an array of probabilities of x being in each component of the mixture
         '''
         #return array([i.prob(x) for i in self.clusters])
-        return compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs).astype('float64')
+        return compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs)
 
     def classify(self, x, **kwargs):
         '''
@@ -191,7 +191,7 @@ class ModalDPMixture(DPMixture):
         ModalDPMixture.prob(x)
         returns  an array of probabilities of x being in each mode of the modal mixture
         '''
-        probs = compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs).astype('float64')
+        probs = compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs)
         
         #can't sum in log prob space
         if logged:

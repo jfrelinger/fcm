@@ -45,7 +45,7 @@ def _mvnpdf(x, mu, va, n=1, logged=False, use_gpu=True, **kwargs):
         else:
             dev = 0
         select_gpu(dev)
-        return mvnpdf_multi(x, mu, va, weights=ones(mu.shape[0]), logged=logged, order='C')
+        return mvnpdf_multi(x, mu, va, weights=ones(mu.shape[0]), logged=logged, order='C').astype('float64')
     else:
         if logged:
             return mvn_weighted_logged(x, mu, va, ones(mu.shape[0]))
@@ -71,7 +71,7 @@ def _wmvnpdf(x, pi, mu, va, n=1, logged=False, use_gpu=True, **kwargs):
         else:
             dev = 0
         select_gpu(dev)
-        return mvnpdf_multi(x, mu, va, weights = pi, logged=logged, order='C')
+        return mvnpdf_multi(x, mu, va, weights = pi, logged=logged, order='C').astype('float64')
     else:
         if logged:
             return mvn_weighted_logged(x, mu, va, pi)
