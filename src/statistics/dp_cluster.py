@@ -35,7 +35,7 @@ class DPCluster(Component):
         returns probability of x beloging to this mixture compoent
         '''
         #return self.pi * mvnormpdf(x, self.mu, self.sigma)
-        return compmixnormpdf(x, self.pi, self.mu, self.sigma, logged=logged, **kwargs)
+        return compmixnormpdf(x, self.pi, self.mu, self.sigma, logged=logged, **kwargs).astype('float64')
 
     def draw(self, n=1):
         '''
@@ -68,7 +68,7 @@ class DPMixture(object):
         returns an array of probabilities of x being in each component of the mixture
         '''
         #return array([i.prob(x) for i in self.clusters])
-        return compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs)
+        return compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs).astype('float64')
 
     def classify(self, x, **kwargs):
         '''
@@ -151,13 +151,13 @@ class DPMixture(object):
         for i in range(k):
             mu_avg = []
             sig_avg = []
-            pi_avg = 0
+            pi_avg = []
             for j in range(self.niter):
                 mu_avg.append(self.clusters[j*k+i].mu)
                 sig_avg.append(self.clusters[j*k+i].sigma)
-                pi_avg+= self.clusters[j*k+i].pi
+                pi_avg.append(self.clusters[j*k+i].pi)
             
-            rslts.append(DPCluster(pi_avg, mean(mu_avg, 0), mean(sig_avg, 0)))
+            rslts.append(DPCluster(mean(pi_avg, 0), mean(mu_avg, 0), mean(sig_avg, 0)))
             
         return DPMixture(rslts)
             
@@ -191,8 +191,8 @@ class ModalDPMixture(DPMixture):
         ModalDPMixture.prob(x)
         returns  an array of probabilities of x being in each mode of the modal mixture
         '''
-        probs = compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs)
-
+        probs = compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs).astype('float64')
+        
         #can't sum in log prob space
         if logged:
             probs = exp(probs)
