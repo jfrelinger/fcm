@@ -190,7 +190,7 @@ class DPMixtureModel(object):
         fit the mixture model to the data
         use get_results() to get the fitted model
         """
-        pnts = fcmdata.view()
+        pnts = fcmdata.view().copy()
         self.m = pnts.mean(0)
         self.s = pnts.std(0)
         self.data = (pnts - self.m) / self.s
@@ -306,7 +306,7 @@ class HDPMixtureModel(DPMixtureModel):
             datasets = datasets.to_list()
         self.d = datasets[0].shape[1]
         
-        datasets = [i[:] for i in datasets]
+        datasets = [i.copy() for i in datasets]
         self.ndatasets = len(datasets)
         total_data = vstack(datasets)
         self.m = mean(total_data, 0)
