@@ -161,8 +161,18 @@ class DPMixture(object):
             
         return DPMixture(rslts)
             
-
-
+    def last(self, n=1):
+        if n > self.niter:
+            raise ValueError('n=%d is larger than niter (%d)' % (n, self.niter))
+        rslts = []
+        k = len(self.clusters)/self.niter
+        for j in range(n):
+            for i in range(k):
+                rslts.append(self.clusters[-1*((i+(j*k))+1)])
+        
+        return DPMixture(rslts[::-1])
+                             
+                            
 
 
 
