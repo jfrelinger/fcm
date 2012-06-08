@@ -378,7 +378,7 @@ class KMeansModel(object):
     def __init__(self, k, niter=20, tol=1e-5):
         
         self.k = k
-        self.niter = niter
+        self.niter = int(niter)
         self.tol = tol
         
     def fit(self, fcmdata):

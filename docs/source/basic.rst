@@ -1,7 +1,7 @@
 .. py:currentmodule:: fcm
 
 Basic *fcm* tutorial
-##################
+####################
 
 Loading fcs data
 ****************

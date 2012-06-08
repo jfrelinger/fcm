@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 The *fcm* flow cytometry analysis library
-================================
+#########################################
 
 FCM is a Python library to perform exploratory data analysis and batch processing for flow cytometry data. 
 
@@ -22,7 +22,7 @@ FCM is a Python library to perform exploratory data analysis and batch processin
    video
 
 Indices and tables
-==============
+##################
 
 * :ref:`genindex`
 * :ref:`modindex`
