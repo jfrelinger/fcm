@@ -34,6 +34,5 @@ be made to fcm, it will automatically begin using the gpu for fitting mixture mo
     ============  ====================================================================================================
     pycuda        http://mathema.tician.de/software/pycuda
     gpustats      http://github.com/dukestats/gpustats
-    scikits.cuda  http://lebedov.github.com/scikits.cuda/ (or without cula https://github.com/jfrelinger/scikits.cuda)
     ============  ====================================================================================================
     
