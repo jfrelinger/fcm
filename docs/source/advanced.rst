@@ -53,7 +53,7 @@ produces
 .. figure:: kmeans.png
    :align: center
    :height: 600px
-   :alt: tux
+   :alt: kmeans model fitting
    :figclass: align-center
 
 
