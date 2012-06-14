@@ -61,11 +61,138 @@ produces
 Clustering with Mixture Models
 ==============================
 
+An alternative to simple k-means models to describe the distribution of 
+flow data is to use a mixture of Guassian (normal) distributions, and use
+the probability of belonging to each Gaussian to assign cells to clusters.
+The :py:class`fcm.statistics.DPMixtureModel` is used to describe these mixtures 
+of Gaussians and estimate the weights (pis), means (mus), and covariances (sigmas)
+of the distribution.  Using the :py:mod:`dpmix` module we have two methods of estimating
+these parameters, markov chain monte carlo (mcmc) and bayesian expectation maximizion (bem)
+
+
 Fitting the model using MCMC
 ============================
+.. code-block:: ipython
+
+   In [1]: import fcm, fcm.statistics as stats
+   
+   In [2]: import pylab
+   
+   In [3]: data = fcm.loadFCS('/home/jolly/Projects/fcm/sample_data/3FITC_4PE_004.fcs')
+   
+   In [4]: dpmodel = stats.DPMixtureModel(10, niter=100)
+   
+   In [5]: dpmodel.ident =True
+   
+   In [6]: results = dpmodel.fit(data,verbose=10)
+   starting MCMC
+   -100
+   -90
+   -80
+   -70
+   -60
+   -50
+   -40
+   -30
+   -20
+   -10
+   10
+   20
+   30
+   40
+   50
+   60
+   70
+   80
+   90
+   
+   In [7]: avg = results.average()
+   
+   In [8]: mus = avg.mus()
+   
+   In [9]: c = avg.classify(data)
+   
+   In [10]: pylab.subplot(1,2,1)
+   Out[10]: <matplotlib.axes.AxesSubplot at 0x8287bad10>
+   
+   In [11]: pylab.scatter(data[:,0], data[:,1], c=c, s=1, edgecolor='none')
+   Out[11]: <matplotlib.collections.CircleCollection at 0x8287ce750>
+   
+   In [12]: pylab.scatter(mus[:,0], mus[:,1])
+   Out[12]: <matplotlib.collections.CircleCollection at 0x8287ce450>
+   
+   In [13]: pylab.subplot(1,2,2)
+   Out[13]: <matplotlib.axes.AxesSubplot at 0x8287ce8d0>
+   
+   In [14]: pylab.scatter(data[:,2], data[:,3], c=c, s=1, edgecolor='none')
+   Out[14]: <matplotlib.collections.CircleCollection at 0x829038d90>
+   
+   In [15]: pylab.scatter(mus[:,2], mus[:,3])
+   Out[15]: <matplotlib.collections.CircleCollection at 0x829038a50>
+   
+   In [16]: pylab.savefig('dpmix.png')
+   
+   
+
+.. figure:: dpmix.png
+   :align: center
+   :height: 600px
+   :alt: DPMixture model fitting
+   :figclass: align-center
 
 Fitting the model using BEM
 ===========================
+.. code-block:: ipython
+
+   In [1]: import fcm, fcm.statistics as stats
+   
+   In [2]: import pylab
+   
+   In [3]: data = fcm.loadFCS('/home/jolly/Projects/fcm/sample_data/3FITC_4PE_004.fcs')
+   
+   In [4]: dpmodel = stats.DPMixtureModel(10, niter=100, type='bem')
+   
+   In [5]: results = dpmodel.fit(data,verbose=10)
+   starting BEM
+   0:, -941157.006634
+   10:, -158859.825045
+   20:, -144465.587253
+   30:, -111709.700352
+   40:, -111378.962977
+   50:, -111366.297392
+   60:, -111365.592223
+   
+   In [6]: mus = results.mus()
+
+   In [7]: c = results.classify(data)
+   
+   In [8]: pylab.subplot(1,2,1)
+   Out[8]: <matplotlib.axes.AxesSubplot at 0x81b7503d0>
+   
+
+   
+   In [9]: pylab.scatter(data[:,0], data[:,1], c=c, s=1, edgecolor='none')
+   Out[9]: <matplotlib.collections.CircleCollection at 0x8287c1810>
+   
+   In [10]: pylab.scatter(mus[:,0], mus[:,1])
+   Out[10]: <matplotlib.collections.CircleCollection at 0x8287f03d0>
+   
+   In [11]: pylab.subplot(1,2,2)
+   Out[11]: <matplotlib.axes.AxesSubplot at 0x808e03d50>
+   
+   In [12]: pylab.scatter(data[:,2], data[:,3], c=c, s=1, edgecolor='none')
+   Out[12]: <matplotlib.collections.CircleCollection at 0x827cef790>
+   
+   In [13]: pylab.scatter(mus[:,2], mus[:,3])
+   Out[13]: <matplotlib.collections.CircleCollection at 0x827cef410>
+   
+   In [14]: pylab.savefig('bem.png')
+
+.. figure:: bem.png
+   :align: center
+   :height: 600px
+   :alt: DPMixture model fitting
+   :figclass: align-center
 
 Supervised learning
 *******************
