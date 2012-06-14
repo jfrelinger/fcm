@@ -46,7 +46,7 @@ class DPCluster(Component):
 
 class DPMixture(object):
     '''
-    collection of compoents that describe a mixture model
+    collection of components that describe a mixture model
     '''
 
     def __init__(self, clusters, niter=1, m=False, s=False, identified=False):
@@ -124,12 +124,17 @@ class DPMixture(object):
             return ModalDPMixture(self.clusters, cmap, modes)
 
     def log_likelihood(self, x):
+        '''
+        return the log liklihood of x belonging to this mixture
+        '''
+        
         return sum(log(sum(self.prob(x), axis=0)))
 
     def draw(self, n):
         '''
         draw n samples from the represented mixture model
         '''
+        
         d = multinomial(n, self.pis())
         results = None
         for index, count in enumerate(d):
@@ -142,6 +147,9 @@ class DPMixture(object):
         return results
 
     def average(self):
+        '''
+        average over mcmc draws to try and find the 'average' weights, means, and covariances
+        '''
         if not self.ident:
             warn("model wasn't run with ident=True, therefor these averages are likely"
                  + "meaningless")
@@ -162,6 +170,9 @@ class DPMixture(object):
         return DPMixture(rslts)
             
     def last(self, n=1):
+        '''
+        return the last n (defaults to 1) mcmc draws
+        '''
         if n > self.niter:
             raise ValueError('n=%d is larger than niter (%d)' % (n, self.niter))
         rslts = []
@@ -178,7 +189,7 @@ class DPMixture(object):
 
 class ModalDPMixture(DPMixture):
     '''
-    collection of modal compoents that describe a mixture model
+    collection of modal components that describe a mixture model
     '''
 
     def __init__(self, clusters, cmap, modes, m=False, s=False):
