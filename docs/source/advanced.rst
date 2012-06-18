@@ -67,7 +67,7 @@ the probability of belonging to each Gaussian to assign cells to clusters.
 The :py:class`fcm.statistics.DPMixtureModel` is used to describe these mixtures 
 of Gaussians and estimate the weights (pis), means (mus), and covariances (sigmas)
 of the distribution.  Using the :py:mod:`dpmix` module we have two methods of estimating
-these parameters, markov chain monte carlo (mcmc) and bayesian expectation maximizion (bem)
+these parameters, markov chain monte carlo (mcmc) and bayesian expectation maximization (bem)
 
 
 Fitting the model using MCMC

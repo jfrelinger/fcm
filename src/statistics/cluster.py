@@ -4,7 +4,7 @@ Created on Oct 30, 2009
 @author: jolly
 '''
 
-from warnings import warn
+
 from numpy import zeros, outer, sum, eye, array, mean, cov, vstack, std
 from numpy.random import multivariate_normal as mvn
 from numpy.random import seed
@@ -95,7 +95,7 @@ class DPMixtureModel(object):
             self._prior_mu = (self.prior_mu.copy() - self.m) / self.s
         
     def load_sigma(self, sigma):
-        n, d = sigma.shape[0:2]
+        n, _ = sigma.shape[0:2]
         if len(sigma.shape) > 3:
             raise ValueError('Shape of Sigma is wrong')
 
