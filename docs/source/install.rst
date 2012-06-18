@@ -9,15 +9,16 @@ Without GPU support
 
 .. table:: Dependant Packages
 
-    ==========  ===================================================
+    ==========  ==================================================================
     package     homepage
-    ==========  ===================================================
+    ==========  ==================================================================
     numpy       http://numpy.scipy.org/
     scipy       http://scipy.scipy.org/
     matplotlib  http://matplotlib.sourceforge.net/
     dpmix       http://github.com/andrewcron/pycdp
-    mip4py      http://http://mpi4py.scipy.org/
-    ==========  ===================================================
+    cython      http://cython.org/ (DPMix dependency)
+    mip4py      http://mpi4py.scipy.org/ (optional DPMix dependency for threading)
+    ==========  ==================================================================
 
 With GPU support
 ****************
