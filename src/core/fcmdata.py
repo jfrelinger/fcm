@@ -67,7 +67,7 @@ class FCMdata(object):
                 return self.get_channel_by_name(item)
             except:
                 raise ValueError('field named a not found')
-        elif isinstance(item,tuple):
+        elif isinstance(item,tuple) or isinstance(item, list):
             if isinstance(item[0],str):
                 return self.get_channel_by_name(list(item))
             else:
@@ -105,7 +105,7 @@ class FCMdata(object):
         """Return the channel indexes for the named channels"""
 
         if isinstance(channels,str):
-            channels = [channels]
+            return self.channels.index(channels)
         idx = []
         for i in channels:
             try:
