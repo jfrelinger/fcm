@@ -53,6 +53,86 @@ to most numpy functions
 deviations of each channel, along with the :py:meth:`FCMdata.boundary_events`
 method to inspect the number of events along the boundaries.
 
+Compensation and Transformation
+*******************************
+Along with reading FCS files, :py:mod:`fcm` provides methods to apply compensation
+to try and counter flourescent spill over.  By default :py:func:`loadFCS` compensates fcs 
+data using the compensation matrix provided in fcs file header.  :py:func:`loadFCS` also allows 
+you to provide your own compensation matrix by passing in the comp and sidx arguments, or 
+can not compensate by passing ``False`` as the ``auto_comp`` arugment to :py:func:`loadFCS`.
+For convenience :py:mod:`fcm` provides the :py:func:`load_compensate_matrix` which will
+return the laser names (sidx) and compensation matrix exported in the format used by Flowjo.
+
+:py:mod:`fcm` also supports the logicle and log data transforms.  By default when loading an
+fcs file :py:func:`loadFCS` will apply the logicle transform to all flourescent channels with
+a range of 262144 (PNR in the fcs header).  The log transform can be used instead by passing 
+the transform argument of ``log`` or automatic transformation can be prevented by setting the
+``transform`` argument to ``None``.
+
+Further :py:class:`FCMdata` provides :py:meth:`FCMdata.compensate`, :py:meth:`FCMdata.logicle`,
+and :py:meth:`FCMdata.log` methods.  The code below shows how to control and manually apply
+logicle transforms and compensation to a :py:class:`FCMdata` object.  It also shows the basics
+of working with the :py:class:`FCMdata` data tree which will be covered in the next section
+
+.. code-block:: python
+
+   import fcm
+   import fcm.graphics as graph
+   import matplotlib.pyplot as pylab
+   
+   sidx, comp = fcm.load_compensate_matrix('CompMatrixDenny06Nov09')
+   
+   data = fcm.loadFCS('E6901F0T-07_CMV pp65.fcs', auto_comp=False, transform=None)
+   
+   data.logicle() # logicle the data so it looks more like you are used to seeing
+   data.tree.rename_node('t1','uncompensated')
+   
+   data.visit('root')
+   data.compensate(sidx,comp)
+   data.logicle()
+   data.tree.rename_node('t1','compensated')
+   
+   
+   fig = pylab.figure(figsize=(8,4))
+   ax = pylab.subplot(1,2,1)
+   
+   data.visit('uncompensated')
+   z = graph.bilinear_interpolate(data['CD8 APC Cy7'],data['CD4 PerCP Cy55'])
+   ax.scatter(data['CD4 PerCP Cy55'],data['CD8 APC Cy7'], s=1, edgecolor='none', c=z)
+   ax.set_xlabel('CD4 PerCP Cy55')
+   ax.set_ylabel('CD8 APC Cy7')
+   graph.set_logicle(ax,'x')
+   graph.set_logicle(ax,'y')
+   ax.set_xlim(-7000, data['CD4 PerCP Cy55'].max())
+   ax.set_ylim(-9000, data['CD8 APC Cy7'].max())
+   ax.set_title('Uncompensated')
+   
+   ax = pylab.subplot(1,2,2)
+   
+   data.visit('compensated')
+   
+   z = graph.bilinear_interpolate(data['CD8 APC Cy7'],data['CD4 PerCP Cy55'])
+   ax.scatter(data['CD4 PerCP Cy55'],data['CD8 APC Cy7'], s=1, edgecolor='none', c=z)
+   ax.set_xlabel('CD4 PerCP Cy55')
+   ax.set_ylabel('CD8 APC Cy7')
+   graph.set_logicle(ax,'x')
+   graph.set_logicle(ax,'y')
+   ax.set_xlim(-30000, data['CD4 PerCP Cy55'].max())
+   ax.set_ylim(-30000, data['CD8 APC Cy7'].max())
+   ax.set_title('Compensated')
+   
+   print data.tree.pprint()
+   pylab.tight_layout()
+   fig.savefig('comp.png')
+
+
+.. figure:: comp.png
+   :align: center
+   :height: 400px
+   :width: 800px
+   :alt: Compensation Effects
+   :figclass: align-center
+
 Gating and working withe the view tree
 **************************************
 Typical flow analysis focuses on finding cell subsets of interest via gating.
