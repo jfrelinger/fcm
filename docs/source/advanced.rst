@@ -8,6 +8,8 @@ plots. These include :py:func:`fcm.graphics.hist`, :py:func:`fcm.graphics.heatma
 
 Histogram using :py:func:`graphics.hist`
 ========================================
+:py:func:`fcm.graphics.hist` plots overlay histogram for the specified channel.
+
 .. code-block:: ipython
 
    In [1]: import fcm
@@ -28,6 +30,22 @@ Histogram using :py:func:`graphics.hist`
 
 Heatmaps using :py:func:`fcm.graphics.heatmap`
 ==============================================
+
+.. code-block:: ipython
+
+   In [1]: import fcm
+   
+   In [2]: import fcm.graphics as graph
+   
+   In [3]: x = fcm.loadFCS('B6901GFJ-08_CMV pp65.fcs')
+   
+   In [4]: graph.heatmap(x,[(7,12)])
+   
+.. figure:: heatmap.png
+   :align: center
+   :height: 400px
+   :alt: example heat map
+   :figclass: align-center
 
 Automated positivity thresholds
 *******************************

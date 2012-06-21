@@ -13,6 +13,8 @@ def hist(fcms, index, savefile=None, display=True, **kwargs):
     """
     figure = pylab.figure()
     for fcm in fcms:
+        if isinstance(index, str):
+            index = fcm.name_to_index(index)
         y = fcm[:, index]
         h, b = histogram(y, bins=200, **kwargs)
         b = (b[:-1] + b[1:]) / 2.0
