@@ -8,13 +8,13 @@ import pylab
 def hist(fcms, index, savefile=None, display=True, **kwargs):
     """Plot overlay histogram.
 
-    fcms is a list of histograms
+    fcms is a list of FCMData objects/arrays
     index is channel to plot
     """
     figure = pylab.figure()
     for fcm in fcms:
         y = fcm[:, index]
-        h, b = histogram(y, bins=200, new=True, **kwargs)
+        h, b = histogram(y, bins=200, **kwargs)
         b = (b[:-1] + b[1:]) / 2.0
         unused_x = pylab.linspace(min(y), max(y), 100)
         pylab.plot(b, h, label=fcm.name)

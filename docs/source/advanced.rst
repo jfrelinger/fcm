@@ -3,6 +3,31 @@ Advanced *fcm* tutorial
 
 Graphics
 ********
+:py:mod:`fcm` provides several convience functions for plotting common flow cytometry
+plots. These include :py:func:`fcm.graphics.hist`, :py:func:`fcm.graphics.heatmap`,
+
+Histogram using :py:func:`graphics.hist`
+========================================
+.. code-block:: ipython
+
+   In [1]: import fcm
+   
+   In [2]: import fcm.graphics as graph
+   
+   In [3]: from glob import glob
+   
+   In [4]: xs =[fcm.loadFCS(x) for x in glob('B6901GFJ-08_*.fcs')]
+   
+   In [5]: graph.hist(xs,3, display=True)
+   
+.. figure:: hist.png
+   :align: center
+   :height: 400px
+   :alt: histogram of channel 3 of three fcs files
+   :figclass: align-center
+
+Heatmaps using :py:func:`fcm.graphics.heatmap`
+==============================================
 
 Automated positivity thresholds
 *******************************
@@ -59,7 +84,7 @@ produces
 
 
 Clustering with Mixture Models
-==============================
+------------------------------
 
 An alternative to simple k-means models to describe the distribution of 
 flow data is to use a mixture of Guassian (normal) distributions, and use
@@ -71,7 +96,7 @@ these parameters, markov chain monte carlo (mcmc) and bayesian expectation maxim
 
 
 Fitting the model using MCMC
-============================
+----------------------------
 .. code-block:: ipython
 
    In [1]: import fcm, fcm.statistics as stats
@@ -141,7 +166,7 @@ Fitting the model using MCMC
    :figclass: align-center
 
 Fitting the model using BEM
-===========================
+---------------------------
 .. code-block:: ipython
 
    In [1]: import fcm, fcm.statistics as stats
@@ -201,7 +226,7 @@ Subset identification with k-nearest neighbors
 ==============================================
 
 Subset identification with SVM
-==============================
+------------------------------
 
 Report generation
 *****************
