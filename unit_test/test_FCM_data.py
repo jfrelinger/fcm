@@ -32,9 +32,15 @@ class FCMdataTestCase(unittest.TestCase):
         a = randint(0,1)
         b = randint(0,2)
         assert type(self.fcm[a]) == type(self.pnts[a]), "__getitem__ failed to return array"
+         
+        print 'new',self.pnts[a,b]
+        print 'new',self.fcm[a,b]
+        
         assert self.fcm[a,b] == self.pnts[a,b], '__getitem__ returned wrong value'
-        assert self.fcm['fsc','ssc'][a,0] == self.pnts[a,0], '__getitem__ with multiple strings failed'
-    
+        assert self.fcm[:,'fsc'][a] == self.pnts[:,0][a], '__getitem__ with multiple strings failed'
+        assert self.fcm[:,['fsc','ssc']][a,0] == self.pnts[a,0], '__getitem__ with multiple strings failed'
+        assert self.fcm[:,['fsc',1]][a,0] == self.pnts[a,0], '__getitem__ with mixed strings failed'
+        
     def testDeligate(self):
         assert self.fcm.mean() == self.pnts.mean(), "deligation of mean failed"
         

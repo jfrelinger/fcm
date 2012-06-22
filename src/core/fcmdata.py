@@ -60,20 +60,25 @@ class FCMdata(object):
         return self.name
 
     def __getitem__(self, item):
-        """return FCMdata.pnts[i] by name or by index"""
-
-        if isinstance(item,str):
-            try:
-                return self.get_channel_by_name(item)
-            except:
-                raise ValueError('field named a not found')
-        elif isinstance(item,tuple) or isinstance(item, list):
-            if isinstance(item[0],str):
-                return self.get_channel_by_name(list(item))
-            else:
-                return self.tree.view()[item]
-        else:
-            return self.tree.view()[item]
+        """return FCMdata points"""
+        
+        if isinstance(item,tuple):
+            
+            item = list(item) # convert to be mutable.
+            if isinstance(item[1],str):
+                
+                item[1] = self.name_to_index(item[1])
+            elif isinstance(item[1],tuple) or isinstance(item[1], list):
+                
+                item[1] = list(item[1])# convert to be mutable.
+                for i,j in enumerate(item[1]):
+                    if isinstance(j,str):
+                        print i, 'is string', j
+                        item[1][i] = self.name_to_index(j)
+            item = tuple(item)
+                        
+        
+        return self.tree.view()[item]
 
     @property
     def channels(self):
