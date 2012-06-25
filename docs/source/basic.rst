@@ -42,13 +42,13 @@ to most numpy functions
 
     import matplotlib.pyplot as plt
     from fcm import loadFCS
-    data = loadFCS('../sample_data/3FITC_4PE_004.fcs')
+    data = loadFCS('../../sample_data/3FITC_4PE_004.fcs')
     plt.scatter(data[:,0],data[:,1], s=1, edgecolors='none')
     plt.xlabel(data.channels[0])
     plt.ylabel(data.channels[1])
     plt.show()
 
-:py:class:`FCMdata` objects also provide some basic QA via the
+:py:class:`FCMdata` objects also provide some basic Q/A via the
 :py:meth:`FCMdata.summary` method which shows the means, and standard
 deviations of each channel, along with the :py:meth:`FCMdata.boundary_events`
 method to inspect the number of events along the boundaries.
@@ -56,15 +56,15 @@ method to inspect the number of events along the boundaries.
 Compensation and Transformation
 *******************************
 Along with reading FCS files, :py:mod:`fcm` provides methods to apply compensation
-to try and counter flourescent spill over.  By default :py:func:`loadFCS` compensates fcs 
+to try and counter fluorescent spill over.  By default :py:func:`loadFCS` compensates fcs 
 data using the compensation matrix provided in fcs file header.  :py:func:`loadFCS` also allows 
 you to provide your own compensation matrix by passing in the comp and sidx arguments, or 
-can not compensate by passing ``False`` as the ``auto_comp`` arugment to :py:func:`loadFCS`.
+can not compensate by passing ``False`` as the ``auto_comp`` argument to :py:func:`loadFCS`.
 For convenience :py:mod:`fcm` provides the :py:func:`load_compensate_matrix` which will
 return the laser names (sidx) and compensation matrix exported in the format used by Flowjo.
 
 :py:mod:`fcm` also supports the logicle and log data transforms.  By default when loading an
-fcs file :py:func:`loadFCS` will apply the logicle transform to all flourescent channels with
+fcs file :py:func:`loadFCS` will apply the logicle transform to all fluorescent channels with
 a range of 262144 (PNR in the fcs header).  The log transform can be used instead by passing 
 the transform argument of ``log`` or automatic transformation can be prevented by setting the
 ``transform`` argument to ``None``.
