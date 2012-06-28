@@ -28,9 +28,9 @@ Histogram using :py:func:`graphics.hist`
    :alt: histogram of channel 3 of three fcs files
    :figclass: align-center
 
-Heat maps using :py:func:`fcm.graphics.heatmap`
-==============================================
-:py:func:`fcm.graphics.heatmap` provides a quick function to generate heat map scatter
+Pseudo-color plots using :py:func:`fcm.graphics.heatmap`
+========================================================
+:py:func:`fcm.graphics.heatmap` provides a quick function to generate pseduo-color scatter
 plots.  Multiple pairs of channels passed as tuples can be passed to generate multiple
 plots at once.  If you wish to generate your own heat maps, :py:mod:`fcm` also provides
 :py:func:`fcm.graphics.bilinear_interpolate` and :py:func:`fcm.graphics.trilinear_interpolate`

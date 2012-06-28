@@ -6,8 +6,19 @@
 The *fcm* flow cytometry analysis library
 #########################################
 
-FCM is a Python library to perform exploratory data analysis and batch processing for flow cytometry data. 
+:py:module:`fcm` is a Python library to perform exploratory data analysis and batch processing
+for flow cytometry data. It provides methods for doing loading fcs data and performing
+spectral compensation and standard log, and loglike transformations.  It supports 
+traditional flow analysis using gating (standard polygon, quadrant, threshold and 
+interval gates) and model based analysis (k-means and Dirichlet processes mixture models).  
 
+.. figure:: heatmap.png
+   :align: center
+   :height: 400px
+   :alt: example heat map
+   :figclass: align-center
+   
+  
 .. toctree::
    :maxdepth: 2
    :hidden:
