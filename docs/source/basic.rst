@@ -43,6 +43,7 @@ to most numpy functions
     import matplotlib.pyplot as plt
     from fcm import loadFCS
     data = loadFCS('../../sample_data/3FITC_4PE_004.fcs')
+    plt.figure(figsize=(4,4))
     plt.scatter(data[:,0],data[:,1], s=1, edgecolors='none')
     plt.xlabel(data.channels[0])
     plt.ylabel(data.channels[1])

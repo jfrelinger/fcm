@@ -25,6 +25,7 @@ print data.tree.pprint()
 
 #return to the transformed node and plot
 data.tree.visit('root')
+plt.figure(figsize=(4,4))
 plt.scatter(data[:,0],data[:,1], s=1, edgecolors='none', c='grey')
 
 #and visit the subset of interest to plot
