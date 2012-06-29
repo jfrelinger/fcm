@@ -95,25 +95,28 @@ Clustering using K-Means
    
    In [6]: c = results.classify(data)
    
-   In [7]: pylab.subplot(1,2,1)
-   Out[7]: <matplotlib.axes.AxesSubplot at 0x81b3ca0d0>
+   In [7]: pylab.figure(figsize=(8,4))
+   Out[7]: <matplotlib.figure.Figure at 0x821a18050>
+      
+   In [8]: pylab.subplot(1,2,1)
+   Out[8]: <matplotlib.axes.AxesSubplot at 0x81b3ca0d0>
    
-   In [8]: pylab.scatter(data[:,0], data[:,1], c=c, s=1, edgecolor='none')
-   Out[8]: <matplotlib.collections.CircleCollection at 0x81b3eab90>
+   In [9]: pylab.scatter(data[:,0], data[:,1], c=c, s=1, edgecolor='none')
+   Out[9]: <matplotlib.collections.CircleCollection at 0x81b3eab90>
    
-   In [9]: pylab.subplot(1,2,2)
-   Out[9]: <matplotlib.axes.AxesSubplot at 0x81b3b3690>
+   In [10]: pylab.subplot(1,2,2)
+   Out[10]: <matplotlib.axes.AxesSubplot at 0x81b3b3690>
    
-   In [10]: pylab.scatter(data[:,2], data[:,3], c=c, s=1, edgecolor='none')
-   Out[10]: <matplotlib.collections.CircleCollection at 0x827d0ee10>
+   In [11]: pylab.scatter(data[:,2], data[:,3], c=c, s=1, edgecolor='none')
+   Out[11]: <matplotlib.collections.CircleCollection at 0x827d0ee10>
    
-   In [11]: pylab.savefig('kmeans.png')
+   In [12]: pylab.savefig('kmeans.png')
 
 produces
 
 .. figure:: kmeans.png
    :align: center
-   :height: 600px
+   :height: 400px
    :alt: kmeans model fitting
    :figclass: align-center
 
@@ -173,31 +176,34 @@ Fitting the model using MCMC
    
    In [9]: c = avg.classify(data)
    
-   In [10]: pylab.subplot(1,2,1)
-   Out[10]: <matplotlib.axes.AxesSubplot at 0x8287bad10>
+   In [10]: pylab.figure(figsize=(8,4))
+   Out[10]: <matplotlib.figure.Figure at 0x823663ed0>
+      
+   In [11]: pylab.subplot(1,2,1)
+   Out[11]: <matplotlib.axes.AxesSubplot at 0x8287bad10>
    
-   In [11]: pylab.scatter(data[:,0], data[:,1], c=c, s=1, edgecolor='none')
-   Out[11]: <matplotlib.collections.CircleCollection at 0x8287ce750>
+   In [12]: pylab.scatter(data[:,0], data[:,1], c=c, s=1, edgecolor='none')
+   Out[12]: <matplotlib.collections.CircleCollection at 0x8287ce750>
    
-   In [12]: pylab.scatter(mus[:,0], mus[:,1])
-   Out[12]: <matplotlib.collections.CircleCollection at 0x8287ce450>
+   In [13]: pylab.scatter(mus[:,0], mus[:,1])
+   Out[13]: <matplotlib.collections.CircleCollection at 0x8287ce450>
    
-   In [13]: pylab.subplot(1,2,2)
-   Out[13]: <matplotlib.axes.AxesSubplot at 0x8287ce8d0>
+   In [14]: pylab.subplot(1,2,2)
+   Out[14]: <matplotlib.axes.AxesSubplot at 0x8287ce8d0>
    
-   In [14]: pylab.scatter(data[:,2], data[:,3], c=c, s=1, edgecolor='none')
-   Out[14]: <matplotlib.collections.CircleCollection at 0x829038d90>
+   In [15]: pylab.scatter(data[:,2], data[:,3], c=c, s=1, edgecolor='none')
+   Out[15]: <matplotlib.collections.CircleCollection at 0x829038d90>
    
-   In [15]: pylab.scatter(mus[:,2], mus[:,3])
-   Out[15]: <matplotlib.collections.CircleCollection at 0x829038a50>
+   In [16]: pylab.scatter(mus[:,2], mus[:,3])
+   Out[16]: <matplotlib.collections.CircleCollection at 0x829038a50>
    
-   In [16]: pylab.savefig('dpmix.png')
+   In [17]: pylab.savefig('dpmix.png')
    
    
 
 .. figure:: dpmix.png
    :align: center
-   :height: 600px
+   :height: 400px
    :alt: DPMixture model fitting
    :figclass: align-center
 
@@ -227,31 +233,33 @@ Fitting the model using BEM
 
    In [7]: c = results.classify(data)
    
-   In [8]: pylab.subplot(1,2,1)
-   Out[8]: <matplotlib.axes.AxesSubplot at 0x81b7503d0>
+   In [8]: pylab.figure(figsize=(8,4))
+   Out[8]: <matplotlib.figure.Figure at 0x8230a8c90>
    
+   In [9]: pylab.subplot(1,2,1)
+   Out[9]: <matplotlib.axes.AxesSubplot at 0x81b7503d0>
 
    
-   In [9]: pylab.scatter(data[:,0], data[:,1], c=c, s=1, edgecolor='none')
-   Out[9]: <matplotlib.collections.CircleCollection at 0x8287c1810>
+   In [10]: pylab.scatter(data[:,0], data[:,1], c=c, s=1, edgecolor='none')
+   Out[10]: <matplotlib.collections.CircleCollection at 0x8287c1810>
    
-   In [10]: pylab.scatter(mus[:,0], mus[:,1])
-   Out[10]: <matplotlib.collections.CircleCollection at 0x8287f03d0>
+   In [11]: pylab.scatter(mus[:,0], mus[:,1])
+   Out[11]: <matplotlib.collections.CircleCollection at 0x8287f03d0>
    
-   In [11]: pylab.subplot(1,2,2)
-   Out[11]: <matplotlib.axes.AxesSubplot at 0x808e03d50>
+   In [12]: pylab.subplot(1,2,2)
+   Out[12]: <matplotlib.axes.AxesSubplot at 0x808e03d50>
    
-   In [12]: pylab.scatter(data[:,2], data[:,3], c=c, s=1, edgecolor='none')
-   Out[12]: <matplotlib.collections.CircleCollection at 0x827cef790>
+   In [13]: pylab.scatter(data[:,2], data[:,3], c=c, s=1, edgecolor='none')
+   Out[13]: <matplotlib.collections.CircleCollection at 0x827cef790>
    
-   In [13]: pylab.scatter(mus[:,2], mus[:,3])
-   Out[13]: <matplotlib.collections.CircleCollection at 0x827cef410>
+   In [14]: pylab.scatter(mus[:,2], mus[:,3])
+   Out[14]: <matplotlib.collections.CircleCollection at 0x827cef410>
    
-   In [14]: pylab.savefig('bem.png')
+   In [15]: pylab.savefig('bem.png')
 
 .. figure:: bem.png
    :align: center
-   :height: 600px
+   :height: 400px
    :alt: DPMixture model fitting
    :figclass: align-center
 

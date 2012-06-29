@@ -9,7 +9,7 @@ logicle_extension = Extension('fcm.core._logicle',
                               include_dirs = [get_include()]
                               )
 setup(name='fcm',
-      version='0.8',
+      version='0.9',
       url='http://code.google.com/p/py-fcm/',
       packages=['fcm', 'fcm.core', 'fcm.graphics', 'fcm.gui', 'fcm.io', 'fcm.statistics' ],
       package_dir = {'fcm': 'src'},
