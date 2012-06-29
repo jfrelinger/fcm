@@ -1,4 +1,4 @@
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 from numpy import get_include
 
 logicle_extension = Extension('fcm.core._logicle',
