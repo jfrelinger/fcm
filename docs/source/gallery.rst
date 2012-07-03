@@ -16,6 +16,14 @@ Example Dotplots
    
 :download:`Different types of dot plots<gallery/g_dotplot.py>`
 
+.. figure:: gallery/scatter_hist.png
+   :align: center
+   :height: 400px
+   :alt: combination plot
+   :figclass: align-center
+
+:download:`Combination scatter and histogram<gallery/scatter_hist.py>`
+
 3d Histograms
 *************
 .. figure:: gallery/3d_hist.png
