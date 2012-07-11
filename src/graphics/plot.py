@@ -62,8 +62,14 @@ def heatmap(fcm, indices, nrows=1, ncols=1, s=1, edgecolors='none',
                 pylab.scatter(x, y, c=z, s=s, edgecolors=edgecolors, **kwargs)
             else:
                 pylab.scatter(x, y, s=s, edgecolors=edgecolors, **kwargs)
-            pylab.xlabel(fcm.channels[idx[0]])
-            pylab.ylabel(fcm.channels[idx[1]])
+            if isinstance(idx[0], str):
+                pylab.xlabel(idx[0])
+            else:
+                pylab.xlabel(fcm.channels[idx[0]])
+            if isinstance(idx[1], str):
+                pylab.ylabel(idx[1])
+            else:
+                pylab.ylabel(fcm.channels[idx[1]])
         pylab.xticks([])
         pylab.yticks([])
         pylab.axis('equal')
