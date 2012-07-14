@@ -12,6 +12,7 @@ from component import Component
 from util import modesearch
 from warnings import warn
 
+from modelresult import ModelResult
 
 class DPCluster(Component):
     '''
@@ -44,7 +45,7 @@ class DPCluster(Component):
         return mvn(self.mu, self.sigma, n)
 
 
-class DPMixture(object):
+class DPMixture(ModelResult):
     '''
     collection of components that describe a mixture model
     '''
