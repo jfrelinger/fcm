@@ -31,10 +31,10 @@ def hist(fcms, index, savefile=None, display=True, **kwargs):
     return figure
 
 
-def heatmap(fcm, indices, nrows=1, ncols=1, s=1, edgecolors='none',
+def pseudocolor(fcm, indices, nrows=1, ncols=1, s=1, edgecolors='none',
             savefile=None, display=True,
             **kwargs):
-    """Plot a heatmap.
+    """Plot a pseudocolor.
 
     indices = list of marker index pairs
     nrows = number of rows to plot
@@ -66,6 +66,7 @@ def heatmap(fcm, indices, nrows=1, ncols=1, s=1, edgecolors='none',
                 pylab.xlabel(idx[0])
             else:
                 pylab.xlabel(fcm.channels[idx[0]])
+                
             if isinstance(idx[1], str):
                 pylab.ylabel(idx[1])
             else:
@@ -82,11 +83,11 @@ def heatmap(fcm, indices, nrows=1, ncols=1, s=1, edgecolors='none',
 
     return figure
 
-def heatmaps(fcm, savefile=None, display=True, **kwargs):
-    """PLot scatter matrix of all heatmaps."""
+def pseudocolors(fcm, savefile=None, display=True, **kwargs):
+    """PLot scatter matrix of all pseudocolors."""
     n = fcm.shape[1]
     indices = [(i, j) for i in range(n) for j in range(n)]
-    heatmap(fcm, indices, nrows=n, ncols=n, savefile=savefile,
+    pseudocolor(fcm, indices, nrows=n, ncols=n, savefile=savefile,
             display=display, **kwargs)
 
 def pair_plot(data, savefile=None, display=True, **kwargs):
@@ -138,8 +139,8 @@ if __name__ == '__main__':
     from io import FCSreader
 
     fcm = FCSreader('../../sample_data/3FITC_4PE_004.fcs').get_FCMdata()
-    # heatmap(fcm, [(0,1),(2,3)], nrows=1, ncols=2, s=1, edgecolors='none')
-    heatmaps(fcm, s=1, edgecolors='none', display=False,
+    # pseudocolor(fcm, [(0,1),(2,3)], nrows=1, ncols=2, s=1, edgecolors='none')
+    pseudocolors(fcm, s=1, edgecolors='none', display=False,
              savefile='3FITC_4PE_004.png', cmap=pylab.cm.hsv)
 
 

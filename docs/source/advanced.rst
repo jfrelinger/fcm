@@ -44,7 +44,7 @@ to calculate the intensity at a given point.
    
    In [3]: x = fcm.loadFCS('B6901GFJ-08_CMV pp65.fcs')
    
-   In [4]: graph.heatmap(x,[(7,12)])
+   In [4]: graph.pseduocolor(x,[(7,12)])
    
 .. figure:: heatmap.png
    :align: center
