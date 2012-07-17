@@ -4,9 +4,9 @@ from plot_gate import plot_gate
 
 __all__ = [
 		'pair_plot',
-		'heatmap',
+		'pseudocolor',
 		'hist',
-		'heatmaps',
+		'pseudocolors',
 		'contour',
 		'bilinear_interpolate', 
 		'trilinear_interpolate',
