@@ -104,6 +104,11 @@ class Dp_clusterTestCase(unittest.TestCase):
             new_r = mix.last(10)
         except ValueError:
                 pass     
+            
+    def testDraw(self):
+        x = self.mix.draw(10)
+        assert x.shape[0] == 10, "Number of drawed rows is wrong"
+        assert x.shape[1] == 3, "number of drawed columns is wrong"
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

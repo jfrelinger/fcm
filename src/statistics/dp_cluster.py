@@ -42,6 +42,8 @@ class DPCluster(Component):
         '''
         draw a random sample of size n form this cluster
         '''
+        # cast n to a int incase it's a numpy.int
+        n = int(n)
         return mvn(self.mu, self.sigma, n)
 
 
