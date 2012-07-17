@@ -43,6 +43,10 @@ class ModalDp_clusterTestCase(unittest.TestCase):
         assert self.mix.classify(pnt)[0] == 0, 'classify classifys mu1 as belonging to something else'
         assert self.mix.classify(pnt)[1] == 1, 'classify classifys m21 as belonging to something else'
 
+    def testDraw(self):
+        x = self.mix.draw(10)
+        assert x.shape[0] == 10, "Number of drawed rows is wrong"
+        assert x.shape[1] == 3, "number of drawed columns is wrong"
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
