@@ -233,7 +233,19 @@ def load_flowjo_xml(fh):
             fcsfile = xmlfcsfile(sample.attrib['name'])                      
         # find gates
         fcsfile.pops = find_pops(sample, prefix, suffix)
-        files[fcsfile.name] = fcsfile
+        
+        uniq = False
+        count = 0
+        new_name = fcsfile.name
+        
+        while not uniq:
+            if  new_name in files:
+                count += 1
+                new_name = fcsfile.name + '_%d' % count
+            else:
+                uniq = True
+        files[new_name] = fcsfile
+
                             
     if len(comps) > 0:
         return FlowjoWorkspace(files,comps)
