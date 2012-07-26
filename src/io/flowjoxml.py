@@ -9,7 +9,9 @@ import numpy
 from fcm import PolyGate
 from fcm.io.readfcs import is_fl_channel
 from fcm.core.transforms import _logicle
+from collections import namedtuple
 
+FlatGate = namedtuple('FlatGate', ['gate','parent'])
         
 
 class PopulationNode(object):
@@ -83,8 +85,27 @@ class xmlfcsfile(object):
         a = []
         for i in self.pops:
             a.append(self.pops[i].gates)
+        
         return a
     
+    
+    def flat_gates(self, a=None, parent=None):
+        if a is None:
+            a = self.gates
+            parent = 'root'
+        last_parent=False
+        flat = []
+        for i in a:
+            if isinstance(i,list):
+                flat.extend(self.flat_gates(i, parent))
+            else:
+                flat.append(FlatGate(i,parent))
+                if not last_parent:
+                    parent = i.name
+                    last_parent = True
+            
+        return flat
+        
     def pprint(self, depth=0):
         j = "  " * depth + self.name + "\n"
         if self.pops is not None:
@@ -135,6 +156,13 @@ class FlowjoWorkspace(object):
             gates[tube_name] = tube.gates
         return gates
 
+    def flat_gates(self):
+        gates = {}
+        for tube_name in self.tubes:
+            tube = self.tubes[tube_name]
+            gates[tube_name] = tube.flat_gates()
+        return gates
+    
     def pprint(self):
         j = ''
         for i in self.tubes:
@@ -390,11 +418,17 @@ if __name__ == "__main__":
 
     print "NEW"
     a = load_flowjo_xml('/home/jolly/Projects/fcm/scratch/flowjoxml/pretty.xml')
-    a.logicle()
-    sidx, spill = a.comp['Comp Matrix']
-    
-    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A01.fcs', sidx=sidx, spill=spill, transform='logicle')
-
-    
-    a.tubes['Specimen_001_A1_A01.fcs'].apply_gates(x)
-    print x.tree.pprint(size=True)
+    print type(a)
+    print type(a.tubes['Specimen_001_A1_A01.fcs'])
+    for i in  a.tubes['Specimen_001_A1_A01.fcs'].flat_gates():
+        print i.parent, '<==',i.gate.name
+        
+    print a.flat_gates()
+#    a.logicle()
+#    sidx, spill = a.comp['Comp Matrix']
+#    
+#    x = fcm.loadFCS('/home/jolly/Projects/fcm/scratch/flowjoxml/001_05Aug11.A01.fcs', sidx=sidx, spill=spill, transform='logicle')
+#
+#    
+#    a.tubes['Specimen_001_A1_A01.fcs'].apply_gates(x)
+#    print x.tree.pprint(size=True)

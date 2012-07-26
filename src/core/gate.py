@@ -21,6 +21,13 @@ class Filter(object):
     def gate(self, fcm, chan=None):
         """do the actual gating here."""
         pass
+    
+    def __repr__(self):
+        return "%s(%s,%s,%s)" % (self.__class__, str(self.vert), str(self.chan), self.name)
+    
+    def __str__(self):
+        return "<%s (%s) on %s>" % (self.__class__, self.name, str(self.chan))
+        
 
 
 
