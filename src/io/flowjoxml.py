@@ -226,25 +226,44 @@ def load_flowjo_xml(fh):
                             prefix, suffix = psdict[keyword.attrib['value']]
                         else:
                             prefix, suffix = (None, None)
+
+        sample_name = None
+        keywords = node.find('Keywords')
+        if keywords is not None:
+            for keyword in keywords.iter('Keyword'):
+                if 'name' in keyword.attrib:
+                    if keyword.attrib['name'] == '$FIL':
+                        sample_name = keyword.attrib['value']
+
+        # fall back on name attrib in SampleNode if above fails
         sample = node.find('SampleNode')
+        if sample_name is None:
+            sample_name = sample.attrib['name']
+            
         if comp_matrix: 
-            fcsfile = xmlfcsfile(sample.attrib['name'], comp = comp_matrix)
+            fcsfile = xmlfcsfile(sample_name, comp = comp_matrix)
         else:
-            fcsfile = xmlfcsfile(sample.attrib['name'])                      
+            fcsfile = xmlfcsfile(sample_name)                      
+
+        # if comp_matrix: 
+        #     fcsfile = xmlfcsfile(sample.attrib['name'], comp = comp_matrix)
+        # else:
+        #     fcsfile = xmlfcsfile(sample.attrib['name'])                      
+
         # find gates
         fcsfile.pops = find_pops(sample, prefix, suffix)
         
         uniq = False
         count = 0
-        new_name = fcsfile.name
+        # new_name = fcsfile.name
         
         while not uniq:
-            if  new_name in files:
+            if  sample_name in files:
                 count += 1
-                new_name = fcsfile.name + '_%d' % count
+                sample_name = fcsfile.name + '_%d' % count
             else:
                 uniq = True
-        files[new_name] = fcsfile
+        files[sample_name] = fcsfile
 
                             
     if len(comps) > 0:
