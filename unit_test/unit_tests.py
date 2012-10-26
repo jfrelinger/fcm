@@ -10,7 +10,8 @@ from test_transforms import FCMtransformTestCase
 from test_load_fcs import FCSreaderTestCase
 from test_tree  import TreeTestCase
 from test_subsample import SubsampleTestCase
-from test_dpmixture import Dp_clusterTestCase
+from test_dpmixture import Dp_mixtureTestCase
+from test_dpcluster import Dp_clusterTestCase
 from test_mdpmixture import ModalDp_clusterTestCase
 from test_mvnpdf import mvnpdfTestCase
 from test_cluster import DPMixtureModel_TestCase
@@ -29,9 +30,10 @@ if __name__ == "__main__":
     suite10 = unittest.makeSuite(mvnpdfTestCase, 'test')
     suite11 = unittest.makeSuite(DPMixtureModel_TestCase, 'test')
     suite12 = unittest.makeSuite(HDPMixtureModel_TestCase, 'test')
+    suite13 = unittest.makeSuite(Dp_mixtureTestCase, 'test')
     alltests = unittest.TestSuite((suite1, suite2, suite3, suite4, suite5,
                                     suite6, suite7, suite8,suite10, suite11,
-                                    suite12))
+                                    suite12, suite13))
 
     unittest.main()
 

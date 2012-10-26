@@ -8,7 +8,7 @@ from fcm.statistics import DPCluster, DPMixture
 from numpy import array, eye, all
 
 
-class Dp_clusterTestCase(unittest.TestCase):
+class Dp_mixtureTestCase(unittest.TestCase):
 
 
     def setUp(self):

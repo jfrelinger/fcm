@@ -5,7 +5,7 @@ Created on Oct 30, 2009
 '''
 
 from distributions import compmixnormpdf
-from numpy import array, log, sum, zeros, concatenate, mean, exp
+from numpy import array, log, sum, zeros, concatenate, mean, exp, ndarray, dot
 from numpy.random import multivariate_normal as mvn
 from numpy.random import multinomial
 from component import Component
@@ -13,11 +13,14 @@ from util import modesearch
 from warnings import warn
 
 from modelresult import ModelResult
+from numbers import Number
 
 class DPCluster(Component):
     '''
     Single component cluster in mixture model
     '''
+    
+    __array_priority__ = 10
 
     def __init__(self, pi, mu, sig):
         '''
@@ -46,6 +49,37 @@ class DPCluster(Component):
         n = int(n)
         return mvn(self.mu, self.sigma, n)
 
+    def __add__(self, k):
+        new_mu = self.mu + k
+        return DPCluster(self.pi, new_mu, self.sigma)
+
+    def __radd__(self, k):
+        return self.__add__(k)
+
+    def __sub__(self, k):
+        new_mu = self.mu - k
+        return DPCluster(self.pi, new_mu, self.sigma)
+
+    def __rsub__(self, k):
+        new_mu = k - self.mu
+        return DPCluster(self.pi, new_mu, self.sigma)
+
+    def __mul__(self, k):
+        new_mu = self.mu * k
+        if isinstance(k, Number):
+            print 'number'
+            new_sigma = k * k * self.sigma
+        elif isinstance(k, ndarray):
+            print 'array'
+            new_sigma = dot(dot(k, self.sigma), k.T)
+        else:
+            raise TypeError('unsupported type: %s' % type(k))
+
+        return DPCluster(self.pi, new_mu, new_sigma)
+
+
+    def __rmul__(self, k):
+        return self.__mul__(k)
 
 class DPMixture(ModelResult):
     '''
@@ -130,14 +164,14 @@ class DPMixture(ModelResult):
         '''
         return the log liklihood of x belonging to this mixture
         '''
-        
+
         return sum(log(sum(self.prob(x), axis=0)))
 
     def draw(self, n):
         '''
         draw n samples from the represented mixture model
         '''
-        
+
         d = multinomial(n, self.pis())
         results = None
         for index, count in enumerate(d):
@@ -156,22 +190,22 @@ class DPMixture(ModelResult):
         if not self.ident:
             warn("model wasn't run with ident=True, therefor these averages are likely"
                  + "meaningless")
-        
-        k = len(self.clusters)/self.niter
+
+        k = len(self.clusters) / self.niter
         rslts = []
         for i in range(k):
             mu_avg = []
             sig_avg = []
             pi_avg = []
             for j in range(self.niter):
-                mu_avg.append(self.clusters[j*k+i].mu)
-                sig_avg.append(self.clusters[j*k+i].sigma)
-                pi_avg.append(self.clusters[j*k+i].pi)
-            
+                mu_avg.append(self.clusters[j * k + i].mu)
+                sig_avg.append(self.clusters[j * k + i].sigma)
+                pi_avg.append(self.clusters[j * k + i].pi)
+
             rslts.append(DPCluster(mean(pi_avg, 0), mean(mu_avg, 0), mean(sig_avg, 0)))
-            
+
         return DPMixture(rslts)
-            
+
     def last(self, n=1):
         '''
         return the last n (defaults to 1) mcmc draws
@@ -179,14 +213,14 @@ class DPMixture(ModelResult):
         if n > self.niter:
             raise ValueError('n=%d is larger than niter (%d)' % (n, self.niter))
         rslts = []
-        k = len(self.clusters)/self.niter
+        k = len(self.clusters) / self.niter
         for j in range(n):
             for i in range(k):
-                rslts.append(self.clusters[-1*((i+(j*k))+1)])
-        
+                rslts.append(self.clusters[-1 * ((i + (j * k)) + 1)])
+
         return DPMixture(rslts[::-1])
-                             
-                            
+
+
 
 
 
@@ -216,18 +250,18 @@ class ModalDPMixture(DPMixture):
         returns  an array of probabilities of x being in each mode of the modal mixture
         '''
         probs = compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs)
-        
+
         #can't sum in log prob space
         if logged:
             probs = exp(probs)
         try:
 
-                
+
             n, j = x.shape # check we're more then 1 point
             rslt = zeros((n, len(self.cmap.keys())))
             for j in self.cmap.keys():
                 rslt[:, j] = sum([probs[:, i] for i in self.cmap[j]], 0)
-                
+
 
 
         except ValueError:
