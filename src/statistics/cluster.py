@@ -154,9 +154,9 @@ class DPMixtureModel(object):
 
     def _load_ref_at_fit(self, pnts):
         if isinstance(self._ref, DPMixture):
-            self.prior_mu = self._ref.mus()
-            self.prior_sigma = self._ref.sigmas()
-            self.prior_pi = self._ref.pis()
+            self.prior_mu = self._ref.mus
+            self.prior_sigma = self._ref.sigmas
+            self.prior_pi = self._ref.pis
         else:
             self.prior_mu = zeros((self.nclusts, pnts.shape[1]))
             self.prior_sigma = zeros((self.nclusts, pnts.shape[1], pnts.shape[1]))

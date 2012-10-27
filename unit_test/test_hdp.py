@@ -75,13 +75,13 @@ class HDPMixtureModel_TestCase(unittest.TestCase):
         diffs = {}
         #print 'r.mus:', r.mus()
         for i in gen_mean:
-            diffs[i] = np.min(np.abs(r[0].mus()-gen_mean[i]),0)
+            diffs[i] = np.min(np.abs(r[0].mus-gen_mean[i]),0)
             #diffs[i] = np.abs(r[0].mus()[i]-gen_mean[i])
             #print i, gen_mean[i],r[0].mus()[i], diffs[i], np.vdot(diffs[i],diffs[i])
             assert( np.vdot(diffs[i],diffs[i]) < 1)
         
         for i in gen_mean:
-            diffs[i] = np.min(np.abs(r[1].mus()-gen_mean[i]),0)
+            diffs[i] = np.min(np.abs(r[1].mus-gen_mean[i]),0)
             #diffs[i] = np.abs(r[1].mus()[i]-gen_mean[i])
             #print i, gen_mean[i],r[1].mus()[i], diffs[i], np.vdot(diffs[i],diffs[i])
             assert( np.vdot(diffs[i],diffs[i]) < 1)

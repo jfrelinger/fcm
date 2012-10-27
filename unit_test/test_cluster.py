@@ -94,11 +94,11 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         rs = model.fit([data1,data2])
         assert(len(rs) == 2)
         for r in rs:
-            print 'mu ',r.mus()
+            print 'mu ',r.mus
             diffs = {}
             for i in gen_mean:
                 
-                diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
+                diffs[i] = np.min(np.abs(r.mus-gen_mean[i]),0)
                 #print i, gen_mean[i], diffs[i], np.vdot(diffs[i],diffs[i])
                 assert( np.vdot(diffs[i],diffs[i]) < 1)
 
@@ -136,7 +136,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         
         diffs = {}
         for i in gen_mean:
-            diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
+            diffs[i] = np.min(np.abs(r.mus-gen_mean[i]),0)
             #print i, gen_mean[i], diffs[i], np.vdot(diffs[i],diffs[i])
             assert( np.vdot(diffs[i],diffs[i]) < 1)
         print 'BEM fitting took %0.3f' % (end)
@@ -159,7 +159,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         diffs = {}
         #print 'r.mus:', r.mus()
         for i in gen_mean:
-            diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
+            diffs[i] = np.min(np.abs(r.mus-gen_mean[i]),0)
             #print i, gen_mean[i], diffs[i], np.vdot(diffs[i],diffs[i])
             assert( np.vdot(diffs[i],diffs[i]) < 1)
         #print diffs
@@ -186,7 +186,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         #print 'r.mus:', r.mus()
         for i in gen_mean:
             #diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
-            diffs[i] = np.abs(r.mus()[i]-gen_mean[i])
+            diffs[i] = np.abs(r.mus[i]-gen_mean[i])
             #print i, gen_mean[i],r.mus()[i], diffs[i], np.vdot(diffs[i],diffs[i])
             assert( np.vdot(diffs[i],diffs[i]) < 1)
         #print diffs
@@ -201,7 +201,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         #print 'r.mus:', r.mus()
         for i in gen_mean:
             #diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
-            diffs[i] = np.abs(r.mus()[i]-gen_mean[i])
+            diffs[i] = np.abs(r.mus[i]-gen_mean[i])
             #print i, gen_mean[i],r.mus()[i], diffs[i], np.vdot(diffs[i],diffs[i])
             assert( np.vdot(diffs[i],diffs[i]) < 1)
         #print diffs
@@ -218,7 +218,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
     def testModel(self):
         r = self.model.fit(self.pnts, verbose=False)
         assert(isinstance(r, DPMixture))
-        mus = r.mus()
+        mus = r.mus
         assert(mus.shape == (16,2))
         
     def testModel_prior(self):
@@ -226,7 +226,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         self.model.load_sigma(self.sig.reshape(1,2,2))
         r = self.model.fit(self.pnts, verbose=False)
         assert(isinstance(r, DPMixture))
-        mus = r.mus()
+        mus = r.mus
         assert(mus.shape == (16,2))
         
 #    def testModel_Pool(self):
