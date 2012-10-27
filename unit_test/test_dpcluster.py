@@ -121,9 +121,9 @@ class Dp_clusterTestCase(unittest.TestCase):
         b = adder*self.clst1
         
         self.assertIsInstance(b, DPCluster, 'subtraction returned wrong type')
-        numpy.testing.assert_array_equal(b.mu, self.mu1 * adder, 
+        numpy.testing.assert_array_equal(b.mu, dot(adder, self.mu1), 
                                          "array mult to cluster failed 1")
-        numpy.testing.assert_array_equal(b.mu, self.clst1.mu * adder, 
+        numpy.testing.assert_array_equal(b.mu, dot(adder, self.clst1.mu), 
                                          "array mult to cluster failed 2")
         numpy.testing.assert_array_equal(b.sigma, 
                                          dot(dot(adder, self.sig),adder.T),

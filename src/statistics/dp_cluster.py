@@ -19,10 +19,10 @@ class DPCluster(Component):
     '''
     Single component cluster in mixture model
     '''
-    
+
     __array_priority__ = 10
 
-    def __init__(self, pi, mu, sig):
+    def __init__(self, pi, mu, sig, centered_mu=None, centered_sigma=None):
         '''
         DPCluster(pi,mu,sigma)
         pi = cluster weight
@@ -32,6 +32,30 @@ class DPCluster(Component):
         self.pi = pi
         self.mu = mu
         self.sigma = sig
+        self._centered_mu = centered_mu
+        self._centered_sigma = centered_sigma
+
+    @property
+    def centered_mu(self):
+        if self._centered_mu is None:
+            raise AttributeError
+        else:
+            return self._centered_mu
+
+    @centered_mu.setter
+    def centered_mu(self, x):
+        self._centered_mu = x
+
+    @property
+    def centered_sigma(self):
+        if self._centered_sigma is None:
+            raise AttributeError
+        else:
+            return self._centered_sigma
+
+    @centered_sigma.setter
+    def centered_sigma(self, s):
+        self._centered_sigma = s
 
     def prob(self, x, logged=False, **kwargs):
         '''
@@ -54,7 +78,8 @@ class DPCluster(Component):
         return DPCluster(self.pi, new_mu, self.sigma)
 
     def __radd__(self, k):
-        return self.__add__(k)
+        new_mu = k + self.mu
+        return DPCluster(self.pi, new_mu, self.sigma)
 
     def __sub__(self, k):
         new_mu = self.mu - k
@@ -65,12 +90,12 @@ class DPCluster(Component):
         return DPCluster(self.pi, new_mu, self.sigma)
 
     def __mul__(self, k):
-        new_mu = self.mu * k
+
         if isinstance(k, Number):
-            print 'number'
+            new_mu = self.mu * k
             new_sigma = k * k * self.sigma
         elif isinstance(k, ndarray):
-            print 'array'
+            new_mu = dot(self.mu, k)
             new_sigma = dot(dot(k, self.sigma), k.T)
         else:
             raise TypeError('unsupported type: %s' % type(k))
@@ -79,14 +104,25 @@ class DPCluster(Component):
 
 
     def __rmul__(self, k):
-        return self.__mul__(k)
+        if isinstance(k, Number):
+            new_mu = self.mu * k
+            new_sigma = k * k * self.sigma
+        elif isinstance(k, ndarray):
+            new_mu = dot(k, self.mu)
+            new_sigma = dot(dot(k, self.sigma), k.T)
+        else:
+            raise TypeError('unsupported type: %s' % type(k))
+
+        return DPCluster(self.pi, new_mu, new_sigma)
 
 class DPMixture(ModelResult):
     '''
     collection of components that describe a mixture model
     '''
 
-    def __init__(self, clusters, niter=1, m=False, s=False, identified=False):
+    __array_priority__ = 10
+
+    def __init__(self, clusters, niter=1, m=None, s=None, identified=False):
         '''
         DPMixture(clusters)
         cluster = list of DPCluster objects
@@ -94,18 +130,52 @@ class DPMixture(ModelResult):
         self.clusters = clusters
         self.niter = niter
         self.ident = identified
-        if m is not False:
-            self.m = m
-        if s is not False:
-            self.s = s
+        self.m = m
+        self.s = s
 
+    def __add__(self, k):
+        new_clusters = [i + k for i in self.clusters]
+        return DPMixture(new_clusters, self.niter, self.m, self.s, self.ident)
+
+    def __radd__(self, k):
+        new_clusters = [k + i for i in self.clusters]
+        return DPMixture(new_clusters, self.niter, self.m, self.s, self.ident)
+
+
+    def __sub__(self, k):
+        new_clusters = [i - k for i in self.clusters]
+        return DPMixture(new_clusters, self.niter, self.m, self.s, self.ident)
+
+
+    def __rsub__(self, k):
+        new_clusters = [k - i for i in self.clusters]
+        return DPMixture(new_clusters, self.niter, self.m, self.s, self.ident)
+
+
+    def __mul__(self, a):
+        new_clusters = [i * a for i in self.clusters]
+        return DPMixture(new_clusters, self.niter, self.m, self.s, self.ident)
+
+    def __rmul__(self, a):
+        new_clusters = [a * i for i in self.clusters]
+        return DPMixture(new_clusters, self.niter, self.m, self.s, self.ident)
+
+    def __len__(self):
+        return len(self.clusters)
+    
+    def __getitem__(self, slice):
+        return self.clusters.__getitem__(slice)
+    
+    def __setitem__(self, slice, values):
+        return self.clusters.__setitem__(slice,values)
+    
     def prob(self, x, logged=False, **kwargs):
         '''
         DPMixture.prob(x)
         returns an array of probabilities of x being in each component of the mixture
         '''
         #return array([i.prob(x) for i in self.clusters])
-        return compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs)
+        return compmixnormpdf(x, self.pis, self.mus, self.sigmas, logged=logged, **kwargs)
 
     def classify(self, x, **kwargs):
         '''
@@ -120,26 +190,31 @@ class DPMixture(ModelResult):
         except ValueError:
             return probs.argmax(0)
 
-    def mus(self, normed=False):
+    @property
+    def mus(self):
         '''
         DPMixture.mus():
         returns an array of all cluster means
         '''
-        if normed:
-            return array([i.nmu for i in self.clusters])
-        else:
-            return array([i.mu for i in self.clusters])
+        return array([i.mu for i in self.clusters])
 
-    def sigmas(self, normed=False):
+    @property
+    def centered_mus(self):
+        return array([i.centered_mu for i in self.clusters])
+
+    @property
+    def sigmas(self):
         '''
         DPMixture.sigmas():
         returns an array of all cluster variance/covariances
         '''
-        if normed:
-            return array([i.nsigma for i in self.clusters])
-        else:
-            return array([i.sigma for i in self.clusters])
+        return array([i.sigma for i in self.clusters])
 
+    @property
+    def centered_sigmas(self):
+        return array([i.centered_sigma for i in self.clusters])
+
+    @property
     def pis(self):
         '''
         DPMixture.pis()
@@ -152,12 +227,12 @@ class DPMixture(ModelResult):
         find the modes and return a modal dp mixture
         """
         try:
-            modes, cmap = modesearch(self.pis(), self.mus(True), self.sigmas(True), tol, maxiter)
+            modes, cmap = modesearch(self.pis, self.centered_mus, self.centered_sigmas, tol, maxiter)
             return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s)
 
         except AttributeError:
             warn("trying to make modal of a mixture I'm not sure is normalized.\nThe mode finding algorithm is designed for normalized data.\nResults may be unexpected")
-            modes, cmap = modesearch(self.pis(), self.mus(), self.sigmas(), tol, maxiter)
+            modes, cmap = modesearch(self.pis, self.mus, self.sigmas, tol, maxiter)
             return ModalDPMixture(self.clusters, cmap, modes)
 
     def log_likelihood(self, x):
@@ -172,7 +247,7 @@ class DPMixture(ModelResult):
         draw n samples from the represented mixture model
         '''
 
-        d = multinomial(n, self.pis())
+        d = multinomial(n, self.pis)
         results = None
         for index, count in enumerate(d):
             if count > 0:
@@ -249,7 +324,7 @@ class ModalDPMixture(DPMixture):
         ModalDPMixture.prob(x)
         returns  an array of probabilities of x being in each mode of the modal mixture
         '''
-        probs = compmixnormpdf(x, self.pis(), self.mus(), self.sigmas(), logged=logged, **kwargs)
+        probs = compmixnormpdf(x, self.pis, self.mus, self.sigmas, logged=logged, **kwargs)
 
         #can't sum in log prob space
         if logged:
