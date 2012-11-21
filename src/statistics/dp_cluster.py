@@ -231,7 +231,7 @@ class DPMixture(ModelResult):
             return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s)
 
         except AttributeError:
-            warn("trying to make modal of a mixture I'm not sure is normalized.\nThe mode finding algorithm is designed for normalized data.\nResults may be unexpected")
+            #warn("trying to make modal of a mixture I'm not sure is normalized.\nThe mode finding algorithm is designed for normalized data.\nResults may be unexpected")
             modes, cmap = modesearch(self.pis, self.mus, self.sigmas, tol, maxiter)
             return ModalDPMixture(self.clusters, cmap, modes)
 
