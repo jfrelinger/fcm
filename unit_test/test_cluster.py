@@ -110,11 +110,11 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         rs = model.fit(c)
         assert(len(rs) == 2)
         for r in rs:
-            print 'mu ',r.mus()
+            print 'mu ',r.mus
             diffs = {}
             for i in gen_mean:
                 
-                diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
+                diffs[i] = np.min(np.abs(r.mus-gen_mean[i]),0)
                 #print i, gen_mean[i], diffs[i], np.vdot(diffs[i],diffs[i])
                 assert( np.vdot(diffs[i],diffs[i]) < 1)
     
@@ -157,7 +157,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         end = time() - start
         
         diffs = {}
-        #print 'r.mus:', r.mus()
+        #print 'r.mus:', r.mus
         for i in gen_mean:
             diffs[i] = np.min(np.abs(r.mus-gen_mean[i]),0)
             #print i, gen_mean[i], diffs[i], np.vdot(diffs[i],diffs[i])
@@ -183,11 +183,11 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         end = time() - start
         
         diffs = {}
-        #print 'r.mus:', r.mus()
+        #print 'r.mus:', r.mus
         for i in gen_mean:
-            #diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
+            #diffs[i] = np.min(np.abs(r.mus-gen_mean[i]),0)
             diffs[i] = np.abs(r.mus[i]-gen_mean[i])
-            #print i, gen_mean[i],r.mus()[i], diffs[i], np.vdot(diffs[i],diffs[i])
+            #print i, gen_mean[i],r.mus[i], diffs[i], np.vdot(diffs[i],diffs[i])
             assert( np.vdot(diffs[i],diffs[i]) < 1)
         #print diffs
         print 'MCMC fitting took %0.3f' % (end)
@@ -198,11 +198,11 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         end = time() - start
         
         diffs = {}
-        #print 'r.mus:', r.mus()
+        #print 'r.mus:', r.mus
         for i in gen_mean:
-            #diffs[i] = np.min(np.abs(r.mus()-gen_mean[i]),0)
+            #diffs[i] = np.min(np.abs(r.mus-gen_mean[i]),0)
             diffs[i] = np.abs(r.mus[i]-gen_mean[i])
-            #print i, gen_mean[i],r.mus()[i], diffs[i], np.vdot(diffs[i],diffs[i])
+            #print i, gen_mean[i],r.mus[i], diffs[i], np.vdot(diffs[i],diffs[i])
             assert( np.vdot(diffs[i],diffs[i]) < 1)
         #print diffs
         
