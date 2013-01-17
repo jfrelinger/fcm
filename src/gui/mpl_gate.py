@@ -177,7 +177,7 @@ def poly_gate(fcm, idxs):
 if __name__ == '__main__':
     import sys
     sys.path.append('../')
-    from io import FCSreader
+    from fcm import FCSreader
 
     fcm = FCSreader('../../sample_data/3FITC_4PE_004.fcs').get_FCMdata()
 

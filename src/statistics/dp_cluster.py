@@ -222,17 +222,17 @@ class DPMixture(ModelResult):
         '''
         return array([i.pi for i in self.clusters])
 
-    def make_modal(self, tol=1e-5, maxiter=20):
+    def make_modal(self,**kwargs):
         """
         find the modes and return a modal dp mixture
         """
         try:
-            modes, cmap = modesearch(self.pis, self.centered_mus, self.centered_sigmas, tol, maxiter)
+            modes, cmap = modesearch(self.pis, self.centered_mus, self.centered_sigmas, **kwargs)
             return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s)
 
         except AttributeError:
             #warn("trying to make modal of a mixture I'm not sure is normalized.\nThe mode finding algorithm is designed for normalized data.\nResults may be unexpected")
-            modes, cmap = modesearch(self.pis, self.mus, self.sigmas, tol, maxiter)
+            modes, cmap = modesearch(self.pis, self.mus, self.sigmas, **kwargs)
             return ModalDPMixture(self.clusters, cmap, modes)
 
     def log_likelihood(self, x):
