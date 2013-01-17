@@ -86,15 +86,15 @@ def modesearch(pis, mus, sigmas, tol=1e-6, maxiter=20, delta=.1, w=None, scale=F
         cur_mode = tuple(m[j, :].tolist())
         xs[key[0], :] = cur_mode
 
-    m = pdist(xs, scale=scale, w=w) < delta#, w=np.array([1,1,1,1]))
+    dm = pdist(xs, scale=scale, w=w) < delta#, w=np.array([1,1,1,1]))
     #print 'm', m
-    cs = find_components(matrix_to_graph(m))
+    cs = find_components(matrix_to_graph(dm))
     cs = sorted(cs, key=len, reverse=True)
-    print cs
+    
     rslt = {}
     modes = {}
     for i, j in enumerate(cs):
-        modes[i] = np.mean(np.vstack([m[k, :] for k in j]), 0)
+        modes[i] = np.mean(np.vstack([xs[k, :] for k in j]), 0)
         rslt[i] = j
 
     return modes, rslt
@@ -148,7 +148,7 @@ def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
             h += 1
 
         mdict[(js, tuple(x))] = [x, px] # eliminate duplicates
-    print 'mdict', mdict
+    
     return mdict, sm, spm
 
 def check_mode(m, pm, pi, mu, sigma):

@@ -56,6 +56,10 @@ class Dp_mixtureTestCase(unittest.TestCase):
         assert self.mix.classify(self.mu1) == modal.classify(self.mu1), 'derived modal mixture is wrong'
         assert self.mix.classify(pnt)[0] == modal.classify(pnt)[0], 'derived modal mixture is wrong'
         assert self.mix.classify(pnt)[1] == modal.classify(pnt)[1], 'derived modal mixture is wrong'
+        
+        modal = self.mix.make_modal(delta=9)
+        assert modal.classify(array([self.mu1, self.mu2, self.mu1, self.mu2, self.mu1, self.mu2])).tolist() == [0, 0, 0, 0, 0, 0], 'classify not working'
+        
 
     def testAverage(self):
         clst1 = DPCluster(0.5, self.mu1, self.sig)
