@@ -203,10 +203,10 @@ class FCSreader(object):
     def fix_lmd(self, offset, start, stop):
         """function to handle lmd counting differently then most other FCS data"""
         text = self.read_bytes(offset, start, stop)
-        for j in range(0, -10, -1):
-            if text[0] == text[j - 1]:
-                return j
-        return 255 #TODO raise error
+        if text[0] == text[-1]:
+            return 0
+        else:
+            return -1
 
     def parse_text(self, offset, start, stop):
         """return parsed text segment of fcs file"""
