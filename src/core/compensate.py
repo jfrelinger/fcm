@@ -31,7 +31,7 @@ def compensate(fcm, S=None, markers=None, comp=False, scale=False):
     idx = fcm.name_to_index(markers)
 
     c = _compensate(fcm.view()[:, idx], S, comp, scale)
-    new = fcm.view()[:]
+    new = fcm.view().copy()
     new[:, idx] = c
     node = CompensationNode('', fcm.get_cur_node, new, markers,S)
     fcm.add_view(node)
