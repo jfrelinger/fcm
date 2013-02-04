@@ -15,7 +15,7 @@ Without GPU support
     numpy       http://numpy.scipy.org/
     scipy       http://scipy.scipy.org/
     matplotlib  http://matplotlib.sourceforge.net/
-    dpmix       http://github.com/andrewcron/pycdp
+    dpmix       http://github.com/andrewcron/dpmix
     cython      http://cython.org/ (DPMix dependency)
     mip4py      http://mpi4py.scipy.org/ (optional DPMix dependency for threading)
     ==========  ==================================================================
