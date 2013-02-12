@@ -110,7 +110,15 @@ class FCMdata(object):
         """Return the channel indexes for the named channels"""
 
         if isinstance(channels,str):
-            return self.channels.index(channels)
+            try:
+                return self.channels.index(channels)
+            except ValueError:
+                for j in range(1,int(self.notes.text['par'])+1):
+                        if channels == self.notes.text['p%dn' % j]:
+                            return self.channels.index(self.notes.text['p%ds' % j])
+                raise ValueError('%s is not in list' % channels)
+                
+                
         idx = []
         for i in channels:
             try:

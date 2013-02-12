@@ -45,7 +45,7 @@ class PolyGate(Filter):
             chan = list(chan)
         for i,j in enumerate(chan):
             if isinstance(j,str):
-                chan[i] = fcm.name_to_index(j)[0]
+                chan[i] = fcm.name_to_index(j)
         
         if name is None:
             name = self.name
