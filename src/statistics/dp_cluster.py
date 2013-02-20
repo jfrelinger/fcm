@@ -377,4 +377,102 @@ class ModalDPMixture(DPMixture):
         except ValueError:
             return probs.argmax(0)
 
+class HDPMixture(Component):
+    '''
+    a 'collectin' of DPMixtures with common means and variances
+    '''
+    
+    __array_priority__ = 10
+    
+    def __init__(self, pis,mus,sigmas, niter=1, m=0, s=1, identified=False):
+        self.pis = pis
+        self.mus = mus
+        self.sigmas = sigmas
+        self.niter = niter
+        self.ident = identified
+        self.m = m
+        self.s = s
+        
+    def __len__(self):
+        return self.pis.shape[0]
+    
+    def __getitem__(self,key):
+        if isinstance( key, slice ) :
+            return [self[ii] for ii in xrange(*key.indices(len(self)))]
+        elif isinstance( key, int ) :
+            if key < 0 : #Handle negative indices
+                key += len( self )
+            if key >= len( self ) :
+                raise IndexError, "The index (%d) is out of range."%key
+            return self._getData(key) #Get the data from elsewhere
+        else:
+            raise TypeError, "Invalid argument type."
+        
+    def _getData(self,key):
+        pis = self.pis[key,:]
+        mus = (self.mus-self.m)/self.s
+        sigmas = (self.sigmas)/self.s
+        clsts = [ DPCluster(i,j,k,l,m) for i,j,k,l,m in 
+                 zip(pis,self.mus,self.sigmas,mus,sigmas)]
+        return DPMixture(clsts, self.niter, self.m, self.s, self.ident)
+    
 
+    def __add__(self, x):
+        return HDPMixture(self.pis, self.mus+x, self.sigmas, self.niter, self.m, self.s, self.ident)
+    
+    def __radd__(self, x):
+        return HDPMixture(self.pis, x+self.mus, self.sigmas, self.niter, self.m, self.s, self.ident)
+    
+    def __sub__(self, x):
+        return HDPMixture(self.pis, self.mus-x, self.sigmas, self.niter, self.m, self.s, self.ident)
+    
+    def __rsub__(self, x):
+        return HDPMixture(self.pis, x+self.mus, self.sigmas, self.niter, self.m, self.s, self.ident)
+    
+    
+    def __mul__(self, k):
+
+        if isinstance(k, Number):
+            new_mu = self.mus * k
+            new_sigma = k * k * self.sigmas
+        elif isinstance(k, ndarray):
+            new_mu = dot(self.mus, k)
+            new_sigma = dot(dot(k, self.sigmas), k.T)
+        else:
+            raise TypeError('unsupported type: %s' % type(k))
+
+        return HDPMixture(self.pis, new_mu, new_sigma, self.niter, self.m, self.s, self.ident)
+
+
+    def __rmul__(self, k):
+        if isinstance(k, Number):
+            new_mu = self.mus * k
+            new_sigma = k * k * self.sigmas
+        elif isinstance(k, ndarray):
+            new_mu = dot(k, self.mus)
+            new_sigma = dot(dot(k, self.sigmas), k.T)
+        else:
+            raise TypeError('unsupported type: %s' % type(k))
+
+        return HDPMixture(self.pi, new_mu, new_sigma, self.niter, sef.m, sef.s, self.ident)
+    
+    
+    def prob(self, x, **kwargs):
+        return array([i.prob(x, kwargs) for i in self])
+    
+    def classify(self, x, **kwargs):
+        return array([i.classify(x, **kwargs) for i in self])
+    
+    def average(self):
+        offset = self.mus.shape[0] / self.niter
+        k = self.mus.shape[0]// self.niter
+        d = self.mus.shape[1]
+        new_mus = self.mus.reshape(self.niter, offset, d ).mean(0)
+        new_sigmas = self.sigmas.reshape(self.niter, offset, d, d).mean(0)
+        new_pis = self.pis.reshape(len(self), self.niter, offset).mean(1)
+        
+        return HDPMixture(new_pis, new_mus, new_sigmas, 1, self.m, self.s, self.ident)
+        
+        
+        
+        

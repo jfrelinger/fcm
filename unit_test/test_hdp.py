@@ -64,27 +64,33 @@ class HDPMixtureModel_TestCase(unittest.TestCase):
     def testMCMCFitting(self):
         print "starting mcmc"
         true, data = self.generate_data()
-            
         model = HDPMixtureModel(3,100,100,1)
         model.seed = 1
         start = time()
         r = model.fit(data, verbose=10)
-        end = time() - start
-        
-        
+#        end = time() - start
+#        print r.pis.shape
+#        print r.pis, r.pis[0]
+#        print r[0],r[0].pis
+        print r.mus
+        self.assertEqual(len(r), 2, 'results are the wrong length: %d' %len(r))
         diffs = {}
         #print 'r.mus:', r.mus()
         for i in gen_mean:
             diffs[i] = np.min(np.abs(r[0].mus-gen_mean[i]),0)
+            #print r[0].mus[0], np.min(np.abs(r[0].mus[0]-gen_mean[i]),0)
             #diffs[i] = np.abs(r[0].mus()[i]-gen_mean[i])
             #print i, gen_mean[i],r[0].mus()[i], diffs[i], np.vdot(diffs[i],diffs[i])
-            assert( np.vdot(diffs[i],diffs[i]) < 1)
+            self.assertLessEqual( np.vdot(diffs[i],diffs[i]),1, 
+                                  'diff to large: %f' % np.vdot(diffs[i], diffs[i]))
         
         for i in gen_mean:
             diffs[i] = np.min(np.abs(r[1].mus-gen_mean[i]),0)
             #diffs[i] = np.abs(r[1].mus()[i]-gen_mean[i])
             #print i, gen_mean[i],r[1].mus()[i], diffs[i], np.vdot(diffs[i],diffs[i])
-            assert( np.vdot(diffs[i],diffs[i]) < 1)
+            self.assertLessEqual( np.vdot(diffs[i],diffs[i]),1, 
+                                  'diff to large: %f' % np.vdot(diffs[i], diffs[i]))
+            
         
 if __name__ == '__main__':
     unittest.main()

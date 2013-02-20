@@ -13,7 +13,7 @@ from scipy.cluster import vq
 from dpmix import DPNormalMixture, BEM_DPNormalMixture, HDPNormalMixture
 from fcm import FCMcollection
 
-from dp_cluster import DPCluster, DPMixture
+from dp_cluster import DPCluster, DPMixture, HDPMixture
 from kmeans import KMeans
 
 
@@ -357,18 +357,23 @@ class HDPMixtureModel(DPMixtureModel):
             self.last = self.niter
 
         if self._run:
-            #print self.mus
-            allresults = []
-            for k in range(self.ndatasets):
-                rslts = []
-                for i in range(self.last):
-                    for j in range(self.nclusts):
-                        tmp = DPCluster(self.hdp.weights[-(i + 1), k, j], (self.hdp.mu[-(i + 1), j] * self.s) + self.m, self.hdp.Sigma[-(i + 1), j] * outer(self.s, self.s))
-                        tmp.nmu = self.hdp.mu[-(i + 1), j]
-                        tmp.nsigma = self.hdp.Sigma[-(i + 1), j]
-                        rslts.append(tmp)
-                allresults.append(DPMixture(rslts, self.last, self.m, self.s, self.ident))
-            return allresults
+#            #print self.mus
+#            allresults = []
+#            for k in range(self.ndatasets):
+#                rslts = []
+#                for i in range(self.last):
+#                    for j in range(self.nclusts):
+#                        tmp = DPCluster(self.hdp.weights[-(i + 1), k, j], (self.hdp.mu[-(i + 1), j] * self.s) + self.m, self.hdp.Sigma[-(i + 1), j] * outer(self.s, self.s))
+#                        tmp.nmu = self.hdp.mu[-(i + 1), j]
+#                        tmp.nsigma = self.hdp.Sigma[-(i + 1), j]
+#                        rslts.append(tmp)
+#                allresults.append(DPMixture(rslts, self.last, self.m, self.s, self.ident))
+#            return allresults
+            #pis = self.hdp.weights[-self.last:].T.reshape(self.ndatasets,self.last*self.nclusts).copy()
+            pis = array([ self.hdp.weights[-self.last:,k,:].flatten() for k in range(self.ndatasets)])
+            mus = (self.hdp.mu[-self.last:]*self.s+self.m).squeeze()
+            sigmas = (self.hdp.Sigma[-self.last:]*outer(self.s,self.s)).squeeze()
+            return HDPMixture(pis, mus, sigmas, self.last, self.m, self.s, self.ident)
 
 class KMeansModel(object):
     '''
