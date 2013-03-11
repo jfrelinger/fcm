@@ -15,6 +15,12 @@ class FCSreaderTestCase(unittest.TestCase):
     def testMultiLoad(self):
         for unused in range(100):
             unused_x = loadFCS('../sample_data/3FITC_4PE_004.fcs', transform=None)
+            
+    def testIOLoad(self):
+        import io
+        with open('../sample_data/3FITC_4PE_004.fcs') as f:
+            mem_file = io.BytesIO(f.read())
+            fcm_data = loadFCS(mem_file)
         
 
 if __name__ == '__main__':

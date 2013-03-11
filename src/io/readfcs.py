@@ -14,6 +14,7 @@ from struct import calcsize, unpack
 import re
 import numpy
 import os
+import io
 
 class FCSreader(object):
     """
@@ -28,50 +29,61 @@ class FCSreader(object):
         #else: # we should have gotten a filehandle then
         #    self.filename = filename.name
         #    self._fh = filename
-        self.transform = transform
         #self._fh = cStringIO.StringIO(open(filename, 'rb').read())
-        self.filename = filename
-        
+        #self.filename = filename
+
+        if isinstance(filename, basestring):
+            try:
+                self._fh = open(filename, 'rb')
+            except IOError:
+                raise
+            except:
+                raise Exception('Unknown exception occurred reading file')
+        elif isinstance(filename, (file, io.IOBase)):
+            self._fh = filename
+        else:
+            raise TypeError("Filename must be a file path or a file handle (either 'file' type or io.IOBase")
+
+        self.transform = transform
         self.cur_offset = 0
         self.spill = spill
         self.sidx = sidx
 
 
-
     def get_FCMdata(self, auto_comp=True, **kwargs):
         """Return the next FCM data set stored in a FCS file"""
 
-        with open(self.filename,'rb') as self._fh:
-            # parse headers
-            header = self.parse_header(self.cur_offset)
-    
-            # parse text 
-            text = self.parse_text(self.cur_offset, header['text_start'], header['text_stop'])
-    
-            # parse annalysis
-            try:
-                astart = text['beginanalysis']
-            except KeyError:
-                astart = header['analysis_start']
-            try:
-                astop = text['endanalysis']
-            except KeyError:
-                astop = header['analysis_end']
-            analysis = self.parse_analysis(self.cur_offset, astart, astop)
-            # parse data
-            try:
-                dstart = int(text['begindata'])
-            except KeyError:
-                dstart = header['data_start']
-            try:
-                dstop = int(text['enddata'])
-            except KeyError:
-                dstop = header['data_end']
-    
-            #account for LMD reporting the wrong values for the size of the data segment
-            lmd = self.fix_lmd(self.cur_offset, header['text_start'], header['text_stop'])
-            dstop = dstop + lmd
-            data = self.parse_data(self.cur_offset, dstart, dstop, text)
+        # parse headers
+        header = self.parse_header(self.cur_offset)
+
+        # parse text
+        text = self.parse_text(self.cur_offset, header['text_start'], header['text_stop'])
+
+        # parse annalysis
+        try:
+            astart = text['beginanalysis']
+        except KeyError:
+            astart = header['analysis_start']
+        try:
+            astop = text['endanalysis']
+        except KeyError:
+            astop = header['analysis_end']
+        analysis = self.parse_analysis(self.cur_offset, astart, astop)
+        # parse data
+        try:
+            dstart = int(text['begindata'])
+        except KeyError:
+            dstart = header['data_start']
+        try:
+            dstop = int(text['enddata'])
+        except KeyError:
+            dstop = header['data_end']
+
+        #account for LMD reporting the wrong values for the size of the data segment
+        lmd = self.fix_lmd(self.cur_offset, header['text_start'], header['text_stop'])
+        dstop = dstop + lmd
+        data = self.parse_data(self.cur_offset, dstart, dstop, text)
+
         # build fcmdata object
         channels = []
         scchannels = []
@@ -99,10 +111,11 @@ class FCSreader(object):
                         to_transform.append(i - 1)
                 except KeyError:
                     pass
-        
 
-
-        unused_path, name = os.path.split(self.filename)
+        try:
+            unused_path, name = os.path.split(self._fh.name)
+        except AttributeError:
+            name = 'InMemoryFile'
         name, unused_ext = os.path.splitext(name)
         tmpfcm = FCMdata(name, data, channels, scchannels,
             Annotation({'text': text,
