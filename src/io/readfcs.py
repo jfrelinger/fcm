@@ -177,6 +177,9 @@ class FCSreader(object):
             tmpfcm._w = self.w
         except AttributeError:
             pass
+        
+        if 'nextdata' in text:
+            self.cur_offset = int(text['nextdata'])
         return tmpfcm
 
 
@@ -364,11 +367,12 @@ def log_factory(base):
 
 log2 = log_factory(2)
 
-def loadFCS(filename, transform='logicle', auto_comp=True, spill=None, sidx=None, **kwargs):
+def loadFCS(filename, transform='logicle', auto_comp=True, spill=None, sidx=None, file_index=0, **kwargs):
     """Load and return a FCM data object from an FCS file"""
 
     tmp = FCSreader(filename, transform, spill=spill, sidx=sidx)
-    data = tmp.get_FCMdata(auto_comp, **kwargs)
+    for i in range(file_index+1):
+        data = tmp.get_FCMdata(auto_comp, **kwargs)
     tmp._fh.close()
     del tmp
     return data
