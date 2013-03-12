@@ -316,7 +316,8 @@ class FCSreader(object):
         except IOError:
             tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
             tmp = numpy.array(tmp)
-        return tmp.reshape((tot, len(tmp) / tot))
+        print num_items, tot, len(tmp)
+        return tmp.reshape((tot, num_items / tot))
 
     def parse_ascii_data(self, offset, start, stop, bitwidth, dtype, tot, order):
         """Parse out ascii encoded data from fcs file"""
@@ -329,7 +330,7 @@ class FCSreader(object):
         except IOError:
             tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
             tmp = numpy.array(tmp)
-        return tmp.reshape((tot, len(tmp) / tot))
+        return tmp.reshape((tot, num_items / tot))
 
 
 def parse_pairs(text):
