@@ -279,10 +279,15 @@ class FCSreader(object):
             if len(set(bitwidth)) == 1: # uniform size for all parameters
                 # calculate how much data to read in.
                 num_items = (stop - start + 1) / calcsize(fmt_integer(bitwidth[0]))
-                #unpack into a list
-                tmp = unpack('%s%d%s' % (order, num_items, fmt_integer(bitwidth[0])),
-                                    self.read_bytes(offset, start, stop))
-
+                try:
+                    fmt = numpy.dtype('%s%d%s' % (order, num_items, fmt_integer(bitwidth[0])))
+                    self._fh.seek(start+offset)
+                    tmp = numpy.fromfile(self._fh, fmt, count=1)
+                except IOError:
+                    #unpack into a list
+                    tmp = unpack('%s%d%s' % (order, num_items, fmt_integer(bitwidth[0])),
+                                        self.read_bytes(offset, start, stop))
+                    tmp = numpy.array(tmp)
 
             else: # parameter sizes are different e.g. 8, 8, 16,8, 32 ... do one at a time
                 unused_bitwidths = map(int, map(log2, drange))
@@ -306,15 +311,28 @@ class FCSreader(object):
 
         #count up how many to read in
         num_items = (stop - start + 1) / calcsize(dtype)
-        tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
-        return numpy.array(tmp).reshape((tot, len(tmp) / tot))
+        try:
+            fmt = numpy.dtype('%s%d%s' % (order, num_items, dtype))
+            self._fh.seek(start+offset)
+            tmp = numpy.fromfile(self._fh, fmt, count=1)
+        except IOError:
+            tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
+            tmp = numpy.array(tmp)
+        return tmp.reshape((tot, len(tmp) / tot))
 
     def parse_ascii_data(self, offset, start, stop, bitwidth, dtype, tot, order):
         """Parse out ascii encoded data from fcs file"""
 
         num_items = (stop - start + 1) / calcsize(dtype)
-        tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
-        return numpy.array(tmp).reshape((tot, len(tmp) / tot))
+        #tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
+        try:
+            fmt = numpy.dtype('%s%d%s' % (order, num_items, dtype))
+            self._fh.seek(start+offset)
+            tmp = numpy.fromfile(self._fh, fmt, count=1)
+        except IOError:
+            tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
+            tmp = numpy.array(tmp)
+        return tmp.reshape((tot, len(tmp) / tot))
 
 
 def parse_pairs(text):
