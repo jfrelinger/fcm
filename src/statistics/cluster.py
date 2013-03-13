@@ -193,6 +193,8 @@ class DPMixtureModel(object):
         pnts = fcmdata.view().copy()
         self.m = pnts.mean(0)
         self.s = pnts.std(0)
+        # incase any of the std's are zero
+        self.s[self.s==0] = 1
         self.data = (pnts - self.m) / self.s
 
         if len(self.data.shape) == 1:
