@@ -385,9 +385,9 @@ class HDPMixture(Component):
     __array_priority__ = 10
     
     def __init__(self, pis,mus,sigmas, niter=1, m=0, s=1, identified=False):
-        self.pis = pis
-        self.mus = mus
-        self.sigmas = sigmas
+        self.pis = pis.squeeze()
+        self.mus = mus.squeeze()
+        self.sigmas = sigmas.squeeze()
         self.niter = niter
         self.ident = identified
         self.m = m
@@ -467,9 +467,9 @@ class HDPMixture(Component):
         offset = self.mus.shape[0] / self.niter
         k = self.mus.shape[0]// self.niter
         d = self.mus.shape[1]
-        new_mus = self.mus.reshape(self.niter, offset, d ).mean(0)
-        new_sigmas = self.sigmas.reshape(self.niter, offset, d, d).mean(0)
-        new_pis = self.pis.reshape(len(self), self.niter, offset).mean(1)
+        new_mus = self.mus.reshape(self.niter, offset, d ).mean(0).squeeze()
+        new_sigmas = self.sigmas.reshape(self.niter, offset, d, d).mean(0).squeeze()
+        new_pis = self.pis.reshape(len(self), self.niter, offset).mean(1).squeeze()
         
         return HDPMixture(new_pis, new_mus, new_sigmas, 1, self.m, self.s, self.ident)
         

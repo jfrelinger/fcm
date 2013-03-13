@@ -334,7 +334,6 @@ class HDPMixtureModel(DPMixtureModel):
         else:
             from datetime import datetime
             seed(datetime.now().microsecond)
-
         self.hdp = HDPNormalMixture(standardized, ncomp=self.nclusts,
                                            gamma0=self.gamma0, m0=self.m0,
                                            nu0=self.nu0, Phi0=self.Phi0,
@@ -375,8 +374,8 @@ class HDPMixtureModel(DPMixtureModel):
 #            return allresults
             #pis = self.hdp.weights[-self.last:].T.reshape(self.ndatasets,self.last*self.nclusts).copy()
             pis = array([ self.hdp.weights[-self.last:,k,:].flatten() for k in range(self.ndatasets)])
-            mus = (self.hdp.mu[-self.last:]*self.s+self.m).squeeze()
-            sigmas = (self.hdp.Sigma[-self.last:]*outer(self.s,self.s)).squeeze()
+            mus = (self.hdp.mu[-self.last:].reshape(self.nclusts*self.last,self.d)*self.s+self.m)
+            sigmas = (self.hdp.Sigma[-self.last:].reshape(self.nclusts*self.last,self.d,self.d)*outer(self.s,self.s))
             return HDPMixture(pis, mus, sigmas, self.last, self.m, self.s, self.ident)
 
 class KMeansModel(object):
