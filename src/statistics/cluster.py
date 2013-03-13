@@ -49,8 +49,8 @@ class DPMixtureModel(object):
         self.prior_mu = None
         self.prior_sigma = None
         self.prior_pi = None
-        self.e0 = 1
-        self.f0 = 1
+        self.e0 = 5
+        self.f0 = 0.1
 
         self._prior_mu = None
         self._prior_pi = None
@@ -300,7 +300,11 @@ class HDPMixtureModel(DPMixtureModel):
     last = number of mcmc itterations to draw samples from. if None last = niter
 
     '''
-
+    def __init__(self, *args, **kwargs):
+        super(HDPMixtureModel, self).__init__(*args, **kwargs)
+        self.g0 = 0.1
+        self.h0 = 0.1
+        
     def fit(self, datasets, verbose=False, tune_interval=100):
         if isinstance(datasets, FCMcollection):
             datasets = datasets.to_list()
@@ -334,7 +338,7 @@ class HDPMixtureModel(DPMixtureModel):
         self.hdp = HDPNormalMixture(standardized, ncomp=self.nclusts,
                                            gamma0=self.gamma0, m0=self.m0,
                                            nu0=self.nu0, Phi0=self.Phi0,
-                                           e0=self.e0, f0=self.f0,
+                                           e0=self.e0, f0=self.f0, g0=self.g0, h0=self.h0,
                                            mu0=self._prior_mu, Sigma0=self._prior_sigma,
                                            weights0=self._prior_pi, alpha0=self.alpha0,
                                            gpu=self.device, parallel=self.parallel, verbose=verbose)
