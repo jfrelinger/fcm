@@ -11,6 +11,7 @@ from numpy.random import multinomial
 from component import Component
 from util import modesearch
 from warnings import warn
+from copy import deepcopy
 
 from modelresult import ModelResult
 from numbers import Number
@@ -162,13 +163,13 @@ class DPMixture(ModelResult):
 
     def __len__(self):
         return len(self.clusters)
-    
+
     def __getitem__(self, slice):
         return self.clusters.__getitem__(slice)
-    
+
     def __setitem__(self, slice, values):
-        return self.clusters.__setitem__(slice,values)
-    
+        return self.clusters.__setitem__(slice, values)
+
     def prob(self, x, logged=False, **kwargs):
         '''
         DPMixture.prob(x)
@@ -222,7 +223,7 @@ class DPMixture(ModelResult):
         '''
         return array([i.pi for i in self.clusters])
 
-    def make_modal(self,**kwargs):
+    def make_modal(self, **kwargs):
         """
         find the modes and return a modal dp mixture
         """
@@ -263,8 +264,8 @@ class DPMixture(ModelResult):
         average over mcmc draws to try and find the 'average' weights, means, and covariances
         '''
         if not self.ident:
-            warn("model wasn't run with ident=True, therefor these averages are likely"
-                 + "meaningless")
+            warn("model wasn't run with ident=True, therefor these averages "
+                 "are likely meaningless")
 
         k = len(self.clusters) / self.niter
         rslts = []
@@ -295,6 +296,32 @@ class DPMixture(ModelResult):
 
         return DPMixture(rslts[::-1])
 
+    def get_iteration(self, iters):
+        '''
+        return a sub model of specific iterations
+        x.get_iteration(0) returns a DPMixture of the first iteration
+        x.get_iteration([0,2,4,6]) returs a DPMixture of iterations 0,2,4,6,
+            eg. poor mans thinning.
+        '''
+        if isinstance(iters, Number):
+            iters = [iters]
+        for i, j in enumerate(iters):
+            if abs(i) > self.niter:
+                raise IndexError('index error out of range: %d' % i)
+            if i < 0:
+                iters[j] = self.niter - i
+
+        stride = len(self.clusters) / self.niter
+        keep = []
+        for i in iters:
+            for j in range(stride):
+                keep.append(deepcopy(self.clusters[(i * stride) + j]))
+
+        pi_adjust = sum(i.pi for i in keep)
+        for i in keep:
+            i.pi = i.pi / pi_adjust
+
+        return DPMixture(keep, len(iters), self.m, self.s, self.ident)
 
 
 
@@ -377,14 +404,15 @@ class ModalDPMixture(DPMixture):
         except ValueError:
             return probs.argmax(0)
 
+
 class HDPMixture(Component):
     '''
     a 'collectin' of DPMixtures with common means and variances
     '''
-    
+
     __array_priority__ = 10
-    
-    def __init__(self, pis,mus,sigmas, niter=1, m=0, s=1, identified=False):
+
+    def __init__(self, pis, mus, sigmas, niter=1, m=0, s=1, identified=False):
         self.pis = pis.squeeze()
         self.mus = mus.squeeze()
         self.sigmas = sigmas.squeeze()
@@ -392,44 +420,44 @@ class HDPMixture(Component):
         self.ident = identified
         self.m = m
         self.s = s
-        
+
     def __len__(self):
         return self.pis.shape[0]
-    
-    def __getitem__(self,key):
-        if isinstance( key, slice ) :
+
+    def __getitem__(self, key):
+        if isinstance(key, slice) :
             return [self[ii] for ii in xrange(*key.indices(len(self)))]
-        elif isinstance( key, int ) :
+        elif isinstance(key, int) :
             if key < 0 : #Handle negative indices
-                key += len( self )
-            if key >= len( self ) :
-                raise IndexError, "The index (%d) is out of range."%key
+                key += len(self)
+            if key >= len(self) :
+                raise IndexError, "The index (%d) is out of range." % key
             return self._getData(key) #Get the data from elsewhere
         else:
             raise TypeError, "Invalid argument type."
-        
-    def _getData(self,key):
-        pis = self.pis[key,:]
-        mus = (self.mus-self.m)/self.s
-        sigmas = (self.sigmas)/self.s
-        clsts = [ DPCluster(i,j,k,l,m) for i,j,k,l,m in 
-                 zip(pis,self.mus,self.sigmas,mus,sigmas)]
+
+    def _getData(self, key):
+        pis = self.pis[key, :]
+        mus = (self.mus - self.m) / self.s
+        sigmas = (self.sigmas) / self.s
+        clsts = [ DPCluster(i, j, k, l, m) for i, j, k, l, m in
+                 zip(pis, self.mus, self.sigmas, mus, sigmas)]
         return DPMixture(clsts, self.niter, self.m, self.s, self.ident)
-    
+
 
     def __add__(self, x):
-        return HDPMixture(self.pis, self.mus+x, self.sigmas, self.niter, self.m, self.s, self.ident)
-    
+        return HDPMixture(self.pis, self.mus + x, self.sigmas, self.niter, self.m, self.s, self.ident)
+
     def __radd__(self, x):
-        return HDPMixture(self.pis, x+self.mus, self.sigmas, self.niter, self.m, self.s, self.ident)
-    
+        return HDPMixture(self.pis, x + self.mus, self.sigmas, self.niter, self.m, self.s, self.ident)
+
     def __sub__(self, x):
-        return HDPMixture(self.pis, self.mus-x, self.sigmas, self.niter, self.m, self.s, self.ident)
-    
+        return HDPMixture(self.pis, self.mus - x, self.sigmas, self.niter, self.m, self.s, self.ident)
+
     def __rsub__(self, x):
-        return HDPMixture(self.pis, x+self.mus, self.sigmas, self.niter, self.m, self.s, self.ident)
-    
-    
+        return HDPMixture(self.pis, x + self.mus, self.sigmas, self.niter, self.m, self.s, self.ident)
+
+
     def __mul__(self, k):
 
         if isinstance(k, Number):
@@ -455,24 +483,23 @@ class HDPMixture(Component):
             raise TypeError('unsupported type: %s' % type(k))
 
         return HDPMixture(self.pi, new_mu, new_sigma, self.niter, sef.m, sef.s, self.ident)
-    
-    
+
+
     def prob(self, x, **kwargs):
         return array([i.prob(x, kwargs) for i in self])
-    
+
     def classify(self, x, **kwargs):
         return array([i.classify(x, **kwargs) for i in self])
-    
+
     def average(self):
         offset = self.mus.shape[0] / self.niter
-        k = self.mus.shape[0]// self.niter
+        k = self.mus.shape[0] // self.niter
         d = self.mus.shape[1]
-        new_mus = self.mus.reshape(self.niter, offset, d ).mean(0).squeeze()
+        new_mus = self.mus.reshape(self.niter, offset, d).mean(0).squeeze()
         new_sigmas = self.sigmas.reshape(self.niter, offset, d, d).mean(0).squeeze()
         new_pis = self.pis.reshape(len(self), self.niter, offset).mean(1).squeeze()
-        
+
         return HDPMixture(new_pis, new_mus, new_sigmas, 1, self.m, self.s, self.ident)
-        
-        
-        
-        
+
+
+
