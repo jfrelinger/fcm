@@ -229,6 +229,16 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         mus = r.mus
         assert(mus.shape == (16,2))
         
+    def testModel_datatypes(self):
+        
+        r = self.model.fit(self.pnts.astype('int'))
+        self.assertIsInstance(r, DPMixture, 'failed to fit integer data')
+
+        r = self.model.fit(self.pnts.astype('float'))
+        self.assertIsInstance(r, DPMixture, 'failed to fit float data')
+        
+        r = self.model.fit(self.pnts.astype('double'))
+        self.assertIsInstance(r, DPMixture, 'failed to fit double data')      
 #    def testModel_Pool(self):
 #        
 #        _, x1 = self.generate_data()
