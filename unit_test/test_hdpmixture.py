@@ -1,5 +1,5 @@
 import unittest
-from fcm.statistics import HDPMixture, DPMixture, DPCluster
+from fcm.statistics import HDPMixture, DPMixture, DPCluster, ModalHDPMixture
 from numpy import array, eye, dot, array
 import numpy.testing
 class HDPMixtureTestCase(unittest.TestCase):
@@ -60,7 +60,9 @@ class HDPMixtureTestCase(unittest.TestCase):
         self.assertIsInstance(avg, HDPMixture, 'average returned wrong type of object')
         self.assertEqual(len(avg),3, 'average return the wrong number of mixtures, %d' % len(avg))
         
-        
+    def test_make_modal(self):
+        modal = self.mix.make_modal()
+        self.assertIsInstance(modal, ModalHDPMixture, 'make_modal failed to return ModalHDPMixture object')
        
 if __name__ == '__main__':
     unittest.main()
