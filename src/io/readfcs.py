@@ -335,12 +335,15 @@ class FCSreader(object):
 def parse_pairs(text):
     """return key/value pairs from a delimited string"""
     delim = text[0]
-    if delim == r'|':
-        delim = '\|'
-    if delim == r'\a'[0]: # test for delimiter being \
-        delim = '\\\\' # regex will require it to be \\
+    
     if delim != text[-1]:
         warn("text in segment does not start and end with delimiter")
+    
+    if delim == r'|':
+        delim = '\|'
+    elif delim == r'\a'[0]: # test for delimiter being \
+        delim = '\\\\' # regex will require it to be \\
+    
     tmp = text[1:-1].replace('$', '')
     # match the delimited character unless it's doubled
     regex = re.compile('(?<=[^%s])%s(?!%s)' % (delim, delim, delim))
