@@ -5,7 +5,7 @@ Created on Oct 30, 2009
 '''
 
 
-from numpy import zeros, outer, sum, eye, array, mean, cov, vstack, std
+from numpy import zeros, outer, sum, eye, array, mean, cov, vstack, std, ones
 from numpy.random import multivariate_normal as mvn
 from numpy.random import seed
 from scipy.cluster import vq
@@ -193,8 +193,8 @@ class DPMixtureModel(object):
         pnts = fcmdata.view().copy().astype('double')
         if normed:
             self.data = pnts
-            self.mu = np.zeros(data.shape[1])
-            self.s = np.ones(data.shape[1])
+            self.mu = zeros(data.shape[1])
+            self.s = ones(data.shape[1])
         else:
             self.m = pnts.mean(0)
             self.s = pnts.std(0)
