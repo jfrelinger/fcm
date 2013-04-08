@@ -5,7 +5,7 @@ Created on Oct 30, 2009
 '''
 
 
-from numpy import zeros, outer, sum, eye, array, mean, cov, vstack, std
+from numpy import zeros, outer, sum, eye, array, mean, cov, vstack, std, ones
 from numpy.random import multivariate_normal as mvn
 from numpy.random import seed
 from scipy.cluster import vq
@@ -177,25 +177,30 @@ class DPMixtureModel(object):
             tot = float(pnts.shape[0])
             self.prior_pi = array([pnts[self._ref == i].shape[0] / tot for i in range(self.nclusts)])
 
-    def fit(self, fcmdata, verbose=False):
+    def fit(self, fcmdata, verbose=False, normed=False):
         if isinstance(fcmdata, FCMcollection):
-            return [self._fit(fcmdata[i], verbose) for i in fcmdata ]
+            return [self._fit(fcmdata[i], verbose, normed) for i in fcmdata ]
         elif isinstance(fcmdata, list):
-            return [self._fit(i, verbose) for i in fcmdata ]
+            return [self._fit(i, verbose, normed) for i in fcmdata ]
         else:
-            return self._fit(fcmdata, verbose)
+            return self._fit(fcmdata, verbose, normed)
 
-    def _fit(self, fcmdata, verbose=False):
+    def _fit(self, fcmdata, verbose=False, normed=False):
         """
         fit the mixture model to the data
         use get_results() to get the fitted model
         """
         pnts = fcmdata.view().copy().astype('double')
-        self.m = pnts.mean(0)
-        self.s = pnts.std(0)
-        # incase any of the std's are zero
-        self.s[self.s==0] = 1
-        self.data = (pnts - self.m) / self.s
+        if normed:
+            self.data = pnts
+            self.m = zeros(self.data.shape[1])
+            self.s = ones(self.data.shape[1])
+        else:
+            self.m = pnts.mean(0)
+            self.s = pnts.std(0)
+            # incase any of the std's are zero
+            self.s[self.s==0] = 1
+            self.data = (pnts - self.m) / self.s
 
         if len(self.data.shape) == 1:
             self.data = self.data.reshape((self.data.shape[0], 1))
