@@ -193,8 +193,8 @@ class DPMixtureModel(object):
         pnts = fcmdata.view().copy().astype('double')
         if normed:
             self.data = pnts
-            self.mu = zeros(data.shape[1])
-            self.s = ones(data.shape[1])
+            self.m = zeros(self.data.shape[1])
+            self.s = ones(self.data.shape[1])
         else:
             self.m = pnts.mean(0)
             self.s = pnts.std(0)
