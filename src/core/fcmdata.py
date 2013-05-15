@@ -10,7 +10,7 @@ from transforms import log_transform as _log
 from tree import Tree
 from fcm.core.compensate import compensate
 #from fcm.io.export_to_fcs import export_fcs
-
+from subsample import DropChannel
 
 class FCMdata(object):
     """
@@ -30,7 +30,7 @@ class FCMdata(object):
         channels: a list of which markers/scatters are on which column of
                     the array.
         scatters: a list of which indexes in channels are scatters
-        
+
         """
         self.name = name
 #        if type(pnts) != type(array([])):
@@ -61,29 +61,29 @@ class FCMdata(object):
 
     def __getitem__(self, item):
         """return FCMdata points"""
-        
-        if isinstance(item,tuple):
-            
+
+        if isinstance(item, tuple):
+
             item = list(item) # convert to be mutable.
-            if isinstance(item[1],str):
-                
+            if isinstance(item[1], str):
+
                 item[1] = self.name_to_index(item[1])
-            elif isinstance(item[1],tuple) or isinstance(item[1], list):
-                
+            elif isinstance(item[1], tuple) or isinstance(item[1], list):
+
                 item[1] = list(item[1])# convert to be mutable.
-                for i,j in enumerate(item[1]):
-                    if isinstance(j,str):
+                for i, j in enumerate(item[1]):
+                    if isinstance(j, str):
                         print i, 'is string', j
                         item[1][i] = self.name_to_index(j)
             item = tuple(item)
-                        
-        
+
+
         return self.tree.view()[item]
 
     @property
     def channels(self):
         return self.current_node.channels
-    
+
     def __getattr__(self, name):
             if name in dir(self.current_node.view()):
                 #return Node.__getattribute__(self.current_node,'view')().__getattribute__(name)
@@ -109,23 +109,23 @@ class FCMdata(object):
     def name_to_index(self, channels):
         """Return the channel indexes for the named channels"""
 
-        if isinstance(channels,str):
+        if isinstance(channels, str):
             try:
                 return self.channels.index(channels)
             except ValueError:
-                for j in range(1,int(self.notes.text['par'])+1):
+                for j in range(1, int(self.notes.text['par']) + 1):
                         if channels == self.notes.text['p%dn' % j]:
                             return self.channels.index(self.notes.text['p%ds' % j])
                 raise ValueError('%s is not in list' % channels)
-                
-                
+
+
         idx = []
         for i in channels:
             try:
                 idx.append(self.channels.index(i))
             except ValueError:
                 try:
-                    for j in range(1,int(self.notes.text['par'])+1):
+                    for j in range(1, int(self.notes.text['par']) + 1):
                         if i == self.notes.text['p%dn' % j]:
                             idx.append(self.channels.index(self.notes.text['p%ds' % j]))
                 except ValueError:
@@ -137,7 +137,7 @@ class FCMdata(object):
 
     def get_channel_by_name(self, channels):
         """Return the data associated with specific channel names"""
-        
+
         return self.tree.view()[:, self.name_to_index(channels)]
 
     def get_markers(self):
@@ -147,7 +147,7 @@ class FCMdata(object):
 
     def get_spill(self):
         """return the spillover matrix from the original fcs used in compisating"""
-        
+
         try:
             return self.notes.text['spill']
         except KeyError:
@@ -155,28 +155,28 @@ class FCMdata(object):
 
     def view(self):
         """return the current view of the data"""
-        
+
         return self.tree.view()
 
     def visit(self, name):
         """Switch current view of the data"""
-        
+
         self.tree.visit(name)
 
     @property
     def current_node(self):
         """return the current node"""
-        
+
         return self.tree.current
 
     def copy(self):
         """return a copy of fcm data object"""
-        
+
         tname = self.name
         tpnts = self.tree.root.data
         tnotes = self.notes.copy()
         tchannels = self.channels[:]
-        
+
         tscchannels = self.scatters[:]
         tmp = FCMdata(tname, tpnts, tchannels, tscchannels, tnotes)
         from copy import deepcopy
@@ -185,53 +185,53 @@ class FCMdata(object):
 
     def logicle(self, channels=None, T=262144, m=4.5, r=None, scale_max=1e5, scale_min=0):
         """return logicle transformed channels"""
-        
+
         if channels is None:
             channels = self.markers
         return _logicle(self, channels, T, m, r, scale_max, scale_min)
 
     def hyperlog(self, channels, b, d, r, order=2, intervals=1000.0):
         """return hyperlog transformed channels"""
-        
+
         return _hyperlog(self, channels, b, d, r, order, intervals)
 
     def log(self, channels=None):
         """return log base 10 transformed channels"""
 
         if channels is None:
-            channels = self.markers        
+            channels = self.markers
         return _log(self, channels)
 
     def gate(self, g, chan=None):
         """return gated region of fcm data"""
-        
+
         return g.gate(self, chan)
 
     def subsample(self, s):
         """return subsampled/sliced fcm data"""
-        
+
         return s.subsample(self)
-    
+
     def compensate(self, sidx=None, spill=None):
         '''Compensate the fcm data'''
-        
-        compensate(self,S=spill, markers=sidx)
+
+        compensate(self, S=spill, markers=sidx)
         return self
 
     def get_cur_node(self):
         """ get current node """
-        
+
         return self.current_node
 
     def add_view(self, node):
         """add a new node to the view tree"""
-        
+
         self.tree.add_child(node.name, node)
         return self
 
     def summary(self):
         """returns summary of current view"""
-        
+
         pnts = self.view()
         means = pnts.mean(0)
         stds = pnts.std(0)
@@ -252,7 +252,7 @@ class FCMdata(object):
     def boundary_events(self):
         """returns dictionary of fraction of events in first and last
         channel for each channel"""
-        
+
         boundary_dict = {}
         for k, chan in enumerate(self.channels):
             col = self.view()[:, k]
@@ -266,3 +266,18 @@ class FCMdata(object):
         '''
         from fcm.io import export_fcs
         export_fcs(file_name, self.view(), self.channels, self.notes.text)
+
+    def drop_channels(self, channels, keep=False):
+        '''
+        create a view without the specified channels
+        '''
+        if isinstance(channels, str) or isinstance(channels, int):
+            channels = [channels]
+        for i, j in enumerate(channels):
+            if isinstance(j, int):
+                channels[i] = self.channels[j]
+
+        d = DropChannel(channels)
+        d.drop(self)
+        return self
+

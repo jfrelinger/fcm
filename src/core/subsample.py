@@ -49,13 +49,16 @@ class DropChannel(object):
     def drop(self, fcm):
         """D(<fcmdata>) -> create a new view in the fcm object missing the specified channels"""
         channels = fcm.channels[:]
-        for i in self.idxs:
-            channels.remove(i)
         left = []
-        for i in channels:
-            left.extend(fcm.name_to_index(i))
+        for i in fcm.channels:
+            if i in self.idxs:
+                channels.remove(i)
+            else:
+                if isinstance(i, str):
+                    left.append(fcm.name_to_index(i))
+                else:
+                    left.append(i)
 
-        left.sort()
         node = DropChannelNode("", fcm.get_cur_node(), left, channels)
         fcm.add_view(node)
         return fcm
