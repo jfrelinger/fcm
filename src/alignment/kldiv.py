@@ -46,3 +46,29 @@ def eSKLdiv(x, y, dim, pnts, lp=None, a=None, b=None, orig_y=None, use_grad=Fals
     r = p * (lp - lq) + q * (lq - lp)
 
     return np.sum(r[np.isfinite(r)])
+
+def eKLdiv(x, y, dim, pnts, lp=None, a=None, b=None, orig_y=None, use_grad=False):
+    if lp is None:
+        #p = np.sum(x.prob(pnts, use_gpu=False), 1)
+        lp = logsumexp(x.prob(pnts, logged=True, use_gpu=True), 1)
+    p = np.exp(lp)
+    try:
+        lq = logsumexp(y.prob(pnts, logged=True, use_gpu=True), 1)
+        q = np.exp(lq)
+    except ValueError, e:
+        print y.sigmas, y.mus
+        print 'a', a, 'b', b
+        raise e
+
+
+    sp = np.sum(p)
+    p = p / sp
+    lp = lp - np.log(sp)
+
+    sq = np.sum(q)
+    q = q / sq
+    lq = lq - np.log(sq)
+
+    r = p * (lp - lq)
+
+    return np.sum(r[np.isfinite(r)])

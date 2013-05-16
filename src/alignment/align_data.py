@@ -9,7 +9,7 @@ from scipy.optimize import fmin
 from kldiv import eSKLdiv
 from fcm.statistics import DPMixtureModel
 
-class DiagonalAlignData(object):
+class BaseAlignData(object):
     def __init__(self, x, m=None, size=25, k=100, verbose=100,
                           maxiter=10000):
 
@@ -34,11 +34,11 @@ class DiagonalAlignData(object):
     def align(self, y, x0=None):
         # if we don't know mx, fit x
         if self.mx is None:
-            self.__fit_xy(self.x, 'mx')
+            self._fit_xy(self.x, 'mx')
 
         # if we don't know my fit y
         if self.my is None:
-            self.__fit_xy(y, 'my')
+            self._fit_xy(y, 'my')
 
         #set up grid for aprox skldiv
         mins = np.array([min(self.x[:, i].min(), y[:, i].min()) for i in range(self.d)])
@@ -52,19 +52,40 @@ class DiagonalAlignData(object):
 
         # estimate x0 if we don't know it
         if x0 is None:
-            shift = -1 * y.mean(0) * self.x.std(0) / y.std(0) + self.x.mean(0)
-            scale = self.x.std(0) / y.std(0)
-            x0 = np.hstack((scale.flatten(), shift))
-
+            x0 = self._get_x0(y)
+            
         #call minimizer on 
-        z = fmin(self.__opteSKLdiv, x0, maxfun=10 ** 6)
-        b = z[-self.d:]
-        a = np.eye(self.d)
-        for i in range(self.d):
-            a[i,i] = z[i]
+        z = fmin(self._optimize, x0, maxiter=self.maxiter)
+        a,b = self._format_z(z)
         
         return a, b
-    def __opteSKLdiv(self, n):
+    
+    def _fit_xy(self, x, key):
+
+        r = self.m.fit(x, self.verbose)
+        r = r.average()
+
+        self.__setattr__(key, r)
+        
+    def _get_x0(self, y):
+        raise NotImplementedError
+        
+    def _format_z(self, z):
+        raise NotImplementedError
+    
+    def _optimize(self, n):
+        raise NotImplementedError
+    
+class DiagonalAlignData(BaseAlignData):
+    
+    def _get_x0(self, y):
+        shift = -1 * y.mean(0) * self.x.std(0) / y.std(0) + self.x.mean(0)
+        scale = self.x.std(0) / y.std(0)
+        return np.hstack((scale.flatten(), shift))
+
+
+
+    def _optimize(self, n):
             a = np.eye(self.d)
             z = 0
             for i in range(self.d):
@@ -74,15 +95,16 @@ class DiagonalAlignData(object):
 
 
 
-    def __fit_xy(self, x, key):
-
-        r = self.m.fit(x, self.verbose)
-        r = r.average()
-
-        self.__setattr__(key, r)
+    
 
 
-
+    def _format_z(self,z):
+        b = z[-self.d:]
+        a = np.eye(self.d)
+        for i in range(self.d):
+            a[i,i] = z[i]
+        
+        return a,b
 
 
 
