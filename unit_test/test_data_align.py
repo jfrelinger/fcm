@@ -17,6 +17,8 @@ class DiagAlignTestCase(unittest.TestCase):
         a,b = self.align.align(self.y)
         npt.assert_array_almost_equal(a, np.eye(4), decimal=2)
         npt.assert_array_almost_equal(b, np.zeros(4), decimal=2)
+        
+
 if __name__ == '__main__':
     suite1 = unittest.makeSuite(DiagAlignTestCase,'test')
 
