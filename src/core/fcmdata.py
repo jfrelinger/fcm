@@ -65,15 +65,14 @@ class FCMdata(object):
         if isinstance(item, tuple):
 
             item = list(item) # convert to be mutable.
-            if isinstance(item[1], str):
+            if isinstance(item[1], basestring):
 
                 item[1] = self.name_to_index(item[1])
             elif isinstance(item[1], tuple) or isinstance(item[1], list):
 
                 item[1] = list(item[1])# convert to be mutable.
                 for i, j in enumerate(item[1]):
-                    if isinstance(j, str):
-                        print i, 'is string', j
+                    if isinstance(j, basestring):
                         item[1][i] = self.name_to_index(j)
             item = tuple(item)
 
@@ -109,7 +108,7 @@ class FCMdata(object):
     def name_to_index(self, channels):
         """Return the channel indexes for the named channels"""
 
-        if isinstance(channels, str):
+        if isinstance(channels, basestring):
             try:
                 return self.channels.index(channels)
             except ValueError:
@@ -267,16 +266,17 @@ class FCMdata(object):
         from fcm.io import export_fcs
         export_fcs(file_name, self.view(), self.channels, self.notes.text)
 
-    def drop_channels(self, channels, keep=False):
+    def extract_channels(self, channels, keep=False):
         '''
-        create a view without the specified channels
+        create a view without the specified channels or with if keep==True
         '''
-        if isinstance(channels, str) or isinstance(channels, int):
+        if isinstance(channels, basestring) or isinstance(channels, int):
             channels = [channels]
         for i, j in enumerate(channels):
             if isinstance(j, int):
                 channels[i] = self.channels[j]
-
+        if keep:
+            channels = [ i  for i in self.channels if i not in channels]
         d = DropChannel(channels)
         d.drop(self)
         return self

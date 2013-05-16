@@ -159,7 +159,7 @@ class Tree(object):
 
     def visit(self, name):
         '''visit a node in the tree'''
-        if isinstance(name, str):
+        if isinstance(name, basestring):
             self.current = self.nodes[name]
         elif isinstance(name, Node): # in this case we assume we're a node type.
             self.current = name
