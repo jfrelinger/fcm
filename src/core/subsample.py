@@ -49,9 +49,12 @@ class DropChannel(object):
     def drop(self, fcm):
         """D(<fcmdata>) -> create a new view in the fcm object missing the specified channels"""
         channels = fcm.channels[:]
+
         left = []
-        for i in fcm.channels:
+        for j,i in enumerate(fcm.channels):
             if i in self.idxs:
+                channels.remove(i)
+            elif j in self.idxs:
                 channels.remove(i)
             else:
                 if isinstance(i, str):
