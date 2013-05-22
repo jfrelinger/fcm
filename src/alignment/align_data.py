@@ -60,7 +60,7 @@ class BaseAlignData(object):
         #call minimizer on 
         z = fmin(self._optimize, x0, maxiter=self.maxiter)
         a, b = self._format_z(z)
-        
+
         #no need to keep my now
         self.__setattr__('my', None)
         return a, b
@@ -91,12 +91,8 @@ class DiagonalAlignData(BaseAlignData):
         return np.hstack((scale.flatten(), shift))
 
     def _optimize(self, n):
-            a = np.eye(self.d)
-            z = 0
-            for i in range(self.d):
-                a[i, i] = n[i]
-            b = n[-self.d:]
-            return eKLdiv(self.mx, (self.my * a), self.d, self.pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
+        a, b = self._format_z(n)
+        return eKLdiv(self.mx, (self.my * a), self.d, self.pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
 
     def _format_z(self, z):
         b = z[-self.d:]
@@ -108,27 +104,40 @@ class DiagonalAlignData(BaseAlignData):
 
 class DiagonalAlignDataS(DiagonalAlignData):
     def _optimize(self, n):
-            a = np.eye(self.d)
-            z = 0
-            for i in range(self.d):
-                a[i, i] = n[i]
-            b = n[-self.d:]
-            return esKLdiv(self.mx, (self.my * a), self.d, self.pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
+        a, b = self._format_z(n)
+        return esKLdiv(self.mx, (self.my * a), self.d, self.pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
 
 
-def comp_align_data():
+def CompAlignData(BaseAlignData):
     def _get_x0(self, y):
-        a = np.eye(self.d)
+        a = np.zeros(self.d ** 2 - self.d)
         b = np.zeros(self.d)
-        return np.hstack(a.flatten(), b)
-    
+        return np.hstack(a, b)
+
 
     def _format_z(self, z):
-        raise NotImplementedError
+        a = np.eye(self.d)
+        b = np.zeros(self.d)
+        counter = 0
+        for i in range(self.d):
+            for j in range(self.d):
+                if i == j:
+                    pass
+                else:
+                    a[i, j] = z[counter]
+                    counter += 1
+        return a, b
 
     def _optimize(self, n):
-        raise NotImplementedError
+        a, b = self._format_z(n)
+        return eKLdiv(self.mx, (self.my * a), self.d, self.pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
 
 
-def full_align_data():
+def CompAlignDataS(CompAlignData):
+    def _optimize(self, n):
+        a, b = self._format_z(n)
+        return eSKLdiv(self.mx, (self.my * a), self.d, self.pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
+
+
+def FullAlignData(BaseAlignData):
     pass #will need more work

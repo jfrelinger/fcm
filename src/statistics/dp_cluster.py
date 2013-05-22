@@ -6,8 +6,11 @@ Created on Oct 30, 2009
 
 from distributions import compmixnormpdf
 from numpy import array, log, sum, zeros, concatenate, mean, exp, ndarray, dot
+from numpy import outer
+import numpy as np
 from numpy.random import multivariate_normal as mvn
 from numpy.random import multinomial
+from numbers import Number
 from component import Component
 from util import modesearch
 from warnings import warn
@@ -323,7 +326,26 @@ class DPMixture(ModelResult):
 
         return DPMixture(keep, len(iters), self.m, self.s, self.ident)
 
-
+    def get_marginal(self, margin):
+        if not isinstance(margin, np.ndarray):
+            margin = array([margin]).squeeze()
+        d = self.mus.shape[1]
+        newd = margin.shape[0]
+        rslts = []
+        x = zeros(d, dtype=np.bool)
+        
+        for i in margin:
+            x[i] = True
+            
+        y = outer(x,x)
+        
+        for i in self.clusters:
+            try:
+                rslts.append(DPCluster(i.pi, i.mu[x], i.sigma[y].reshape(newd,newd), i.centered_mu[x], i.centered_sigma[y].reshape(newd,newd)))
+            except AttributeError:
+                rslts.append(DPCluster(i.pi, i.mu[x], i.sigma[y].reshape(newd,newd)))
+        
+        return DPMixture(rslts, self.niter, self.m, self.s, self.ident)
 
 
 class ModalDPMixture(DPMixture):
