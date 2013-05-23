@@ -35,36 +35,49 @@ class BaseAlignData(object):
         '''
         Generate A and B that minimizes the distance between x and y
         '''
-        # if we don't know mx, fit x
-        if self.mx is None:
-            self._fit_xy(self.x, 'mx')
+        #fit models
+        self._fit_models(y)
 
-        # if we don't know my fit y
-        if self.my is None:
-            self._fit_xy(y, 'my')
-
-        #set up grid for aprox skldiv
-        mins = np.array([min(self.x[:, i].min(), y[:, i].min()) for i in range(self.d)])
-        maxs = np.array([max(self.x[:, i].max(), y[:, i].max()) for i in range(self.d)])
-
-        idxs = tuple([slice(mins[i], maxs[i], self.size * 1j) for i in range(self.d)])
-        self.pnts = np.mgrid[idxs].T.flatten().reshape((self.size ** self.d, self.d))
+        #build a grid of points to evaluate over
+        self.pnts = self._buid_grid(y)
 
         # precalculate lp for kldiv, it doesn't change between iterations
         self.lp = logsumexp(self.mx.prob(self.pnts, logged=True, use_gpu=True), 1)
+
+
 
         # estimate x0 if we don't know it
         if x0 is None:
             x0 = self._get_x0(y)
 
+
         #call minimizer on 
-        z = fmin(self._optimize, x0, maxiter=self.maxiter)
+        z = self._min(self._optimize, x0, maxiter=self.maxiter)
         a, b = self._format_z(z)
 
         #no need to keep my now
         self.__setattr__('my', None)
         return a, b
 
+    def _min(self, func, x0, **kwargs):
+        return fmin(func, x0, **kwargs)
+
+    def _buid_grid(self, y):
+        #set up grid for aprox skldiv
+        mins = np.array([min(self.x[:, i].min(), y[:, i].min()) for i in range(self.d)])
+        maxs = np.array([max(self.x[:, i].max(), y[:, i].max()) for i in range(self.d)])
+
+        idxs = tuple([slice(mins[i], maxs[i], self.size * 1j) for i in range(self.d)])
+        return np.mgrid[idxs].T.flatten().reshape((self.size ** self.d, self.d))
+
+    def _fit_models(self, y):
+        # if we don't know mx fit x
+        if self.mx is None:
+            self._fit_xy(self.x, 'mx')
+
+        # if we don't know my fit y
+        if self.my is None:
+            self._fit_xy(y, 'my')
     def _fit_xy(self, x, key):
 
         r = self.m.fit(x, self.verbose)
@@ -85,14 +98,40 @@ class DiagonalAlignData(BaseAlignData):
     '''
     Generate Diagonal only alignment
     '''
+    
+    def _buid_grid(self, y):
+        #set up grid for aprox skldiv
+        mins = np.array([min(self.x[:, i].min(), y[:, i].min()) for i in range(self.d)])
+        maxs = np.array([max(self.x[:, i].max(), y[:, i].max()) for i in range(self.d)])
+        pnts = np.empty((self.size, self.d))
+        for i in range(self.d):
+            pnts[:,i] = np.linspace(mins[i], maxs[i], self.size)
+            
+        return pnts
+        
     def _get_x0(self, y):
         shift = -1 * y.mean(0) * self.x.std(0) / y.std(0) + self.x.mean(0)
         scale = self.x.std(0) / y.std(0)
         return np.hstack((scale.flatten(), shift))
 
-    def _optimize(self, n):
-        a, b = self._format_z(n)
-        return eKLdiv(self.mx, (self.my * a), self.d, self.pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
+    def _optimize(self, n, mx, my, pnts):
+        a, b = n
+        return eKLdiv(mx, (my * a), self.d, pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
+
+    def _min(self, func, x0, **kwargs):
+        z = np.zeros(self.d + self.d)
+        for i in range(self.d):
+            mx = self.mx.get_marginal(i)
+            my = self.my.get_marginal(i)
+            self.lp = logsumexp(mx.prob(self.pnts[:,i], logged=True, use_gpu=True), 0)
+            a, b = fmin(func, x0[[i, self.d + i]], (mx,my, self.pnts[:,i]))
+            z[i] = a
+            z[i + self.d] = b
+
+        return np.array(z)
+
+
+
 
     def _format_z(self, z):
         b = z[-self.d:]
@@ -103,10 +142,9 @@ class DiagonalAlignData(BaseAlignData):
         return a, b
 
 class DiagonalAlignDataS(DiagonalAlignData):
-    def _optimize(self, n):
-        a, b = self._format_z(n)
-        return esKLdiv(self.mx, (self.my * a), self.d, self.pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
-
+    def _optimize(self, n, mx, my, pnts):
+        a, b = n
+        return eSKLdiv(mx, (my * a), self.d, pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
 
 def CompAlignData(BaseAlignData):
     def _get_x0(self, y):

@@ -328,7 +328,7 @@ class DPMixture(ModelResult):
 
     def get_marginal(self, margin):
         if not isinstance(margin, np.ndarray):
-            margin = array([margin]).squeeze()
+            margin = array([margin]).squeeze().reshape(1,)
         d = self.mus.shape[1]
         newd = margin.shape[0]
         rslts = []
