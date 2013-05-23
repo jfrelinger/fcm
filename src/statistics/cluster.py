@@ -9,6 +9,7 @@ from numpy import zeros, outer, sum, eye, array, mean, cov, vstack, std, ones
 from numpy.random import multivariate_normal as mvn
 from numpy.random import seed
 from scipy.cluster import vq
+import collections
 
 from dpmix import DPNormalMixture, BEM_DPNormalMixture, HDPNormalMixture
 from fcm import FCMcollection
@@ -180,7 +181,7 @@ class DPMixtureModel(object):
     def fit(self, fcmdata, verbose=False, normed=False):
         if isinstance(fcmdata, FCMcollection):
             return [self._fit(fcmdata[i], verbose, normed) for i in fcmdata ]
-        elif isinstance(fcmdata, list):
+        elif isinstance(fcmdata, list) or isinstance(fcmdata, tuple):
             return [self._fit(i, verbose, normed) for i in fcmdata ]
         else:
             return self._fit(fcmdata, verbose, normed)
@@ -399,7 +400,7 @@ class KMeansModel(object):
     def fit(self, fcmdata):
         if isinstance(fcmdata, FCMcollection):
             return [self._fit(fcmdata[i]) for i in fcmdata ]
-        elif isinstance(fcmdata, list):
+        elif isinstance(fcmdata, list) or isinstance(fcmdata, tuple):
             return [self._fit(i) for i in fcmdata ]
         else:
             return self._fit(fcmdata)
