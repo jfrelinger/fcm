@@ -525,13 +525,13 @@ class HDPMixture(Component):
         # merge aggressively
         c_consensus = r_consensus.make_modal(**kwargs)
         ref_cmap = c_consensus.cmap
-        ref_modes = c_consensus.modes()
+        ref_modemap = c_consensus.modemap
 
-        return ModalHDPMixture(self.pis, self.mus, self.sigmas, ref_cmap, ref_modes, self.m, self.s)
+        return ModalHDPMixture(self.pis, self.mus, self.sigmas, ref_cmap, ref_modemap, self.m, self.s)
 
 
 class ModalHDPMixture(HDPMixture):
-        def __init__(self, pis, mus, sigmas, cmap, modes, m=None, s=None):
+        def __init__(self, pis, mus, sigmas, cmap, modemap, m=None, s=None):
             '''
             ModalHDPMixture(clusters)
             cluster = HDPMixture object
@@ -542,7 +542,7 @@ class ModalHDPMixture(HDPMixture):
             self.mus = mus.copy()
             self.sigmas = sigmas.copy()
             self.cmap = cmap
-            self.modemap = modes
+            self.modemap = modemap
 
             if m is not None:
                 self.m = m
