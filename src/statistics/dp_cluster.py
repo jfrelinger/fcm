@@ -531,7 +531,7 @@ class HDPMixture(Component):
 
 
 class ModalHDPMixture(HDPMixture):
-        def __init__(self, pis, mus, sigmas, cmap, modes, m=False, s=False):
+        def __init__(self, pis, mus, sigmas, cmap, modes, m=None, s=None):
             '''
             ModalHDPMixture(clusters)
             cluster = HDPMixture object
@@ -544,11 +544,11 @@ class ModalHDPMixture(HDPMixture):
             self.cmap = cmap
             self.modemap = modes
 
-            if m:
+            if m is not None:
                 self.m = m
             else:
                 self.m = 0
-            if s:
+            if s is not None:
                 self.s = s
             else:
                 self.s = 1
