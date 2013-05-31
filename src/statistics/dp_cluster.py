@@ -230,11 +230,11 @@ class DPMixture(ModelResult):
         """
         try:
             modes, cmap = modesearch(self.pis, self.centered_mus, self.centered_sigmas, **kwargs)
-            return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s, identified=self.ident)
+            return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s)
 
         except AttributeError:
             modes, cmap = modesearch(self.pis, self.mus, self.sigmas, **kwargs)
-            return ModalDPMixture(self.clusters, cmap, modes, identified=self.ident)
+            return ModalDPMixture(self.clusters, cmap, modes)
 
     def log_likelihood(self, x):
         '''
