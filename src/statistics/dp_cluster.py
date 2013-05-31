@@ -17,7 +17,7 @@ from warnings import warn
 from copy import deepcopy
 
 from modelresult import ModelResult
-from numbers import Number
+
 
 class DPCluster(Component):
     '''
@@ -64,7 +64,7 @@ class DPCluster(Component):
     def prob(self, x, logged=False, **kwargs):
         '''
         DPCluster.prob(x):
-        returns probability of x beloging to this mixture compoent
+        returns probability of x belonging to this mixture component
         '''
         #return self.pi * mvnormpdf(x, self.mu, self.sigma)
         return compmixnormpdf(x, self.pi, self.mu, self.sigma, logged=logged, **kwargs)
@@ -106,7 +106,6 @@ class DPCluster(Component):
 
         return DPCluster(self.pi, new_mu, new_sigma)
 
-
     def __rmul__(self, k):
         if isinstance(k, Number):
             new_mu = self.mu * k
@@ -118,6 +117,7 @@ class DPCluster(Component):
             raise TypeError('unsupported type: %s' % type(k))
 
         return DPCluster(self.pi, new_mu, new_sigma)
+
 
 class DPMixture(ModelResult):
     '''
@@ -145,16 +145,13 @@ class DPMixture(ModelResult):
         new_clusters = [k + i for i in self.clusters]
         return DPMixture(new_clusters, self.niter, self.m, self.s, self.ident)
 
-
     def __sub__(self, k):
         new_clusters = [i - k for i in self.clusters]
         return DPMixture(new_clusters, self.niter, self.m, self.s, self.ident)
 
-
     def __rsub__(self, k):
         new_clusters = [k - i for i in self.clusters]
         return DPMixture(new_clusters, self.niter, self.m, self.s, self.ident)
-
 
     def __mul__(self, a):
         new_clusters = [i * a for i in self.clusters]
@@ -167,16 +164,17 @@ class DPMixture(ModelResult):
     def __len__(self):
         return len(self.clusters)
 
-    def __getitem__(self, slice):
-        return self.clusters.__getitem__(slice)
+    def __getitem__(self, s):
+        return self.clusters.__getitem__(s)
 
-    def __setitem__(self, slice, values):
-        return self.clusters.__setitem__(slice, values)
+    def __setitem__(self, s, values):
+        return self.clusters.__setitem__(s, values)
 
     def prob(self, x, logged=False, **kwargs):
         '''
         DPMixture.prob(x)
-        returns an array of probabilities of x being in each component of the mixture
+        returns an array of probabilities of x being in each component of the
+        mixture
         '''
         #return array([i.prob(x) for i in self.clusters])
         return compmixnormpdf(x, self.pis, self.mus, self.sigmas, logged=logged, **kwargs)
@@ -232,16 +230,15 @@ class DPMixture(ModelResult):
         """
         try:
             modes, cmap = modesearch(self.pis, self.centered_mus, self.centered_sigmas, **kwargs)
-            return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s)
+            return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s, identified=self.ident)
 
         except AttributeError:
-            #warn("trying to make modal of a mixture I'm not sure is normalized.\nThe mode finding algorithm is designed for normalized data.\nResults may be unexpected")
             modes, cmap = modesearch(self.pis, self.mus, self.sigmas, **kwargs)
-            return ModalDPMixture(self.clusters, cmap, modes)
+            return ModalDPMixture(self.clusters, cmap, modes, identified=self.ident)
 
     def log_likelihood(self, x):
         '''
-        return the log liklihood of x belonging to this mixture
+        return the log likelihood of x belonging to this mixture
         '''
 
         return sum(log(sum(self.prob(x), axis=0)))
@@ -264,7 +261,8 @@ class DPMixture(ModelResult):
 
     def average(self):
         '''
-        average over mcmc draws to try and find the 'average' weights, means, and covariances
+        average over mcmc draws to try and find the 'average' weights, means,
+        and covariances
         '''
         if not self.ident:
             warn("model wasn't run with ident=True, therefor these averages "
@@ -333,18 +331,18 @@ class DPMixture(ModelResult):
         newd = margin.shape[0]
         rslts = []
         x = zeros(d, dtype=np.bool)
-        
+
         for i in margin:
             x[i] = True
-            
-        y = outer(x,x)
-        
+
+        y = outer(x, x)
+
         for i in self.clusters:
             try:
-                rslts.append(DPCluster(i.pi, i.mu[x], i.sigma[y].reshape(newd,newd), i.centered_mu[x], i.centered_sigma[y].reshape(newd,newd)))
+                rslts.append(DPCluster(i.pi, i.mu[x], i.sigma[y].reshape(newd, newd), i.centered_mu[x], i.centered_sigma[y].reshape(newd, newd)))
             except AttributeError:
-                rslts.append(DPCluster(i.pi, i.mu[x], i.sigma[y].reshape(newd,newd)))
-        
+                rslts.append(DPCluster(i.pi, i.mu[x], i.sigma[y].reshape(newd, newd)))
+
         return DPMixture(rslts, self.niter, self.m, self.s, self.ident)
 
 
@@ -372,7 +370,8 @@ class ModalDPMixture(DPMixture):
     def prob(self, x, logged=False, **kwargs):
         '''
         ModalDPMixture.prob(x)
-        returns  an array of probabilities of x being in each mode of the modal mixture
+        returns  an array of probabilities of x being in each mode of the modal
+        mixture
         '''
         probs = compmixnormpdf(x, self.pis, self.mus, self.sigmas, logged=logged, **kwargs)
 
@@ -380,15 +379,10 @@ class ModalDPMixture(DPMixture):
         if logged:
             probs = exp(probs)
         try:
-
-
-            n, j = x.shape # check we're more then 1 point
+            n, j = x.shape  # check we're more then 1 point
             rslt = zeros((n, len(self.cmap.keys())))
             for j in self.cmap.keys():
                 rslt[:, j] = sum([probs[:, i] for i in self.cmap[j]], 0)
-
-
-
         except ValueError:
             #single point
             rslt = zeros((len(self.cmap.keys())))
@@ -430,7 +424,7 @@ class ModalDPMixture(DPMixture):
 
 class HDPMixture(Component):
     '''
-    a 'collectin' of DPMixtures with common means and variances
+    a 'collection' of DPMixtures with common means and variances
     '''
 
     __array_priority__ = 10
@@ -448,25 +442,25 @@ class HDPMixture(Component):
         return self.pis.shape[0]
 
     def __getitem__(self, key):
-        if isinstance(key, slice) :
+        if isinstance(key, slice):
             return [self[ii] for ii in xrange(*key.indices(len(self)))]
-        elif isinstance(key, int) :
-            if key < 0 : #Handle negative indices
+        elif isinstance(key, int):
+            #Handle negative indices
+            if key < 0:
                 key += len(self)
-            if key >= len(self) :
-                raise IndexError, "The index (%d) is out of range." % key
-            return self._getData(key) #Get the data from elsewhere
+            if key >= len(self):
+                raise IndexError("The index (%d) is out of range." % key)
+            return self._getData(key)
         else:
-            raise TypeError, "Invalid argument type."
+            raise TypeError("Invalid argument type.")
 
     def _getData(self, key):
         pis = self.pis[key, :]
         mus = (self.mus - self.m) / self.s
-        sigmas = (self.sigmas) / self.s
-        clsts = [ DPCluster(i, j, k, l, m) for i, j, k, l, m in
+        sigmas = (self.sigmas) / outer(self.s,self.s)
+        clsts = [DPCluster(i, j, k, l, m) for i, j, k, l, m in
                  zip(pis, self.mus, self.sigmas, mus, sigmas)]
         return DPMixture(clsts, self.niter, self.m, self.s, self.ident)
-
 
     def __add__(self, x):
         return HDPMixture(self.pis, self.mus + x, self.sigmas, self.niter, self.m, self.s, self.ident)
@@ -479,7 +473,6 @@ class HDPMixture(Component):
 
     def __rsub__(self, x):
         return HDPMixture(self.pis, x + self.mus, self.sigmas, self.niter, self.m, self.s, self.ident)
-
 
     def __mul__(self, k):
 
@@ -494,7 +487,6 @@ class HDPMixture(Component):
 
         return HDPMixture(self.pis, new_mu, new_sigma, self.niter, self.m, self.s, self.ident)
 
-
     def __rmul__(self, k):
         if isinstance(k, Number):
             new_mu = self.mus * k
@@ -505,8 +497,7 @@ class HDPMixture(Component):
         else:
             raise TypeError('unsupported type: %s' % type(k))
 
-        return HDPMixture(self.pi, new_mu, new_sigma, self.niter, sef.m, sef.s, self.ident)
-
+        return HDPMixture(self.pi, new_mu, new_sigma, self.niter, self.m, self.s, self.ident)
 
     def prob(self, x, **kwargs):
         return array([i.prob(x, kwargs) for i in self])
@@ -516,7 +507,6 @@ class HDPMixture(Component):
 
     def average(self):
         offset = self.mus.shape[0] / self.niter
-        k = self.mus.shape[0] // self.niter
         d = self.mus.shape[1]
         new_mus = self.mus.reshape(self.niter, offset, d).mean(0).squeeze()
         new_sigmas = self.sigmas.reshape(self.niter, offset, d, d).mean(0).squeeze()
@@ -524,23 +514,23 @@ class HDPMixture(Component):
 
         return HDPMixture(new_pis, new_mus, new_sigmas, 1, self.m, self.s, self.ident)
 
-    def make_modal(self):
+    def make_modal(self, **kwargs):
         # set reference cmap by averaging
-        r_consensus = self[0]
+        r_consensus = self._getData(0)
         pis = sum(self.pis, 0)
         pis /= sum(pis)
         for i in range(len(r_consensus.clusters)):
             r_consensus.clusters[i].pi = pis[i]
-    
+
         # merge aggressively
-        c_consensus = r_consensus.make_modal(delta=0.1)
+        c_consensus = r_consensus.make_modal(**kwargs)
         ref_cmap = c_consensus.cmap
         ref_modes = c_consensus.modes()
-    
+
         return ModalHDPMixture(self.pis, self.mus, self.sigmas, ref_cmap, ref_modes, self.m, self.s)
 
-class ModalHDPMixture(HDPMixture):
 
+class ModalHDPMixture(HDPMixture):
         def __init__(self, pis, mus, sigmas, cmap, modes, m=False, s=False):
             '''
             ModalHDPMixture(clusters)
@@ -553,7 +543,7 @@ class ModalHDPMixture(HDPMixture):
             self.sigmas = sigmas.copy()
             self.cmap = cmap
             self.modemap = modes
-            
+
             if m:
                 self.m = m
             else:
@@ -562,15 +552,15 @@ class ModalHDPMixture(HDPMixture):
                 self.s = s
             else:
                 self.s = 1
-        
+
         def _getData(self, key):
             pis = self.pis[key, :]
             mus = (self.mus - self.m) / self.s
             sigmas = (self.sigmas) / self.s
-            clsts = [ DPCluster(i, j, k, l, m) for i, j, k, l, m in
+            clsts = [DPCluster(i, j, k, l, m) for i, j, k, l, m in
                      zip(pis, self.mus, self.sigmas, mus, sigmas)]
-            return ModalDPMixture(clsts, self.cmap, self.modemap, self.m, self.s)  
-        
+            return ModalDPMixture(clsts, self.cmap, self.modemap, self.m, self.s)
+
         def modes(self):
             '''
             ModalDPMixture.modes():
@@ -586,6 +576,6 @@ class ModalHDPMixture(HDPMixture):
 
         def prob(self, x):
             return array([r.prob(x) for r in self])
-        
+
         def classify(self, x):
             return array([r.classify(x) for r in self])

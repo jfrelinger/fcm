@@ -73,7 +73,7 @@ def pdist(x, w=None, scale=False):
         return squareform(_pdist(x, 'euclidean'))
 
 
-def modesearch(pis, mus, sigmas, tol=1e-6, maxiter=20, delta=.1, w=None, scale=False):
+def modesearch(pis, mus, sigmas, tol=1e-6, maxiter=20, delta=0.1, w=None, scale=False):
     """find the modes of a mixture of guassians"""
 
     mdict, sm, unused_spm = _mode_search(pis, mus, sigmas, nk=0, tol=tol, maxiter=maxiter)
