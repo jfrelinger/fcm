@@ -124,69 +124,69 @@ class Dp_mixtureTestCase(unittest.TestCase):
 
         # add
         b = self.mix + adder
-        assert(isinstance(b, DPMixture), 'integer addition return wrong type')
+        self.assertIsInstance(b, DPMixture, 'integer addition return wrong type')
         assert_equal(b.mus[0], self.mix.mus[0] + adder,
                      'integer addition returned wrong value')
 
         c = self.mix + array_adder
-        assert(isinstance(c, DPMixture), 'array addition return wrong type')
-        assert_equal(c.mus[0], self.mix.mus[0] + array_adder,
+        self.assertIsInstance(c, DPMixture, 'array addition return wrong type')
+        assert_array_equal(c.mus[0], self.mix.mus[0] + array_adder,
                      'array addition returned wrong value')
 
 
         # radd
         b = adder + self.mix
-        assert(isinstance(b, DPMixture), 'integer addition return wrong type')
-        assert_equal(b.mus[0], adder + self.mix.mus[0],
+        self.assertIsInstance(b, DPMixture, 'integer addition return wrong type')
+        assert_array_equal(b.mus[0], adder + self.mix.mus[0],
                      'integer addition returned wrong value')
 
         c = array_adder + self.mix
-        assert(isinstance(c, DPMixture), 'array addition return wrong type')
-        assert_equal(c.mus[0], array_adder + self.mix.mus[0],
+        self.assertIsInstance(c, DPMixture, 'array addition return wrong type')
+        assert_array_equal(c.mus[0], array_adder + self.mix.mus[0],
                      'array addition returned wrong value')
 
         # sub
         b = self.mix - adder
-        assert(isinstance(b, DPMixture), 'integer subtraction return wrong type')
-        assert_equal(b.mus[0], self.mix.mus[0] - adder,
+        self.assertIsInstance(b, DPMixture, 'integer subtraction return wrong type')
+        assert_array_equal(b.mus[0], self.mix.mus[0] - adder,
                      'integer subtraction returned wrong value')
 
         c = self.mix - array_adder
-        assert(isinstance(c, DPMixture), 'array subtraction return wrong type')
-        assert_equal(c.mus[0], self.mix.mus[0] - array_adder,
+        self.assertIsInstance(c, DPMixture, 'array subtraction return wrong type')
+        assert_array_equal(c.mus[0], self.mix.mus[0] - array_adder,
                      'array subtraction returned wrong value')
 
         # rsub
         b = adder - self.mix
-        assert(isinstance(b, DPMixture), 'integer subtraction return wrong type')
-        assert_equal(b.mus[0], adder - self.mix.mus[0],
+        self.assertIsInstance(b, DPMixture, 'integer subtraction return wrong type')
+        assert_array_equal(b.mus[0], adder - self.mix.mus[0],
                      'integer subtraction returned wrong value')
 
         c = array_adder - self.mix
-        assert(isinstance(c, DPMixture), 'array subtraction return wrong type')
-        assert_equal(c.mus[0], array_adder - self.mix.mus[0],
+        self.assertIsInstance(c, DPMixture, 'array subtraction return wrong type')
+        assert_array_equal(c.mus[0], array_adder - self.mix.mus[0],
                      'array subtraction returned wrong value')
         # mul
         b = self.mix * adder
-        assert(isinstance(b, DPMixture), 'integer multiplication return wrong type')
-        assert_equal(b.mus[0], self.mix.mus[0] * adder,
+        self.assertIsInstance(b, DPMixture, 'integer multiplication return wrong type')
+        assert_array_equal(b.mus[0], self.mix.mus[0] * adder,
                      'integer multiplication returned wrong value')
 
         c = self.mix * array_adder
-        assert(isinstance(c, DPMixture), 'array multiplicaton return wrong type')
-        assert_equal(c.mus[0], dot(self.mix.mus[0], array_adder),
+        self.assertIsInstance(c, DPMixture, 'array multiplicaton return wrong type')
+        assert_array_equal(c.mus[0], dot(self.mix.mus[0], array_adder),
                      'array multiplication returned wrong value')
 
 
         # rmul
         b = adder * self.mix
-        assert(isinstance(b, DPMixture), 'integer multiplication return wrong type')
-        assert_equal(b.mus[0], adder * self.mix.mus[0],
+        self.assertIsInstance(b, DPMixture, 'integer multiplication return wrong type')
+        assert_array_equal(b.mus[0], adder * self.mix.mus[0],
                      'integer multiplication returned wrong value')
 
         c = array_adder * self.mix
-        assert(isinstance(c, DPMixture), 'array multiplication return wrong type')
-        assert_equal(c.mus[0], dot(array_adder, self.mix.mus[0]),
+        self.assertIsInstance(c, DPMixture, 'array multiplication return wrong type')
+        assert_array_equal(c.mus[0], dot(array_adder, self.mix.mus[0]),
                      'array multiplication returned wrong value')
 
 
@@ -205,6 +205,26 @@ class Dp_mixtureTestCase(unittest.TestCase):
                               'get_iteration failed')
         self.assertEqual(len(self.mix.get_iteration([0,2]).clusters), 4, 
                          'get_iteration return wrong number of clusters')
+        
+    def testEnumerateClusters(self):
+        for i,j in self.mix.enumerate_clusters():
+            self.assertIsInstance(i, int)
+            self.assertIs(j, self.mix[i], 'fialed to return the right cluster when enumerating')
+    
+    def testEnumeratePis(self):
+        for i,j in self.mix.enumerate_pis():
+            self.assertIsInstance(i, int)
+            self.assertIs(j, self.mix[i].pi, 'fialed to return the right pi when enumerating')
+    
+    def testEnumerateMus(self):
+        for i,j in self.mix.enumerate_mus():
+            self.assertIsInstance(i, int)
+            self.assertIs(j, self.mix[i].mu, 'fialed to return the right mean when enumerating')
+            
+    def testEnumerateSigmas(self):
+        for i,j in self.mix.enumerate_sigmas():
+            self.assertIsInstance(i, int)
+            self.assertIs(j, self.mix[i].sigma, 'fialed to return the right covariance when enumerating')
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

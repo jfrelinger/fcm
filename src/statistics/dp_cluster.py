@@ -4,14 +4,14 @@ Created on Oct 30, 2009
 @author: Jacob Frelinger
 '''
 
-from distributions import compmixnormpdf
+from fcm.statistics.distributions import compmixnormpdf
+from fcm.statistics.component import Component
 from numpy import array, log, sum, zeros, concatenate, mean, exp, ndarray, dot
 from numpy import outer
 import numpy as np
 from numpy.random import multivariate_normal as mvn
 from numpy.random import multinomial
 from numbers import Number
-from component import Component
 from util import modesearch
 from warnings import warn
 from copy import deepcopy
@@ -345,6 +345,30 @@ class DPMixture(ModelResult):
 
         return DPMixture(rslts, self.niter, self.m, self.s, self.ident)
 
+    def enumerate_clusters(self):
+        '''
+        enumerate through clusters
+        '''
+        for i in range(len(self.clusters)):
+            yield i, self.clusters[i]
+
+    def enumerate_pis(self):
+        for i in range(len(self.clusters)):
+            yield i, self.clusters[i].pi
+
+    def enumerate_mus(self):
+        '''
+        enumerate through the clusters means
+        '''
+        for i in range(len(self.clusters)):
+            yield i, self.clusters[i].mu
+
+    def enumerate_sigmas(self):
+        '''
+        enumerate through the cluster covariances
+        '''
+        for i in range(len(self.clusters)):
+            yield i, self.clusters[i].sigma
 
 class ModalDPMixture(DPMixture):
     '''
