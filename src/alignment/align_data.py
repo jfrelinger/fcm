@@ -6,10 +6,14 @@ Author: Jacob Frelinger <jacob.frelinger@duke.edu>
 import numpy as np
 from scipy.misc import logsumexp
 from scipy.optimize import fmin
-from kldiv import eSKLdiv, eKLdiv
+from fcm.alignment.kldiv import eSKLdiv, eKLdiv
 from fcm.statistics import DPMixtureModel
 
+
 class BaseAlignData(object):
+    '''
+    base class to align a data set to a reference data set
+    '''
     def __init__(self, x, m=None, size=25, k=100, verbose=100,
                           maxiter=10000):
 
@@ -31,6 +35,7 @@ class BaseAlignData(object):
 
         self.mx = None
         self.my = None
+
     def align(self, y, x0=None):
         '''
         Generate A and B that minimizes the distance between x and y
@@ -44,14 +49,11 @@ class BaseAlignData(object):
         # precalculate lp for kldiv, it doesn't change between iterations
         self.lp = logsumexp(self.mx.prob(self.pnts, logged=True, use_gpu=True), 1)
 
-
-
         # estimate x0 if we don't know it
         if x0 is None:
             x0 = self._get_x0(y)
 
-
-        #call minimizer on 
+        #call minimizer on
         z = self._min(self._optimize, x0, maxiter=self.maxiter)
         a, b = self._format_z(z)
 
@@ -78,8 +80,8 @@ class BaseAlignData(object):
         # if we don't know my fit y
         if self.my is None:
             self._fit_xy(y, 'my')
-    def _fit_xy(self, x, key):
 
+    def _fit_xy(self, x, key):
         r = self.m.fit(x, self.verbose)
         r = r.average()
 
@@ -94,21 +96,21 @@ class BaseAlignData(object):
     def _optimize(self, n):
         raise NotImplementedError
 
+
 class DiagonalAlignData(BaseAlignData):
     '''
     Generate Diagonal only alignment
     '''
-    
     def _buid_grid(self, y):
         #set up grid for aprox skldiv
         mins = np.array([min(self.x[:, i].min(), y[:, i].min()) for i in range(self.d)])
         maxs = np.array([max(self.x[:, i].max(), y[:, i].max()) for i in range(self.d)])
         pnts = np.empty((self.size, self.d))
         for i in range(self.d):
-            pnts[:,i] = np.linspace(mins[i], maxs[i], self.size)
-            
+            pnts[:, i] = np.linspace(mins[i], maxs[i], self.size)
+
         return pnts
-        
+
     def _get_x0(self, y):
         shift = -1 * y.mean(0) * self.x.std(0) / y.std(0) + self.x.mean(0)
         scale = self.x.std(0) / y.std(0)
@@ -123,15 +125,12 @@ class DiagonalAlignData(BaseAlignData):
         for i in range(self.d):
             mx = self.mx.get_marginal(i)
             my = self.my.get_marginal(i)
-            self.lp = logsumexp(mx.prob(self.pnts[:,i], logged=True, use_gpu=True), 0)
-            a, b = fmin(func, x0[[i, self.d + i]], (mx,my, self.pnts[:,i]))
+            self.lp = logsumexp(mx.prob(self.pnts[:, i], logged=True, use_gpu=True), 0)
+            a, b = fmin(func, x0[[i, self.d + i]], (mx, my, self.pnts[:, i]))
             z[i] = a
             z[i + self.d] = b
 
         return np.array(z)
-
-
-
 
     def _format_z(self, z):
         b = z[-self.d:]
@@ -141,17 +140,24 @@ class DiagonalAlignData(BaseAlignData):
 
         return a, b
 
+
 class DiagonalAlignDataS(DiagonalAlignData):
+    '''
+    Gnerate Diagonal alignment using symetric KLDivergence
+    '''
     def _optimize(self, n, mx, my, pnts):
         a, b = n
         return eSKLdiv(mx, (my * a), self.d, pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
 
+
 def CompAlignData(BaseAlignData):
+    '''
+    Generate 'compensation' alignment: (only estimate off diagonals)
+    '''
     def _get_x0(self, y):
         a = np.zeros(self.d ** 2 - self.d)
         b = np.zeros(self.d)
         return np.hstack(a, b)
-
 
     def _format_z(self, z):
         a = np.eye(self.d)
@@ -172,10 +178,16 @@ def CompAlignData(BaseAlignData):
 
 
 def CompAlignDataS(CompAlignData):
+    '''
+    Generate 'compensation' alignment using symetric KLDivergence
+    '''
     def _optimize(self, n):
         a, b = self._format_z(n)
         return eSKLdiv(self.mx, (self.my * a), self.d, self.pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
 
 
 def FullAlignData(BaseAlignData):
-    pass #will need more work
+    '''
+    Generate full alignment matrix
+    '''
+    pass  #will need more work

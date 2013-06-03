@@ -90,7 +90,7 @@ def modesearch(pis, mus, sigmas, tol=1e-6, maxiter=20, delta=0.1, w=None, scale=
     #print 'm', m
     cs = find_components(matrix_to_graph(dm))
     cs = sorted(cs, key=len, reverse=True)
-    
+
     rslt = {}
     modes = {}
     for i, j in enumerate(cs):
@@ -148,7 +148,7 @@ def _mode_search(pi, mu, sigma, nk=0, tol=0.000001, maxiter=20):
             h += 1
 
         mdict[(js, tuple(x))] = [x, px] # eliminate duplicates
-    
+
     return mdict, sm, spm
 
 def check_mode(m, pm, pi, mu, sigma):

@@ -40,7 +40,7 @@ if __name__ == "__main__":
     alltests = unittest.TestSuite((suite1, suite2, suite3, suite4, suite5,
                                     suite6, suite7, suite8,suite10, suite11,
                                     suite12, suite13, suite14, suite15,
-                                    suit16))
+                                    suite16))
 
     unittest.main()
 

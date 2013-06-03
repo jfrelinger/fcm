@@ -457,7 +457,7 @@ class HDPMixture(Component):
     def _getData(self, key):
         pis = self.pis[key, :]
         mus = (self.mus - self.m) / self.s
-        sigmas = (self.sigmas) / outer(self.s,self.s)
+        sigmas = (self.sigmas) / outer(self.s, self.s)
         clsts = [DPCluster(i, j, k, l, m) for i, j, k, l, m in
                  zip(pis, self.mus, self.sigmas, mus, sigmas)]
         return DPMixture(clsts, self.niter, self.m, self.s, self.ident)
