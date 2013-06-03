@@ -137,6 +137,12 @@ class DPMixture(ModelResult):
         self.m = m
         self.s = s
 
+    def __getstate__(self):
+        return self.clusters, self.niter, self.ident, self.m, self.s
+
+    def __setstate__(self, x):
+        self.clusters, self.niter, self.ident, self.m, self.s = x
+
     def __add__(self, k):
         new_clusters = [i + k for i in self.clusters]
         return DPMixture(new_clusters, self.niter, self.m, self.s, self.ident)
@@ -388,8 +394,14 @@ class ModalDPMixture(DPMixture):
 
         if m is not False:
             self.m = m
+        else:
+            self.m = 0
         if s is not False:
             self.s = s
+        else:
+            self.s = 1
+    def __getsstate__(self):
+        return self.clusters, self.cmap, self.modemap, self.m, self.s
 
     def prob(self, x, logged=False, **kwargs):
         '''
@@ -461,6 +473,12 @@ class HDPMixture(Component):
         self.ident = identified
         self.m = m
         self.s = s
+
+    def __getstate__(self):
+        return self.pis, self.mus, self.sigma, self.niter, self.ident, self.m, self.s
+
+    def __setstate__(self, x):
+        self.pis, self.mus, self.sigma, self.niter, self.ident, self.m, self.s = x
 
     def __len__(self):
         return self.pis.shape[0]
@@ -555,51 +573,57 @@ class HDPMixture(Component):
 
 
 class ModalHDPMixture(HDPMixture):
-        def __init__(self, pis, mus, sigmas, cmap, modemap, m=None, s=None):
-            '''
-            ModalHDPMixture(clusters)
-            cluster = HDPMixture object
-            cmap = map of modal clusters to component clusters
-            modes = array of mode locations
-            '''
-            self.pis = pis.copy()
-            self.mus = mus.copy()
-            self.sigmas = sigmas.copy()
-            self.cmap = cmap
-            self.modemap = modemap
+    def __init__(self, pis, mus, sigmas, cmap, modemap, m=None, s=None):
+        '''
+        ModalHDPMixture(clusters)
+        cluster = HDPMixture object
+        cmap = map of modal clusters to component clusters
+        modes = array of mode locations
+        '''
+        self.pis = pis.copy()
+        self.mus = mus.copy()
+        self.sigmas = sigmas.copy()
+        self.cmap = cmap
+        self.modemap = modemap
 
-            if m is not None:
-                self.m = m
-            else:
-                self.m = 0
-            if s is not None:
-                self.s = s
-            else:
-                self.s = 1
+        if m is not None:
+            self.m = m
+        else:
+            self.m = 0
+        if s is not None:
+            self.s = s
+        else:
+            self.s = 1
 
-        def _getData(self, key):
-            pis = self.pis[key, :]
-            mus = (self.mus - self.m) / self.s
-            sigmas = (self.sigmas) / self.s
-            clsts = [DPCluster(i, j, k, l, m) for i, j, k, l, m in
-                     zip(pis, self.mus, self.sigmas, mus, sigmas)]
-            return ModalDPMixture(clsts, self.cmap, self.modemap, self.m, self.s)
+    def __getstate__(self):
+        return self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s
 
-        def modes(self):
-            '''
-            ModalDPMixture.modes():
-            return an array of mode locations
-            '''
-            lst = []
-            for i in self.modemap.itervalues():
-                try:
-                    lst.append((array(i) * self.s) + self.m)
-                except AttributeError:
-                    lst.append(i)
-            return array(lst)
+    def __setstate__(self,x):
+        self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s = x
 
-        def prob(self, x):
-            return array([r.prob(x) for r in self])
+    def _getData(self, key):
+        pis = self.pis[key, :]
+        mus = (self.mus - self.m) / self.s
+        sigmas = (self.sigmas) / self.s
+        clsts = [DPCluster(i, j, k, l, m) for i, j, k, l, m in
+                 zip(pis, self.mus, self.sigmas, mus, sigmas)]
+        return ModalDPMixture(clsts, self.cmap, self.modemap, self.m, self.s)
 
-        def classify(self, x):
-            return array([r.classify(x) for r in self])
+    def modes(self):
+        '''
+        ModalDPMixture.modes():
+        return an array of mode locations
+        '''
+        lst = []
+        for i in self.modemap.itervalues():
+            try:
+                lst.append((array(i) * self.s) + self.m)
+            except AttributeError:
+                lst.append(i)
+        return array(lst)
+
+    def prob(self, x):
+        return array([r.prob(x) for r in self])
+
+    def classify(self, x):
+        return array([r.classify(x) for r in self])
