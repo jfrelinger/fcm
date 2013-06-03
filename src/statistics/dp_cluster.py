@@ -376,6 +376,69 @@ class DPMixture(ModelResult):
         for i in range(len(self.clusters)):
             yield i, self.clusters[i].sigma
 
+    def reorder(self, lookup):
+        '''
+        add an order to a DPMixture
+        '''
+        return OrderedDPMixture(self.clusters, lookup, self.niter, self.m, self.s, self.ident)
+
+class OrderedDPMixture(DPMixture):
+    '''
+    a ordered/identified DPMixture
+    '''
+    def __init__(self, clusters, lookup, niter=1, m=None, s=None, identified=False):
+        self.lookup = lookup
+        super(OrderedDPMixture, self).__init__(clusters, niter, m, s, identified)
+
+    def __getstate__(self):
+        return self.clusters, self.lookup, self.niter, self.m, self.s, self.ident
+
+    def __setstate__(self, x):
+        self.clusters, self.lookup, self.niter, self.m, self.s, self.ident = x
+
+    def __add__(self, k):
+        return super(OrderedDPMixture, self).__add__(k).reorder(self.lookup)
+
+    def __radd__(self, k):
+        return super(OrderedDPMixture, self).__radd__(k).reorder(self.lookup)
+
+    def __sub__(self, k):
+        return super(OrderedDPMixture, self).__sub__(k).reorder(self.lookup)
+
+    def __rsub__(self, k):
+        return super(OrderedDPMixture, self).__rsub__(k).reorder(self.lookup)
+
+    def __mul__(self, k):
+        return super(OrderedDPMixture, self).__mul__(k).reorder(self.lookup)
+
+    def __rmul__(self, k):
+        return super(OrderedDPMixture, self).__rmul__(k).reorder(self.lookup)
+
+    def enumerate_clusters(self):
+        '''
+        enumerate through clusters
+        '''
+        for i in range(len(self.clusters)):
+            yield self.lookup[i], self.clusters[i]
+
+    def enumerate_pis(self):
+        for i in range(len(self.clusters)):
+            yield self.lookup[i], self.clusters[i].pi
+
+    def enumerate_mus(self):
+        '''
+        enumerate through the clusters means
+        '''
+        for i in range(len(self.clusters)):
+            yield self.lookup[i], self.clusters[i].mu
+
+    def enumerate_sigmas(self):
+        '''
+        enumerate through the cluster covariances
+        '''
+        for i in range(len(self.clusters)):
+            yield self.lookup[i], self.clusters[i].sigma
+
 class ModalDPMixture(DPMixture):
     '''
     collection of modal components that describe a mixture model
@@ -598,7 +661,7 @@ class ModalHDPMixture(HDPMixture):
     def __getstate__(self):
         return self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s
 
-    def __setstate__(self,x):
+    def __setstate__(self, x):
         self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s = x
 
     def _getData(self, key):
