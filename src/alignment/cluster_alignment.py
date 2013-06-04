@@ -6,18 +6,27 @@ distfunc = {'mean': mean_distance,
             'class': classification_distance,
             'kldiv': kldiv_distance}
 
-  
-    
 class AlignMixture(object):
-    def __init__(self, mx, dtype='kldiv', max_cost=None):
+    '''
+    find alignment map between two mixture models
+    '''
+    def __init__(self, mx, dtype='kldiv'):
         self.mx = mx
         self.dtype = distfunc[dtype]
-        self.max_cost = max_cost
 
-    def align(self, my, min_unused=None, *args, **kwargs):
-        cost = self.dtype(self.mx, my, *args, **kwargs)
-        if self.max_cost is not None:
-            munk = max_cost_munkres(cost, self.max_cost)
+    def get_cost(self, my, *args, **kwargs):
+        '''
+        generate cost matrix between reference set and my
+        '''
+        return self.dtype(self.mx, my, *args, **kwargs)
+    
+    def align(self, my, max_cost = None, min_unused=None, *args, **kwargs):
+        '''
+        generate alignment map for my and convert to an ordered mixture model
+        '''
+        cost = self.get_cost(my, *args, **kwargs)
+        if max_cost is not None:
+            munk = max_cost_munkres(cost, max_cost)
         else:            
             munk = munkres(cost)
         print munk, cost

@@ -15,22 +15,22 @@ class ClusterAlignTestCase(unittest.TestCase):
         self.my = DPMixture(clusters[1:])
         
     def test_kldiv(self):
-        a = AlignMixture(self.mx, 'kldiv', max_cost=1)
-        r = a.align(self.my)
+        a = AlignMixture(self.mx, 'kldiv')
+        r = a.align(self.my, max_cost=1)
         self.assertIsInstance(r, OrderedDPMixture, 'failed to return an ordered mixture')
         for i in r.lookup:
             self.assertEqual(i+1, r.lookup[i], 'assignment failed %d : %d' % (i, r.lookup[i]))
     
     def test_mean(self):
-        a = AlignMixture(self.mx, 'mean', max_cost=1)
-        r = a.align(self.my)
+        a = AlignMixture(self.mx, 'mean')
+        r = a.align(self.my, max_cost=1)
         self.assertIsInstance(r, OrderedDPMixture, 'failed to return an ordered mixture')
         for i in r.lookup:
             self.assertEqual(i+1, r.lookup[i], 'assignment failed %d : %d' % (i, r.lookup[i]))
         
     def test_class(self):
-        a = AlignMixture(self.mx, 'class', max_cost=90000)
-        r = a.align(self.my)
+        a = AlignMixture(self.mx, 'class',)
+        r = a.align(self.my, max_cost=90000)
         self.assertIsInstance(r, OrderedDPMixture, 'failed to return an ordered mixture')
         for i in r.lookup:
             self.assertEqual(i+1, r.lookup[i], 'assignment failed %d : %d' % (i, r.lookup[i]))
