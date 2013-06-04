@@ -20,7 +20,7 @@ def mean_distance(ref, test, use_means=None):
         try:
             x = ref.modes
             y = test.modes
-        except:
+        except AttributeError:
             x = ref.mus
             y = test.mus
     else:

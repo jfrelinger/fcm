@@ -16,9 +16,11 @@ class HDPMixtureTestCase(unittest.TestCase):
         numpy.testing.assert_array_equal((self.mix+2).mus, self.mix.mus+2,
                                     "Failed addition")
         numpy.testing.assert_array_equal((self.mix*2).mus, self.mix.mus*2,
-                                    "Failed addition")
+                                    "Failed multiplication")
         numpy.testing.assert_array_equal((self.mix*2).sigmas, self.mix.sigmas*4,
-                                    "multiplication addition")
+                                    "failed multiplication")
+        
+        numpy.testing.assert_equal((self.mix*2).sigmas.shape, self.mix.sigmas.shape, 'multiplication failed')
         
         numpy.testing.assert_array_equal((self.mix+2).pis, self.mix.pis,
                                     "addition changes pi values")

@@ -796,6 +796,42 @@ class ModalHDPMixture(HDPMixture):
         else:
             self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s = x
 
+    def __add__(self,k):
+        return ModalHDPMixture(self.pis, self.mus+k, self.sigmas, self.cmap, self.modemap, self.m, self.s)
+
+    def __radd__(self, k):
+        return ModalHDPMixture(self.pis, k+self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s)
+
+    def __sub__(self, k):
+        return ModalHDPMixture(self.pis, self.mus-k, self.sigmas, self.cmap, self.modemap, self.m, self.s)
+
+    def __rsub__(self,k):
+        return ModalHDPMixture(self.pis, k-self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s)
+
+    def __mul__(self, k):
+        if isinstance(k, Number):
+            new_mu = self.mus * k
+            new_sigma = k * k * self.sigmas
+        elif isinstance(k, ndarray):
+            new_mu = dot(self.mus, k)
+            new_sigma = dot(dot(k, self.sigmas), k.T)
+        else:
+            raise TypeError('unsupported type: %s' % type(k))
+
+        return ModalHDPMixture(self.pis, new_mu, new_sigma, self.cmap, self.modemap, self.m, self.s)
+
+    def __rmul__(self, x):
+        if isinstance(k, Number):
+            new_mu = self.mus * k
+            new_sigma = k * k * self.sigmas
+        elif isinstance(k, ndarray):
+            new_mu = dot(k, self.mus)
+            new_sigma = dot(dot(k, self.sigmas), k.T)
+        else:
+            raise TypeError('unsupported type: %s' % type(k))
+
+        return ModalHDPMixture(self.pis, new_mu, new_sigma, self.cmap, self.modemap, self.m, self.s)
+        
     def _getData(self, key):
         pis = self.pis[key, :]
         mus = (self.mus - self.m) / self.s

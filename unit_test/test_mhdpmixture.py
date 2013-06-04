@@ -56,6 +56,18 @@ class ModalHDp_clusterTestCase(unittest.TestCase):
         numpy.testing.assert_array_equal(self.mix.classify(pnt)[0], array([0, 1]), 'classify classifys mu1 as belonging to something else')
         numpy.testing.assert_array_equal(self.mix.classify(pnt)[1], array([0, 1]), 'classify classifys m21 as belonging to something else')
 
+    def test_arith(self):
+        numpy.testing.assert_array_equal((self.mix+2).mus, self.mix.mus+2,
+                                    "Failed addition")
+        numpy.testing.assert_array_equal((self.mix*2).mus, self.mix.mus*2,
+                                    "Failed multiplication")
+        numpy.testing.assert_array_equal((self.mix*2).sigmas, self.mix.sigmas*4,
+                                    "failed multiplication")
+        
+        numpy.testing.assert_equal((self.mix*2).sigmas.shape, self.mix.sigmas.shape, 'multiplication failed')
+        
+        numpy.testing.assert_array_equal((self.mix+2).pis, self.mix.pis,
+                                    "addition changes pi values")
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
