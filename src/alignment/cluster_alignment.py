@@ -29,7 +29,6 @@ class AlignMixture(object):
             munk = max_cost_munkres(cost, max_cost)
         else:            
             munk = munkres(cost)
-        print munk, cost
         translate = {}
         if min_unused is None:
             min_unused = len(self.mx)
