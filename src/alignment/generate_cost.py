@@ -16,9 +16,13 @@ def mean_distance(ref, test, use_means=None):
     optional argument use_means controls overiding default use of modes if
     available
     '''
-    if isinstance(ref, stats.ModalDPMixture) and isinstance(test, stats.ModalDPMixture) and not use_means:
-        x = ref.modes()
-        y = test.modes()
+    if not use_means:
+        try:
+            x = ref.modes
+            y = test.modes
+        except:
+            x = ref.mus
+            y = test.mus
     else:
         x = ref.mus
         y = test.mus
