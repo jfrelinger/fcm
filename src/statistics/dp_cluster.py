@@ -141,7 +141,11 @@ class DPMixture(ModelResult):
         return self.clusters, self.niter, self.ident, self.m, self.s
 
     def __setstate__(self, x):
-        self.clusters, self.niter, self.ident, self.m, self.s = x
+        if isinstance(x, dict):
+            for i in x:
+                self.__dict__[i] = x[i]
+        else:
+            self.clusters, self.niter, self.ident, self.m, self.s = x
 
     def __add__(self, k):
         new_clusters = [i + k for i in self.clusters]
@@ -394,7 +398,11 @@ class OrderedDPMixture(DPMixture):
         return self.clusters, self.lookup, self.niter, self.m, self.s, self.ident
 
     def __setstate__(self, x):
-        self.clusters, self.lookup, self.niter, self.m, self.s, self.ident = x
+        if isinstance(x, dict):
+            for i in x:
+                self.__dict__[i] = x[i]
+        else:
+            self.clusters, self.lookup, self.niter, self.m, self.s, self.ident = x
 
     def __add__(self, k):
         return super(OrderedDPMixture, self).__add__(k).reorder(self.lookup)
@@ -439,6 +447,12 @@ class OrderedDPMixture(DPMixture):
         for i in range(len(self.clusters)):
             yield self.lookup[i], self.clusters[i].sigma
 
+    def classify(self, x):
+        z = super(OrderedDPMixture, self).classify(x)
+        lut = np.array([self.lookup[i] for i in range(len(self))])
+        return lut[z]
+        
+
 class ModalDPMixture(DPMixture):
     '''
     collection of modal components that describe a mixture model
@@ -463,8 +477,19 @@ class ModalDPMixture(DPMixture):
             self.s = s
         else:
             self.s = 1
+
     def __getsstate__(self):
         return self.clusters, self.cmap, self.modemap, self.m, self.s
+
+    def __setstate__(self, x):
+        if isinstance(x, dict):
+            for i in x:
+                self.__dict__[i] = x[i]
+        else:
+            self.clusters, self.cmap, self.modemap, self.m, self.s = x
+
+    def __len__(self):
+        return len(self.modemap)
 
     def prob(self, x, logged=False, **kwargs):
         '''
@@ -494,6 +519,7 @@ class ModalDPMixture(DPMixture):
 
         return rslt
 
+    @property
     def modes(self):
         '''
         ModalDPMixture.modes():
@@ -506,6 +532,12 @@ class ModalDPMixture(DPMixture):
             except AttributeError:
                 lst.append(i)
         return array(lst)
+
+    def enumerate_modes(self):
+        for i in range(len(self.modes)):
+            yield i, self.modes[i]
+
+
 
     def classify(self, x, **kwargs):
         '''
@@ -520,6 +552,59 @@ class ModalDPMixture(DPMixture):
         except ValueError:
             return probs.argmax(0)
 
+    def reorder(self, lookup):
+        return OrderedModalDPMixture(self.clusters, self.cmap, self.modemap, lookup, self.m, self.s)
+
+class OrderedModalDPMixture(ModalDPMixture):
+    '''
+    an ordered Modal DP Mixture
+    '''
+    def __init__(self, clusters, cmap, modes, lookup, m=False, s=False):
+        '''
+        clusters, cmap, modes, lookup, m=False, s=False
+        '''
+        super(OrderedModalDPMixture, self).__init__(clusters, cmap, modes, m, s)
+        self.lookup = lookup
+
+    def __getsstate__(self):
+        return self.clusters, self.cmap, self.modemap, self.lookup, self.m, self.s
+
+    def __setstate__(self, x):
+        if isinstance(x, dict):
+            for i in x:
+                self.__dict__[i] = x[i]
+        else:
+            self.clusters, self.cmap, self.modemap, self.lookup, self.m, self.s = x
+
+    def __add__(self, k):
+        return super(OrderedModalDPMixture, self).__add__(k).reorder(self.lookup)
+
+    def __radd__(self, k):
+        return super(OrderedModalDPMixture, self).__radd__(k).reorder(self.lookup)
+
+    def __sub__(self, k):
+        return super(OrderedModalDPMixture, self).__sub__(k).reorder(self.lookup)
+
+    def __rsub__(self, k):
+        return super(OrderedModalDPMixture, self).__rsub__(k).reorder(self.lookup)
+
+    def __mul__(self, k):
+        return super(OrderedModalDPMixture, self).__mul__(k).reorder(self.lookup)
+
+    def __rmul__(self, k):
+        return super(OrderedModalDPMixture, self).__rmul__(k).reorder(self.lookup)
+
+
+    def enumerate_modes(self):
+        for i in range(len(self.modes)):
+            yield self.lookup[i], self.modes[i]
+
+
+
+    def classify(self, x, **kwargs):
+        z = super(OrderedModalDPMixture, self).classify(x)
+        lut = np.array([self.lookup[i] for i in range(len(self))])
+        return lut[z]
 
 class HDPMixture(Component):
     '''
@@ -541,7 +626,11 @@ class HDPMixture(Component):
         return self.pis, self.mus, self.sigma, self.niter, self.ident, self.m, self.s
 
     def __setstate__(self, x):
-        self.pis, self.mus, self.sigma, self.niter, self.ident, self.m, self.s = x
+        if isinstance(x, dict):
+            for i in x:
+                self.__dict__[i] = x[i]
+        else:
+            self.pis, self.mus, self.sigma, self.niter, self.ident, self.m, self.s = x
 
     def __len__(self):
         return self.pis.shape[0]
@@ -634,6 +723,45 @@ class HDPMixture(Component):
 
         return ModalHDPMixture(self.pis, self.mus, self.sigmas, ref_cmap, ref_modemap, self.m, self.s)
 
+    def reorder(self, lookup):
+        return OrderedHDPMixture(self.pis, self.mus, self.sigmas, lookup, self.niter, self.m, self.s, self.ident)
+
+class OrderedHDPMixture(HDPMixture):
+    def __init__(self, pis, mus, sigmas, lookup, niter=1, m=0, s=1, identified=False):
+        super(OrderedHDPMixture, self).__init__(pis, mus, sigmas, niter, m, s, identified)
+        self.lookup = lookup
+
+    def __getstate__(self):
+        return self.pis, self.mus, self.sigmas, self.lookup, self.niter, self.m, self.s, self.ident
+
+    def __setstate__(self, x):
+        self.pis, self.mus, self.sigmas, self.lookup, self.niter, self.m, self.s, self.ident = x
+
+    def __add__(self, k):
+        return super(OrderedHDPMixture, self).__add__(k).reorder(self.lookup)
+
+    def __radd__(self, k):
+        return super(OrderedHDPMixture, self).__radd__(k).reorder(self.lookup)
+
+    def __sub__(self, k):
+        return super(OrderedHDPMixture, self).__sub__(k).reorder(self.lookup)
+
+    def __rsub__(self, k):
+        return super(OrderedHDPMixture, self).__rsub__(k).reorder(self.lookup)
+
+    def __mul__(self, k):
+        return super(OrderedHDPMixture, self).__mul__(k).reorder(self.lookup)
+
+    def __rmul__(self, k):
+        return super(OrderedHDPMixture, self).__rmul__(k).reorder(self.lookup)
+
+    def _getData(self, key):
+        return super(OrderedHDPMixture, self)._getData(key).reorder(self.lookup)
+
+    def classify(self):
+        z = super(OrderedHDPMixture, self).classify(x)
+        lut = np.array([self.lookup[i] for i in range(len(self))])
+        return lut[z]
 
 class ModalHDPMixture(HDPMixture):
     def __init__(self, pis, mus, sigmas, cmap, modemap, m=None, s=None):
@@ -662,7 +790,11 @@ class ModalHDPMixture(HDPMixture):
         return self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s
 
     def __setstate__(self, x):
-        self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s = x
+        if isinstance(x, dict):
+            for i in x:
+                self.__dict__[i] = x[i]
+        else:
+            self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s = x
 
     def _getData(self, key):
         pis = self.pis[key, :]
@@ -672,6 +804,7 @@ class ModalHDPMixture(HDPMixture):
                  zip(pis, self.mus, self.sigmas, mus, sigmas)]
         return ModalDPMixture(clsts, self.cmap, self.modemap, self.m, self.s)
 
+    @property
     def modes(self):
         '''
         ModalDPMixture.modes():
@@ -690,3 +823,52 @@ class ModalHDPMixture(HDPMixture):
 
     def classify(self, x):
         return array([r.classify(x) for r in self])
+
+    def reorder(self, lookup):
+        return OrderedModalHDPMixture(self.pis, self.mus, self.sigmas, self.cmap, self.modemap, lookup, self.m, self.s)
+
+    def enumerate_modes(self):
+        for i in range(len(self.modes)):
+            yield i, self.modes[i]
+
+
+class OrderedModalHDPMixture(ModalHDPMixture):
+    def __init__(self, pis, mus, sigmas, cmap, modemap, lookup, m=None, s=None):
+        super(OrderedModalHDPMixture, self).__init__(pis, mus, sigmas, cmap, modemap, m, s)
+        self.lookup = lookup
+
+    def __getstate__(self):
+        return self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.lookup, sellf.m, self.s
+
+    def __setstate(self, x):
+        self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.lookup, sellf.m, self.s = x
+
+    def __add__(self, k):
+        return super(OrderedModalHDPMixture, self).__add__(k).reorder(self.lookup)
+
+    def __radd__(self, k):
+        return super(OrderedModalHDPMixture, self).__radd__(k).reorder(self.lookup)
+
+    def __sub__(self, k):
+        return super(OrderedModalHDPMixture, self).__sub__(k).reorder(self.lookup)
+
+    def __rsub__(self, k):
+        return super(OrderedModalHDPMixture, self).__rsub__(k).reorder(self.lookup)
+
+    def __mul__(self, k):
+        return super(OrderedModalHDPMixture, self).__mul__(k).reorder(self.lookup)
+
+    def __rmul__(self, k):
+        return super(OrderedModalHDPMixture, self).__rmul__(k).reorder(self.lookup)
+    
+    def _getData(self, key):
+        return super(OrderedModalHDPMixture, self)._getData(key).reorder(self.lookup)
+
+    def enumerate_modes(self):
+        for i in range(len(self.modes)):
+            yield self.lookup[i], self.modes[i]
+
+    def classify(self, x):
+        z = super(OrderedModalHDPMixture, self).classify(x)
+        lut = np.array([self.lookup[i] for i in range(len(self))])
+        return lut[z]

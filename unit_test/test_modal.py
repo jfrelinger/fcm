@@ -1,4 +1,4 @@
-from statistics import DPMixtureModel
+from fcm.statistics import DPMixtureModel
 import numpy
 import pylab
 

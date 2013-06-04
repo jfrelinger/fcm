@@ -1,6 +1,6 @@
 import unittest
 from fcm.statistics import DPCluster, ModalDPMixture
-from numpy import array, eye, all
+from numpy import array, eye, all, ndarray
 
 
 class ModalDp_clusterTestCase(unittest.TestCase):
@@ -20,9 +20,17 @@ class ModalDp_clusterTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def testLen(self):
+        self.assertEqual(len(self.mix), 2, 'length wrong')
+        
+    def testEnumerateClusters(self):
+        for i,j in self.mix.enumerate_modes():
+            self.assertIsInstance(i, int, 'wrong return value')
+            self.assertIsInstance(j, ndarray, 'wrong return value')
+            
     def testModes(self):
-        assert all(self.mix.modes()[0] == self.mu1)
-        assert all(self.mix.modes()[1] == self.mu2) 
+        assert all(self.mix.modes[0] == self.mu1)
+        assert all(self.mix.modes[1] == self.mu2) 
 
     def testprob(self):
         pnt = array([1,1,1])

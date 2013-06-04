@@ -31,8 +31,8 @@ class ModalHDp_clusterTestCase(unittest.TestCase):
         pass
 
     def testModes(self):
-        assert all(self.mix.modes()[0] == self.mu1)
-        assert all(self.mix.modes()[1] == self.mu2)
+        assert all(self.mix.modes[0] == self.mu1)
+        assert all(self.mix.modes[1] == self.mu2)
 
     def testmixprob(self):
         pnt = array([1, 1, 1])
@@ -46,7 +46,7 @@ class ModalHDp_clusterTestCase(unittest.TestCase):
     def testgetitem(self):
         r = self.mix[0]
         self.assertIsInstance(r, ModalDPMixture, 'get item returned wrong type')
-        numpy.testing.assert_array_equal(r.modes()[0], self.mix.modes()[0], 'modes changed under getitem')
+        numpy.testing.assert_array_equal(r.modes[0], self.mix.modes[0], 'modes changed under getitem')
 
     
     def testclassify(self):
