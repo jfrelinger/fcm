@@ -20,6 +20,7 @@ from test_hdpmixture import HDPMixtureTestCase
 from test_mhdpmixture import ModalHDp_clusterTestCase
 from test_data_align import DiagAlignTestCase
 from test_ordereddpmixture import OrderedDp_mixtureTestCase
+from test_cluster_align import ClusterAlignTestCase
 
 if __name__ == "__main__":
     suite1 = unittest.makeSuite(FCMdataTestCase,'test')
@@ -39,10 +40,11 @@ if __name__ == "__main__":
     suite15 = unittest.makeSuite(ModalHDp_clusterTestCase, 'test')
     suite16 = unittest.makeSuite(DiagAlignTestCase, 'test')
     suite17 = unittest.makeSuite(OrderedDp_mixtureTestCase, 'test')
+    suite18 = unittest.makeSuite(ClusterAlignTestCase, 'test')
     alltests = unittest.TestSuite((suite1, suite2, suite3, suite4, suite5,
                                     suite6, suite7, suite8,suite10, suite11,
                                     suite12, suite13, suite14, suite15,
-                                    suite16, suite17))
+                                    suite16, suite17, suite18))
 
     unittest.main()
 
