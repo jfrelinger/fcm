@@ -36,11 +36,11 @@ class DPCluster(Component):
         self.pi = pi
         self.mu = mu
         self.sigma = sig
-        if centered_mu:
+        if centered_mu is not None:
             self._centered_mu = centered_mu
         else:
             self._centered_mu = None
-        if centered_sigma:
+        if centered_sigma is not None:
             self._centered_sigma = centered_sigma
         else:
             self._centered_sigma = None
@@ -73,7 +73,8 @@ class DPCluster(Component):
         returns probability of x belonging to this mixture component
         '''
         #return self.pi * mvnormpdf(x, self.mu, self.sigma)
-        return compmixnormpdf(x, self.pi, self.mu, self.sigma, logged=logged, **kwargs)
+        d = self.mu.shape[0]
+        return compmixnormpdf(x, self.pi, self.mu.reshape(1,-1), self.sigma.reshape(1,d,d), logged=logged, **kwargs)
 
     def draw(self, n=1):
         '''
