@@ -1,6 +1,8 @@
 import unittest
 from fcm.statistics import DPCluster, ModalDPMixture
-from numpy import array, eye, all, ndarray
+from numpy import array, eye, all, ndarray, dot
+from numpy.testing import assert_array_equal
+from numpy.testing.utils import assert_equal
 
 
 class ModalDp_clusterTestCase(unittest.TestCase):
@@ -66,12 +68,13 @@ class ModalDp_clusterTestCase(unittest.TestCase):
         self.assertIsInstance(b, ModalDPMixture, 'integer addition return wrong type')
         assert_equal(b.mus[0], self.mix.mus[0] + adder,
                      'integer addition returned wrong value')
+        assert_equal(b.modes[0], self.mix.modes[0] + adder)
 
         c = self.mix + array_adder
         self.assertIsInstance(c, ModalDPMixture, 'array addition return wrong type')
         assert_array_equal(c.mus[0], self.mix.mus[0] + array_adder,
                      'array addition returned wrong value')
-
+        assert_equal(c.modes[0], self.mix.modes[0] + array_adder)
 
         # radd
         b = adder + self.mix
@@ -127,17 +130,19 @@ class ModalDp_clusterTestCase(unittest.TestCase):
         self.assertIsInstance(b, ModalDPMixture, 'integer multiplication return wrong type')
         assert_array_equal(b.mus[0], adder * self.mix.mus[0],
                      'integer multiplication returned wrong value')
-
+        assert_array_equal(b.modes[0], self.mix.modes[0] * adder)
+        
         c = array_adder * self.mix
-        self.assertIsInstance(c, ModlaDPMixture, 'array multiplication return wrong type')
+        self.assertIsInstance(c, ModalDPMixture, 'array multiplication return wrong type')
         assert_array_equal(c.mus[0], dot(array_adder, self.mix.mus[0]),
                      'array multiplication returned wrong value')
+        assert_array_equal(c.modes[0], dot(array_adder,self.mix.modes[0]))
         
         d = mat_adder * self.mix
         self.assertIsInstance(d, ModalDPMixture, 'array multiplicaton return wrong type')
         assert_array_equal(d.mus[0], dot(mat_adder, self.mix.mus[0]),
                      'array multiplication returned wrong value')
-        
+        assert_array_equal(d.modes[0], dot(mat_adder,self.mix.modes[0]))
         assert_array_equal(d.sigmas[0], dot(mat_adder,dot(self.mix.sigmas[0], mat_adder)),
                            'array multiplcation failed')
 if __name__ == "__main__":

@@ -240,7 +240,7 @@ class DPMixture(ModelResult):
         """
         try:
             modes, cmap = modesearch(self.pis, self.centered_mus, self.centered_sigmas, **kwargs)
-            return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s)
+            return ModalDPMixture(self.clusters, cmap, modes, self.niter, self.m, self.s, self.ident)
 
         except AttributeError:
             modes, cmap = modesearch(self.pis, self.mus, self.sigmas, **kwargs)
@@ -458,7 +458,7 @@ class ModalDPMixture(DPMixture):
     collection of modal components that describe a mixture model
     '''
 
-    def __init__(self, clusters, cmap, modes, m=False, s=False):
+    def __init__(self, clusters, cmap, modes, niter=1, m=False, s=False, ident=False):
         '''
         ModalDPMixture(clusters)
         cluster = list of DPCluster objects
@@ -468,7 +468,9 @@ class ModalDPMixture(DPMixture):
         self.clusters = clusters
         self.cmap = cmap
         self.modemap = modes
-
+        self.niter = niter
+        self.ident = ident
+        
         if m is not False:
             self.m = m
         else:
@@ -487,6 +489,55 @@ class ModalDPMixture(DPMixture):
                 self.__dict__[i] = x[i]
         else:
             self.clusters, self.cmap, self.modemap, self.m, self.s = x
+    
+    def __add__(self, k):
+        new_clusters = [i + k for i in self.clusters]
+        new_modes = {}
+        for i in self.modemap:
+            new_modes[i] = self.modemap[i]+k
+        return ModalDPMixture(new_clusters, self.cmap, new_modes, self.niter, self.m, self.s, self.ident)
+
+    def __radd__(self, k):
+        new_clusters = [k + i for i in self.clusters]
+        new_modes = {}
+        for i in self.modemap:
+            new_modes[i] = k+self.modemap[i]
+        return ModalDPMixture(new_clusters, self.cmap, new_modes, self.niter, self.m, self.s, self.ident)
+
+    def __sub__(self, k):
+        new_clusters = [i - k for i in self.clusters]
+        new_modes = {}
+        for i in self.modemap:
+            new_modes[i] = self.modemap[i]-k
+        return ModalDPMixture(new_clusters, self.cmap, new_modes, self.niter, self.m, self.s, self.ident)
+
+    def __rsub__(self, k):
+        new_clusters = [k - i for i in self.clusters]
+        new_modes = {}
+        for i in self.modemap:
+            new_modes[i] = k-self.modemap[i]
+        return ModalDPMixture(new_clusters, self.cmap, new_modes, self.niter, self.m, self.s, self.ident)
+
+    def __mul__(self, a):
+        new_clusters = [i * a for i in self.clusters]
+        new_modes = {}
+        for i in self.modemap:
+            if isinstance(a,Number):
+                new_modes[i] = self.modemap[i]*a
+            else:
+                new_modes[i] = np.dot(self.modemap[i],a)
+        return ModalDPMixture(new_clusters, self.cmap, new_modes, self.niter, self.m, self.s, self.ident)
+
+    def __rmul__(self, a):
+        new_clusters = [a * i for i in self.clusters]
+        new_modes = {}
+        for i in self.modemap:
+            if isinstance(a,Number):
+                new_modes[i] = a*self.modemap[i]
+            else:
+                new_modes[i] = np.dot(a,self.modemap[i])
+        return ModalDPMixture(new_clusters, self.cmap, new_modes, self.niter, self.m, self.s, self.ident)
+
 
     def __len__(self):
         return len(self.modemap)
@@ -675,7 +726,7 @@ class HDPMixture(Component):
             new_sigma = k * k * self.sigmas
         elif isinstance(k, ndarray):
             new_mu = dot(self.mus, k)
-            new_sigma = dot(dot(k, self.sigmas), k.T)
+            new_sigma = np.array([dot(dot(k, i), k.T) for i in self.sigmas])
         else:
             raise TypeError('unsupported type: %s' % type(k))
 
@@ -687,7 +738,7 @@ class HDPMixture(Component):
             new_sigma = k * k * self.sigmas
         elif isinstance(k, ndarray):
             new_mu = dot(k, self.mus)
-            new_sigma = dot(dot(k, self.sigmas), k.T)
+            new_sigma = np.array([dot(dot(k, i), k.T) for i in self.sigmas])
         else:
             raise TypeError('unsupported type: %s' % type(k))
 
@@ -764,7 +815,7 @@ class OrderedHDPMixture(HDPMixture):
         return lut[z]
 
 class ModalHDPMixture(HDPMixture):
-    def __init__(self, pis, mus, sigmas, cmap, modemap, m=None, s=None):
+    def __init__(self, pis, mus, sigmas, cmap, modemap, niter=1, m=None, s=None):
         '''
         ModalHDPMixture(clusters)
         cluster = HDPMixture object
@@ -776,6 +827,7 @@ class ModalHDPMixture(HDPMixture):
         self.sigmas = sigmas.copy()
         self.cmap = cmap
         self.modemap = modemap
+        self.niter = niter
 
         if m is not None:
             self.m = m
@@ -787,26 +839,26 @@ class ModalHDPMixture(HDPMixture):
             self.s = 1
 
     def __getstate__(self):
-        return self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s
+        return self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.niter, self.m, self.s
 
     def __setstate__(self, x):
         if isinstance(x, dict):
             for i in x:
                 self.__dict__[i] = x[i]
         else:
-            self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s = x
+            self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.niter, self.m, self.s = x
 
     def __add__(self,k):
-        return ModalHDPMixture(self.pis, self.mus+k, self.sigmas, self.cmap, self.modemap, self.m, self.s)
+        return ModalHDPMixture(self.pis, self.mus+k, self.sigmas, self.cmap, self.modemap, self.niter, self.m, self.s)
 
     def __radd__(self, k):
-        return ModalHDPMixture(self.pis, k+self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s)
+        return ModalHDPMixture(self.pis, k+self.mus, self.sigmas, self.cmap, self.modemap, self.niter, self.m, self.s)
 
     def __sub__(self, k):
-        return ModalHDPMixture(self.pis, self.mus-k, self.sigmas, self.cmap, self.modemap, self.m, self.s)
+        return ModalHDPMixture(self.pis, self.mus-k, self.sigmas, self.cmap, self.modemap, self.niter, self.m, self.s)
 
     def __rsub__(self,k):
-        return ModalHDPMixture(self.pis, k-self.mus, self.sigmas, self.cmap, self.modemap, self.m, self.s)
+        return ModalHDPMixture(self.pis, k-self.mus, self.sigmas, self.cmap, self.modemap, self.niter, self.m, self.s)
 
     def __mul__(self, k):
         if isinstance(k, Number):
@@ -814,11 +866,11 @@ class ModalHDPMixture(HDPMixture):
             new_sigma = k * k * self.sigmas
         elif isinstance(k, ndarray):
             new_mu = dot(self.mus, k)
-            new_sigma = dot(dot(k, self.sigmas), k.T)
+            new_sigma = np.array([dot(dot(k, i), k.T) for i in self.sigmas])
         else:
             raise TypeError('unsupported type: %s' % type(k))
 
-        return ModalHDPMixture(self.pis, new_mu, new_sigma, self.cmap, self.modemap, self.m, self.s)
+        return ModalHDPMixture(self.pis, new_mu, new_sigma, self.cmap, self.modemap, self.niter, self.m, self.s)
 
     def __rmul__(self, x):
         if isinstance(k, Number):
@@ -826,19 +878,19 @@ class ModalHDPMixture(HDPMixture):
             new_sigma = k * k * self.sigmas
         elif isinstance(k, ndarray):
             new_mu = dot(k, self.mus)
-            new_sigma = dot(dot(k, self.sigmas), k.T)
+            new_sigma = np.array([dot(dot(k, i), k.T) for i in self.sigmas])
         else:
             raise TypeError('unsupported type: %s' % type(k))
 
-        return ModalHDPMixture(self.pis, new_mu, new_sigma, self.cmap, self.modemap, self.m, self.s)
+        return ModalHDPMixture(self.pis, new_mu, new_sigma, self.cmap, self.modemap, self.niter, self.m, self.s)
         
     def _getData(self, key):
         pis = self.pis[key, :]
         mus = (self.mus - self.m) / self.s
-        sigmas = (self.sigmas) / self.s
+        sigmas = (self.sigmas) / outer(self.s, self.s)
         clsts = [DPCluster(i, j, k, l, m) for i, j, k, l, m in
                  zip(pis, self.mus, self.sigmas, mus, sigmas)]
-        return ModalDPMixture(clsts, self.cmap, self.modemap, self.m, self.s)
+        return ModalDPMixture(clsts, self.cmap, self.modemap, self.niter, self.m, self.s)
 
     @property
     def modes(self):
@@ -861,7 +913,7 @@ class ModalHDPMixture(HDPMixture):
         return array([r.classify(x) for r in self])
 
     def reorder(self, lookup):
-        return OrderedModalHDPMixture(self.pis, self.mus, self.sigmas, self.cmap, self.modemap, lookup, self.m, self.s)
+        return OrderedModalHDPMixture(self.pis, self.mus, self.sigmas, self.cmap, self.modemap, lookup, self.niter, self.m, self.s)
 
     def enumerate_modes(self):
         for i in range(len(self.modes)):
@@ -869,15 +921,15 @@ class ModalHDPMixture(HDPMixture):
 
 
 class OrderedModalHDPMixture(ModalHDPMixture):
-    def __init__(self, pis, mus, sigmas, cmap, modemap, lookup, m=None, s=None):
-        super(OrderedModalHDPMixture, self).__init__(pis, mus, sigmas, cmap, modemap, m, s)
+    def __init__(self, pis, mus, sigmas, cmap, modemap, lookup, niter, m=None, s=None):
+        super(OrderedModalHDPMixture, self).__init__(pis, mus, sigmas, cmap, modemap, niter, m, s)
         self.lookup = lookup
 
     def __getstate__(self):
-        return self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.lookup, sellf.m, self.s
+        return self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.lookup, self.niter, sellf.m, self.s
 
     def __setstate(self, x):
-        self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.lookup, sellf.m, self.s = x
+        self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.lookup, self.niter, sellf.m, self.s = x
 
     def __add__(self, k):
         return super(OrderedModalHDPMixture, self).__add__(k).reorder(self.lookup)

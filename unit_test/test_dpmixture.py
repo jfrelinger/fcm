@@ -121,7 +121,7 @@ class Dp_mixtureTestCase(unittest.TestCase):
     def testarith(self):
         adder = 3
         array_adder = array([1, 2, 3])
-        mat_adder = eye(3)
+        mat_adder = 2*eye(3)
 
         # add
         b = self.mix + adder
