@@ -36,8 +36,14 @@ class DPCluster(Component):
         self.pi = pi
         self.mu = mu
         self.sigma = sig
-        self._centered_mu = centered_mu
-        self._centered_sigma = centered_sigma
+        if centered_mu:
+            self._centered_mu = centered_mu
+        else:
+            self._centered_mu = None
+        if centered_sigma:
+            self._centered_sigma = centered_sigma
+        else:
+            self._centered_sigma = None
 
     @property
     def centered_mu(self):
@@ -137,15 +143,6 @@ class DPMixture(ModelResult):
         self.m = m
         self.s = s
 
-    def __getstate__(self):
-        return self.clusters, self.niter, self.ident, self.m, self.s
-
-    def __setstate__(self, x):
-        if isinstance(x, dict):
-            for i in x:
-                self.__dict__[i] = x[i]
-        else:
-            self.clusters, self.niter, self.ident, self.m, self.s = x
 
     def __add__(self, k):
         new_clusters = [i + k for i in self.clusters]
@@ -335,9 +332,15 @@ class DPMixture(ModelResult):
         return DPMixture(keep, len(iters), self.m, self.s, self.ident)
 
     def get_marginal(self, margin):
-        if not isinstance(margin, np.ndarray):
-            margin = array([margin]).squeeze().reshape(1,)
-        d = self.mus.shape[1]
+        if isinstance(margin, Number):
+            margin = array([margin])
+        elif not isinstance(margin, np.ndarray):
+            margin = array([margin]).reshape(-1)
+        try:
+            d = self.mus.shape[1]
+        except:
+            d = 1
+
         newd = margin.shape[0]
         rslts = []
         x = zeros(d, dtype=np.bool)
@@ -393,16 +396,6 @@ class OrderedDPMixture(DPMixture):
     def __init__(self, clusters, lookup, niter=1, m=None, s=None, identified=False):
         self.lookup = lookup
         super(OrderedDPMixture, self).__init__(clusters, niter, m, s, identified)
-
-    def __getstate__(self):
-        return self.clusters, self.lookup, self.niter, self.m, self.s, self.ident
-
-    def __setstate__(self, x):
-        if isinstance(x, dict):
-            for i in x:
-                self.__dict__[i] = x[i]
-        else:
-            self.clusters, self.lookup, self.niter, self.m, self.s, self.ident = x
 
     def __add__(self, k):
         return super(OrderedDPMixture, self).__add__(k).reorder(self.lookup)
@@ -480,16 +473,6 @@ class ModalDPMixture(DPMixture):
         else:
             self.s = 1
 
-    def __getsstate__(self):
-        return self.clusters, self.cmap, self.modemap, self.m, self.s
-
-    def __setstate__(self, x):
-        if isinstance(x, dict):
-            for i in x:
-                self.__dict__[i] = x[i]
-        else:
-            self.clusters, self.cmap, self.modemap, self.m, self.s = x
-    
     def __add__(self, k):
         new_clusters = [i + k for i in self.clusters]
         new_modes = {}
@@ -617,16 +600,6 @@ class OrderedModalDPMixture(ModalDPMixture):
         super(OrderedModalDPMixture, self).__init__(clusters, cmap, modes, m, s)
         self.lookup = lookup
 
-    def __getsstate__(self):
-        return self.clusters, self.cmap, self.modemap, self.lookup, self.m, self.s
-
-    def __setstate__(self, x):
-        if isinstance(x, dict):
-            for i in x:
-                self.__dict__[i] = x[i]
-        else:
-            self.clusters, self.cmap, self.modemap, self.lookup, self.m, self.s = x
-
     def __add__(self, k):
         return super(OrderedModalDPMixture, self).__add__(k).reorder(self.lookup)
 
@@ -672,16 +645,6 @@ class HDPMixture(Component):
         self.ident = identified
         self.m = m
         self.s = s
-
-    def __getstate__(self):
-        return self.pis, self.mus, self.sigma, self.niter, self.ident, self.m, self.s
-
-    def __setstate__(self, x):
-        if isinstance(x, dict):
-            for i in x:
-                self.__dict__[i] = x[i]
-        else:
-            self.pis, self.mus, self.sigma, self.niter, self.ident, self.m, self.s = x
 
     def __len__(self):
         return self.pis.shape[0]
@@ -772,7 +735,7 @@ class HDPMixture(Component):
         ref_cmap = c_consensus.cmap
         ref_modemap = c_consensus.modemap
 
-        return ModalHDPMixture(self.pis, self.mus, self.sigmas, ref_cmap, ref_modemap, self.m, self.s)
+        return ModalHDPMixture(self.pis, self.mus, self.sigmas, ref_cmap, ref_modemap, self.niter, self.m, self.s)
 
     def reorder(self, lookup):
         return OrderedHDPMixture(self.pis, self.mus, self.sigmas, lookup, self.niter, self.m, self.s, self.ident)
@@ -781,12 +744,6 @@ class OrderedHDPMixture(HDPMixture):
     def __init__(self, pis, mus, sigmas, lookup, niter=1, m=0, s=1, identified=False):
         super(OrderedHDPMixture, self).__init__(pis, mus, sigmas, niter, m, s, identified)
         self.lookup = lookup
-
-    def __getstate__(self):
-        return self.pis, self.mus, self.sigmas, self.lookup, self.niter, self.m, self.s, self.ident
-
-    def __setstate__(self, x):
-        self.pis, self.mus, self.sigmas, self.lookup, self.niter, self.m, self.s, self.ident = x
 
     def __add__(self, k):
         return super(OrderedHDPMixture, self).__add__(k).reorder(self.lookup)
@@ -837,16 +794,6 @@ class ModalHDPMixture(HDPMixture):
             self.s = s
         else:
             self.s = 1
-
-    def __getstate__(self):
-        return self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.niter, self.m, self.s
-
-    def __setstate__(self, x):
-        if isinstance(x, dict):
-            for i in x:
-                self.__dict__[i] = x[i]
-        else:
-            self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.niter, self.m, self.s = x
 
     def __add__(self,k):
         return ModalHDPMixture(self.pis, self.mus+k, self.sigmas, self.cmap, self.modemap, self.niter, self.m, self.s)
@@ -924,12 +871,6 @@ class OrderedModalHDPMixture(ModalHDPMixture):
     def __init__(self, pis, mus, sigmas, cmap, modemap, lookup, niter, m=None, s=None):
         super(OrderedModalHDPMixture, self).__init__(pis, mus, sigmas, cmap, modemap, niter, m, s)
         self.lookup = lookup
-
-    def __getstate__(self):
-        return self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.lookup, self.niter, sellf.m, self.s
-
-    def __setstate(self, x):
-        self.pis, self.mus, self.sigmas, self.cmap, self.modemap, self.lookup, self.niter, sellf.m, self.s = x
 
     def __add__(self, k):
         return super(OrderedModalHDPMixture, self).__add__(k).reorder(self.lookup)

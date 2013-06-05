@@ -33,12 +33,12 @@ from dpmix.utils import mvn_weighted_logged
 
 def _mvnpdf(x, mu, va, n=1, logged=False, use_gpu=True, **kwargs):
     if len(x.shape) == 1:
-            x = x.reshape((1,x.shape))
+            x = x.reshape((1, x.shape))
     if len(mu.shape) == 1:
-        mu = mu.reshape((1,mu.shape))
+        mu = mu.reshape((1, mu.shape))
     if len(va.shape) == 2:
-        va = va.reshape(1,va.shape[0], va.shape[1])
-        
+        va = va.reshape(1, va.shape[0], va.shape[1])
+
     if has_gpu and use_gpu:
         if 'device' in kwargs:
             dev = kwargs['device']
@@ -52,58 +52,68 @@ def _mvnpdf(x, mu, va, n=1, logged=False, use_gpu=True, **kwargs):
         else:
             return exp(mvn_weighted_logged(x, mu, va, ones(mu.shape[0])))
 
-def _wmvnpdf(x, pi, mu, va, n=1, logged=False, use_gpu=True, **kwargs):
+def _wmvnpdf(x, pi, mu, va, d=1, logged=False, use_gpu=True, **kwargs):
     if len(x.shape) == 1:
-            x = x.reshape((1,x.shape))
+        x = x.reshape((1, x.shape))
     if len(mu.shape) == 1:
-        mu = mu.reshape((1,mu.shape))
+        mu = mu.reshape((1, mu.shape))
     if len(va.shape) == 2:
-        va = va.reshape(1,va.shape[0], va.shape[1])
+        va = va.reshape(1, va.shape[0], va.shape[1])
+
+    if len(va.shape) == 1:
+        va = va.reshape(va.shape[0], 1, 1)
+
     if isinstance(pi, float) or isinstance(pi, int):
         pi = array([pi])
     elif isinstance(pi, ndarray):
         if len(pi.shape) == 0:
             pi = pi.reshape((1))
-    
+
     if has_gpu and use_gpu:
         if 'device' in kwargs:
             dev = kwargs['device']
         else:
             dev = 0
         select_gpu(dev)
-        return mvnpdf_multi(x, mu, va, weights = pi, logged=logged, order='C').astype('float64')
+        return mvnpdf_multi(x, mu, va, weights=pi, logged=logged, order='C').astype('float64')
     else:
         if logged:
             return mvn_weighted_logged(x, mu, va, pi)
         else:
             return exp(mvn_weighted_logged(x, mu, va, pi))
-    
+
 
 def mvnormpdf(x, mu, va, **kwargs):
     """
-    calculate the multi-variate normal pdf 
+    calculate the multi-variate normal pdf
     D(x, mu, sigma) -> float
     """
     try:
-        n, p = x.shape
+        n, d = x.shape
     except ValueError:
-        n = x.shape
-        p = 0
-    if p > 0:
-        results = _mvnpdf(x, mu, va, n, **kwargs)
-    else:
-        results = _mvnpdf(x, mu, va, 1, **kwargs)
+        if len(mu.shape) > 1 : # single point in multi dim
+            n = 1
+            d = x.shape[0]
+        else: # many points in single dim
+            n = x.shape[0]
+            x = x.reshape(n, 1)
+            d = 0
+    results = _mvnpdf(x, mu, va, n, **kwargs)
 
-    return results
+    return results.squeeze()
 
 def compmixnormpdf(x, prop, mu, Sigma, **kwargs):
     """Component mixture multivariate normal pdfs"""
     try:
         n, d = x.shape
     except ValueError:
-        d = x.shape[0]
-        n = 1
-        x = x.reshape((1, d))
+        if len(mu.shape) == 1 or mu.shape[1] == 1:  #one dimensional system so many points
+            n = x.shape[0]
+            d = 1
+        else: # single point in a multi dimensional system
+            n = 1
+            d = x.shape[0]
+        x = x.reshape((n, d))
     try:
         c = prop.shape[0]
     except AttributeError:

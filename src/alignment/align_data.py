@@ -28,7 +28,7 @@ class BaseAlignData(object):
         self.size = size
 
         if m is None:
-            self.m = DPMixtureModel(self.k, 1, 1000)
+            self.m = DPMixtureModel(self.k, 100, 1000)
         else:
             self.m = m
         self.m.ident = True
@@ -118,7 +118,7 @@ class DiagonalAlignData(BaseAlignData):
 
     def _optimize(self, n, mx, my, pnts):
         a, b = n
-        return eKLdiv(mx, (my * a), self.d, pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
+        return eKLdiv(mx, (my * a)+b, self.d, pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
 
     def _min(self, func, x0, **kwargs):
         z = np.zeros(self.d + self.d)
@@ -147,7 +147,7 @@ class DiagonalAlignDataS(DiagonalAlignData):
     '''
     def _optimize(self, n, mx, my, pnts):
         a, b = n
-        return eSKLdiv(mx, (my * a), self.d, pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
+        return eSKLdiv(mx, (my * a)+b, self.d, pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
 
 
 def CompAlignData(BaseAlignData):

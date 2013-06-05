@@ -30,9 +30,10 @@ class Dp_mixtureTestCase(unittest.TestCase):
 
 
     def testprob(self):
-        pnt = array([1, 1, 1])
-
+        pnt = array([[1, 1, 1]])
+        print pnt.shape
         for i in [self.clust1, self.clust2]:
+            print i.prob(pnt)
             assert i.prob(pnt) <= 1, 'prob of clst %s is > 1' % i
             assert i.prob(pnt) >= 0, 'prob of clst %s is < 0' % i
 

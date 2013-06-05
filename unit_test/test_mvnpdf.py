@@ -2,6 +2,7 @@ from fcm.statistics.distributions import mvnormpdf, compmixnormpdf, mixnormpdf
 import unittest
 from numpy import array, eye, pi, fabs, sqrt, dot, ones, exp, sum
 from numpy.linalg import inv, det
+from numpy.testing import assert_array_almost_equal
 from random import uniform
 from scipy.stats import norm
 
@@ -39,18 +40,29 @@ class mvnpdfTestCase(unittest.TestCase):
             print p, m, p - m
             self.assertAlmostEqual(p, m, delta=1e-6, msg='pmvnormpdf and mvnormpdf differ in result, %0.8e != %0.8e, [%0.8e], (%d): %s, %s, %s ' % (p, m, p - m, i, str(x), str(mu), str(sigma).replace('\n', ',')))
 
+    def testMultiplePointSingleComponent_1d(self):
+        x = array([0,1,2,3,4])
+        mu = array([1])
+        sigma = eye(1).reshape(1,1,1)
+        px = pdf(x, mu, sigma).squeeze()
+        mx = mvnormpdf(x, mu, sigma)
+        assert_array_almost_equal(px, mx, 6, 'pmvnormpdf and mvnormpdf differ in result, %s != %s' % (str(type(px)), str(type(mx))))
+
     def testSinglePointSingleComponent(self):
         x = array([0, 0])
-        mu = array([1, 1])
-        sigma = eye(2)
-
-        self.assertAlmostEqual(pmvnormpdf(x, mu, sigma), mvnormpdf(x, mu, sigma), 6, 'pmvnormpdf and mvnormpdf differ in result, %f != %f' % (pmvnormpdf(x, mu, sigma), mvnormpdf(x, mu, sigma)))
+        mu = array([1, 1]).reshape(1,2)
+        sigma = eye(2).reshape(1,2,2)
+        mx = mvnormpdf(x, mu, sigma)
+        px = pmvnormpdf(x, mu.squeeze(), sigma.squeeze())
+        self.assertAlmostEqual(px, mx, 6, 'pmvnormpdf and mvnormpdf differ in result, %f != %f' % (px, mx))
         for i in range(100):
             x = array([uniform(-4, 4), uniform(-4, 4)])
-            mu = array([uniform(-4, 4), uniform(-4, 4)])
+            mu = array([uniform(-4, 4), uniform(-4, 4)]).reshape(1,2)
             a = uniform(0, 4)
-            sigma = eye(2) + a
-            self.assertAlmostEqual(pmvnormpdf(x, mu, sigma), mvnormpdf(x, mu, sigma), 6, 'pmvnormpdf and mvnormpdf differ in result, %f != %f, (%d): %s, %s, %s ' % (pmvnormpdf(x, mu, sigma), mvnormpdf(x, mu, sigma), i, str(x), str(mu), str(sigma).replace('\n', ',')))
+            sigma = (eye(2) + a).reshape(1,2,2)
+            mx = mvnormpdf(x, mu, sigma)
+            px = pmvnormpdf(x, mu.squeeze(), sigma.squeeze())
+            self.assertAlmostEqual(px, mx, 6, 'pmvnormpdf and mvnormpdf differ in result, %f != %f, (%d): %s, %s, %s ' % (px, mx, i, str(x), str(mu), str(sigma).replace('\n', ',')))
 
     def testMultiplePointSingleComponent(self):
         for i in range(100):
