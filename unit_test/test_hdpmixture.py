@@ -24,6 +24,9 @@ class HDPMixtureTestCase(unittest.TestCase):
         
         numpy.testing.assert_array_equal((self.mix+2).pis, self.mix.pis,
                                     "addition changes pi values")
+        
+        numpy.testing.assert_array_equal((self.mix*eye(2)).sigmas, self.mix.sigmas, 'multicplication failed')
+        
     def test_getitem(self):
         single = self.mix[0]
         self.assertIsInstance(single, DPMixture, 

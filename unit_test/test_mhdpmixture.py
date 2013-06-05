@@ -68,6 +68,8 @@ class ModalHDp_clusterTestCase(unittest.TestCase):
         
         numpy.testing.assert_array_equal((self.mix+2).pis, self.mix.pis,
                                     "addition changes pi values")
+        
+        numpy.testing.assert_array_equal((self.mix*eye(3)).sigmas, self.mix.sigmas, 'multicplication failed')
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

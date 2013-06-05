@@ -56,6 +56,90 @@ class ModalDp_clusterTestCase(unittest.TestCase):
         assert x.shape[0] == 10, "Number of drawed rows is wrong"
         assert x.shape[1] == 3, "number of drawed columns is wrong"
 
+    def testarith(self):
+        adder = 3
+        array_adder = array([1, 2, 3])
+        mat_adder = eye(3)
+
+        # add
+        b = self.mix + adder
+        self.assertIsInstance(b, ModalDPMixture, 'integer addition return wrong type')
+        assert_equal(b.mus[0], self.mix.mus[0] + adder,
+                     'integer addition returned wrong value')
+
+        c = self.mix + array_adder
+        self.assertIsInstance(c, ModalDPMixture, 'array addition return wrong type')
+        assert_array_equal(c.mus[0], self.mix.mus[0] + array_adder,
+                     'array addition returned wrong value')
+
+
+        # radd
+        b = adder + self.mix
+        self.assertIsInstance(b, ModalDPMixture, 'integer addition return wrong type')
+        assert_array_equal(b.mus[0], adder + self.mix.mus[0],
+                     'integer addition returned wrong value')
+
+        c = array_adder + self.mix
+        self.assertIsInstance(c, ModalDPMixture, 'array addition return wrong type')
+        assert_array_equal(c.mus[0], array_adder + self.mix.mus[0],
+                     'array addition returned wrong value')
+
+        # sub
+        b = self.mix - adder
+        self.assertIsInstance(b, ModalDPMixture, 'integer subtraction return wrong type')
+        assert_array_equal(b.mus[0], self.mix.mus[0] - adder,
+                     'integer subtraction returned wrong value')
+
+        c = self.mix - array_adder
+        self.assertIsInstance(c, ModalDPMixture, 'array subtraction return wrong type')
+        assert_array_equal(c.mus[0], self.mix.mus[0] - array_adder,
+                     'array subtraction returned wrong value')
+
+        # rsub
+        b = adder - self.mix
+        self.assertIsInstance(b, ModalDPMixture, 'integer subtraction return wrong type')
+        assert_array_equal(b.mus[0], adder - self.mix.mus[0],
+                     'integer subtraction returned wrong value')
+
+        c = array_adder - self.mix
+        self.assertIsInstance(c, ModalDPMixture, 'array subtraction return wrong type')
+        assert_array_equal(c.mus[0], array_adder - self.mix.mus[0],
+                     'array subtraction returned wrong value')
+        # mul
+        b = self.mix * adder
+        self.assertIsInstance(b, ModalDPMixture, 'integer multiplication return wrong type')
+        assert_array_equal(b.mus[0], self.mix.mus[0] * adder,
+                     'integer multiplication returned wrong value')
+
+        c = self.mix * array_adder
+        self.assertIsInstance(c, ModalDPMixture, 'array multiplicaton return wrong type')
+        assert_array_equal(c.mus[0], dot(self.mix.mus[0], array_adder),
+                     'array multiplication returned wrong value')
+
+        d = self.mix * mat_adder
+        self.assertIsInstance(d, ModalDPMixture, 'array multiplicaton return wrong type')
+        assert_array_equal(d.mus[0], dot(self.mix.mus[0], mat_adder),
+                     'array multiplication returned wrong value')
+        
+
+        # rmul
+        b = adder * self.mix
+        self.assertIsInstance(b, ModalDPMixture, 'integer multiplication return wrong type')
+        assert_array_equal(b.mus[0], adder * self.mix.mus[0],
+                     'integer multiplication returned wrong value')
+
+        c = array_adder * self.mix
+        self.assertIsInstance(c, ModlaDPMixture, 'array multiplication return wrong type')
+        assert_array_equal(c.mus[0], dot(array_adder, self.mix.mus[0]),
+                     'array multiplication returned wrong value')
+        
+        d = mat_adder * self.mix
+        self.assertIsInstance(d, ModalDPMixture, 'array multiplicaton return wrong type')
+        assert_array_equal(d.mus[0], dot(mat_adder, self.mix.mus[0]),
+                     'array multiplication returned wrong value')
+        
+        assert_array_equal(d.sigmas[0], dot(mat_adder,dot(self.mix.sigmas[0], mat_adder)),
+                           'array multiplcation failed')
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

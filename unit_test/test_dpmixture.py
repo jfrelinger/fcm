@@ -121,6 +121,7 @@ class Dp_mixtureTestCase(unittest.TestCase):
     def testarith(self):
         adder = 3
         array_adder = array([1, 2, 3])
+        mat_adder = eye(3)
 
         # add
         b = self.mix + adder
@@ -177,6 +178,11 @@ class Dp_mixtureTestCase(unittest.TestCase):
         assert_array_equal(c.mus[0], dot(self.mix.mus[0], array_adder),
                      'array multiplication returned wrong value')
 
+        d = self.mix * mat_adder
+        self.assertIsInstance(d, DPMixture, 'array multiplicaton return wrong type')
+        assert_array_equal(d.mus[0], dot(self.mix.mus[0], mat_adder),
+                     'array multiplication returned wrong value')
+        
 
         # rmul
         b = adder * self.mix
@@ -188,7 +194,14 @@ class Dp_mixtureTestCase(unittest.TestCase):
         self.assertIsInstance(c, DPMixture, 'array multiplication return wrong type')
         assert_array_equal(c.mus[0], dot(array_adder, self.mix.mus[0]),
                      'array multiplication returned wrong value')
-
+        
+        d = mat_adder * self.mix
+        self.assertIsInstance(d, DPMixture, 'array multiplicaton return wrong type')
+        assert_array_equal(d.mus[0], dot(mat_adder, self.mix.mus[0]),
+                     'array multiplication returned wrong value')
+        
+        assert_array_equal(d.sigmas[0], dot(mat_adder,dot(self.mix.sigmas[0], mat_adder)),
+                           'array multiplcation failed')
 
     def testgetitem(self):
         assert_equal(self.mu1, self.mix[0].mu, 'getitem failed')
