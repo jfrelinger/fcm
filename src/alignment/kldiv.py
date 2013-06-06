@@ -21,73 +21,11 @@ def true_skldiv(m0, m1, s0, s1):
     return true_kldiv(m0, m1, s0, s1) + true_kldiv(m1, m0, s1, s0)
 
 
-def eSKLdiv(x, y, pnts, lp=None):
-    if len(pnts.shape) > 1:
-        axis = 1
-    else:
-        axis = 0
-    if lp is None:
-        #p = np.sum(x.prob(pnts, use_gpu=False), 1)
-        lp = logsumexp(x.prob(pnts, logged=True, use_gpu=True), axis)
-    p = np.exp(lp)
-    try:
-        lq = logsumexp(y.prob(pnts, logged=True, use_gpu=True), axis)
-        q = np.exp(lq)
-    except ValueError, e:
-        raise e
+
+def eKLdiv(x, y, n=100000):
+    px = x.draw(n).reshape(n, -1)
+    return (1.0 / n) * np.sum(np.log(np.sum(x.prob(px, use_gpu=True), 1) / np.sum(y.prob(px, use_gpu=True), 1)))
 
 
-    sp = np.sum(p)
-    p = p / sp
-    lp = lp - np.log(sp)
-
-    sq = np.sum(q)
-    q = q / sq
-    lq = lq - np.log(sq)
-
-    r = p * (lp - lq) + q * (lq - lp)
-    if axis:
-        return np.sum(r[np.isfinite(r)])
-    else:
-        return np.sum(r)
-
-def eKLdiv(x, y, pnts, lp=None):
-    if len(pnts.shape) > 1:
-        axis = 1
-    else:
-        axis = 0
-    if lp is None:
-        #p = np.sum(x.prob(pnts, use_gpu=False), 1)
-        lp = logsumexp(x.prob(pnts, logged=True, use_gpu=True), axis)
-    p = np.exp(lp)
-    try:
-        lq = logsumexp(y.prob(pnts, logged=True, use_gpu=True), axis)
-        q = np.exp(lq)
-    except ValueError, e:
-        raise e
-
-
-    sp = np.sum(p)
-    p = p / sp
-    lp = lp - np.log(sp)
-
-    sq = np.sum(q)
-    q = q / sq
-    lq = lq - np.log(sq)
-
-    r = p * (lp - lq)
-    
-    if axis:
-        return np.sum(r[np.isfinite(r)])
-    else:
-        return np.sum(r)
-    
-    
-def new_eKLdiv(x,y,pnts):
-    n=100000
-    px = x.draw(n).reshape(n,1)
-    return (1.0/n)*np.sum(np.log(np.sum(x.prob(px),1)/np.sum(y.prob(px),1)))
-
-
-def new_eSKLdiv(x,y,pnts):
-    return new_eKLdiv(x,y,pnts)+new_eKLdiv(y,x,pnts)
+def eSKLdiv(x, y, n):
+    return new_eKLdiv(x, y, n) + new_eKLdiv(y, x, n)
