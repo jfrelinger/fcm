@@ -29,10 +29,10 @@ class DiagAlignTestCase(unittest.TestCase):
     def testCompAlign(self):
         m = np.array([[1,0,.2],[0,1,0],[0,0,1]])
         y = self.x*m
-        print y.mus
-        a,b = self.Comp.align(y, x0=np.array([0,-.1,0,0,0,0,]))
+        a,b = self.Comp.align(y, x0=np.array([0,-.1,0,0,0,0,]), maxiter=100, maxfun=100)
         npt.assert_array_almost_equal(a, np.linalg.inv(m), decimal=1)
         npt.assert_array_almost_equal(b, np.array([0,0,0]), decimal=1)
+        npt.assert_array_almost_equal((y*a).mus, self.x.mus, decimal=1)
         
 if __name__ == '__main__':
     suite1 = unittest.makeSuite(DiagAlignTestCase,'test')

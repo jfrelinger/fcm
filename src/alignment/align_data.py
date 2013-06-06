@@ -63,7 +63,6 @@ class DiagonalAlignData(BaseAlignData):
     def _optimize(self, n, mx, my, size):
         a, b = n
         rslt = eKLdiv(mx, (my * a) + b, size)
-        print 'rslt', rslt, a,b
         return rslt
 
     def _min(self, func, x0, *args, **kwargs):
@@ -118,7 +117,6 @@ class CompAlignData(BaseAlignData):
                     a[i, j] = n[counter]
                     counter += 1
         rslt = eKLdiv(self.mx, (self.my * a), self.size)
-        print 'comp', rslt, a
         return rslt
 
     def _min(self, func, x0, *args, **kwargs):
