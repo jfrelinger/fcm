@@ -24,8 +24,9 @@ def true_skldiv(m0, m1, s0, s1):
 
 def eKLdiv(x, y, n=100000):
     px = x.draw(n).reshape(n, -1)
-    return (1.0 / n) * np.sum(np.log(np.sum(x.prob(px, use_gpu=True), 1) / np.sum(y.prob(px, use_gpu=True), 1)))
-
+    #return (1.0 / n) * np.sum(np.log(np.sum(x.prob(px, use_gpu=True), 1) / np.sum(y.prob(px, use_gpu=True), 1)))
+    return 1.0/n * (np.sum(logsumexp(x.prob(px, use_gpu=True, logged=True), 1)) 
+                    - np.sum(logsumexp(y.prob(px, use_gpu=True, logged=True), 1)) )
 
 def eSKLdiv(x, y, n):
     return new_eKLdiv(x, y, n) + new_eKLdiv(y, x, n)
