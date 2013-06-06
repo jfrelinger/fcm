@@ -21,7 +21,7 @@ def true_skldiv(m0, m1, s0, s1):
     return true_kldiv(m0, m1, s0, s1) + true_kldiv(m1, m0, s1, s0)
 
 
-def eSKLdiv(x, y, dim, pnts, lp=None, a=None, b=None, orig_y=None, use_grad=False):
+def eSKLdiv(x, y, pnts, lp=None):
     if len(pnts.shape) > 1:
         axis = 1
     else:
@@ -34,8 +34,6 @@ def eSKLdiv(x, y, dim, pnts, lp=None, a=None, b=None, orig_y=None, use_grad=Fals
         lq = logsumexp(y.prob(pnts, logged=True, use_gpu=True), axis)
         q = np.exp(lq)
     except ValueError, e:
-        print y.sigmas, y.mus
-        print 'a', a, 'b', b
         raise e
 
 
@@ -53,7 +51,7 @@ def eSKLdiv(x, y, dim, pnts, lp=None, a=None, b=None, orig_y=None, use_grad=Fals
     else:
         return np.sum(r)
 
-def eKLdiv(x, y, dim, pnts, lp=None, a=None, b=None, orig_y=None, use_grad=False):
+def eKLdiv(x, y, pnts, lp=None):
     if len(pnts.shape) > 1:
         axis = 1
     else:
@@ -66,8 +64,6 @@ def eKLdiv(x, y, dim, pnts, lp=None, a=None, b=None, orig_y=None, use_grad=False
         lq = logsumexp(y.prob(pnts, logged=True, use_gpu=True), axis)
         q = np.exp(lq)
     except ValueError, e:
-        print y.sigmas, y.mus
-        print 'a', a, 'b', b
         raise e
 
 
@@ -85,3 +81,13 @@ def eKLdiv(x, y, dim, pnts, lp=None, a=None, b=None, orig_y=None, use_grad=False
         return np.sum(r[np.isfinite(r)])
     else:
         return np.sum(r)
+    
+    
+def new_eKLdiv(x,y,pnts):
+    n=100000
+    px = x.draw(n).reshape(n,1)
+    return (1.0/n)*np.sum(np.log(np.sum(x.prob(px),1)/np.sum(y.prob(px),1)))
+
+
+def new_eSKLdiv(x,y,pnts):
+    return new_eKLdiv(x,y,pnts)+new_eKLdiv(y,x,pnts)

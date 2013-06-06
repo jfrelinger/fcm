@@ -6,7 +6,7 @@ Author: Jacob Frelinger <jacob.frelinger@duke.edu>
 import numpy as np
 from scipy.misc import logsumexp
 from scipy.optimize import fmin
-from fcm.alignment.kldiv import eSKLdiv, eKLdiv
+from fcm.alignment.kldiv import eSKLdiv, eKLdiv, new_eKLdiv, new_eSKLdiv
 from fcm.statistics import DPMixtureModel
 
 
@@ -47,12 +47,12 @@ class BaseAlignData(object):
         self.pnts = self._buid_grid(y)
 
         # precalculate lp for kldiv, it doesn't change between iterations
-        self.lp = logsumexp(self.mx.prob(self.pnts, logged=True, use_gpu=True), 1)
+        #self.lp = logsumexp(self.mx.prob(self.pnts, logged=True, use_gpu=True), 1)
 
         # estimate x0 if we don't know it
         if x0 is None:
             x0 = self._get_x0(y)
-
+        
         #call minimizer on
         z = self._min(self._optimize, x0, maxiter=self.maxiter)
         a, b = self._format_z(z)
@@ -65,7 +65,7 @@ class BaseAlignData(object):
         return fmin(func, x0, **kwargs)
 
     def _buid_grid(self, y):
-        #set up grid for aprox skldiv
+        #set up grid for aprox kldiv
         mins = np.array([min(self.x[:, i].min(), y[:, i].min()) for i in range(self.d)])
         maxs = np.array([max(self.x[:, i].max(), y[:, i].max()) for i in range(self.d)])
 
@@ -118,19 +118,19 @@ class DiagonalAlignData(BaseAlignData):
 
     def _optimize(self, n, mx, my, pnts):
         a, b = n
-        return eKLdiv(mx, (my * a)+b, self.d, pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
-
+        rslt = new_eKLdiv(mx, (my * a)+b, pnts)
+        return rslt
+    
     def _min(self, func, x0, **kwargs):
         z = np.zeros(self.d + self.d)
         for i in range(self.d):
             mx = self.mx.get_marginal(i)
             my = self.my.get_marginal(i)
-            self.lp = logsumexp(mx.prob(self.pnts[:, i], logged=True, use_gpu=True), 0)
             a, b = fmin(func, x0[[i, self.d + i]], (mx, my, self.pnts[:, i]))
             z[i] = a
             z[i + self.d] = b
 
-        return np.array(z)
+        return z
 
     def _format_z(self, z):
         b = z[-self.d:]
@@ -147,7 +147,7 @@ class DiagonalAlignDataS(DiagonalAlignData):
     '''
     def _optimize(self, n, mx, my, pnts):
         a, b = n
-        return eSKLdiv(mx, (my * a)+b, self.d, pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
+        return new_eSKLdiv(mx, (my * a)+b, pnts)
 
 
 def CompAlignData(BaseAlignData):
@@ -174,7 +174,7 @@ def CompAlignData(BaseAlignData):
 
     def _optimize(self, n):
         a, b = self._format_z(n)
-        return eKLdiv(self.mx, (self.my * a), self.d, self.pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
+        return eKLdiv(self.mx, (self.my * a), self.pnts)
 
 
 def CompAlignDataS(CompAlignData):
@@ -183,7 +183,7 @@ def CompAlignDataS(CompAlignData):
     '''
     def _optimize(self, n):
         a, b = self._format_z(n)
-        return eSKLdiv(self.mx, (self.my * a), self.d, self.pnts, lp=self.lp, a=a, b=b, orig_y=self.my)
+        return eSKLdiv(self.mx, (self.my * a), self.pnts)
 
 
 def FullAlignData(BaseAlignData):
