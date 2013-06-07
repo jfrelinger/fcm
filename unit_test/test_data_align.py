@@ -1,7 +1,7 @@
 import unittest
 import fcm
 from fcm.statistics import DPMixture, DPCluster
-from fcm.alignment import DiagonalAlignData, CompAlignData
+from fcm.alignment import DiagonalAlignData, CompAlignData, FullAlignData
 import numpy as np
 import numpy.testing as npt
 
@@ -18,6 +18,7 @@ class DiagAlignTestCase(unittest.TestCase):
        
         self.Diag = DiagonalAlignData(self.x, size=100000)
         self.Comp = CompAlignData(self.x, size=100000)
+        self.Full = FullAlignData(self.x, size=200000)
 
         
     def testDiagAlign(self):
@@ -33,6 +34,14 @@ class DiagAlignTestCase(unittest.TestCase):
         npt.assert_array_almost_equal(a, np.linalg.inv(m), decimal=1)
         npt.assert_array_almost_equal(b, np.array([0,0,0]), decimal=1)
         npt.assert_array_almost_equal((y*a).mus, self.x.mus, decimal=1)
+        
+    def testFullAlign(self):
+        m = np.array([[1,0,.2],[0,1,0],[0,0,1]])
+        y = self.x*m
+        a,b = self.Full.align(y, maxiter=200, maxfun=200)
+        npt.assert_array_almost_equal(a, np.linalg.inv(m), decimal=1)
+        npt.assert_array_almost_equal(b, np.array([0,0,0]), decimal=1)
+        npt.assert_array_almost_equal(((y*a)+b).mus, self.x.mus, decimal=1)
         
 if __name__ == '__main__':
     suite1 = unittest.makeSuite(DiagAlignTestCase,'test')

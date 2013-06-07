@@ -10,7 +10,7 @@ class AlignMixture(object):
     '''
     find alignment map between two mixture models
     '''
-    def __init__(self, mx, dtype='kldiv'):
+    def __init__(self, mx, model='kldiv'):
         self.mx = mx
         self.dtype = distfunc[dtype]
 

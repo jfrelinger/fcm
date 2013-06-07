@@ -35,8 +35,9 @@ class BaseAlignData(object):
 
         return a, b
 
-    def _min(self, func, x0, **kwargs):
-        return fmin(func, x0, **kwargs)
+    def _min(self, func, x0, *args, **kwargs):
+        z = fmin(func, x0, (self.mx, self.my, self.size), *args, **kwargs)
+        return z
 
 
     def _get_x0(self):
@@ -55,10 +56,14 @@ class DiagonalAlignData(BaseAlignData):
     '''
 
     def _get_x0(self):
-        shift = self.mx.mus.mean(0) - self.my.mus.mean(0)
-
-        scale = np.diag(self.mx.sigmas.mean(0)) / np.diag(self.my.sigmas.mean(0))
-        return np.hstack((scale, shift))
+#        shift = self.mx.mus.mean(0) - self.my.mus.mean(0)
+#
+#        scale = np.diag(self.mx.sigmas.mean(0)) / np.diag(self.my.sigmas.mean(0))
+        x = self.mx.draw(self.size)
+        y = self.my.draw(self.size)
+        shift = -1 * y.mean(0) * x.std(0) / y.std(0) + x.mean(0)
+        scale =  np.diag(x.std(0) / y.std(0))
+        return np.hstack((scale.flatten(), shift))
 
     def _optimize(self, n, mx, my, size):
         a, b = n
@@ -127,4 +132,20 @@ class FullAlignData(BaseAlignData):
     '''
     Generate full alignment matrix
     '''
-    pass  #will need more work
+    def _format_z(self,z):
+        a = z[0:self.d**2].reshape(self.d, self.d)
+        b = z[-self.d:]
+        return a,b
+    
+    def _optimize(self, n, mx, my, size):
+        a,b = self._format_z(n)
+        rslt = eKLdiv(self.mx, (self.my*a)+b, size)
+        return rslt
+          
+    def _get_x0(self):
+        m = DiagonalAlignData(self.mx, self.size)
+        scale, shift = m.align(self.my)
+#        shift = self.mx.mus.mean(0) - self.my.mus.mean(0)
+#
+#        scale = np.diag(self.mx.sigmas.mean(0)) / np.diag(self.my.sigmas.mean(0))
+        return np.hstack((scale.flatten(), shift))
