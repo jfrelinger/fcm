@@ -12,7 +12,7 @@ class AlignMixture(object):
     '''
     def __init__(self, mx, model='kldiv'):
         self.mx = mx
-        self.dtype = distfunc[dtype]
+        self.dtype = distfunc[model]
 
     def get_cost(self, my, *args, **kwargs):
         '''
