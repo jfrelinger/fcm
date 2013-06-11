@@ -5,8 +5,8 @@ Author: Jacob Frelinger <jacob.frelinger@duke.edu>
 
 import numpy as np
 from scipy.misc import logsumexp
-from scipy.optimize import fmin
-from fcm.alignment.kldiv import eSKLdiv, eKLdiv
+from scipy.optimize import minimize
+from fcm.alignment.kldiv import eKLdivVar
 
 
 class BaseAlignData(object):
@@ -36,8 +36,8 @@ class BaseAlignData(object):
         return a, b
 
     def _min(self, func, x0, *args, **kwargs):
-        z = fmin(func, x0, (self.mx, self.my, self.size), *args, **kwargs)
-        return z
+        z = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
+        return z.x
 
 
     def _get_x0(self):
@@ -62,12 +62,13 @@ class DiagonalAlignData(BaseAlignData):
         x = self.mx.draw(self.size)
         y = self.my.draw(self.size)
         shift = -1 * y.mean(0) * x.std(0) / y.std(0) + x.mean(0)
-        scale =  np.diag(x.std(0) / y.std(0))
+        scale =  x.std(0) / y.std(0)
+
         return np.hstack((scale.flatten(), shift))
 
     def _optimize(self, n, mx, my, size):
         a, b = n
-        rslt = eKLdiv(mx, (my * a) + b, size)
+        rslt = eKLdivVar(mx, (my * a) + b, size)
         return rslt
 
     def _min(self, func, x0, *args, **kwargs):
@@ -75,7 +76,10 @@ class DiagonalAlignData(BaseAlignData):
         for i in range(self.d):
             mx = self.mx.get_marginal(i)
             my = self.my.get_marginal(i)
-            a, b = fmin(func, x0[[i, self.d + i]], (mx, my, self.size), *args, **kwargs)
+            
+            r = minimize(func, x0[[i, self.d+i]], args=(mx, my, self.size), *args, **kwargs)
+            print r
+            a,b = r.x
             z[i] = a
             z[i + self.d] = b
 
@@ -121,12 +125,12 @@ class CompAlignData(BaseAlignData):
                 else:
                     a[i, j] = n[counter]
                     counter += 1
-        rslt = eKLdiv(self.mx, (self.my * a), self.size)
+        rslt = eKLdivVar(self.mx, (self.my * a), self.size)
         return rslt
 
     def _min(self, func, x0, *args, **kwargs):
-        a= fmin(func, x0, (self.mx, self.my, self.size), *args, **kwargs)
-        return a
+        a= minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
+        return a.x
 
 class FullAlignData(BaseAlignData):
     '''
@@ -139,12 +143,12 @@ class FullAlignData(BaseAlignData):
     
     def _optimize(self, n, mx, my, size):
         a,b = self._format_z(n)
-        rslt = eKLdiv(self.mx, (self.my*a)+b, size)
+        rslt = eKLdivVar(self.mx, (self.my*a)+b, size)
         return rslt
           
     def _get_x0(self):
         m = DiagonalAlignData(self.mx, self.size)
-        scale, shift = m.align(self.my)
+        scale, shift = m.align(self.my, options={'disp':False})
 #        shift = self.mx.mus.mean(0) - self.my.mus.mean(0)
 #
 #        scale = np.diag(self.mx.sigmas.mean(0)) / np.diag(self.my.sigmas.mean(0))

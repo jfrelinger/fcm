@@ -1,5 +1,4 @@
-from fcm.alignment.kldiv import eKLdiv, true_kldiv
-
+from fcm.alignment.kldiv import eKLdiv, true_kldiv, eKLdivVar, eKLdivVarU
 import unittest
 import fcm
 from fcm.statistics import DPMixture, DPCluster
@@ -32,3 +31,30 @@ class KLdivTestCase(unittest.TestCase):
         f = eKLdiv(self.x, y, 3000000)
         g = true_kldiv(self.mux, y.mus[0], self.sigx, y.sigmas[0])
         self.assertAlmostEqual(f, g, 2, 'fialed to generate simialr ansers, f:%f, g:%f' % (f, g))
+
+    def testeKLdivVar(self):
+        f = eKLdivVar(self.x, self.y, 0)
+        g = true_kldiv(self.mux, self.muy, self.sigx, self.sigy)
+        self.assertAlmostEqual(f, g, 2, 'fialed to generate simialr ansers, f:%f, g:%f' % (f, g))
+        
+    def testRandomeKLdivVar(self):
+        y= self.y + np.random.uniform(-1,1,3)
+        f = eKLdivVar(self.x, y, 3000000)
+        g = true_kldiv(self.mux, y.mus[0], self.sigx, y.sigmas[0])
+        self.assertAlmostEqual(f, g, 2, 'fialed to generate simialr ansers, f:%f, g:%f' % (f, g))
+
+    def testeKLdivVarU(self):
+        f = eKLdivVarU(self.x, self.y, 0)
+        g = true_kldiv(self.mux, self.muy, self.sigx, self.sigy)
+        self.assertAlmostEqual(f, g, 2, 'fialed to generate simialr ansers, f:%f, g:%f' % (f, g))
+        
+    def testRandomeKLdivVarU(self):
+        y= self.y + np.random.uniform(-1,1,3)
+        f = eKLdivVarU(self.x, y, 3000000)
+        g = true_kldiv(self.mux, y.mus[0], self.sigx, y.sigmas[0])
+        self.assertAlmostEqual(f, g, 2, 'fialed to generate simialr ansers, f:%f, g:%f' % (f, g))
+        
+if __name__ == '__main__':
+    suite1 = unittest.makeSuite(KLdivTestCase,'test')
+
+    unittest.main()
