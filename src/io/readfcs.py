@@ -51,7 +51,7 @@ class FCSreader(object):
         self.spill = spill
         self.sidx = sidx
 
-    def get_FCMdata(self, auto_comp=True, **kwargs):
+    def get_FCMdata(self, auto_comp=False, **kwargs):
         """Return the next FCM data set stored in a FCS file"""
 
         # parse headers
@@ -123,6 +123,8 @@ class FCSreader(object):
                         'header': header,
                         'analysis': analysis,
                         }))
+        if self.sidx is not None and self.spill is not None:
+            auto_comp = True # if we're passed a spillover we assume we compensate
         if auto_comp:
             if self.sidx is None and self.spill is None:
                 if tmpfcm.get_spill():
@@ -383,7 +385,7 @@ def log_factory(base):
 log2 = log_factory(2)
 
 
-def loadFCS(filename, transform='logicle', auto_comp=True, spill=None, sidx=None, file_index=0, **kwargs):
+def loadFCS(filename, transform='logicle', auto_comp=False, spill=None, sidx=None, file_index=0, **kwargs):
     """Load and return a FCM data object from an FCS file"""
 
     tmp = FCSreader(filename, transform, spill=spill, sidx=sidx)
@@ -394,7 +396,7 @@ def loadFCS(filename, transform='logicle', auto_comp=True, spill=None, sidx=None
     return data
 
 
-def loadMultipleFCS(files, transform='logicle', auto_comp=True, spill=None, sidx=None, **kwargs):
+def loadMultipleFCS(files, transform='logicle', auto_comp=False, spill=None, sidx=None, **kwargs):
     for filename in files:
         tmp = loadFCS(filename, transform, auto_comp, spill, sidx, **kwargs)
         try:
