@@ -67,23 +67,14 @@ class DiagonalAlignData(BaseAlignData):
         return np.hstack((scale.flatten(), shift))
 
     def _optimize(self, n, mx, my, size):
-        a, b = n
+        a, b = self._format_z(n)
         rslt = eKLdivVar(mx, (my * a) + b, size)
         return rslt
 
-    def _min(self, func, x0, *args, **kwargs):
-        z = np.zeros(self.d + self.d)
-        for i in range(self.d):
-            mx = self.mx.get_marginal(i)
-            my = self.my.get_marginal(i)
-            
-            r = minimize(func, x0[[i, self.d+i]], args=(mx, my, self.size), *args, **kwargs)
-            print r
-            a,b = r.x
-            z[i] = a
-            z[i + self.d] = b
+    def _min(self, func, x0, *args, **kwargs): 
+        r = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
 
-        return z
+        return r.x
 
     def _format_z(self, z):
         b = z[-self.d:]
