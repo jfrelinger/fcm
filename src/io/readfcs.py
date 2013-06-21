@@ -156,13 +156,22 @@ class FCSreader(object):
             else:
                 scale_max = 1e5
 
+            if 'scale_min' in kwargs.keys():
+                scale_min = kwargs['scale_min']
+            else:
+                scale_min = 0
+
+            if 'rquant' in kwargs.keys():
+                rquant = kwargs['rquant']
+            else:
+                rquant = None
 #            if 'w' in kwargs.keys():
 #                w = kwargs['w']
 #            else:
 #                w = None
 
             if to_transform:
-                tmpfcm.logicle(to_transform, T, m, self.r, scale_max)
+                tmpfcm.logicle(to_transform, T, m, self.r, scale_max, scale_min, rquant)
 
         elif self.transform == 'log':
             if to_transform:
