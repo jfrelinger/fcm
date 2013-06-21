@@ -9,6 +9,8 @@ from transforms import hyperlog as _hyperlog
 from transforms import log_transform as _log
 from tree import Tree
 from fcm.core.compensate import compensate
+from fcm.core.subsample import Subsample, RandomSubsample, AnomalySubsample
+from fcm.core.subsample import BiasSubsample
 #from fcm.io.export_to_fcs import export_fcs
 from subsample import DropChannel
 
@@ -206,10 +208,21 @@ class FCMdata(object):
 
         return g.gate(self, chan)
 
-    def subsample(self, s):
+    def subsample(self, s, model='random', *args, **kwargs):
         """return subsampled/sliced fcm data"""
-
-        return s.subsample(self)
+        if isinstance(s, Subsample):
+            return s.subsample(self)
+        elif isinstance(s, slice):
+            r = Subsample(s)
+            return r.subsample(self)
+        else:
+            if model == 'random':
+                r = RandomSubsample(s)
+            elif model == 'anomaly':
+                r = AnomalySubsample(s, *args, **kwargs)
+            elif model == 'bias':
+                r = BiasSubsample(s, *args, **kwargs)
+            return r.subsample(self)
 
     def compensate(self, sidx=None, spill=None):
         '''Compensate the fcm data'''

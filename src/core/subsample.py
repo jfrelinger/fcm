@@ -3,7 +3,10 @@ Created on Aug 27, 2009
 
 @author: jolly
 '''
-from tree import SubsampleNode, DropChannelNode
+from fcm.core.tree import SubsampleNode, DropChannelNode
+from fcm.statistics import mixnormpdf
+import numpy as np
+import numpy.random as npr
 
 
 
@@ -38,6 +41,61 @@ class _SubsampleFactory(object):
 
 SubsampleFactory = _SubsampleFactory()
 
+class RandomSubsample(Subsample):
+    '''
+    randomly subsample events
+    '''
+    def __init__(self, n):
+        '''
+        n = number of events to sample
+        '''
+        self.n = n
+        
+    def subsample(self, fcm):
+        x = fcm[:]
+        samp = npr.choice(np.arange(x.shape[0]), self.n)
+        node = SubsampleNode("", fcm.get_cur_node(), samp)
+        fcm.add_view(node)
+        return fcm
+    
+    
+class AnomalySubsample(Subsample):
+    def __init__(self, n, neg):
+        self.n = n
+        self.neg = neg
+    
+    def subsample(self, fcm):
+        x = fcm[:]
+        p = mixnormpdf(x, self.neg.pis, self.neg.mus, self.neg.sigmas)
+        p = 1/p
+        p = p/np.sum(p)
+    
+        samp = npr.choice(np.arange(x.shape[0]), size=self.n, replace=False, p=p)
+        node = SubsampleNode("", fcm.get_cur_node(), samp)
+        fcm.add_view(node)
+        return fcm
+    
+class BiasSubsample(Subsample):
+    def __init__(self, n, pos, neg):
+        self.n = n
+        self.pos = pos
+        self.neg = neg
+        
+    def subsample(self, fcm):
+        x = fcm[:]
+        neg_py = mixnormpdf(x, self.neg.pis, self.neg.mus, self.neg.sigmas)
+        pos_py = mixnormpdf(x, self.pos.pis, self.pos.mus, self.pos.sigmas)
+
+        diff = np.log10(pos_py) - np.log10(neg_py)
+
+        probs = np.power(10, diff)
+        probs = probs / np.sum(probs)
+        samp = npr.choice(np.arange(x.shape[0]), size=self.n,
+                                replace=False, p=probs)
+        node = SubsampleNode("", fcm.get_cur_node(), samp)
+        fcm.add_view(node)
+        return fcm
+    
 
 class DropChannel(object):
     """

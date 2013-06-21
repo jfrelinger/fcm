@@ -4,6 +4,7 @@ from random import randint
 
 from fcm import FCMdata
 from fcm import PolyGate, IntervalGate
+from fcm.statistics import DPMixture, DPCluster
 from numpy.testing.utils import assert_array_equal
 
 
@@ -32,9 +33,6 @@ class FCMdataTestCase(unittest.TestCase):
         a = randint(0,1)
         b = randint(0,2)
         assert type(self.fcm[a]) == type(self.pnts[a]), "__getitem__ failed to return array"
-         
-        print 'new',self.pnts[a,b]
-        print 'new',self.fcm[a,b]
         
         assert self.fcm[a,b] == self.pnts[a,b], '__getitem__ returned wrong value'
         assert self.fcm[:,'fsc'][a] == self.pnts[:,0][a], '__getitem__ with multiple strings failed'
@@ -168,6 +166,41 @@ class FCMdataTestCase(unittest.TestCase):
         #make sure tree is actually copied
         cpy = self.fcm.copy()
         self.assertTrue(cpy.tree.pprint() == self.fcm.tree.pprint(), "copy failed to reproduce the view tree")
+
+    def testRandomSubsample(self):
+        self.fcm.subsample(1)
+        
+        self.assertEqual(1,self.fcm.shape[0], 'random subsampling failed')
+        self.assertTrue(self.fcm[0] in self.pnts, 'random subsample geneterated non-existant point')
+
+    def testAnomalySubsample(self):
+        mu = array([0,1,2])
+        sig = array([[1,0,0],[0,1,0],[0,0,1]])
+        cluster = DPCluster(1.0, mu, sig)
+        mix = DPMixture([cluster])
+        self.fcm.subsample(1, 'anomaly', mix)
+        
+        self.assertEqual(1,self.fcm.shape[0], 'anomaly subsampling failed')
+        self.assertTrue(self.fcm[0] in self.pnts, 'anomaly subsample geneterated non-existant point')
+
+    def testBiasSubsample(self):
+        neg_mu = array([0,1,2])
+        pos_mu = array([3,4,5])
+        sig = array([[1,0,0],[0,1,0],[0,0,1]])
+        neg_cluster = DPCluster(1.0,neg_mu, sig)
+        neg_mix = DPMixture([neg_cluster])
+        pos_cluster0 = DPCluster(0.5, neg_mu, sig)
+        pos_cluster1 = DPCluster(0.5, pos_mu, sig)
+        pos_mix = DPMixture([pos_cluster0, pos_cluster1])
+        self.fcm.subsample(1, 'bias', pos=pos_mix, neg=neg_mix)
+        
+        self.assertEqual(1,self.fcm.shape[0], 'bias subsampling failed')
+        self.assertTrue(self.fcm[0] in self.pnts, 'bias subsample geneterated non-existant point')
+
+    def testSubsamplebySlice(self):
+        self.fcm.subsample(slice(1))
+        self.assertEqual(1,self.fcm.shape[0])
+        assert_array_equal(self.pnts[0], self.fcm[0], 'subsample by slice failed')
 if __name__ == '__main__':
     suite1 = unittest.makeSuite(FCMdataTestCase,'test')
 

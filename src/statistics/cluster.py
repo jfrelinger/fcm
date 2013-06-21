@@ -12,7 +12,7 @@ from scipy.cluster import vq
 import collections
 
 from dpmix import DPNormalMixture, BEM_DPNormalMixture, HDPNormalMixture
-from fcm import FCMcollection
+from fcm.core.fcmcollection import FCMcollection
 
 from dp_cluster import DPCluster, DPMixture, HDPMixture
 from kmeans import KMeans
