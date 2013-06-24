@@ -53,7 +53,7 @@ def logicle(fcm, channels, T, m, r=None, scale_max=1e5, scale_min=0, w=None, rqu
             tmp = npnts[:,i]
             r = quantile(tmp[tmp<0], 0.05)
         if r is None and w is None:
-            w = -10
+            w = 10
         tmp = scale_max * _logicle(npnts[:, i].T, T, m, r, w)
         #tmp[tmp<scale_min] = scale_min
         npnts.T[i] = tmp
