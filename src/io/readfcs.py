@@ -167,6 +167,7 @@ class FCSreader(object):
             else:
                 rquant = None
             if 'w' in kwargs.keys():
+
                 w = kwargs['w']
             else:
                 w = None
