@@ -45,7 +45,8 @@ class FCSreader(object):
             self._fh = filename
         else:
             raise TypeError("Filename must be a file path or a file handle (either 'file' type or io.IOBase")
-
+        if transform not in ['log', 'logicle', None]:
+            raise TypeError('transform argument must be one of [\'log\', \'logicle\', None]')
         self.transform = transform
         self.cur_offset = 0
         self.spill = spill
@@ -171,7 +172,7 @@ class FCSreader(object):
                 w = None
 
             if to_transform:
-                tmpfcm.logicle(to_transform, T, m, self.r, scale_max, scale_min, rquant)
+                tmpfcm.logicle(to_transform, T, m, self.r, scale_max, scale_min, rquant, w)
 
         elif self.transform == 'log':
             if to_transform:
