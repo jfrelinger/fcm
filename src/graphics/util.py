@@ -119,10 +119,9 @@ def plot_mu_labels(mu, colors, dims):
                                                   bbox=dict(facecolor=colors[j], alpha=0.5),
                                                   va='center', ha='center')
 
-def set_logicle(ax, xy, T =262144, m=4.5, w=0.5, scale_max = 10**5):
-    scale = scale_max*logicle(numpy.array([0, 100, 10**3, 10**4, 10**5]), T, m, None, w)
-    labels = ['0', '10^2', '10^3', '10^4', '10^5']
-    
+def set_logicle(ax, xy, T =262144, m=4.5, w=0.5,a=0, scale_max = 10**5):
+    scale = scale_max*logicle(numpy.array([0, 10**3, 10**4, 10**5]), T=T, m=m, r=None, w=w, a=a)
+    labels = ['$0$', '$10^3$', '$10^4$', '$10^5$']
     minorraw = numpy.hstack([numpy.linspace(10**i,10**(i+1), 10) for i in range(2,5)])
     minorvalues = scale_max*logicle(minorraw, T, m, None, w)
     if xy == 'x':
