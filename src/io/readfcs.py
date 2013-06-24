@@ -23,7 +23,7 @@ class FCSreader(object):
     class to hold object to read and parse fcs files.  main usage is to get
     a FCMdata object out of a fcs file
     """
-    def __init__(self, filename, transform='logicle', sidx=None, spill=None):
+    def __init__(self, filename, transform=None, sidx=None, spill=None):
         #self.filename = filename
         #if type(filename) == str:
         #    self.filename = filename
@@ -165,10 +165,10 @@ class FCSreader(object):
                 rquant = kwargs['rquant']
             else:
                 rquant = None
-#            if 'w' in kwargs.keys():
-#                w = kwargs['w']
-#            else:
-#                w = None
+            if 'w' in kwargs.keys():
+                w = kwargs['w']
+            else:
+                w = None
 
             if to_transform:
                 tmpfcm.logicle(to_transform, T, m, self.r, scale_max, scale_min, rquant)
@@ -394,7 +394,7 @@ def log_factory(base):
 log2 = log_factory(2)
 
 
-def loadFCS(filename, transform='logicle', auto_comp=False, spill=None, sidx=None, file_index=0, **kwargs):
+def loadFCS(filename, transform=None, auto_comp=False, spill=None, sidx=None, file_index=0, **kwargs):
     """Load and return a FCM data object from an FCS file"""
 
     tmp = FCSreader(filename, transform, spill=spill, sidx=sidx)
@@ -405,7 +405,7 @@ def loadFCS(filename, transform='logicle', auto_comp=False, spill=None, sidx=Non
     return data
 
 
-def loadMultipleFCS(files, transform='logicle', auto_comp=False, spill=None, sidx=None, **kwargs):
+def loadMultipleFCS(files, transform=None, auto_comp=False, spill=None, sidx=None, **kwargs):
     for filename in files:
         tmp = loadFCS(filename, transform, auto_comp, spill, sidx, **kwargs)
         try:
