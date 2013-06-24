@@ -170,10 +170,14 @@ class FCSreader(object):
 
                 w = kwargs['w']
             else:
-                w = None
+                w = 0.5
+            if 'a' in kwargs.keys():
+                a = kwargs['a']
+            else:
+                a = 0
 
             if to_transform:
-                tmpfcm.logicle(to_transform, T, m, self.r, scale_max, scale_min, rquant, w)
+                tmpfcm.logicle(to_transform, T=T, m=m, r=self.r, w=w, a=a, scale_max=scale_max, scale_min=scale_min, rquant=rquant)
 
         elif self.transform == 'log':
             if to_transform:

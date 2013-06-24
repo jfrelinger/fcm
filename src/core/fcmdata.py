@@ -184,12 +184,12 @@ class FCMdata(object):
         tmp.tree = deepcopy(self.tree)
         return tmp
 
-    def logicle(self, channels=None, T=262144, m=4.5, r=None, scale_max=1e5, scale_min=0, rquant=None, w=None):
+    def logicle(self, channels=None, T=262144, m=4.5, r=None, w=0.5, a=0, scale_max=1e5, scale_min=0, rquant=None):
         """return logicle transformed channels"""
 
         if channels is None:
             channels = self.markers
-        return _logicle(self, channels, T, m, r, scale_max, scale_min, w, rquant)
+        return _logicle(self, channels, T, m, r, scale_max, scale_min, w, a, rquant)
 
     def hyperlog(self, channels, b, d, r, order=2, intervals=1000.0):
         """return hyperlog transformed channels"""
