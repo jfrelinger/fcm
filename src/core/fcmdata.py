@@ -83,8 +83,25 @@ class FCMdata(object):
 
     @property
     def channels(self):
-        return self.current_node.channels
-
+        return [i[1] for i in self.current_node.channels]
+    
+    @property
+    def short_names(self):
+        return [i[0] for i in self.current_node.channels]
+    
+    @property
+    def long_names(self):
+        rslt = []
+        for i in self.current_node.channels:
+            if i[0] == i[1]:
+                rslt.append(i[0])
+            else:
+                rslt.append('::'.join(i))
+        return rslt
+    
+    def __len__(self):
+        return self.current_node.view().__len__()
+    
     def __getattr__(self, name):
             if name in dir(self.current_node.view()):
                 #return Node.__getattribute__(self.current_node,'view')().__getattribute__(name)
@@ -112,7 +129,15 @@ class FCMdata(object):
 
         if isinstance(channels, basestring):
             try:
-                return self.channels.index(channels)
+                if channels in self.channels:
+                    return self.channels.index(channels)
+                elif channels in self.short_names:
+                    return self.short_names.index(channels)
+                elif channels in self.long_names:
+                    return self.long_names.index(channels)
+                else:
+                    raise ValueError('%s is not in list' % channels)
+
             except ValueError:
                 for j in range(1, int(self.notes.text['par']) + 1):
                         if channels == self.notes.text['p%dn' % j]:
@@ -122,15 +147,25 @@ class FCMdata(object):
 
         idx = []
         for i in channels:
-            try:
+#            try:
+            if i in self.channels:
                 idx.append(self.channels.index(i))
-            except ValueError:
-                try:
-                    for j in range(1, int(self.notes.text['par']) + 1):
-                        if i == self.notes.text['p%dn' % j]:
-                            idx.append(self.channels.index(self.notes.text['p%ds' % j]))
-                except ValueError:
-                    raise ValueError('%s is not in list' % i)
+            elif i in self.short_names:
+                idx.append(self.short_names.index(i))
+            elif i in self.long_names:
+                idx.append(self.long_names.index(i))
+            else:
+                raise ValueError('%s is not in list' % channels)
+#            except ValueError:
+#                try:
+#                    for j in range(1, int(self.notes.text['par']) + 1):
+#                        if i == self.notes.text['p%dn' % j]:
+#                            if self.channels[j-1] == self.notes.text['p%ds' % j]:
+#                                idx.append(j-1)
+#                            else:
+#                                idx.append(self.channels.index(self.notes.text['p%ds' % j]))
+#                except ValueError:
+#                    raise ValueError('%s is not in list' % i)
         if idx:
             return idx
         else:

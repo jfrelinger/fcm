@@ -119,7 +119,7 @@ class FCSreader(object):
         except AttributeError:
             name = 'InMemoryFile'
         name, unused_ext = os.path.splitext(name)
-        tmpfcm = FCMdata(name, data, channels, scchannels,
+        tmpfcm = FCMdata(name, data, zip(base_chan_name,channels), scchannels,
             Annotation({'text': text,
                         'header': header,
                         'analysis': analysis,

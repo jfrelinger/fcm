@@ -11,10 +11,20 @@ from numpy.testing.utils import assert_array_equal
 class FCMdataTestCase(unittest.TestCase):
     def setUp(self):
         self.pnts = array([[0,1,2],[3,4,5]])
-        self.fcm = FCMdata('test_fcm', self.pnts, ['fsc','ssc','cd3'], [0,1])
+        self.fcm = FCMdata('test_fcm', self.pnts, [('fsc','fsc'),('ssc','ssc'),('fl-1','cd3')], [0,1])
         
     def testChannels(self):
         assert self.fcm.channels[0] == 'fsc', "channel property fails"
+        
+    def testLen(self):
+        assert len(self.fcm) == 2, 'length wrong'
+        
+    def testShortNames(self):
+        assert self.fcm.short_names[2] == 'fl-1', "channel property fails"
+        
+    def testLongNames(self):
+        assert self.fcm.long_names[2] == 'fl-1::cd3', 'long names property fails: %s' % self.fcm.long_names[2]
+        assert self.fcm.long_names[0] == 'fsc', 'long names property fails: %s' % self.fcm.long_names[0]
         
     def testGetPnts(self):
         a = randint(0,1)
@@ -24,7 +34,8 @@ class FCMdataTestCase(unittest.TestCase):
     def testGetChannelByName(self):
         assert self.fcm.get_channel_by_name(['fsc'])[0] == 0, 'incorrect first column'
         assert self.fcm.get_channel_by_name(['fsc'])[1] == 3, 'incorrect first column'
-        
+        assert self.fcm.get_channel_by_name(['fl-1'])[0] == 2, 'incorrect last column: %d' % self.fcm.get_channel_by_name(['fl-1'])[0]
+        assert self.fcm.get_channel_by_name(['fl-1'])[1] == 5, 'incorrect first column: %d' % self.fcm.get_channel_by_name(['fl-1'])[1]
     def testGetMarkers(self):
         #print self.fcm.markers
         assert self.fcm.markers == [2], 'Marker CD3 not picked up'
@@ -115,10 +126,11 @@ class FCMdataTestCase(unittest.TestCase):
 
     def testBoundaryEvents(self):
         pnts = array([[0,1,2],[3,4,5],[0,2,5]])
-        fcm = FCMdata('test_fcm', pnts, ['fsc','ssc','cd3'], [0,1])
+        fcm = FCMdata('test_fcm', pnts, [('fsc','fsc'),('ssc','ssc'),('fl-1','cd3')], [0,1])
         eps = 1e-10
         result = fcm.boundary_events()
-        assert result['fsc'] - 1 < eps
+    
+        assert result['fsc'] - 1 < eps, str(result['fsc'])
         assert result['ssc'] - 2.0/3.0 < eps
         assert result['cd3'] - 1 < eps
 
