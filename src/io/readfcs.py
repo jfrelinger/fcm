@@ -292,7 +292,7 @@ class FCSreader(object):
                 num_items = (stop - start + 1) / calcsize(fmt_integer(bitwidth[0]))
                 try:
                     fmt = numpy.dtype('%s%d%s' % (order, num_items, fmt_integer(bitwidth[0])))
-                    tmp = numpy.memmap(self._fh, fmt, mode='r', offset=start + offset, shape=1)
+                    tmp = numpy.memmap(self._fh, fmt, mode='c', offset=start + offset, shape=1)
                 except IOError:
                     #unpack into a list
                     tmp = unpack('%s%d%s' % (order, num_items, fmt_integer(bitwidth[0])),
@@ -323,7 +323,7 @@ class FCSreader(object):
         num_items = (stop - start + 1) / calcsize(dtype)
         try:
             fmt = numpy.dtype('%s%d%s' % (order, num_items, dtype))
-            tmp = numpy.memmap(self._fh, fmt, mode='r', offset=start + offset, shape=1)
+            tmp = numpy.memmap(self._fh, fmt, mode='c', offset=start + offset, shape=1)
         except IOError:
             tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
             tmp = numpy.array(tmp)
@@ -336,7 +336,7 @@ class FCSreader(object):
         #tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
         try:
             fmt = numpy.dtype('%s%d%s' % (order, num_items, dtype))
-            tmp = numpy.memmap(self._fh, fmt, mode='r', offset=start + offset, shape=1)
+            tmp = numpy.memmap(self._fh, fmt, mode='c', offset=start + offset, shape=1)
         except IOError:
             tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
             tmp = numpy.array(tmp)

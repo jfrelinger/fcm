@@ -61,9 +61,7 @@ class FCMdata(object):
     def __repr__(self):
         return self.name
 
-    def __getitem__(self, item):
-        """return FCMdata points"""
-
+    def _lookup_item(self,item):
         if isinstance(item, tuple):
 
             item = list(item) # convert to be mutable.
@@ -77,10 +75,17 @@ class FCMdata(object):
                     if isinstance(j, basestring):
                         item[1][i] = self.name_to_index(j)
             item = tuple(item)
-
-
+        return item
+    
+    def __getitem__(self, item):
+        """return FCMdata points"""
+        item = self._lookup_item(item)
+        
         return self.tree.view()[item]
 
+    def __setitem__(self,key,value):
+        item = self._lookup_item(key)
+        self.tree.view()[item] = value
     @property
     def channels(self):
         return [i[1] for i in self.current_node.channels]
