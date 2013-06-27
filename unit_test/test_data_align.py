@@ -44,6 +44,16 @@ class DiagAlignTestCase(unittest.TestCase):
         npt.assert_array_almost_equal(b, np.array([0, 0, 0]), decimal=1)
         npt.assert_array_almost_equal(((y * a) + b).mus, self.x.mus, decimal=1)
 
+    def testFullAlignExclude(self):
+        m = np.array([[1, 0, .2], [0, 1, 0], [0, 0, 1]])
+        y = self.x * m
+        x0 = np.hstack((np.eye(3).flatten(), np.zeros(3)))
+        Full = FullAlignData(self.x, size=200000, exclude=[0])
+        a, b = Full.align(y, x0=x0, method='TNC', tol=1e-8, options={'disp': False})#, maxiter=200, maxfun=200)
+        npt.assert_array_almost_equal(a[0], np.array([1,0,0]), decimal=1)
+        npt.assert_array_almost_equal(a[:,0], np.array([1,0,0]), decimal=1)
+
+
 if __name__ == '__main__':
     suite1 = unittest.makeSuite(DiagAlignTestCase, 'test')
 
