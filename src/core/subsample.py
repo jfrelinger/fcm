@@ -4,6 +4,7 @@ Created on Aug 27, 2009
 @author: jolly
 '''
 from fcm.core.tree import SubsampleNode, DropChannelNode
+from fcm.core.fcmdata import FCMdata
 from fcm.statistics import mixnormpdf
 import numpy as np
 import numpy.random as npr
