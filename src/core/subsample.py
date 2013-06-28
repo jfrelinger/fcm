@@ -54,9 +54,12 @@ class RandomSubsample(Subsample):
     def subsample(self, fcm):
         x = fcm[:]
         samp = npr.choice(np.arange(x.shape[0]), self.n)
-        node = SubsampleNode("", fcm.get_cur_node(), samp)
-        fcm.add_view(node)
-        return fcm
+        if isinstance(fcm, FCMdata):
+            node = SubsampleNode("", fcm.get_cur_node(), samp)
+            fcm.add_view(node)
+            return fcm
+        else:
+            return samp
     
     
 class AnomalySubsample(Subsample):
@@ -71,9 +74,12 @@ class AnomalySubsample(Subsample):
         p = p/np.sum(p)
     
         samp = npr.choice(np.arange(x.shape[0]), size=self.n, replace=False, p=p)
-        node = SubsampleNode("", fcm.get_cur_node(), samp)
-        fcm.add_view(node)
-        return fcm
+        if isinstance(fcm, FCMdata):
+            node = SubsampleNode("", fcm.get_cur_node(), samp)
+            fcm.add_view(node)
+            return fcm
+        else:
+            return samp
     
 class BiasSubsample(Subsample):
     def __init__(self, n, pos, neg):
@@ -92,9 +98,12 @@ class BiasSubsample(Subsample):
         probs = probs / np.sum(probs)
         samp = npr.choice(np.arange(x.shape[0]), size=self.n,
                                 replace=False, p=probs)
-        node = SubsampleNode("", fcm.get_cur_node(), samp)
-        fcm.add_view(node)
-        return fcm
+        if isinstance(fcm, FCMdata):
+            node = SubsampleNode("", fcm.get_cur_node(), samp)
+            fcm.add_view(node)
+            return fcm
+        else:
+            return samp
     
 
 class DropChannel(object):

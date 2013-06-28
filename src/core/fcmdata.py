@@ -262,7 +262,7 @@ class FCMdata(object):
                 r = AnomalySubsample(s, *args, **kwargs)
             elif model == 'bias':
                 r = BiasSubsample(s, *args, **kwargs)
-            return r.subsample(self)
+            return r.subsample(self, *args, **kwargs)
 
     def compensate(self, sidx=None, spill=None):
         '''Compensate the fcm data'''
