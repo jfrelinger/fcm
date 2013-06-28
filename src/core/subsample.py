@@ -4,7 +4,7 @@ Created on Aug 27, 2009
 @author: jolly
 '''
 from fcm.core.tree import SubsampleNode, DropChannelNode
-from fcm.core import FCMdata
+import fcm
 from fcm.statistics import mixnormpdf
 import numpy as np
 import numpy.random as npr
@@ -23,11 +23,11 @@ class Subsample(object):
         '''
         self.samp = slicing
 
-    def subsample(self, fcm):
+    def subsample(self, fcs):
         """D(<fcmdata>) -> leads to a new fcm view of subsampled data"""
-        node = SubsampleNode("", fcm.get_cur_node(), self.samp)
-        fcm.add_view(node)
-        return fcm
+        node = SubsampleNode("", fcs.get_cur_node(), self.samp)
+        fcs.add_view(node)
+        return fcs
 
 class _SubsampleFactory(object):
     '''
@@ -52,15 +52,15 @@ class RandomSubsample(Subsample):
         '''
         self.n = n
         
-    def subsample(self, fcm):
-        x = fcm[:]
+    def subsample(self, fcs):
+        x = fcs[:]
         samp = npr.choice(np.arange(x.shape[0]), self.n)
-        if isinstance(fcm, FCMdata):
-            node = SubsampleNode("", fcm.get_cur_node(), samp)
-            fcm.add_view(node)
-            return fcm
+        if isinstance(fcs, fcm.FCMdata):
+            node = SubsampleNode("", fcs.get_cur_node(), samp)
+            fcs.add_view(node)
+            return fcs
         else:
-            return samp
+            return x[samp]
     
     
 class AnomalySubsample(Subsample):
@@ -68,19 +68,19 @@ class AnomalySubsample(Subsample):
         self.n = n
         self.neg = neg
     
-    def subsample(self, fcm):
-        x = fcm[:]
+    def subsample(self, fcs):
+        x = fcs[:]
         p = mixnormpdf(x, self.neg.pis, self.neg.mus, self.neg.sigmas)
         p = 1/p
         p = p/np.sum(p)
     
         samp = npr.choice(np.arange(x.shape[0]), size=self.n, replace=False, p=p)
-        if isinstance(fcm, FCMdata):
-            node = SubsampleNode("", fcm.get_cur_node(), samp)
-            fcm.add_view(node)
-            return fcm
+        if isinstance(fcs, fcm.FCMdata):
+            node = SubsampleNode("", fcs.get_cur_node(), samp)
+            fcs.add_view(node)
+            return fcs
         else:
-            return samp
+            return x[samp]
     
 class BiasSubsample(Subsample):
     def __init__(self, n, pos, neg):
@@ -88,8 +88,8 @@ class BiasSubsample(Subsample):
         self.pos = pos
         self.neg = neg
         
-    def subsample(self, fcm,*args, **kwargs):
-        x = fcm[:]
+    def subsample(self, fcs,*args, **kwargs):
+        x = fcs[:]
         neg_py = mixnormpdf(x, self.neg.pis, self.neg.mus, self.neg.sigmas, logged=True, *args, **kwargs)
         pos_py = mixnormpdf(x, self.pos.pis, self.pos.mus, self.pos.sigmas, logged=True, *args, **kwargs)
 
@@ -99,12 +99,12 @@ class BiasSubsample(Subsample):
         probs = probs / np.sum(probs)
         samp = npr.choice(np.arange(x.shape[0]), size=self.n,
                                 replace=False, p=probs)
-        if isinstance(fcm, FCMdata):
-            node = SubsampleNode("", fcm.get_cur_node(), samp)
-            fcm.add_view(node)
-            return fcm
+        if isinstance(fcs, fcm.FCMdata):
+            node = SubsampleNode("", fcs.get_cur_node(), samp)
+            fcs.add_view(node)
+            return fcs
         else:
-            return samp
+            return x[samp]
     
 
 class DropChannel(object):
@@ -114,22 +114,22 @@ class DropChannel(object):
     def __init__(self, idxs):
         self.idxs = idxs
 
-    def drop(self, fcm):
+    def drop(self, fcs):
         """D(<fcmdata>) -> create a new view in the fcm object missing the specified channels"""
-        channels = fcm.channels[:]
+        channels = fcs.channels[:]
 
         left = []
-        for j,i in enumerate(fcm.channels):
+        for j,i in enumerate(fcs.channels):
             if i in self.idxs:
                 channels.remove(i)
             elif j in self.idxs:
                 channels.remove(i)
             else:
                 if isinstance(i, str):
-                    left.append(fcm.name_to_index(i))
+                    left.append(fcs.name_to_index(i))
                 else:
                     left.append(i)
 
-        node = DropChannelNode("", fcm.get_cur_node(), left, channels)
-        fcm.add_view(node)
-        return fcm
+        node = DropChannelNode("", fcs.get_cur_node(), left, channels)
+        fcs.add_view(node)
+        return fcs
