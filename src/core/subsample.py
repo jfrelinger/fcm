@@ -90,8 +90,10 @@ class BiasSubsample(Subsample):
         
     def subsample(self, fcs,*args, **kwargs):
         x = fcs[:]
-        neg_py = mixnormpdf(x, self.neg.pis, self.neg.mus, self.neg.sigmas, logged=True, *args, **kwargs)
-        pos_py = mixnormpdf(x, self.pos.pis, self.pos.mus, self.pos.sigmas, logged=True,*args, **kwargs)
+        neg_py = mixnormpdf(x, self.neg.pis, self.neg.mus, self.neg.sigmas,
+                            logged=True, *args, **kwargs)
+        pos_py = mixnormpdf(x, self.pos.pis, self.pos.mus, self.pos.sigmas,
+                            logged=True,*args, **kwargs)
 
         diff = pos_py - neg_py
 
@@ -99,7 +101,7 @@ class BiasSubsample(Subsample):
         probs = probs / np.sum(probs)
         samp = npr.choice(np.arange(x.shape[0]), size=self.n,
                                 replace=False, p=probs)
-        print samp
+        
         if isinstance(fcs, fcm.FCMdata):
             node = SubsampleNode("", fcs.get_cur_node(), samp)
             fcs.add_view(node)
