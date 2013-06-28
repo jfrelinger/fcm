@@ -4,7 +4,7 @@ Distributions used in FCS analysis
 
 from numpy import array, sum, cumsum, reshape, exp, ones, ndarray
 from numpy.random import random, multivariate_normal
-
+from scipy.misc import logsumexp
 
 try:
     from gpustats import mvnpdf_multi
@@ -141,11 +141,21 @@ def mixnormpdf(x, prop, mu, Sigma, **kwargs):
 #    for i in range(len(prop)):
 #        tmp += prop[i]*mvnormpdf(x, mu[i], Sigma[i])
 #    return tmp
+    if 'logged' in kwargs:
+        logged = kwargs['logged']
+    else:
+        logged = False
     tmp = compmixnormpdf(x, prop, mu, Sigma, **kwargs)
     try:
-        return sum(tmp, 1)
+        if logged:
+            return logsumexp(tmp,1)
+        else:
+            return sum(tmp, 1)
     except ValueError:
-        return sum(tmp, 0)
+        if logged:
+            return logsumexp(tmp,0)
+        else:
+            return sum(tmp, 0)
 
 
 def mixnormrnd(pi, mu, sigma, k):
