@@ -81,14 +81,14 @@ class BiasSubsample(Subsample):
         self.pos = pos
         self.neg = neg
         
-    def subsample(self, fcm):
+    def subsample(self, fcm,*args, **kwargs):
         x = fcm[:]
-        neg_py = mixnormpdf(x, self.neg.pis, self.neg.mus, self.neg.sigmas)
-        pos_py = mixnormpdf(x, self.pos.pis, self.pos.mus, self.pos.sigmas)
+        neg_py = mixnormpdf(x, self.neg.pis, self.neg.mus, self.neg.sigmas, logged=True, *args, **kwargs)
+        pos_py = mixnormpdf(x, self.pos.pis, self.pos.mus, self.pos.sigmas, logged=True, *args, **kwargs)
 
-        diff = np.log10(pos_py) - np.log10(neg_py)
+        diff = pos_py - neg_py
 
-        probs = np.power(10, diff)
+        probs = np.exp(diff)
         probs = probs / np.sum(probs)
         samp = npr.choice(np.arange(x.shape[0]), size=self.n,
                                 replace=False, p=probs)
