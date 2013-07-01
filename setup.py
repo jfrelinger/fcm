@@ -28,7 +28,7 @@ setup(name='fcm',
       cmdclass = {'build_ext': build_ext},
       ext_modules=[logicle_extension, munkres_extension],
       requires=['numpy (>=1.3.0)',
-                'scipy (>=0.6)',
+                'scipy (>=0.12.0)',
 		        'dpmix (>=0.1)',
                 'matplotlib (>=1.0)'], 
       )
