@@ -327,7 +327,7 @@ class FCMdata(object):
             channels = [channels]
         for i, j in enumerate(channels):
             if isinstance(j, str):
-                channels[i] = self.channels.index(j)
+                channels[i] = self.name_to_index(j)
         if keep:
             channels = [ i  for i in range(len(self.channels)) if i not in channels]
         d = DropChannel(channels)
