@@ -50,8 +50,10 @@ def eSKLdiv(x, y, n):
 def eKLdivVar(x,y, n):
     z = []
     for i in x.clusters:
-        numerator = np.log(np.sum([ j.pi * np.exp(-1*true_kldiv(i.mu,j.mu,i.sigma,j.sigma)) for j in x.clusters]))
-        denominator = np.log(np.sum([ j.pi * np.exp(-1*true_kldiv(i.mu, j.mu, i.sigma, j.sigma)) for j in y.clusters]))
+        #numerator = np.log(np.sum([ j.pi * np.exp(-1*true_kldiv(i.mu,j.mu,i.sigma,j.sigma)) for j in x.clusters]))
+        numerator = logsumexp(np.array([-1*true_kldiv(i.mu, j.mu, i.sigma, j.sigma) for j in x.clusters]), b=x.pis)
+        #denominator = np.log(np.sum([ j.pi * np.exp(-1*true_kldiv(i.mu, j.mu, i.sigma, j.sigma)) for j in y.clusters]))
+        denominator = logsumexp(np.array([-1*true_kldiv(i.mu, j.mu, i.sigma, j.sigma) for j in y.clusters]), b=y.pis)
         z.append(i.pi*(numerator-denominator))
     return max(np.sum(z),0)
         
