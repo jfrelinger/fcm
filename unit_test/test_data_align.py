@@ -24,14 +24,16 @@ class DiagAlignTestCase(unittest.TestCase):
     def testDiagAlign(self):
         y = self.x + np.array([1, -1, 1])
         #a, b = self.Diag.align(y, method='TNC', bounds=np.array([(0.5, 2), (None, None)]), tol=1e-8, options={'disp': False})
-        a, b = self.Diag.align(y, method='TNC', tol=1e-8, options={'disp': False})
+        a, b, s, _ = self.Diag.align(y, method='TNC', tol=1e-8, options={'disp': False})
+        assert s, 'failed to converge'
         npt.assert_array_almost_equal(a, np.eye(3), decimal=1)
         npt.assert_array_almost_equal(b, np.array([-1, 1, -1]), decimal=1)
 
     def testCompAlign(self):
         m = np.array([[1, 0, .2], [0, 1, 0], [0, 0, 1]])
         y = self.x * m
-        a, b = self.Comp.align(y, method='TNC', tol=1e-8, options={'disp': False})
+        a, b, s, _ = self.Comp.align(y, method='TNC', tol=1e-8, options={'disp': False})
+        assert s, 'failed to converge'
         npt.assert_array_almost_equal(a, np.linalg.inv(m), decimal=1)
         npt.assert_array_almost_equal(b, np.array([0, 0, 0]), decimal=1)
         npt.assert_array_almost_equal((y * a).mus, self.x.mus, decimal=1)
@@ -39,7 +41,8 @@ class DiagAlignTestCase(unittest.TestCase):
     def testFullAlign(self):
         m = np.array([[1, 0, .2], [0, 1, 0], [0, 0, 1]])
         y = self.x * m
-        a, b = self.Full.align(y, method='TNC', tol=1e-8, options={'disp': False})#, maxiter=200, maxfun=200)
+        a, b, s, _ = self.Full.align(y, method='TNC', options={'disp': False, 'maxiter':2000})
+        assert s, 'failed to converge'
         npt.assert_array_almost_equal(a, np.linalg.inv(m), decimal=1)
         npt.assert_array_almost_equal(b, np.array([0, 0, 0]), decimal=1)
         npt.assert_array_almost_equal(((y * a) + b).mus, self.x.mus, decimal=1)
@@ -49,7 +52,7 @@ class DiagAlignTestCase(unittest.TestCase):
         y = self.x * m
         x0 = np.hstack((np.eye(3).flatten(), np.zeros(3)))
         Full = FullAlignData(self.x, size=200000, exclude=[0])
-        a, b = Full.align(y, x0=x0, method='TNC', tol=1e-8, options={'disp': False})#, maxiter=200, maxfun=200)
+        a, b, s, _ = Full.align(y, x0=x0, method='TNC', options={'disp': False, 'maxiter': 2000})
         npt.assert_array_almost_equal(a[0], np.array([1,0,0]), decimal=1)
         npt.assert_array_almost_equal(a[:,0], np.array([1,0,0]), decimal=1)
 

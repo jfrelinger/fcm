@@ -30,14 +30,14 @@ class BaseAlignData(object):
             x0 = self._get_x0()
 
         #call minimizer on
-        z = self._min(self._optimize, x0, *args, **kwargs)
+        z, s, m = self._min(self._optimize, x0, *args, **kwargs)
         a, b = self._format_z(z)
 
-        return a, b
+        return a, b, s, m
 
     def _min(self, func, x0, *args, **kwargs):
         z = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
-        return z.x
+        return z.x, z.success, z.message
 
 
     def _get_x0(self):
@@ -73,8 +73,7 @@ class DiagonalAlignData(BaseAlignData):
 
     def _min(self, func, x0, *args, **kwargs):
         r = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
-
-        return r.x
+        return r.x, r.success, r.message
 
     def _format_z(self, z):
         b = z[-self.d:]
@@ -121,7 +120,7 @@ class CompAlignData(BaseAlignData):
 
     def _min(self, func, x0, *args, **kwargs):
         a = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
-        return a.x
+        return a.x, a.success, a.message
 
 class FullAlignData(BaseAlignData):
     '''
@@ -150,14 +149,14 @@ class FullAlignData(BaseAlignData):
 
 
         #call minimizer on
-        z = self._min(self._optimize, x0, *args, **kwargs)
+        z ,s, m= self._min(self._optimize, x0, *args, **kwargs)
         a_sub, b_sub = self._format_z(z)
         a = x0[0:self.d**2].reshape((self.d,self.d))
         a[np.ix_(self.include,self.include)] = a_sub
         b = x0[-self.d:]
         b[self.include] = b_sub
         
-        return a,b
+        return a,b, s, m
     
     def _format_z(self, z):
         a = z[0:self.d_sub ** 2].reshape(self.d_sub, self.d_sub)
@@ -172,11 +171,11 @@ class FullAlignData(BaseAlignData):
     def _min(self, func, x0, *args, **kwargs):
         x0 = self._format_x0(x0)
         z = minimize(func, x0, args=(self.mxm, self.mym, self.size), *args, **kwargs)
-        return z.x
+        return z.x ,z.success, z.message
 
     def _get_x0(self):
         m = DiagonalAlignData(self.mx, self.size)
-        scale, shift = m.align(self.my, options={'disp':False})
+        scale, shift, s, m = m.align(self.my, options={'disp':False})
 #        shift = self.mx.mus.mean(0) - self.my.mus.mean(0)
 #
 #        scale = np.diag(self.mx.sigmas.mean(0)) / np.diag(self.my.sigmas.mean(0))
