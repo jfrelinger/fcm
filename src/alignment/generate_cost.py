@@ -11,7 +11,7 @@ from fcm.alignment.kldiv import eKLdiv as kldiv
 from fcm.statistics.dp_cluster import ModalDPMixture
 
 
-def mean_distance(ref, test, use_means=None):
+def mean_distance(ref, test, use_means=None, **kwargs):
     '''
     calculate cost matrix using mean distance between mixture models
     optional argument use_means controls overiding default use of modes if
@@ -31,15 +31,15 @@ def mean_distance(ref, test, use_means=None):
     return cdist(x, y)
 
 
-def classification_distance(ref, test, test_data=None, ndraw=100000):
+def classification_distance(ref, test, test_data=None, ndraw=100000, **kwargs):
     '''
     generate cost matrix using miss classification as distance
     '''
     if test_data is None:
         test_data = ref.draw(ndraw)
 
-    t_x = test.classify(test_data)
-    r_x = ref.classify(test_data)
+    t_x = test.classify(test_data, **kwargs)
+    r_x = ref.classify(test_data, **kwargs)
     
     cost = np.zeros((len(test), len(ref)), dtype=np.int)
     tot = np.bincount(r_x)
@@ -53,7 +53,7 @@ def classification_distance(ref, test, test_data=None, ndraw=100000):
     return cost.T.copy()
 
 
-def kldiv_distance(ref, test, use_means=None, ndraws=100000):
+def kldiv_distance(ref, test, use_means=None, ndraws=100000, **kwargs):
     '''
     generate cost matrix using kl-divergence
     '''
