@@ -3,6 +3,7 @@ from fcm.statistics import DPCluster, ModalDPMixture
 from numpy import array, eye, all, ndarray, dot
 from numpy.testing import assert_array_equal
 from numpy.testing.utils import assert_equal
+from scipy.misc import logsumexp
 
 
 class ModalDp_clusterTestCase(unittest.TestCase):
@@ -46,7 +47,12 @@ class ModalDp_clusterTestCase(unittest.TestCase):
         pnt = array([1,1,1])
         assert self.mix.prob(pnt)[0] == (self.clst1.prob(pnt)+self.clst2.prob(pnt)), 'mixture generates different prob then compoent 1'
         assert self.mix.prob(pnt)[1] == self.clst3.prob(pnt), 'mixture generates different prob then compoent 2'
-        
+    
+    def testmixproblogged(self):
+        pnt = array([1,1,1])
+        assert self.mix.prob(pnt, logged=True)[0] == logsumexp([self.clst1.prob(pnt, logged=True),self.clst2.prob(pnt, logged=True)]), 'mixture generates different prob then compoent 1'
+        assert self.mix.prob(pnt)[1] == self.clst3.prob(pnt), 'mixture generates different prob then compoent 2'    
+    
     def testclassify(self):
         pnt = array([self.mu1, self.mu2])
         assert self.mix.classify(array([self.mu1, self.mu2, self.mu1, self.mu2, self.mu1, self.mu2])).tolist() == [0,1,0,1,0,1], 'classify not working'

@@ -9,6 +9,7 @@ from fcm.statistics.component import Component
 from numpy import array, log, sum, zeros, concatenate, mean, exp, ndarray, dot
 from numpy import outer
 import numpy as np
+from scipy.misc import logsumexp
 from numpy.random import multivariate_normal as mvn
 from numpy.random import multinomial
 from numbers import Number
@@ -535,22 +536,24 @@ class ModalDPMixture(DPMixture):
         probs = compmixnormpdf(x, self.pis, self.mus, self.sigmas, logged=logged, **kwargs)
 
         #can't sum in log prob space
-        if logged:
-            probs = exp(probs)
+        
         try:
             n, j = x.shape  # check we're more then 1 point
             rslt = zeros((n, len(self.cmap.keys())))
             for j in self.cmap.keys():
-                rslt[:, j] = sum([probs[:, i] for i in self.cmap[j]], 0)
+                if logged:
+                    rslt[:,j] = logsumexp([probs[:,i] for i in self.cmap[j]], 0)
+                else:
+                    rslt[:, j] = sum([probs[:, i] for i in self.cmap[j]], 0)
         except ValueError:
             #single point
             rslt = zeros((len(self.cmap.keys())))
             for j in self.cmap.keys():
-                rslt[j] = sum([self.clusters[i].prob(x) for i in self.cmap[j]])
+                if logged:
+                    rslt[j] = logsumexp([self.clusters[i].prob(x, logged=logged) for i in self.cmap[j]])
+                else:
+                    rslt[j] = sum([self.clusters[i].prob(x) for i in self.cmap[j]])
 
-        #return to log prob space
-        if logged:
-            rslt = log(rslt)
 
         return rslt
 
