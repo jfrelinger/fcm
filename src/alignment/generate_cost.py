@@ -7,7 +7,8 @@ import numpy as np
 from scipy.spatial.distance import cdist
 import fcm.statistics as stats
 from fcm.alignment.munkres import _get_cost
-from fcm.alignment.kldiv import true_kldiv as kldiv
+from fcm.alignment.kldiv import eKLdiv as kldiv
+from fcm.statistics.dp_cluster import ModalDPMixture
 
 
 def mean_distance(ref, test, use_means=None):
@@ -52,40 +53,18 @@ def kldiv_distance(ref, test, use_means=None, ndraws=100000):
     '''
     generate cost matrix using kl-divergence
     '''
-    if isinstance(ref, stats.ModalDPMixture) and isinstance(test, stats.ModalDPMixture) and not use_means:
-        ref_list = []
-        ref_sample = ref.draw(ndraws)
-        ref_x = ref.classify(ref_sample)
-        d = ref_sample.shape[1]
-        pi = 1.0
-
-        for i in sorted(ref.cmap):
-            sub_x = ref_sample[ref_x == i]
-            if sub_x.shape[0] == 0:
-                ref_list.append(stats.DPCluster(pi, np.zeros(d), np.eye(d)))
-            else:
-                ref_list.append(stats.DPCluster(pi, sub_x.mean(0), np.cov(sub_x.T)))
-
-        test_list = []
-        test_sample = test.draw(ndraws)
-        test_x = test.classify(test_sample)
-
-        for i in sorted(test.cmap):
-            sub_x = test_sample[test_x == i]
-            if sub_x.shape[0] == 0:
-                test_list.append(stats.DPCluster(pi, np.zeros(d), np.eye(d)))
-            else:
-                test_list.append(stats.DPCluster(pi, sub_x.mean(0), np.cov(sub_x.T)))
-
-        ref = stats.DPMixture(ref_list)
-        test = stats.DPMixture(test_list)
-
-    cost = np.zeros((len(ref.clusters), len(test.clusters)))
-
-    for i in range(len(ref.clusters)):
-        for j in range(len(test.clusters)):
-            cost[i, j] = kldiv(ref[i].mu, test[j].mu, ref[i].sigma, test[j].sigma)
-
+    if isinstance(ref, ModalDPMixture) and isinstance(test, ModalDPMixture):
+        xs = [ref.get_submodel(j) for j in ref.cmap]
+        ys = [test.get_submodel(j) for j in test.cmap]
+    else:
+        xs = [ref.get_submodel(j) for j in range(len(ref))]
+        ys = [test.get_submodel(j) for j in range(len(test))]
+        
+    cost = np.zeros((len(xs),len(ys)))
+    for i,j in enumerate(xs):
+        for k,l in enumerate(ys):
+            cost[i,k] = kldiv(j,l)
+            
     return cost
 
 if __name__ == '__main__':
@@ -120,10 +99,10 @@ if __name__ == '__main__':
     print classification_distance(mA, mB).mean()
     print munkres(classification_distance(mA, mB))
 
-#    print 'kldiv'
-#    print kldiv_distance(A, B)
-#    print munkres(kldiv_distance(A, B))
-#
-#    print 'modal kldiv'
-#    print kldiv_distance(mA, mB)
-#    print munkres(kldiv_distance(mA, mB))
+    print 'kldiv'
+    print kldiv_distance(A, B)
+    print munkres(kldiv_distance(A, B))
+
+    print 'modal kldiv'
+    print kldiv_distance(mA, mB)
+    print munkres(kldiv_distance(mA, mB))
