@@ -45,7 +45,7 @@ class DPCluster(Component):
             self._centered_sigma = centered_sigma
         else:
             self._centered_sigma = None
-
+    
     @property
     def centered_mu(self):
         if self._centered_mu is None:
@@ -305,7 +305,19 @@ class DPMixture(ModelResult):
                 rslts.append(self.clusters[-1 * ((i + (j * k)) + 1)])
 
         return DPMixture(rslts[::-1])
-
+    
+    def get_submodel(self, idxs):
+        '''
+        return a sub model of only specific clusters
+        '''
+        if isinstance(idxs, Number):
+            idxs = [idxs]
+        rslts = [deepcopy(self.clusters[i]) for i in idxs]
+        norm = sum([i.pi for i in rslts])
+        for i in rslts:
+            i.pi = i.pi/norm
+        return DPMixture(rslts,1,self.m, self.s, self.ident)
+    
     def get_iteration(self, iters):
         '''
         return a sub model of specific iterations
