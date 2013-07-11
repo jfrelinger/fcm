@@ -44,11 +44,11 @@ def classification_distance(ref, test, test_data=None, ndraw=100000, **kwargs):
     cost = np.zeros((len(test), len(ref)), dtype=np.int)
     tot = np.bincount(r_x)
     for i,j in enumerate(tot):
-        cost[:,i]= j
+        cost[:,i]= j+1
     _get_cost(t_x, r_x, cost)
     cost = cost.astype(np.double)
     for i,j in enumerate(tot):
-        cost[:,i] = cost[:,i]/j
+        cost[:,i] = cost[:,i]/(j+1)
     #return (cost / test_data.shape[0]).T.copy()
     return cost.T.copy()
 
