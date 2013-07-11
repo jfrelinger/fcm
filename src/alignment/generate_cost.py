@@ -40,13 +40,17 @@ def classification_distance(ref, test, test_data=None, ndraw=100000):
 
     t_x = test.classify(test_data)
     r_x = ref.classify(test_data)
-
-    cost = test_data.shape[0] * np.ones((len(test.clusters), len(ref.clusters)), dtype=np.int)
-
+    
+    cost = np.zeros((len(test), len(ref)), dtype=np.int)
+    tot = np.array([np.sum(r_x == i) for i in range(r_x.max()+1)])
+    for i,j in enumerate(tot):
+        cost[:,i]= j
     _get_cost(t_x, r_x, cost)
-
+    cost = cost.astype(np.double)
+    for i,j in enumerate(tot):
+        cost[:,i] = cost[:,i]/j
     #return (cost / test_data.shape[0]).T.copy()
-    return cost.T.copy().astype(np.double)/test_data.shape[0]
+    return cost.T.copy()
 
 
 def kldiv_distance(ref, test, use_means=None, ndraws=100000):
