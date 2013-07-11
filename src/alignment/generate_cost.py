@@ -42,7 +42,7 @@ def classification_distance(ref, test, test_data=None, ndraw=100000):
     r_x = ref.classify(test_data)
     
     cost = np.zeros((len(test), len(ref)), dtype=np.int)
-    tot = np.array([np.sum(r_x == i) for i in range(r_x.max()+1)])
+    tot = np.bincount(r_x)
     for i,j in enumerate(tot):
         cost[:,i]= j
     _get_cost(t_x, r_x, cost)
