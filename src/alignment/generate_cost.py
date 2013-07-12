@@ -30,6 +30,7 @@ def mean_distance(ref, test, use_means=None, **kwargs):
                 x = ref.centered_modes
                 y = ref.centered_modes
             except:
+                print 'failed to find centered_modes'
                 x = ref.modes
                 y = test.modes
         except AttributeError:

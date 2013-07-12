@@ -585,7 +585,7 @@ class ModalDPMixture(DPMixture):
     
     @property
     def centered_modes(self):
-        return array([ i for i in self.modemap.itervalues()])
+        return (self.modes - self.m)/self.s
     
     def enumerate_modes(self):
         for i in range(len(self.modes)):
