@@ -19,6 +19,7 @@ class ClusterAlignTestCase(unittest.TestCase):
         a = AlignMixture(self.mx, 'kldiv')
         r = a.align(self.my, max_cost=1)
         self.assertIsInstance(r, OrderedDPMixture, 'failed to return an ordered mixture')
+
         for i in r.lookup:
             self.assertEqual(i+1, r.lookup[i], 'assignment failed %d : %d' % (i, r.lookup[i]))
     
@@ -31,7 +32,7 @@ class ClusterAlignTestCase(unittest.TestCase):
         
     def test_class(self):
         a = AlignMixture(self.mx, 'class',)
-        r = a.align(self.my, max_cost=90000)
+        r = a.align(self.my, max_cost=.9)
         self.assertIsInstance(r, OrderedDPMixture, 'failed to return an ordered mixture')
         for i in r.lookup:
             self.assertEqual(i+1, r.lookup[i], 'assignment failed %d : %d' % (i, r.lookup[i]))

@@ -41,21 +41,21 @@ def classification_distance(ref, test, test_data=None, ndraw=100000, **kwargs):
     t_x = test.classify(test_data, **kwargs)
     r_x = ref.classify(test_data, **kwargs)
     
-    cost = np.zeros((len(ref), len(test)), dtype=np.int)
+    cost = np.zeros((len(test), len(ref)), dtype=np.int)
     tot = np.bincount(r_x)+1
     #for i,j in enumerate(tot):
     #    print 'tot', i,j
     for i,j in enumerate(tot):
-        cost[i,:]= j
+        cost[:,i]= j
     _get_cost(t_x, r_x, cost)
     cost = cost.astype(np.double)
     for i,j in enumerate(tot):
-        cost[i,:] = cost[i,:]/j
+        cost[:,i] = cost[:,i]/j
     #for i in range(len(ref)):
     #    if i != cost[i,:].argmin():
     #        print 'cost', i, 'tot', tot[i],'min',cost[i,:].argmin(), cost[i,:]
     #return (cost / test_data.shape[0]).T.copy()
-    return cost
+    return cost.T
 
 
 def kldiv_distance(ref, test, use_means=None, ndraws=100000, **kwargs):
