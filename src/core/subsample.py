@@ -64,11 +64,11 @@ class RandomSubsample(Subsample):
     
     
 class AnomalySubsample(Subsample):
-    def __init__(self, n, neg):
+    def __init__(self, n, neg, *args, **kwargs):
         self.n = n
         self.neg = neg
     
-    def subsample(self, fcs):
+    def subsample(self, fcs, *args, **kwargs):
         x = fcs[:]
         p = mixnormpdf(x, self.neg.pis, self.neg.mus, self.neg.sigmas)
         p = 1/p

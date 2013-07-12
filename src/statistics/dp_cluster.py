@@ -287,10 +287,13 @@ class DPMixture(ModelResult):
                 mu_avg.append(self.clusters[j * k + i].mu)
                 sig_avg.append(self.clusters[j * k + i].sigma)
                 pi_avg.append(self.clusters[j * k + i].pi)
+            new_pi = mean(pi_avg, 0)
+            new_mu = mean(mu_avg, 0)
+            new_sig = mean(sig_avg, 0)
+            
+            rslts.append(DPCluster(new_pi, new_mu, new_sig, (new_mu-self.m)/self.s, new_sig/outer(self.s,self.s)))
 
-            rslts.append(DPCluster(mean(pi_avg, 0), mean(mu_avg, 0), mean(sig_avg, 0)))
-
-        return DPMixture(rslts)
+        return DPMixture(rslts, 1, self.m, self.s)
 
     def last(self, n=1):
         '''
