@@ -37,17 +37,24 @@ def true_skldiv(m0, m1, s0, s1):
 
 
 
-def eKLdiv(x, y, n=100000):
-    px = x.draw(n).reshape(n, -1)
+def eKLdiv(x, y, n=100000, **kwargs):
+    pnts = x.draw(n).reshape(n, -1)
     #return (1.0 / n) * np.sum(np.log(np.sum(x.prob(px, use_gpu=True), 1) / np.sum(y.prob(px, use_gpu=True), 1)))
-    return np.max(1.0/n * (np.sum(logsumexp(x.prob(px, use_gpu=True, logged=True), 1)) 
-                    - np.sum(logsumexp(y.prob(px, use_gpu=True, logged=True), 1)) ),0)
+    px = x.prob(pnts, logged=True, **kwargs)
+    if len(px.shape) == 1:
+       px = px.reshape(n,1)
+    py = y.prob(pnts, logged=True, **kwargs)
+    if len(py.shape) == 1:
+       py = py.reshape(n,1)
+    return np.max(1.0/n * (np.sum(logsumexp(px, 1)) - np.sum(logsumexp(py, 1)) ),0)
 
 def eSKLdiv(x, y, n):
     return new_eKLdiv(x, y, n) + new_eKLdiv(y, x, n)
 
 
-def eKLdivVar(x,y, n):
+def eKLdivVar(x,y, n=100000, **kwargs):
+    if len(x) == 1 and len(y) == 1:
+        return true_kldiv(x[0].mu, y[0].mu, x[0].sigma, y[0].sigma)
     z = []
     for i in x.clusters:
         #numerator = np.log(np.sum([ j.pi * np.exp(-1*true_kldiv(i.mu,j.mu,i.sigma,j.sigma)) for j in x.clusters]))

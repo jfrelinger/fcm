@@ -7,7 +7,7 @@ import numpy as np
 from scipy.spatial.distance import cdist
 import fcm.statistics as stats
 from fcm.alignment.munkres import _get_cost
-from fcm.alignment.kldiv import eKLdiv as kldiv
+from fcm.alignment.kldiv import eKLdivVar as kldiv
 from fcm.statistics.dp_cluster import ModalDPMixture
 
 
@@ -17,16 +17,16 @@ def mean_distance(ref, test, use_means=None, **kwargs):
     optional argument use_means controls overiding default use of modes if
     available
     '''
-    if not use_means:
+    if use_means:
+        x = ref.mus
+        y = test.mus
+    else:
         try:
             x = ref.modes
             y = test.modes
         except AttributeError:
             x = ref.mus
             y = test.mus
-    else:
-        x = ref.mus
-        y = test.mus
 
     return cdist(x, y)
 
@@ -41,16 +41,21 @@ def classification_distance(ref, test, test_data=None, ndraw=100000, **kwargs):
     t_x = test.classify(test_data, **kwargs)
     r_x = ref.classify(test_data, **kwargs)
     
-    cost = np.zeros((len(test), len(ref)), dtype=np.int)
-    tot = np.bincount(r_x)
+    cost = np.zeros((len(ref), len(test)), dtype=np.int)
+    tot = np.bincount(r_x)+1
+    #for i,j in enumerate(tot):
+    #    print 'tot', i,j
     for i,j in enumerate(tot):
-        cost[:,i]= j+1
+        cost[i,:]= j
     _get_cost(t_x, r_x, cost)
     cost = cost.astype(np.double)
     for i,j in enumerate(tot):
-        cost[:,i] = cost[:,i]/(j+1)
+        cost[i,:] = cost[i,:]/j
+    #for i in range(len(ref)):
+    #    if i != cost[i,:].argmin():
+    #        print 'cost', i, 'tot', tot[i],'min',cost[i,:].argmin(), cost[i,:]
     #return (cost / test_data.shape[0]).T.copy()
-    return cost.T.copy()
+    return cost
 
 
 def kldiv_distance(ref, test, use_means=None, ndraws=100000, **kwargs):
@@ -67,7 +72,7 @@ def kldiv_distance(ref, test, use_means=None, ndraws=100000, **kwargs):
     cost = np.zeros((len(xs),len(ys)))
     for i,j in enumerate(xs):
         for k,l in enumerate(ys):
-            cost[i,k] = kldiv(j,l)
+            cost[i,k] = kldiv(j,l, **kwargs)
             
     return cost
 

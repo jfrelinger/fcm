@@ -454,8 +454,8 @@ class OrderedDPMixture(DPMixture):
         for i in range(len(self.clusters)):
             yield self.lookup[i], self.clusters[i].sigma
 
-    def classify(self, x):
-        z = super(OrderedDPMixture, self).classify(x)
+    def classify(self, x, **kwargs):
+        z = super(OrderedDPMixture, self).classify(x, **kwargs)
         lut = np.array([self.lookup[i] for i in range(len(self))])
         return lut[z]
         
@@ -642,7 +642,7 @@ class OrderedModalDPMixture(ModalDPMixture):
 
 
     def classify(self, x, **kwargs):
-        z = super(OrderedModalDPMixture, self).classify(x)
+        z = super(OrderedModalDPMixture, self).classify(x, **kwargs)
         lut = np.array([self.lookup[i] for i in range(len(self))])
         return lut[z]
 
@@ -782,8 +782,8 @@ class OrderedHDPMixture(HDPMixture):
     def _getData(self, key):
         return super(OrderedHDPMixture, self)._getData(key).reorder(self.lookup)
 
-    def classify(self):
-        z = super(OrderedHDPMixture, self).classify(x)
+    def classify(self, x, **kwargs):
+        z = super(OrderedHDPMixture, self).classify(x, **kwargs)
         lut = np.array([self.lookup[i] for i in range(len(self))])
         return lut[z]
 
@@ -872,8 +872,8 @@ class ModalHDPMixture(HDPMixture):
     def prob(self, x):
         return array([r.prob(x) for r in self])
 
-    def classify(self, x):
-        return array([r.classify(x) for r in self])
+    def classify(self, x, **kwargs):
+        return array([r.classify(x, **kwargs) for r in self])
 
     def reorder(self, lookup):
         return OrderedModalHDPMixture(self.pis, self.mus, self.sigmas, self.cmap, self.modemap, lookup, self.niter, self.m, self.s)
@@ -913,7 +913,7 @@ class OrderedModalHDPMixture(ModalHDPMixture):
         for i in range(len(self.modes)):
             yield self.lookup[i], self.modes[i]
 
-    def classify(self, x):
-        z = super(OrderedModalHDPMixture, self).classify(x)
+    def classify(self, x, **kwargs):
+        z = super(OrderedModalHDPMixture, self).classify(x, **kwargs)
         lut = np.array([self.lookup[i] for i in range(len(self))])
         return lut[z]
