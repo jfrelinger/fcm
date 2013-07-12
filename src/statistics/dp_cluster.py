@@ -582,7 +582,11 @@ class ModalDPMixture(DPMixture):
             except AttributeError:
                 lst.append(i)
         return array(lst)
-
+    
+    @property
+    def centered_modes(self):
+        return array([ i for i in self.modemap.itervalues()])
+    
     def enumerate_modes(self):
         for i in range(len(self.modes)):
             yield i, self.modes[i]

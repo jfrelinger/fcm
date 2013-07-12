@@ -18,12 +18,20 @@ def mean_distance(ref, test, use_means=None, **kwargs):
     available
     '''
     if use_means:
-        x = ref.mus
-        y = test.mus
+        try:
+            x = ref.centered_mus
+            y = test.centered_mus
+        except:
+            x = ref.mus
+            y = test.mus
     else:
         try:
-            x = ref.modes
-            y = test.modes
+            try:
+                x = ref.centered_modes
+                y = ref.centered_modes
+            except:
+                x = ref.modes
+                y = test.modes
         except AttributeError:
             x = ref.mus
             y = test.mus
