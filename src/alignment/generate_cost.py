@@ -64,7 +64,7 @@ def kldiv_distance(ref, test, use_means=None, ndraws=100000, **kwargs):
     '''
     if isinstance(ref, ModalDPMixture) and isinstance(test, ModalDPMixture):
         xs = [ref.get_submodel(ref.cmap[j]) for j in ref.cmap]
-        ys = [test.get_submodel(ref.cmap[j]) for j in test.cmap]
+        ys = [test.get_submodel(test.cmap[j]) for j in test.cmap]
     else:
         xs = [ref.get_submodel(j) for j in range(len(ref))]
         ys = [test.get_submodel(j) for j in range(len(test))]
