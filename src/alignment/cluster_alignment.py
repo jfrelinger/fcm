@@ -32,7 +32,7 @@ class AlignMixture(object):
         translate = {}
         if min_unused is None:
             min_unused = cost.shape[0]
-        for i, j in enumerate(munk.T):
+        for i, j in enumerate(munk):
             if np.any(j):
                 translate[i] = np.arange(cost.shape[0])[j].squeeze()
             else:

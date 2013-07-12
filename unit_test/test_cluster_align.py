@@ -11,7 +11,8 @@ class ClusterAlignTestCase(unittest.TestCase):
         pis = np.array([1.0/3, 1.0/3, 1.0/3, 1.0/3])
         clusters = [DPCluster(i,j,k) for i,j,k in zip(pis,mus,sigmas)]
         
-        self.mx = DPMixture(clusters[0:])
+        self.mx = DPMixture(clusters[0:]).get_submodel([0,1,2,3])
+        
         self.my = DPMixture(clusters[1:])
         
     def test_kldiv(self):

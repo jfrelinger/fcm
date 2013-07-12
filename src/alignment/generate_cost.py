@@ -82,8 +82,8 @@ if __name__ == '__main__':
     cluster3 = stats.DPCluster(.25, np.array([0, 0]), np.eye(2))
     cluster4 = stats.DPCluster(.25, np.array([4, 0]), np.eye(2))
     cluster5 = stats.DPCluster(.5, np.array([0, 4]), np.eye(2))
-    A = stats.DPMixture([cluster1, cluster2])
-    B = stats.DPMixture([cluster3, cluster4, cluster5])
+    A = stats.DPMixture([cluster1, cluster2]).get_submodel([0,1])
+    B = stats.DPMixture([cluster3, cluster4, cluster5]).get_submodel([0,1,2])
     from munkres import munkres
     print 'Ref has means', A.mus, 'with weights', A.pis
     print 'Test has means', B.mus, 'with weights', B.pis
