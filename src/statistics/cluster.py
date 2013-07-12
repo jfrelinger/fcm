@@ -270,9 +270,7 @@ class DPMixtureModel(object):
             if self.type.lower() == 'bem':
                 rslts = []
                 for j in range(self.nclusts):
-                    tmp = DPCluster(self.cdp.weights[j], (self.cdp.mu[j] * self.s) + self.m, self.cdp.Sigma[j] * outer(self.s, self.s))
-                    tmp.nmu = self.cdp.mu[j]
-                    tmp.nsigma = self.cdp.Sigma[j]
+                    tmp = DPCluster(self.cdp.weights[j], (self.cdp.mu[j] * self.s) + self.m, self.cdp.Sigma[j] * outer(self.s, self.s), self.cdp.mu[j], self.cdp.Sigma[j])
                     rslts.append(tmp)
                 tmp = DPMixture(rslts, self.m, self.s)
             else:
@@ -280,9 +278,7 @@ class DPMixtureModel(object):
                 rslts = []
                 for i in range(self.last):
                     for j in range(self.nclusts):
-                        tmp = DPCluster(self.cdp.weights[-(i + 1), j], (self.cdp.mu[-(i + 1), j] * self.s) + self.m, self.cdp.Sigma[-(i + 1), j] * outer(self.s, self.s))
-                        tmp.nmu = self.cdp.mu[-(i + 1), j]
-                        tmp.nsigma = self.cdp.Sigma[-(i + 1), j]
+                        tmp = DPCluster(self.cdp.weights[-(i + 1), j], (self.cdp.mu[-(i + 1), j] * self.s) + self.m, self.cdp.Sigma[-(i + 1), j] * outer(self.s, self.s), self.cdp.mu[-(i + 1), j], self.cdp.Sigma[-(i + 1), j])
                         rslts.append(tmp)
                 tmp = DPMixture(rslts, self.last, self.m, self.s, self.ident)
             return tmp

@@ -243,7 +243,7 @@ class DPMixture(ModelResult):
 
         except AttributeError:
             modes, cmap = modesearch(self.pis, self.mus, self.sigmas, **kwargs)
-            return ModalDPMixture(self.clusters, cmap, modes)
+            return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s)
 
     def log_likelihood(self, x):
         '''
@@ -585,7 +585,7 @@ class ModalDPMixture(DPMixture):
     
     @property
     def centered_modes(self):
-        return (self.modes - self.m)/self.s
+        return array([i for i in self.modemap.itervalues()])
     
     def enumerate_modes(self):
         for i in range(len(self.modes)):
