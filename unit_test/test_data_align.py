@@ -32,7 +32,7 @@ class DiagAlignTestCase(unittest.TestCase):
     def testCompAlign(self):
         m = np.array([[1, 0, .2], [0, 1, 0], [0, 0, 1]])
         y = self.x * m
-        a, b, s, _ = self.Comp.align(y, method='TNC', tol=1e-8, options={'disp': False})
+        a, b, s, _ = self.Comp.align(y,  options={'disp': False})
         assert s, 'failed to converge'
         npt.assert_array_almost_equal(a, np.linalg.inv(m), decimal=1)
         npt.assert_array_almost_equal(b, np.array([0, 0, 0]), decimal=1)

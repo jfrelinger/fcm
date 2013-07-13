@@ -610,7 +610,7 @@ class ModalDPMixture(DPMixture):
             return probs.argmax(0)
 
     def reorder(self, lookup):
-        return OrderedModalDPMixture(self.clusters, self.cmap, self.modemap, lookup, self.m, self.s)
+        return OrderedModalDPMixture(self.clusters, self.cmap, self.modemap, lookup, self.niter, self.m, self.s)
 
 class OrderedModalDPMixture(ModalDPMixture):
     '''
