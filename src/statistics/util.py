@@ -41,11 +41,11 @@ def flatten(listOfLists):
 
 def nodes(collection):
     """Return unique nodes"""
-    return tuple(set(node for node in flatten(collection) if node is not None))
+    return frozenset(node for node in flatten(collection) if node is not None)
 
 def find_components(g):
     """Find connected components in graph g"""
-    return np.unique([nodes(bfs(g, i)) for i in range(len(g))])
+    return np.unique(frozenset([nodes(bfs(g, i)) for i in range(len(g))]))
 
 def matrix_to_graph(m):
     """Convert adjacency matrix to dictionary form of graph"""
@@ -89,13 +89,14 @@ def modesearch(pis, mus, sigmas, tol=1e-6, maxiter=20, delta=0.1, w=None, scale=
     dm = pdist(xs, scale=scale, w=w) < delta#, w=np.array([1,1,1,1]))
     #print 'm', m
     cs = find_components(matrix_to_graph(dm))
+    print cs
     cs = sorted(cs, key=len, reverse=True)
-
+    
     rslt = {}
     modes = {}
     for i, j in enumerate(cs):
         modes[i] = np.mean(np.vstack([xs[k, :] for k in j]), 0)
-        rslt[i] = j
+        rslt[i] = tuple(j)
 
     return modes, rslt
 
