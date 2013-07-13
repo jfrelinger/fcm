@@ -243,7 +243,7 @@ class DPMixture(ModelResult):
 
         except AttributeError:
             modes, cmap = modesearch(self.pis, self.mus, self.sigmas, **kwargs)
-            return ModalDPMixture(self.clusters, cmap, modes, self.m, self.s)
+            return ModalDPMixture(self.clusters, cmap, modes, self.niter, self.m, self.s)
 
     def log_likelihood(self, x):
         '''
@@ -616,11 +616,11 @@ class OrderedModalDPMixture(ModalDPMixture):
     '''
     an ordered Modal DP Mixture
     '''
-    def __init__(self, clusters, cmap, modes, lookup, m=False, s=False):
+    def __init__(self, clusters, cmap, modes, lookup,niter=1, m=False, s=False):
         '''
         clusters, cmap, modes, lookup, m=False, s=False
         '''
-        super(OrderedModalDPMixture, self).__init__(clusters, cmap, modes, m, s)
+        super(OrderedModalDPMixture, self).__init__(clusters, cmap, modes,niter, m, s)
         self.lookup = lookup
 
     def __add__(self, k):
