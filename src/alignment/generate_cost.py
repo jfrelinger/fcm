@@ -28,7 +28,7 @@ def mean_distance(ref, test, use_means=None, **kwargs):
         try:
             try:
                 x = ref.centered_modes
-                y = ref.centered_modes
+                y = test.centered_modes
             except:
                 print 'failed to find centered_modes'
                 x = ref.modes
