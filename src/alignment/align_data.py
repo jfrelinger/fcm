@@ -7,7 +7,7 @@ import numpy as np
 from scipy.misc import logsumexp
 from scipy.optimize import minimize
 from fcm.alignment.kldiv import eKLdivVar
-
+from openopt import NLP
 
 class BaseAlignData(object):
     '''
@@ -36,8 +36,11 @@ class BaseAlignData(object):
         return a, b, s, m
 
     def _min(self, func, x0, *args, **kwargs):
-        z = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
-        return z.x, z.success, z.message
+        # z = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
+        p = NLP(func, x0, args=(self.mx, self.my, self.size), **kwargs)
+        z = p.solve(solver)
+
+        return z.xf, z.ff, z.msg
 
 
     def _get_x0(self):
@@ -72,8 +75,12 @@ class DiagonalAlignData(BaseAlignData):
         return rslt
 
     def _min(self, func, x0, *args, **kwargs):
-        r = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
-        return r.x, r.success, r.message
+        # r = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
+        # return r.x, r.success, r.message
+        p = NLP(func, x0, args=(self.mx, self.my, self.size), **kwargs)
+        z = p.solve('ralg')
+
+        return z.xf, z.ff, z.msg
 
     def _format_z(self, z):
         b = z[-self.d:]
@@ -119,8 +126,12 @@ class CompAlignData(BaseAlignData):
         return rslt
 
     def _min(self, func, x0, *args, **kwargs):
-        a = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
-        return a.x, a.success, a.message
+        # a = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
+        # return a.x, a.success, a.message
+        p = NLP(func, x0, args=(self.mx, self.my, self.size), **kwargs)
+        z = p.solve('ralg')
+
+        return z.xf, z.ff, z.msg
 
 class FullAlignData(BaseAlignData):
     '''
@@ -129,9 +140,9 @@ class FullAlignData(BaseAlignData):
     def __init__(self, x, size=100000, exclude=None):
         if exclude is None:
             exclude = []
-            
+
         super(FullAlignData, self).__init__(x, size)
-          
+
         self.exclude = exclude
         self.include = np.array([i for i in range(self.d) if i not in exclude])
         self.d_sub = len(self.include)
@@ -143,7 +154,7 @@ class FullAlignData(BaseAlignData):
         '''
         self.my = y
         self.mym = self.my.get_marginal(self.include)
-        
+
         if x0 is None:
             x0 = self._get_x0()
 
@@ -155,9 +166,9 @@ class FullAlignData(BaseAlignData):
         a[np.ix_(self.include,self.include)] = a_sub
         b = x0[-self.d:]
         b[self.include] = b_sub
-        
+
         return a,b, s, m
-    
+
     def _format_z(self, z):
         a = z[0:self.d_sub ** 2].reshape(self.d_sub, self.d_sub)
         b = z[-self.d_sub:]
@@ -170,8 +181,12 @@ class FullAlignData(BaseAlignData):
 
     def _min(self, func, x0, *args, **kwargs):
         x0 = self._format_x0(x0)
-        z = minimize(func, x0, args=(self.mxm, self.mym, self.size), *args, **kwargs)
-        return z.x ,z.success, z.message
+        # z = minimize(func, x0, args=(self.mxm, self.mym, self.size), *args, **kwargs)
+        # return z.x ,z.success, z.message
+        p = NLP(func, x0, args=(self.mxm, self.mym, self.size), **kwargs)
+        z = p.solve('ralg')
+
+        return z.xf, z.ff, z.msg
 
     def _get_x0(self):
         m = DiagonalAlignData(self.mx, self.size)
