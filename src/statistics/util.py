@@ -89,7 +89,6 @@ def modesearch(pis, mus, sigmas, tol=1e-6, maxiter=20, delta=0.1, w=None, scale=
     dm = pdist(xs, scale=scale, w=w) < delta#, w=np.array([1,1,1,1]))
     #print 'm', m
     cs = find_components(matrix_to_graph(dm))
-    print cs
     cs = sorted(cs, key=len, reverse=True)
     
     rslt = {}
