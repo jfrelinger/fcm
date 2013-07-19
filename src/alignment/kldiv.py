@@ -35,6 +35,13 @@ def true_kldiv(m0, m1, s0, s1):
 def true_skldiv(m0, m1, s0, s1):
     return true_kldiv(m0, m1, s0, s1) + true_kldiv(m1, m0, s1, s0)
 
+def KLdivDiff(p_mean,p_sig,q_mean,q_sig,a,b):
+    asai = inv(np.dot(a,np.dot(q_sig,a.T)))
+    asig = np.dot(a,q_sig)
+    mdiff = p_mean-np.dot(a,q_mean)-b
+    
+    rf = (-1*asig) + np.dot(mdiff,q_mean.T) + np.dot(np.dot(p_sig+(np.dot(mdiff,mdiff.T)),asai),asig)
+    return np.hstack([np.dot(-1*asai,rf).flatten(), -1*np.dot(asai,mdiff)])
 
 
 def eKLdiv(x, y, n=100000, **kwargs):
@@ -64,10 +71,21 @@ def eKLdivVar(x,y, n=100000, **kwargs):
         z.append(i.pi*(numerator-denominator))
     return max(np.sum(z),0)
         
-        
+
+
 def eKLdivVarU(x,y,n):
     z = []
     for i in x.clusters:
         for j in y.clusters:
             z.append(i.pi*j.pi*true_kldiv(i.mu,j.mu,i.sigma,j.sigma))
     return np.sum(z)
+
+def eKLdivVarDiff(x,y,my,a,b):
+    z = []
+    for i in x.clusters:
+        divs = np.array([KLdivDiff(i.mu, i.sigma, j.mu, j.sigma, a, b) for j in y.clusters])
+        numerator = np.sum([j.pi*np.exp(-1*true_kldiv(i.mu, j.mu, i.sigma, j.sigma))*divs[k] for k,j in enumerate(my.clusters)], axis=0)
+        denominator = np.sum(np.array([j.pi*np.exp(-1*true_kldiv(i.mu, j.mu, i.sigma, j.sigma)) for j in my.clusters]))
+        z.append(i.pi*numerator/denominator)
+    return np.sum(z, axis=0)
+        

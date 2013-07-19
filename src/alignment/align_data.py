@@ -9,11 +9,11 @@ from scipy.optimize import minimize
 try:
     from openopt import NLP
     import DerApproximator
-    _USE_OPENOPT=True
+    _USE_OPENOPT = True
 except:
-    _USE_OPENOPT=False
-    
-from fcm.alignment.kldiv import eKLdivVar
+    _USE_OPENOPT = False
+
+from fcm.alignment.kldiv import eKLdivVar, eKLdivVarDiff
 
 
 class BaseAlignData(object):
@@ -51,11 +51,16 @@ class BaseAlignData(object):
                 solver = 'ralg'
             p = NLP(func, x0, args=(self.mx, self.my, self.size), **kwargs)
             z = p.solve(solver)
-            
+
             return z.xf, z.ff, z.istop > 0, z.msg
         else:
             z = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
             return z.x, x.fun, z.success, z.msg
+    def _diff(self, n, *args, **kwargs):
+        a, b = self._format_z(n)
+
+        return eKLdivVarDiff(self.mx, self.my, (self.my * a) + b, a, b)
+
 
     def _get_x0(self):
         raise NotImplementedError
@@ -95,13 +100,21 @@ class DiagonalAlignData(BaseAlignData):
                 del kwargs['solver']
             else:
                 solver = 'ralg'
-            p = NLP(func, x0, args=(self.mx, self.my, self.size), **kwargs)
+            p = NLP(func, x0, df=self._diff, args=(self.mx, self.my, self.size), **kwargs)
             z = p.solve(solver)
             return z.xf, z.ff, z.istop > 0, z.msg
         else:
             r = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
             return r.x, r.fun, r.success, r.message
-        
+    def _diff(self, n, *args, **kwargs):
+        z = super(DiagonalAlignData, self)._diff(n,*args, **kwargs)
+        tmp = []
+        for i in range(self.d):
+            tmp.append(z[(self.d*i)+i])
+        for i in range(self.d):
+            tmp.append(z[-1])
+        return np.array(tmp)
+
     def _format_z(self, z):
         b = z[-self.d:]
         a = np.eye(self.d)
@@ -154,7 +167,7 @@ class CompAlignData(BaseAlignData):
                 solver = 'ralg'
             p = NLP(func, x0, args=(self.mx, self.my, self.size), **kwargs)
             z = p.solve(solver)
-            
+
             return z.xf, z.ff, z.istop > 0, z.msg
         else:
             a = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
@@ -187,14 +200,14 @@ class FullAlignData(BaseAlignData):
 
 
         #call minimizer on
-        z ,s, f, m= self._min(self._optimize, x0, *args, **kwargs)
+        z , s, f, m = self._min(self._optimize, x0, *args, **kwargs)
         a_sub, b_sub = self._format_z(z)
-        a = x0[0:self.d**2].reshape((self.d,self.d))
-        a[np.ix_(self.include,self.include)] = a_sub
+        a = x0[0:self.d ** 2].reshape((self.d, self.d))
+        a[np.ix_(self.include, self.include)] = a_sub
         b = x0[-self.d:]
         b[self.include] = b_sub
 
-        return a,b, f, s, m
+        return a, b, f, s, m
 
     def _format_z(self, z):
         a = z[0:self.d_sub ** 2].reshape(self.d_sub, self.d_sub)
@@ -216,7 +229,7 @@ class FullAlignData(BaseAlignData):
                 solver = 'ralg'
             p = NLP(func, x0, args=(self.mxm, self.mym, self.size), **kwargs)
             z = p.solve(solver)
-            
+
             return z.xf, z.ff, z.istop > 0, z.msg
         else:
             z = minimize(func, x0, args=(self.mxm, self.mym, self.size), *args, **kwargs)
@@ -224,15 +237,15 @@ class FullAlignData(BaseAlignData):
 
     def _get_x0(self):
         m = DiagonalAlignData(self.mx, self.size)
-        scale, shift,f, s, m = m.align(self.my, options={'disp':False})
+        scale, shift, f, s, m = m.align(self.my, options={'disp':False})
 #        shift = self.mx.mus.mean(0) - self.my.mus.mean(0)
 #
 #        scale = np.diag(self.mx.sigmas.mean(0)) / np.diag(self.my.sigmas.mean(0))
         return np.hstack((scale.flatten(), shift))
 
     def _format_x0(self, x0):
-        scale = x0[0:self.d**2].reshape(self.d,self.d)
+        scale = x0[0:self.d ** 2].reshape(self.d, self.d)
         shift = x0[-self.d:]
-        scale = scale[np.ix_(self.include,self.include)]
+        scale = scale[np.ix_(self.include, self.include)]
         shift = shift[self.include]
         return np.hstack((scale.flatten(), shift))
