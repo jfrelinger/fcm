@@ -49,7 +49,7 @@ class BaseAlignData(object):
                 del kwargs['solver']
             else:
                 solver = 'ralg'
-            p = NLP(func, x0, args=(self.mx, self.my, self.size), **kwargs)
+            p = NLP(func, x0, df=self._diff, args=(self.mx, self.my, self.size), **kwargs)
             z = p.solve(solver)
 
             return z.xf, z.ff, z.istop > 0, z.msg
@@ -100,7 +100,7 @@ class DiagonalAlignData(BaseAlignData):
                 del kwargs['solver']
             else:
                 solver = 'ralg'
-            p = NLP(func, x0, df=self._diff, args=(self.mx, self.my, self.size), **kwargs)
+            p = NLP(func, x0, args=(self.mx, self.my, self.size), **kwargs)
             z = p.solve(solver)
             return z.xf, z.ff, z.istop > 0, z.msg
         else:
@@ -172,6 +172,16 @@ class CompAlignData(BaseAlignData):
         else:
             a = minimize(func, x0, args=(self.mx, self.my, self.size), *args, **kwargs)
             return a.x, a.fun, a.success, a.message
+
+    def _diff(self, n, *args, **kwargs):
+        z = super(CompAlignData, self)._diff(n,*args, **kwargs)
+        tmp = []
+        for i in range(self.d):
+            for j in range(self.d):
+                if i != j:
+                    tmp.append(z[(self.d*i)+j])
+        
+        return np.array(tmp)
 
 class FullAlignData(BaseAlignData):
     '''
