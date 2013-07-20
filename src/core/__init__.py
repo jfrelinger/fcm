@@ -10,5 +10,5 @@ from fcm.core.fcmexceptions import CompensationError
 from fcm.core.transforms import logicle, hyperlog, productlog
 from fcm.core.gate import PolyGate, points_in_poly, QuadGate, IntervalGate, ThresholdGate
 from fcm.core.gate import generate_f_score_gate
-from fcm.core.subsample import Subsample, SubsampleFactory, DropChannel
+from fcm.core.subsample import Subsample, SubsampleFactory, DropChannel, RandomSubsample, AnomalySubsample, BiasSubsample
 from fcm.core.compensate import load_compensate_matrix, compensate, gen_spill_matrix, get_spill

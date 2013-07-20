@@ -9,7 +9,7 @@ from fcm.core import BadFCMPointDataTypeError, UnimplementedFcsDataMode
 from fcm.core import CompensationError
 from fcm.core import load_compensate_matrix, compensate, gen_spill_matrix
 from fcm.io import FCSreader, loadFCS, loadMultipleFCS, FlowjoWorkspace, load_flowjo_xml, export_fcs
-from fcm.core import Subsample, SubsampleFactory, DropChannel
+from fcm.core import Subsample, SubsampleFactory, DropChannel, RandomSubsample, AnomalySubsample, BiasSubsample
 from fcm.core  import logicle, hyperlog
 
 __all__ = [
