@@ -108,7 +108,7 @@ class DPCluster(Component):
             new_sigma = k * k * self.sigma
         elif isinstance(k, ndarray):
             new_mu = dot(self.mu, k)
-            new_sigma = dot(dot(k, self.sigma), k.T)
+            new_sigma = dot(dot(k.T, self.sigma), k)
         else:
             raise TypeError('unsupported type: %s' % type(k))
 
@@ -119,7 +119,7 @@ class DPCluster(Component):
             new_mu = self.mu * k
             new_sigma = k * k * self.sigma
         elif isinstance(k, ndarray):
-            new_mu = dot(k, self.mu)
+            new_mu = np.dot(k, self.mu)
             new_sigma = dot(dot(k, self.sigma), k.T)
         else:
             raise TypeError('unsupported type: %s' % type(k))
@@ -279,6 +279,14 @@ class DPMixture(ModelResult):
 
         k = len(self.clusters) / self.niter
         rslts = []
+        if self.m is None:
+            m = 0
+        else:
+            m = self.m
+        if self.s is None:
+            s = 1
+        else:
+            s = self.s
         for i in range(k):
             mu_avg = []
             sig_avg = []
@@ -291,9 +299,10 @@ class DPMixture(ModelResult):
             new_mu = mean(mu_avg, 0)
             new_sig = mean(sig_avg, 0)
             
-            rslts.append(DPCluster(new_pi, new_mu, new_sig, (new_mu-self.m)/self.s, new_sig/outer(self.s,self.s)))
+            
+            rslts.append(DPCluster(new_pi, new_mu, new_sig, (new_mu-m)/s, new_sig/outer(s,s)))
 
-        return DPMixture(rslts, 1, self.m, self.s)
+        return DPMixture(rslts, 1, m, s)
 
     def last(self, n=1):
         '''
@@ -723,8 +732,8 @@ class HDPMixture(Component):
             new_mu = self.mus * k
             new_sigma = k * k * self.sigmas
         elif isinstance(k, ndarray):
-            new_mu = dot(k, self.mus)
-            new_sigma = np.array([dot(dot(k, i), k.T) for i in self.sigmas])
+            new_mu = dot(k,self.mus)
+            new_sigma = np.array([dot(k,dot( i, k.T)) for i in self.sigmas])
         else:
             raise TypeError('unsupported type: %s' % type(k))
 

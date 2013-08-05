@@ -13,7 +13,7 @@ try:
 except:
     _USE_OPENOPT = False
 
-from fcm.alignment.kldiv import eKLdivVar, eKLdivVarDiff
+from fcm.alignment.kldiv import eKLdivVar, eKLdivVarDiff, eSKLdivVar
 
 
 class BaseAlignData(object):
@@ -50,6 +50,7 @@ class BaseAlignData(object):
             else:
                 solver = 'ralg'
             p = NLP(func, x0, df=self._diff, args=(self.mx, self.my, self.size), **kwargs)
+            
             z = p.solve(solver)
 
             return z.xf, z.ff, z.istop > 0, z.msg
@@ -58,7 +59,7 @@ class BaseAlignData(object):
             return z.x, x.fun, z.success, z.msg
     def _diff(self, n, *args, **kwargs):
         a, b = self._format_z(n)
-
+        
         return eKLdivVarDiff(self.mx, self.my, (self.my * a) + b, a, b)
 
 
@@ -100,7 +101,9 @@ class DiagonalAlignData(BaseAlignData):
                 del kwargs['solver']
             else:
                 solver = 'ralg'
-            p = NLP(func, x0, args=(self.mx, self.my, self.size), **kwargs)
+            p = NLP(func, x0, args=(self.mx, self.my, self.size), df=self._diff, **kwargs)
+            p.checkdf()
+            
             z = p.solve(solver)
             return z.xf, z.ff, z.istop > 0, z.msg
         else:
@@ -146,15 +149,8 @@ class CompAlignData(BaseAlignData):
         return a, b
 
     def _optimize(self, n, mx, my, size):
-        a = np.eye(self.d)
-        counter = 0
-        for i in range(self.d):
-            for j in range(self.d):
-                if i == j:
-                    pass
-                else:
-                    a[i, j] = n[counter]
-                    counter += 1
+        a,b = self._format_z(n)
+        
         rslt = eKLdivVar(self.mx, (self.my * a), self.size)
         return rslt
 
@@ -165,7 +161,7 @@ class CompAlignData(BaseAlignData):
                 del kwargs['solver']
             else:
                 solver = 'ralg'
-            p = NLP(func, x0, args=(self.mx, self.my, self.size), **kwargs)
+            p = NLP(func, x0, args=(self.mx, self.my, self.size),df=self._diff, **kwargs)
             z = p.solve(solver)
 
             return z.xf, z.ff, z.istop > 0, z.msg
@@ -174,11 +170,14 @@ class CompAlignData(BaseAlignData):
             return a.x, a.fun, a.success, a.message
 
     def _diff(self, n, *args, **kwargs):
-        z = super(CompAlignData, self)._diff(n,*args, **kwargs)
+        a,b = self._format_z(n)
+        z =  eKLdivVarDiff(self.mx, self.my, (self.my * a) + b, a, b)
         tmp = []
         for i in range(self.d):
             for j in range(self.d):
-                if i != j:
+                if i == j:
+                    pass
+                else:
                     tmp.append(z[(self.d*i)+j])
         
         return np.array(tmp)
@@ -237,7 +236,7 @@ class FullAlignData(BaseAlignData):
                 del kwargs['solver']
             else:
                 solver = 'ralg'
-            p = NLP(func, x0, args=(self.mxm, self.mym, self.size), **kwargs)
+            p = NLP(func, x0, args=(self.mxm, self.mym, self.size),df= self._diff, **kwargs)
             z = p.solve(solver)
 
             return z.xf, z.ff, z.istop > 0, z.msg
@@ -259,3 +258,7 @@ class FullAlignData(BaseAlignData):
         scale = scale[np.ix_(self.include, self.include)]
         shift = shift[self.include]
         return np.hstack((scale.flatten(), shift))
+    def _diff(self, n, *args, **kwargs):
+        a, b = self._format_z(n)
+        
+        return eKLdivVarDiff(self.mxm, self.mym, (self.mym * a) + b, a, b)

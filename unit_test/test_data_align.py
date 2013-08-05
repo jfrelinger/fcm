@@ -23,16 +23,19 @@ class DiagAlignTestCase(unittest.TestCase):
 
     def testDiagAlign(self):
         y = self.x + np.array([1, -1, 1])
+        lb = np.array([0.1,0.1,0.1,-np.inf,-np.inf,-np.inf])
         #a, b = self.Diag.align(y, method='TNC', bounds=np.array([(0.5, 2), (None, None)]), tol=1e-8, options={'disp': False})
-        a, b, f, s, _ = self.Diag.align(y)
+        a, b, f, s, m = self.Diag.align(y, lb=lb, solver='ralg')
         assert s, 'failed to converge'
         npt.assert_array_almost_equal(a, np.eye(3), decimal=1)
         npt.assert_array_almost_equal(b, np.array([-1, 1, -1]), decimal=1)
 
     def testCompAlign(self):
         m = np.array([[1, 0, .2], [0, 1, 0], [0, 0, 1]])
+        lb = np.ones(6)*-.2
+        ub = np.ones(6)*.2
         y = self.x * m
-        a, b, f, s, _ = self.Comp.align(y, ftol=1e-16, xtol=1e-16)
+        a, b, f, s, _ = self.Comp.align(y, lb=lb, ub=ub, fEnough=0, ftol=1e-16, xtol=1e-16)
         assert s, 'failed to converge'
         npt.assert_array_almost_equal(a, np.linalg.inv(m), decimal=1)
         npt.assert_array_almost_equal(b, np.array([0, 0, 0]), decimal=1)
@@ -41,7 +44,7 @@ class DiagAlignTestCase(unittest.TestCase):
     def testFullAlign(self):
         m = np.array([[1, 0, .2], [0, 1, 0], [0, 0, 1]])
         y = self.x * m
-        a, b, f, s, _ = self.Full.align(y)
+        a, b, f, s, _ = self.Full.align(y, ftol=1e-10, gtol=1e-10, xtol=1e-10)
         assert s, 'failed to converge'
         npt.assert_array_almost_equal(a, np.linalg.inv(m), decimal=1)
         npt.assert_array_almost_equal(b, np.array([0, 0, 0]), decimal=1)
