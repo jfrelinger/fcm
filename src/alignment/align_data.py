@@ -124,7 +124,7 @@ class DiagonalAlignData(BaseAlignData):
         for i in range(self.d):
             tmp.append(z[(self.d * i) + i])
         for i in range(self.d):
-            tmp.append(z[-1])
+            tmp.append(z[(self.d**2)+i])
         return np.array(tmp)
 
     def _format_z(self, z):

@@ -25,7 +25,7 @@ class DiagAlignTestCase(unittest.TestCase):
         y = self.x + np.array([1, -1, 1])
         lb = np.array([0.1,0.1,0.1,-np.inf,-np.inf,-np.inf])
         #a, b = self.Diag.align(y, method='TNC', bounds=np.array([(0.5, 2), (None, None)]), tol=1e-8, options={'disp': False})
-        a, b, f, s, m = self.Diag.align(y, lb=lb, solver='ralg')
+        a, b, f, s, m = self.Diag.align(y, solver='ralg', stencil=3)
         assert s, 'failed to converge'
         npt.assert_array_almost_equal(a, np.eye(3), decimal=1)
         npt.assert_array_almost_equal(b, np.array([-1, 1, -1]), decimal=1)

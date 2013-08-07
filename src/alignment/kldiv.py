@@ -40,10 +40,9 @@ def KLdivDiff(p_mean,p_sig,q_mean,q_sig,a,b):
     asai = inv(np.dot(a,np.dot(q_sig,a.T)))
     asig = np.dot(a,q_sig)
     mdiff = p_mean-np.dot(a, q_mean)-b
-    #print 'matrix', np.dot(mdiff, q_mean.T), np.outer(mdiff, q_mean)
+
     rf = (-1*asig) + np.outer(mdiff,q_mean) + np.dot(np.dot(p_sig+(np.outer(mdiff,mdiff)),asai),asig)
-    
-    return np.hstack([np.dot(-1*asai,rf).T.flatten(), (-1*np.dot(mdiff,asai))])
+    return np.hstack([np.dot(-1*asai,rf).T.flatten(),(np.dot(-1*asai,mdiff))])
 
 
 def eKLdiv(x, y, n=100000, **kwargs):
