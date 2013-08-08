@@ -56,14 +56,18 @@ def export_fcs(name, pnts, channels, extra=None):
         text['P%dE' % (i+1)] = '0,0'
         #text['P%dR' % (i+1)] = '2623144'
         text['P%dR' % (i+1)] = str(int(pnts[:,i].max()))
-        text['P%dN' % (i+1)] = channels[i]
+        text['P%dN' % (i+1)] = channels[i][0].replace(delim,delim+delim)
+        if channels[i][0] != channels[i][1]:
+            text['P%dS' % (i+1)] = channels[i][1].replace(delim,delim+delim)
         
     if extra is not None:
         for i in extra:
-            i = i.strip()
-            if i.lower() not in text and i.upper() not in text:
-                text[i] = extra[i]
-        
+            tmp =  i.replace(delim,delim+delim)
+            tmp = i.strip()
+            if tmp.lower() not in text and tmp.upper() not in text:
+                val = extra[i].replace(delim,delim+delim)
+                text[i] = val
+
     i = 1
     size, _ =text_size(text, delim)
     prop_size = text_start+((size%256)+i) * 256

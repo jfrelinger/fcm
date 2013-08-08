@@ -253,7 +253,7 @@ class FCSreader(object):
 
     def parse_data(self, offset, start, stop, text):
         """return numpy.array of data segment of fcs file"""
-
+        print text
         dtype = text['datatype']
         mode = text['mode']
         tot = int(text['tot'])
@@ -359,7 +359,7 @@ def parse_pairs(text):
     # match the delimited character unless it's doubled
     regex = re.compile('(?<=[^%s])%s(?!%s)' % (delim, delim, delim))
     tmp = regex.split(tmp)
-    return dict(zip([x.lower() for x in tmp[::2]], tmp[1::2]))
+    return dict(zip([x.lower().replace(delim+delim,delim) for x in tmp[::2]],[x.replace(delim+delim,delim) for x in tmp[1::2]]))
 
 
 def fmt_integer(b):

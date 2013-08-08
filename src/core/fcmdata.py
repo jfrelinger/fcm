@@ -2,7 +2,7 @@
 A python object representing flow cytomoetry data
 """
 from __future__ import division
-from numpy import median, log
+from numpy import median, log, zeros
 from annotation import Annotation
 from transforms import logicle as _logicle
 from transforms import hyperlog as _hyperlog
@@ -12,7 +12,7 @@ from fcm.core.compensate import compensate
 from fcm.core.subsample import Subsample, RandomSubsample, AnomalySubsample
 from fcm.core.subsample import BiasSubsample
 #from fcm.io.export_to_fcs import export_fcs
-from subsample import DropChannel
+from subsample import DropChannel, AddChannel
 
 class FCMdata(object):
     """
@@ -317,7 +317,7 @@ class FCMdata(object):
         export out current view to a fcs file
         '''
         from fcm.io import export_fcs
-        export_fcs(file_name, self.view(), self.channels, self.notes.text)
+        export_fcs(file_name, self.view(), self.current_node.channels, self.notes.text)
 
     def extract_channels(self, channels, keep=False):
         '''
@@ -334,3 +334,12 @@ class FCMdata(object):
         d.drop(self)
         return self
 
+    def add_channel(self, name, channel=None, short_name=None):
+        if channel is None:
+            channel = zeros((self.shape[0],1))
+        
+        print channel.shape
+        
+        node = AddChannel(channel, name, short_name)
+        node.add(self)
+        return self

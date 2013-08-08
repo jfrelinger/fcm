@@ -111,7 +111,24 @@ class DropChannelNode(Node):
         return the view of the data associated with this node
         """
         return self.parent.view()[:, self.param]
+        
 
+class AddChannelNode(DropChannelNode):
+    '''
+    Node of data adding a channel
+    '''
+    def __init__(self, name, parent, data, channels):
+        self.name = name
+        self.parent = parent
+        self.data = data
+        self.prefix = 'a'
+        self.channels = channels    
+    
+    def view(self):
+        """
+        return the view of the data associated with this node
+        """
+        return self.data
 
 class GatingNode(Node):
     """
