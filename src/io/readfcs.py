@@ -253,7 +253,7 @@ class FCSreader(object):
 
     def parse_data(self, offset, start, stop, text):
         """return numpy.array of data segment of fcs file"""
-        print text
+        
         dtype = text['datatype']
         mode = text['mode']
         tot = int(text['tot'])
