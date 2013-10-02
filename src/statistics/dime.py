@@ -23,9 +23,9 @@ class Dime(object):
 
         #pull mixture parameters from cluster if passed
         if cluster is  not None:
-            self.pi = cluster.pis()
-            self.mu = cluster.mus()
-            self.sigma = cluster.sigmas()
+            self.pi = cluster.pis
+            self.mu = cluster.mus
+            self.sigma = cluster.sigmas
             # TODO add fetching cmap here
             try:
                 if cmap == None:
