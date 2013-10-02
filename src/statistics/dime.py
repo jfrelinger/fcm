@@ -102,7 +102,7 @@ class Dime(object):
             dimm = dim[tt]
             D = zeros((self.k, self.k))
             for i in range(self.k):
-                mi = self.mu[i, :][:, dimm]
+                mi = self.mu[i, :][:, dimm].reshape(1,-1)
                 si = self.sigma[i, :, :][dimm, :][:, dimm]
                 for jj in range(i, self.k):
                     #print self.sigma[jj,:,:][dimm,:][:,dimm]
