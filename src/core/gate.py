@@ -1,5 +1,4 @@
 import numpy
-from matplotlib.nxutils import points_inside_poly
 from tree import GatingNode
 
 
@@ -49,11 +48,7 @@ class PolyGate(Filter):
         
         if name is None:
             name = self.name
-        #idxs = points_in_poly(self.vert, fcm.view()[:, chan])
-
-        # matplotlib has points in poly routine in C
-        # no faster than our numpy version
-        idxs = points_inside_poly(fcm.view()[:, chan], self.vert)
+        idxs = points_in_poly(self.vert, fcm.view()[:, chan])
 
         if invert:
             idxs = numpy.invert(idxs)
@@ -289,12 +284,16 @@ def points_in_poly(vs, ps):
     return numpy.bitwise_or.reduce(inPoly, 0)
 
 if __name__ == '__main__':
-    vertices = numpy.array([[2, 2], [10, 2], [10, 10], [2, 10]], 'd')
-    points = numpy.random.uniform(0, 10, (10000000, 2))
-
+    vertices = numpy.array([[5, 5], [10, 5], [10, 10], [5, 10]], 'd')
+    #vertices = numpy.array([[0,0],[10,10],[0,10]], 'd')
+    points = numpy.random.uniform(0, 10, (1000000, 2))
+    #points = numpy.array([[5,7],[10,6]])
     import time
     start = time.clock()
     inside = points_in_poly(vertices, points)
     print "Time elapsed: ", time.clock() - start
     print numpy.sum(inside)
-
+    import pylab
+    pylab.scatter(points[~inside,0], points[~inside,1], s=10, edgecolor='none', c='b')
+    pylab.scatter(points[inside,0], points[inside,1], s=10, edgecolor='none', c='r')
+    pylab.show()
