@@ -273,7 +273,7 @@ class FCSreader(object):
         drange = []
         for i in range(1, int(text['par']) + 1):
             bitwidth.append(int(text['p%db' % i]))
-            drange.append(int(text['p%dr' % i]))
+            drange.append(int(float(text['p%dr' % i])))
 
         if dtype.lower() == 'i':
             data = self.parse_int_data(offset, start, stop, bitwidth, drange, tot, order)
