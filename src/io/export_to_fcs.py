@@ -13,6 +13,9 @@ def text_size(dict,delim):
     return size, rslt
 
 def export_fcs(name, pnts, channels, extra=None):
+    '''
+    write a set of points and corresponding channels out as a fcs file given by name
+    '''
     # magic fcs defined positions
     header_text_start = (10, 17)
     header_text_end = (18, 25)
@@ -72,7 +75,7 @@ def export_fcs(name, pnts, channels, extra=None):
     size, _ =text_size(text, delim)
     prop_size = text_start+((size%256)+i) * 256
     text['BEGINDATA'] = prop_size
-    text['ENDDATA'] = prop_size+datasize
+    text['ENDDATA'] = prop_size+datasize-1
     data_start = prop_size
     data_end = prop_size+datasize-1
     size, text_segment = text_size(text,delim)

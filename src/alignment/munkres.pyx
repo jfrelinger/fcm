@@ -18,9 +18,9 @@ cdef extern from "munkres_ext/Munkres.h":
 
 @cython.boundscheck(False)
 def munkres(np.ndarray[np.double_t,ndim=2, mode="c"] A not None):
-    '''
+    """
     calculate the minimum cost assigment of a cost matrix (must be numpy.double type)
-    '''
+    """
     cdef int x = A.shape[0]
     cdef int y = A.shape[1]
     

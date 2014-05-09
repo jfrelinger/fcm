@@ -1,7 +1,7 @@
-'''
+"""
 Created on May 16, 2013
 Author: Jacob Frelinger <jacob.frelinger@duke.edu>
-'''
+"""
 
 import numpy as np
 from scipy.misc import logsumexp
@@ -13,13 +13,13 @@ try:
 except:
     _USE_OPENOPT = False
 
-from fcm.alignment.kldiv import eKLdivVar, eKLdivVarDiff, eSKLdivVar
+from fcm.alignment.kldiv import eKLdivVar, eKLdivVarDiff
 
 
 class BaseAlignData(object):
-    '''
+    """
     base class to align a data set to a reference data set
-    '''
+    """
     def __init__(self, x, size=100000):
 
         self.mx = x
@@ -27,11 +27,10 @@ class BaseAlignData(object):
 
         self.size = size
 
-
     def align(self, y, x0=None, *args, ** kwargs):
-        '''
+        """
         Generate A and B that minimizes the distance between x and y
-        '''
+        """
         self.my = y
         if x0 is None:
             x0 = self._get_x0()
@@ -67,7 +66,6 @@ class BaseAlignData(object):
 
         return eKLdivVarDiff(self.mx, self.my, (self.my * a) + b, a, b)
 
-
     def _get_x0(self):
         raise NotImplementedError
 
@@ -79,14 +77,10 @@ class BaseAlignData(object):
 
 
 class DiagonalAlignData(BaseAlignData):
-    '''
+    """
     Generate Diagonal only alignment
-    '''
-
+    """
     def _get_x0(self):
-#        shift = self.mx.mus.mean(0) - self.my.mus.mean(0)
-#
-#        scale = np.diag(self.mx.sigmas.mean(0)) / np.diag(self.my.sigmas.mean(0))
         x = self.mx.draw(self.size)
         y = self.my.draw(self.size)
         shift = -1 * y.mean(0) * x.std(0) / y.std(0) + x.mean(0)
@@ -137,9 +131,9 @@ class DiagonalAlignData(BaseAlignData):
 
 
 class CompAlignData(BaseAlignData):
-    '''
+    """
     Generate 'compensation' alignment: (only estimate off diagonals)
-    '''
+    """
     def _get_x0(self):
         a = np.zeros(self.d ** 2 - self.d)
         return a
@@ -196,10 +190,11 @@ class CompAlignData(BaseAlignData):
 
         return np.array(tmp)
 
+
 class FullAlignData(BaseAlignData):
-    '''
+    """
     Generate full alignment matrix
-    '''
+    """
     def __init__(self, x, size=100000, exclude=None):
         if exclude is None:
             exclude = []
@@ -212,15 +207,14 @@ class FullAlignData(BaseAlignData):
         self.mxm = self.mx.get_marginal(self.include)
 
     def align(self, y, x0=None, *args, ** kwargs):
-        '''
+        """
         Generate A and B that minimizes the distance between x and y
-        '''
+        """
         self.my = y
         self.mym = self.my.get_marginal(self.include)
 
         if x0 is None:
             x0 = self._get_x0()
-
 
         #call minimizer on
         z , s, f, m = self._min(self._optimize, x0, *args, **kwargs)
@@ -266,9 +260,6 @@ class FullAlignData(BaseAlignData):
     def _get_x0(self):
         m = DiagonalAlignData(self.mx, self.size)
         scale, shift, f, s, m = m.align(self.my, options={'disp':False})
-#        shift = self.mx.mus.mean(0) - self.my.mus.mean(0)
-#
-#        scale = np.diag(self.mx.sigmas.mean(0)) / np.diag(self.my.sigmas.mean(0))
         return np.hstack((scale.flatten(), shift))
 
     def _format_x0(self, x0):

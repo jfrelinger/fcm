@@ -1,8 +1,8 @@
-'''
+"""
 Created on May 6, 2013
 
 @author: Jacob Frelinger <jacob.frelinger@duke.edu>
-'''
+"""
 import numpy as np
 from scipy.spatial.distance import cdist
 import fcm.statistics as stats
@@ -12,11 +12,11 @@ from fcm.statistics.dp_cluster import ModalDPMixture
 
 
 def mean_distance(ref, test, use_means=None, **kwargs):
-    '''
+    """
     calculate cost matrix using mean distance between mixture models
     optional argument use_means controls overiding default use of modes if
     available
-    '''
+    """
     if use_means:
         try:
             x = ref.centered_mus
@@ -41,9 +41,9 @@ def mean_distance(ref, test, use_means=None, **kwargs):
 
 
 def classification_distance(ref, test, test_data=None, ndraw=100000, **kwargs):
-    '''
+    """
     generate cost matrix using miss classification as distance
-    '''
+    """
     if test_data is None:
         test_data = ref.draw(ndraw)
 
@@ -60,17 +60,13 @@ def classification_distance(ref, test, test_data=None, ndraw=100000, **kwargs):
     cost = cost.astype(np.double)
     for i,j in enumerate(tot):
         cost[:,i] = cost[:,i]/j
-    #for i in range(len(ref)):
-    #    if i != cost[i,:].argmin():
-    #        print 'cost', i, 'tot', tot[i],'min',cost[i,:].argmin(), cost[i,:]
-    #return (cost / test_data.shape[0]).T.copy()
     return cost.T.copy()
 
 
 def kldiv_distance(ref, test, use_means=None, ndraws=100000, **kwargs):
-    '''
+    """
     generate cost matrix using kl-divergence
-    '''
+    """
     if isinstance(ref, ModalDPMixture) and isinstance(test, ModalDPMixture):
         xs = [ref.get_submodel(ref.cmap[j]) for j in ref.cmap]
         ys = [test.get_submodel(test.cmap[j]) for j in test.cmap]
@@ -96,17 +92,8 @@ if __name__ == '__main__':
     from munkres import munkres
     print 'Ref has means', A.mus, 'with weights', A.pis
     print 'Test has means', B.mus, 'with weights', B.pis
-#    print 'mean distance'
-#    print mean_distance(A, B)
-#    print munkres(mean_distance(A, B))
     mA = A.make_modal()
     mB = B.make_modal()
-#    print 'modal distance'
-#    print mean_distance(mA, mB)
-#    print munkres(mean_distance(mA, mB))
-#    print 'modal using means'
-#    print mean_distance(mA, mB, use_means=True)
-#    print munkres(mean_distance(mA, mB, use_means=True))
 
     print 'classification'
     print classification_distance(A, B)
