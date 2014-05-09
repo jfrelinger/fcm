@@ -3,6 +3,7 @@ import numpy as np
 
 
 class Node(object):
+
     """
     base node object
     """
@@ -24,19 +25,26 @@ class Node(object):
         tmp = "  " * depth + self.name
         if size:
             tmp = tmp + " " + str(self.view().shape[0])
-    
+
         return tmp + "\n"
 
     def __getattr__(self, name):
         if name == 'channels':
             return self.parent.channels
         else:
-            raise AttributeError("'%s' has no attribue '%s'" % (str(self.__class__), name))
+            raise AttributeError(
+                "'%s' has no attribue '%s'" %
+                (str(
+                    self.__class__),
+                    name))
+
 
 class RootNode(Node):
+
     """
     Root Node
     """
+
     def __init__(self, name, data, channels):
         self.name = name
         self.parent = None
@@ -44,7 +52,9 @@ class RootNode(Node):
         self.channels = channels
         self.prefix = 'root'
 
+
 class TransformNode(Node):
+
     """
     Transformed Data Node
     """
@@ -59,9 +69,15 @@ class TransformNode(Node):
         if name == 'channels':
             return self.parent.channels
         else:
-            raise AttributeError("'%s' has no attribue '%s'" % (str(self.__class__), name))
-        
+            raise AttributeError(
+                "'%s' has no attribue '%s'" %
+                (str(
+                    self.__class__),
+                    name))
+
+
 class CompensationNode(TransformNode):
+
     '''
     Compensated Data Node
     '''
@@ -73,9 +89,10 @@ class CompensationNode(TransformNode):
         self.sidx = sidx
         self.spill = spill
         self.prefix = 'c'
-        
+
 
 class SubsampleNode(Node):
+
     """
     Node of subsampled data
     """
@@ -85,7 +102,7 @@ class SubsampleNode(Node):
         self.parent = parent
         self.param = param
         self.prefix = 's'
-        if isinstance(param,tuple):
+        if isinstance(param, tuple):
             self.channels = self.parent.channels[param[1]]
 
     def view(self):
@@ -94,7 +111,9 @@ class SubsampleNode(Node):
         """
         return self.parent.view().__getitem__(self.param)
 
+
 class DropChannelNode(Node):
+
     """
     Node of data removing specific channels
     """
@@ -111,26 +130,30 @@ class DropChannelNode(Node):
         return the view of the data associated with this node
         """
         return self.parent.view()[:, self.param]
-        
+
 
 class AddChannelNode(DropChannelNode):
+
     '''
     Node of data adding a channel
     '''
+
     def __init__(self, name, parent, data, channels):
         self.name = name
         self.parent = parent
         self.data = data
         self.prefix = 'a'
-        self.channels = channels    
-    
+        self.channels = channels
+
     def view(self):
         """
         return the view of the data associated with this node
         """
         return self.data
 
+
 class GatingNode(Node):
+
     """
     Node of gated data
     """
@@ -153,9 +176,15 @@ class GatingNode(Node):
         if name == 'channels':
             return self.parent.channels
         else:
-            raise AttributeError("'%s' has no attribue '%s'" % (str(self.__class__), name))
+            raise AttributeError(
+                "'%s' has no attribue '%s'" %
+                (str(
+                    self.__class__),
+                    name))
+
 
 class Tree(object):
+
     '''Tree of data for FCMdata object.'''
 
     def __init__(self, pnts, channels):
@@ -168,9 +197,9 @@ class Tree(object):
         '''return the parent of a node'''
         return self.current.parent
 
-    def children(self , node=None):
+    def children(self, node=None):
         '''return the children of a node'''
-        if node == None:
+        if node is None:
             node = self.current
         return [i for i in self.nodes.values() if i.parent == node]
 
@@ -178,7 +207,8 @@ class Tree(object):
         '''visit a node in the tree'''
         if isinstance(name, basestring):
             self.current = self.nodes[name]
-        elif isinstance(name, Node): # in this case we assume we're a node type.
+        # in this case we assume we're a node type.
+        elif isinstance(name, Node):
             self.current = name
         else:
             raise KeyError("No such Node %s" % str(name))
@@ -191,7 +221,7 @@ class Tree(object):
             if name in self.nodes:
                 return self.nodes[name]
             else:
-                raise KeyError, 'No node named %s' % name
+                raise KeyError('No node named %s' % name)
 
     def view(self):
         '''Return a view of the current data'''
@@ -204,13 +234,13 @@ class Tree(object):
             pat = re.compile(prefix + "(\d+)")
             matches = [pat.search(i) for i in self.nodes]
             matches = [i for i in matches if i is not None]
-            if len(matches): # len > 0
-                n = max([ int(i.group(1)) for i in matches])
+            if len(matches):  # len > 0
+                n = max([int(i.group(1)) for i in matches])
                 name = prefix + str(n + 1)
             else:
                 name = prefix + '1'
         if name in self.nodes.keys():
-            raise KeyError, 'name, %s, already in use in tree' % name
+            raise KeyError('name, %s, already in use in tree' % name)
         else:
             node.name = name
             self.nodes[name] = node
@@ -222,16 +252,15 @@ class Tree(object):
         Rename a node name
         D(old,new) -> rename old to new
         """
-        if not self.nodes.has_key(old_name):
+        if old_name not in self.nodes:
             # we don't have old_name...
-            raise KeyError, 'No node named %s' % old_name
-        if self.nodes.has_key(new_name):
-            raise KeyError, 'There already is a node name %s' % new_name
+            raise KeyError('No node named %s' % old_name)
+        if new_name in self.nodes:
+            raise KeyError('There already is a node name %s' % new_name)
         else:
-            self.nodes[new_name] = self.nodes[old_name] # move node
-            self.nodes[new_name].name = new_name # fix it's name
-            del self.nodes[old_name] # remove old node.
-
+            self.nodes[new_name] = self.nodes[old_name]  # move node
+            self.nodes[new_name].name = new_name  # fix it's name
+            del self.nodes[old_name]  # remove old node.
 
     def pprint(self, size=False):
         return self._rpprint(self.root, 0, size)
@@ -244,5 +273,3 @@ class Tree(object):
 
 if __name__ == '__main__':
     pass
-
-

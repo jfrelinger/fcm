@@ -3,6 +3,7 @@ import numpy
 
 # do we even use this?
 class Partition(object):
+
     """Stores information about how a data set was partitioned.
 
     Typically returned by some clustering function."""
@@ -18,7 +19,7 @@ class Partition(object):
         self.fcm = fcm
         self.component = component
         if p is None and z is None:
-            raise(Warning("Neither p nor z arguments specified."))
+            raise Warning
         self.p = p
         if z is not None:
             self.z = z
@@ -31,7 +32,7 @@ class Partition(object):
             try:
                 self.z = numpy.argmax(self.p, 1)
             except:
-                raise(Warning("Neither p nor z is defined"))
+                raise Warning
         return self.z
 
     def get_k(self, k, theta=None):
@@ -41,7 +42,10 @@ class Partition(object):
         if self.z is None:
             return numpy.array([])
         else:
-            return numpy.nonzero((self.z == k) & numpy.any(self.p > theta, 1))[0]
+            return numpy.nonzero(
+                (self.z == k) & numpy.any(
+                    self.p > theta,
+                    1))[0]
 
 if __name__ == '__main__':
     pass

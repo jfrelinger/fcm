@@ -1,7 +1,9 @@
 """FCM annotation and annotation sets for FCM data and files
 """
 
+
 class Annotation(object):
+
     """
     Annotation object for storing metadata about FCM data
     """
@@ -10,7 +12,7 @@ class Annotation(object):
         """
         Annotation([annotations = {}])
         """
-        if annotations == None:
+        if annotations is None:
             annotations = {}
 
         self.__dict__['_mydict'] = annotations
@@ -27,7 +29,11 @@ class Annotation(object):
             try:
                 return self._mydict.__getattribute__(name)
             except:
-                raise AttributeError("'%s' has no attribue '%s'" % (str(self.__class__), name))
+                raise AttributeError(
+                    "'%s' has no attribue '%s'" %
+                    (str(
+                        self.__class__),
+                        name))
 
     def __getstate__(self):
         return self._mydict
@@ -42,7 +48,7 @@ class Annotation(object):
         allow usage of annotation.foo  = x or annotation[foo] =x to set the
         intendede value
         """
-        #return setattr(self._mydict, name, value)
+        # return setattr(self._mydict, name, value)
         Annotation.__getattribute__(self, '_mydict')[name] = value
         self.__dict__[name] = value
 

@@ -1,6 +1,7 @@
 import numpy
 import pylab
 
+
 def dimechart(indicators, values, labels,
               cmap=pylab.cm.gist_rainbow, xlab='', ylab=''):
     indicators = numpy.array(indicators)
@@ -56,21 +57,25 @@ def dimechart(indicators, values, labels,
 
     pylab.show()
 
+
 def make_spark(xs, xoffset=0, yoffset=0, w=1, h=10,
                cmap=pylab.cm.gist_rainbow):
     # make central line
     n = len(xs)
     dw = (w - 1) / 2.0
-    pylab.plot([xoffset + 1 - dw, xoffset + 1 + n + dw], [yoffset, yoffset], 'k-')
+    pylab.plot(
+        [xoffset + 1 - dw, xoffset + 1 + n + dw], [yoffset, yoffset], 'k-')
     cs = cmap(numpy.linspace(0, 1, n))
     for k, x in enumerate(xs):
-        if x: # up
-            xpts = numpy.array([k + 1 - dw, k + 2 + dw, k + 2 + dw, k + 1 - dw]) + xoffset
+        if x:  # up
+            xpts = numpy.array(
+                [k + 1 - dw, k + 2 + dw, k + 2 + dw, k + 1 - dw]) + xoffset
             ypts = numpy.array([0, 0, h, h]) + yoffset
             pylab.fill(xpts, ypts, color=cs[k], alpha=0.5, closed=True,
                        ec='k')
         else:
-            xpts = numpy.array([k + 1 - dw, k + 2 + dw, k + 2 + dw, k + 1 - dw]) + xoffset
+            xpts = numpy.array(
+                [k + 1 - dw, k + 2 + dw, k + 2 + dw, k + 1 - dw]) + xoffset
             ypts = numpy.array([0, 0, -h, -h]) + yoffset
             pylab.fill(xpts, ypts, color=cs[k], alpha=0.5, closed=True,
                        ec='k')
@@ -82,4 +87,3 @@ if __name__ == '__main__':
     print d
     dimechart(i, d, l, pylab.cm.gist_rainbow)
     pylab.show()
-

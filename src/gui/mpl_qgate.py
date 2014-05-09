@@ -5,7 +5,9 @@ import matplotlib.pyplot as plt
 import time
 from fcm import QuadGate
 
+
 class Gate(object):
+
     """Gate class implements gating using Matplotlib animation and events.
 
     Right click to add vertex.
@@ -46,13 +48,14 @@ class Gate(object):
                 self.vline.set_ydata([event.ydata, event.ydata])
             else:
                 print 'setting up lines'
-                self.hline = self.ax.plot([event.xdata, event.xdata], [ymin, ymax], linewidth=.001 * w, c='black')[-1]
-                self.vline = self.ax.plot([xmin, xmax], [event.ydata, event.ydata], linewidth=.001 * w, c='black')[-1]
+                self.hline = self.ax.plot(
+                    [event.xdata, event.xdata], [ymin, ymax], linewidth=.001 * w, c='black')[-1]
+                self.vline = self.ax.plot(
+                    [xmin, xmax], [event.ydata, event.ydata], linewidth=.001 * w, c='black')[-1]
 
         if event.button == 1:
             if (time.time() - self.t < self.double_click_t):
                 self.gate(event.xdata, event.ydata)
-
 
         self.t = time.time()
         self.update()
@@ -68,6 +71,7 @@ class Gate(object):
         g = QuadGate([x, y], self.idxs)
         self.fcm.gate(g)
         self.g = g
+
 
 def quad_gate(fcm, idxs):
     fig = plt.figure()

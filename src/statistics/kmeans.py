@@ -1,7 +1,9 @@
 from scipy.cluster import vq
 from modelresult import ModelResult
 
+
 class KMeans(ModelResult):
+
     '''
     K means model
     '''
@@ -17,4 +19,3 @@ class KMeans(ModelResult):
 
     def centroids(self):
         return self.mus()
-

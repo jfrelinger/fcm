@@ -5,18 +5,19 @@ import pylab
 from fcm.core.transforms import _logicle as logicle
 # from scipy.interpolate import interp2d
 
+
 def bilinear_interpolate(x, y, bins=None):
     """Returns interpolated density values on points (x, y).
-    
+
     Ref: http://en.wikipedia.org/wiki/Bilinear_interpolation.
     """
     if bins is None:
         bins = int(numpy.sqrt(len(x)))
 
-    z, unused_xedge, unused_yedge = numpy.histogram2d(y, x, bins=[bins, bins],
-                                        range=[(numpy.min(y), numpy.max(y)),
-                                               (numpy.min(x), numpy.max(x))]
-                                        )
+    z, unused_xedge, unused_yedge = numpy.histogram2d(
+        y, x, bins=[
+            bins, bins], range=[
+            (numpy.min(y), numpy.max(y)), (numpy.min(x), numpy.max(x))])
     xfrac, xint = numpy.modf((x - numpy.min(x)) /
                              (numpy.max(x) - numpy.min(x)) * (bins - 1))
     yfrac, yint = numpy.modf((y - numpy.min(y)) /
@@ -37,9 +38,10 @@ def bilinear_interpolate(x, y, bins=None):
     return q11 * (1 - xfrac) * (1 - yfrac) + q21 * (1 - xfrac) * (yfrac) + \
         q12 * (xfrac) * (1 - yfrac) + q22 * (xfrac) * (yfrac)
 
+
 def trilinear_interpolate(x, y, z, bins=None):
     """Returns interpolated density values on points (x, y, z).
-    
+
     Ref: http://en.wikipedia.org/wiki/Trilinear_interpolation.
     """
     if bins is None:
@@ -51,8 +53,8 @@ def trilinear_interpolate(x, y, z, bins=None):
     vals[:, 2] = z
 
     h, unused_edges = numpy.histogramdd(vals,
-                                 bins=[bins, bins, bins]
-                                 )
+                                        bins=[bins, bins, bins]
+                                        )
     xfrac, xint = numpy.modf((x - numpy.min(x)) /
                              (numpy.max(x) - numpy.min(x)) * (bins - 1))
     yfrac, yint = numpy.modf((y - numpy.min(y)) /
@@ -92,7 +94,8 @@ def color_map(nclusts):
     '''
     return a list of rgb values spaced over the color wheel.
     '''
-    return [ floatRgb(i, 0, nclusts + 1) for i in range(nclusts + 1)]
+    return [floatRgb(i, 0, nclusts + 1) for i in range(nclusts + 1)]
+
 
 def floatRgb(mag, cmin, cmax, alpha=1.0):
     """
@@ -116,14 +119,17 @@ def plot_mu_labels(mu, colors, dims):
     x, y = dims
     for j in range(mu.shape[0]):
         pylab.text(mu[j, x], mu[j, y], str(j), fontsize=12, weight='bold',
-                                                  bbox=dict(facecolor=colors[j], alpha=0.5),
-                                                  va='center', ha='center')
+                   bbox=dict(facecolor=colors[j], alpha=0.5),
+                   va='center', ha='center')
 
-def set_logicle(ax, xy, T =262144, m=4.5, w=0.5,a=0, scale_max = 10**5):
-    scale = scale_max*logicle(numpy.array([0, 10**3, 10**4, 10**5]), T=T, m=m, r=None, w=w, a=a)
+
+def set_logicle(ax, xy, T=262144, m=4.5, w=0.5, a=0, scale_max=10 ** 5):
+    scale = scale_max * \
+        logicle(numpy.array([0, 10 ** 3, 10 ** 4, 10 ** 5]), T=T, m=m, r=None, w=w, a=a)
     labels = ['$0$', '$10^3$', '$10^4$', '$10^5$']
-    minorraw = numpy.hstack([numpy.linspace(10**i,10**(i+1), 10) for i in range(2,5)])
-    minorvalues = scale_max*logicle(minorraw, T, m, None, w)
+    minorraw = numpy.hstack(
+        [numpy.linspace(10 ** i, 10 ** (i + 1), 10) for i in range(2, 5)])
+    minorvalues = scale_max * logicle(minorraw, T, m, None, w)
     if xy == 'x':
         ax.set_xticks(scale)
         ax.set_xticklabels(labels)
@@ -132,10 +138,10 @@ def set_logicle(ax, xy, T =262144, m=4.5, w=0.5,a=0, scale_max = 10**5):
         ax.set_yticks(scale)
         ax.set_yticklabels(labels)
         ax.set_yticks(minorvalues, minor=True)
-        
+
     else:
         raise TypeError('Unknown axis to label "%s"' % str(xy))
-    
+
 
 if __name__ == '__main__':
     import sys

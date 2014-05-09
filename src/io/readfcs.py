@@ -15,20 +15,22 @@ from io import IOBase
 import re
 import numpy
 import os
-
+from functools import reduce
 
 
 class FCSreader(object):
+
     """
     class to hold object to read and parse fcs files.  main usage is to get
     a FCMdata object out of a fcs file
     """
+
     def __init__(self, filename, transform=None, sidx=None, spill=None):
         #self.filename = filename
-        #if type(filename) == str:
+        # if type(filename) == str:
         #    self.filename = filename
         #    self._fh = open(filename, 'rb')
-        #else: # we should have gotten a filehandle then
+        # else: # we should have gotten a filehandle then
         #    self.filename = filename.name
         #    self._fh = filename
         #self._fh = cStringIO.StringIO(open(filename, 'rb').read())
@@ -44,9 +46,11 @@ class FCSreader(object):
         elif isinstance(filename, (file, IOBase)):
             self._fh = filename
         else:
-            raise TypeError("Filename must be a file path or a file handle (either 'file' type or io.IOBase")
+            raise TypeError(
+                "Filename must be a file path or a file handle (either 'file' type or io.IOBase")
         if transform not in ['log', 'logicle', None]:
-            raise TypeError('transform argument must be one of [\'log\', \'logicle\', None]')
+            raise TypeError(
+                'transform argument must be one of [\'log\', \'logicle\', None]')
         self.transform = transform
         self.cur_offset = 0
         self.spill = spill
@@ -59,7 +63,10 @@ class FCSreader(object):
         header = self.parse_header(self.cur_offset)
 
         # parse text
-        text = self.parse_text(self.cur_offset, header['text_start'], header['text_stop'])
+        text = self.parse_text(
+            self.cur_offset,
+            header['text_start'],
+            header['text_stop'])
 
         # parse annalysis
         try:
@@ -81,8 +88,12 @@ class FCSreader(object):
         except KeyError:
             dstop = header['data_end']
 
-        #account for LMD reporting the wrong values for the size of the data segment
-        lmd = self.fix_lmd(self.cur_offset, header['text_start'], header['text_stop'])
+        # account for LMD reporting the wrong values for the size of the data
+        # segment
+        lmd = self.fix_lmd(
+            self.cur_offset,
+            header['text_start'],
+            header['text_stop'])
         dstop = dstop + lmd
         data = self.parse_data(self.cur_offset, dstart, dstop, text)
 
@@ -102,7 +113,7 @@ class FCSreader(object):
             except KeyError:
                 name = text['p%dn' % i]
             channels.append(name)
-            #if not name.lower().startswith('fl'):
+            # if not name.lower().startswith('fl'):
             if not is_fl_channel(name):
                 scchannels.append(name)
                 if name != 'Time':
@@ -119,13 +130,14 @@ class FCSreader(object):
         except AttributeError:
             name = 'InMemoryFile'
         name, unused_ext = os.path.splitext(name)
-        tmpfcm = FCMdata(name, data, zip(base_chan_name,channels), scchannels,
-            Annotation({'text': text,
-                        'header': header,
-                        'analysis': analysis,
-                        }))
+        tmpfcm = FCMdata(name, data, zip(base_chan_name, channels), scchannels,
+                         Annotation({'text': text,
+                                     'header': header,
+                                     'analysis': analysis,
+                                     }))
         if self.sidx is not None and self.spill is not None:
-            auto_comp = True # if we're passed a spillover we assume we compensate
+            # if we're passed a spillover we assume we compensate
+            auto_comp = True
         if auto_comp:
             if self.sidx is None and self.spill is None:
                 if tmpfcm.get_spill():
@@ -177,7 +189,16 @@ class FCSreader(object):
                 a = 0
 
             if to_transform:
-                tmpfcm.logicle(to_transform, T=T, m=m, r=self.r, w=w, a=a, scale_max=scale_max, scale_min=scale_min, rquant=rquant)
+                tmpfcm.logicle(
+                    to_transform,
+                    T=T,
+                    m=m,
+                    r=self.r,
+                    w=w,
+                    a=a,
+                    scale_max=scale_max,
+                    scale_min=scale_min,
+                    rquant=rquant)
 
         elif self.transform == 'log':
             if to_transform:
@@ -239,7 +260,7 @@ class FCSreader(object):
         """return parsed text segment of fcs file"""
 
         text = self.read_bytes(offset, start, stop)
-        #TODO: add support for suplement text segment
+        # TODO: add support for suplement text segment
         return parse_pairs(text)
 
     def parse_analysis(self, offset, start, stop):
@@ -253,7 +274,7 @@ class FCSreader(object):
 
     def parse_data(self, offset, start, stop, text):
         """return numpy.array of data segment of fcs file"""
-        
+
         dtype = text['datatype']
         mode = text['mode']
         tot = int(text['tot'])
@@ -265,7 +286,9 @@ class FCSreader(object):
         elif text['byteord'] == '4,3,2,1' or text['byteord'] == '2,1':
             order = '>'
         else:
-            warn("unsupported byte order %s , using default @" % text['byteord'])
+            warn(
+                "unsupported byte order %s , using default @" %
+                text['byteord'])
             order = '@'
         # from here on out we assume mode l (list)
 
@@ -276,30 +299,75 @@ class FCSreader(object):
             drange.append(int(float(text['p%dr' % i])))
 
         if dtype.lower() == 'i':
-            data = self.parse_int_data(offset, start, stop, bitwidth, drange, tot, order)
+            data = self.parse_int_data(
+                offset,
+                start,
+                stop,
+                bitwidth,
+                drange,
+                tot,
+                order)
         elif dtype.lower() == 'f' or dtype.lower() == 'd':
-            data = self.parse_float_data(offset, start, stop, dtype.lower(), tot, order)
+            data = self.parse_float_data(
+                offset,
+                start,
+                stop,
+                dtype.lower(),
+                tot,
+                order)
         else:  # ascii
-            data = self.parse_ascii_data(offset, start, stop, bitwidth, dtype, tot, order)
+            data = self.parse_ascii_data(
+                offset,
+                start,
+                stop,
+                bitwidth,
+                dtype,
+                tot,
+                order)
         return data
 
-    def parse_int_data(self, offset, start, stop, bitwidth, drange, tot, order):
+    def parse_int_data(
+            self,
+            offset,
+            start,
+            stop,
+            bitwidth,
+            drange,
+            tot,
+            order):
         """Parse out and return integer list data from fcs file"""
 
         if reduce(and_, [item in [8, 16, 32] for item in bitwidth]):
             if len(set(bitwidth)) == 1:  # uniform size for all parameters
                 # calculate how much data to read in.
-                num_items = (stop - start + 1) / calcsize(fmt_integer(bitwidth[0]))
+                num_items = (stop - start + 1) / \
+                    calcsize(fmt_integer(bitwidth[0]))
                 try:
-                    fmt = numpy.dtype('%s%d%s' % (order, num_items, fmt_integer(bitwidth[0])))
-                    tmp = numpy.memmap(self._fh, fmt, mode='c', offset=start + offset, shape=1)
+                    fmt = numpy.dtype(
+                        '%s%d%s' %
+                        (order,
+                         num_items,
+                         fmt_integer(
+                             bitwidth[0])))
+                    tmp = numpy.memmap(
+                        self._fh,
+                        fmt,
+                        mode='c',
+                        offset=start +
+                        offset,
+                        shape=1)
                 except IOError:
-                    #unpack into a list
-                    tmp = unpack('%s%d%s' % (order, num_items, fmt_integer(bitwidth[0])),
-                                        self.read_bytes(offset, start, stop))
+                    # unpack into a list
+                    tmp = unpack(
+                        '%s%d%s' %
+                        (order, num_items, fmt_integer(
+                            bitwidth[0])), self.read_bytes(
+                            offset, start, stop))
                     tmp = numpy.array(tmp)
 
-            else:  # parameter sizes are different e.g. 8, 8, 16,8, 32 ... do one at a time
+            # parameter sizes are different e.g. 8, 8, 16,8, 32 ... do one at a
+            # time
+            else:
                 unused_bitwidths = map(int, map(log2, drange))
                 tmp = []
                 cur = start
@@ -307,9 +375,16 @@ class FCSreader(object):
                     for i, curwidth in enumerate(bitwidth):
                         bitmask = mask_integer(curwidth, unused_bitwidths[i])
                         nbytes = curwidth / 8
-                        bin_string = self.read_bytes(offset, cur, cur + nbytes - 1)
+                        bin_string = self.read_bytes(
+                            offset,
+                            cur,
+                            cur +
+                            nbytes -
+                            1)
                         cur += nbytes
-                        val = bitmask & unpack('%s%s' % (order, fmt_integer(curwidth)), bin_string)[0]
+                        val = bitmask & unpack(
+                            '%s%s' %
+                            (order, fmt_integer(curwidth)), bin_string)[0]
                         tmp.append(val)
         else:  # non starndard bitwiths...  Does this happen?
             warn('Non-standard bitwidths for data segments')
@@ -319,26 +394,52 @@ class FCSreader(object):
     def parse_float_data(self, offset, start, stop, dtype, tot, order):
         """Parse out and return float list data from fcs file"""
 
-        #count up how many to read in
+        # count up how many to read in
         num_items = (stop - start + 1) / calcsize(dtype)
         try:
             fmt = numpy.dtype('%s%d%s' % (order, num_items, dtype))
-            tmp = numpy.memmap(self._fh, fmt, mode='c', offset=start + offset, shape=1)
+            tmp = numpy.memmap(
+                self._fh,
+                fmt,
+                mode='c',
+                offset=start +
+                offset,
+                shape=1)
         except IOError:
-            tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
+            tmp = unpack(
+                '%s%d%s' %
+                (order, num_items, dtype), self.read_bytes(
+                    offset, start, stop))
             tmp = numpy.array(tmp)
         return tmp.reshape((tot, num_items / tot))
 
-    def parse_ascii_data(self, offset, start, stop, bitwidth, dtype, tot, order):
+    def parse_ascii_data(
+            self,
+            offset,
+            start,
+            stop,
+            bitwidth,
+            dtype,
+            tot,
+            order):
         """Parse out ascii encoded data from fcs file"""
 
         num_items = (stop - start + 1) / calcsize(dtype)
         #tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
         try:
             fmt = numpy.dtype('%s%d%s' % (order, num_items, dtype))
-            tmp = numpy.memmap(self._fh, fmt, mode='c', offset=start + offset, shape=1)
+            tmp = numpy.memmap(
+                self._fh,
+                fmt,
+                mode='c',
+                offset=start +
+                offset,
+                shape=1)
         except IOError:
-            tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
+            tmp = unpack(
+                '%s%d%s' %
+                (order, num_items, dtype), self.read_bytes(
+                    offset, start, stop))
             tmp = numpy.array(tmp)
         return tmp.reshape((tot, num_items / tot))
 
@@ -359,7 +460,9 @@ def parse_pairs(text):
     # match the delimited character unless it's doubled
     regex = re.compile('(?<=[^%s])%s(?!%s)' % (delim, delim, delim))
     tmp = regex.split(tmp)
-    return dict(zip([x.lower().replace(delim+delim,delim) for x in tmp[::2]],[x.replace(delim+delim,delim) for x in tmp[1::2]]))
+    return dict(zip([x.lower().replace(delim +
+                                       delim, delim) for x in tmp[::2]], [x.replace(delim +
+                                                                                    delim, delim) for x in tmp[1::2]]))
 
 
 def fmt_integer(b):
@@ -400,7 +503,14 @@ def log_factory(base):
 log2 = log_factory(2)
 
 
-def loadFCS(filename, transform=None, auto_comp=False, spill=None, sidx=None, file_index=0, **kwargs):
+def loadFCS(
+        filename,
+        transform=None,
+        auto_comp=False,
+        spill=None,
+        sidx=None,
+        file_index=0,
+        **kwargs):
     """Load and return a FCM data object from an FCS file"""
 
     tmp = FCSreader(filename, transform, spill=spill, sidx=sidx)
@@ -411,7 +521,13 @@ def loadFCS(filename, transform=None, auto_comp=False, spill=None, sidx=None, fi
     return data
 
 
-def loadMultipleFCS(files, transform=None, auto_comp=False, spill=None, sidx=None, **kwargs):
+def loadMultipleFCS(
+        files,
+        transform=None,
+        auto_comp=False,
+        spill=None,
+        sidx=None,
+        **kwargs):
     for filename in files:
         tmp = loadFCS(filename, transform, auto_comp, spill, sidx, **kwargs)
         try:

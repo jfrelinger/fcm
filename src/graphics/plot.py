@@ -5,6 +5,7 @@ from scipy import histogram
 from numpy import histogram2d
 import pylab
 
+
 def hist(fcms, index, savefile=None, display=True, **kwargs):
     """Plot overlay histogram.
 
@@ -32,8 +33,8 @@ def hist(fcms, index, savefile=None, display=True, **kwargs):
 
 
 def pseudocolor(fcm, indices, nrows=1, ncols=1, s=1, edgecolors='none',
-            savefile=None, display=True,
-            **kwargs):
+                savefile=None, display=True,
+                **kwargs):
     """Plot a pseudocolor.
 
     indices = list of marker index pairs
@@ -66,7 +67,7 @@ def pseudocolor(fcm, indices, nrows=1, ncols=1, s=1, edgecolors='none',
                 pylab.xlabel(idx[0])
             else:
                 pylab.xlabel(fcm.channels[idx[0]])
-                
+
             if isinstance(idx[1], str):
                 pylab.ylabel(idx[1])
             else:
@@ -83,12 +84,14 @@ def pseudocolor(fcm, indices, nrows=1, ncols=1, s=1, edgecolors='none',
 
     return figure
 
+
 def pseudocolors(fcm, savefile=None, display=True, **kwargs):
     """PLot scatter matrix of all pseudocolors."""
     n = fcm.shape[1]
     indices = [(i, j) for i in range(n) for j in range(n)]
     pseudocolor(fcm, indices, nrows=n, ncols=n, savefile=savefile,
-            display=display, **kwargs)
+                display=display, **kwargs)
+
 
 def pair_plot(data, savefile=None, display=True, **kwargs):
     chan = data.channels
@@ -124,7 +127,6 @@ def contour(data, indices, savefile=None, display=True, **kwargs):
     figure = pylab.figure()
     pylab.contour(z[0])
 
-
     if display:
         pylab.show()
 
@@ -141,7 +143,4 @@ if __name__ == '__main__':
     fcm = FCSreader('../../sample_data/3FITC_4PE_004.fcs').get_FCMdata()
     # pseudocolor(fcm, [(0,1),(2,3)], nrows=1, ncols=2, s=1, edgecolors='none')
     pseudocolors(fcm, s=1, edgecolors='none', display=False,
-             savefile='3FITC_4PE_004.png', cmap=pylab.cm.hsv)
-
-
-
+                 savefile='3FITC_4PE_004.png', cmap=pylab.cm.hsv)

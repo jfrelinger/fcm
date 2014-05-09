@@ -9,6 +9,7 @@ from tree import TransformNode
 
 import logicle as clogicle
 
+
 def quantile(x, n):
     """return the lower nth quantile"""
     try:
@@ -27,31 +28,45 @@ def productlog(x, prec=1e-12):
     else:
         return log(x - 4.0) - (1.0 - 1.0 / log(x)) * log(log(x))
 
+
 def S(x, y, T, m, w):
     p = w / (2 * productlog(0.5 * exp(-w / 2) * w))
     sgn = sign(x - w)
     xw = sgn * (x - w)
-    return sgn * T * exp(-(m - w)) * (exp(xw) - p ** 2 * exp(-xw / p) + p ** 2 - 1) - y
+    return sgn * T * exp(-(m - w)) * \
+        (exp(xw) - p ** 2 * exp(-xw / p) + p ** 2 - 1) - y
+
 
 def _logicle(y, T=262144, m=4.5, r=None, w=0.5, a=0):
     y = array(y, dtype='double')
-    if w is None: # we need an r then...
+    if w is None:  # we need an r then...
         if r == 0:
-            w = 1 # don't like this but it works... FIX!
+            w = 1  # don't like this but it works... FIX!
         else:
             w = (m - log10(T / abs(r))) / 2.0
 
     clogicle.logicle_scale(T, w, m, a, y)
     return y
 
-def logicle(fcm, channels, T, m, r=None, scale_max=1e5, scale_min=0, w=0.5, a=0, rquant=None):
+
+def logicle(
+        fcm,
+        channels,
+        T,
+        m,
+        r=None,
+        scale_max=1e5,
+        scale_min=0,
+        w=0.5,
+        a=0,
+        rquant=None):
     """return logicle transformed points in fcm data for channels listed"""
     npnts = fcm.view().copy()
     for i in channels:
         if rquant:
             w = None
-            tmp = npnts[:,i]
-            r = quantile(tmp[tmp<0], 0.05)
+            tmp = npnts[:, i]
+            r = quantile(tmp[tmp < 0], 0.05)
         if r is None and w is None:
             w = 0.5
         tmp = scale_max * _logicle(npnts[:, i].T, T, m, r, w, a)
@@ -61,14 +76,17 @@ def logicle(fcm, channels, T, m, r=None, scale_max=1e5, scale_min=0, w=0.5, a=0,
     fcm.add_view(node)
     return fcm
 
+
 def EH(x, y, b, d, r):
     e = float(d) / r
     sgn = sign(x)
     return sgn * 10 ** (sgn * e * x) + b * e * x - sgn - y
 
+
 def hyperlog0(y, b, d, r):
     return brentq(EH, -10 ** 6, 10 ** 6, (y, b, d, r))
 hyperlog0 = vectorize(hyperlog0)
+
 
 def _hyperlog(y, b, d, r, order=2, intervals=1000.0):
     ub = log(max(y) + 1 - min(y))
@@ -77,13 +95,23 @@ def _hyperlog(y, b, d, r, order=2, intervals=1000.0):
     t = interpolate.splrep(xx, yy, k=order)
     return interpolate.splev(y, t)
 
+
 def hyperlog(fcm, channels, b, d, r, order=2, intervals=1000.0):
     npnts = fcm.view().copy()
     for i in channels:
-        npnts.T[i] = _hyperlog(npnts[:, i].T, b, d, r, order=2, intervals=1000.0)
+        npnts.T[i] = _hyperlog(
+            npnts[
+                :,
+                i].T,
+            b,
+            d,
+            r,
+            order=2,
+            intervals=1000.0)
     node = TransformNode('', fcm.get_cur_node(), npnts)
     fcm.add_view(node)
     return fcm
+
 
 def log_transform(fcm, channels):
     npnts = fcm.view().copy()
@@ -94,6 +122,7 @@ def log_transform(fcm, channels):
     fcm.add_view(node)
     return fcm
 
+
 def _log_transform(npnts):
     return where(npnts <= 1, 0, log10(npnts))
 
@@ -101,7 +130,6 @@ if __name__ == '__main__':
     from numpy.random import normal, lognormal
     import numpy
     import pylab
-
 
     d1 = normal(0, 50, (50000))
     d2 = lognormal(8, 1, (50000))
@@ -115,7 +143,7 @@ if __name__ == '__main__':
     r = quantile(d3[d3 < 0], 0.05)
     w = (m - log(T / abs(r))) / 2
     w = (m - numpy.log10(T / numpy.abs(r))) / 2.0
-    #if (w<0):
+    # if (w<0):
     #w = .5
     print w
     print _logicle([0, T], T, m, r)
@@ -124,8 +152,16 @@ if __name__ == '__main__':
     print n
     lmin, lmax = _logicle([0, T], T, m, r)
     pylab.clf()
-    pylab.figtext(0.5, 0.94, 'Logicle transform with r=%.2f, d=%d and T=%d\nData is normal(0, 50, 50000) + lognormal(8, 1, 50000)' % (r, d, T),
-                  va='center', ha='center', fontsize=12)
+    pylab.figtext(
+        0.5,
+        0.94,
+        'Logicle transform with r=%.2f, d=%d and T=%d\nData is normal(0, 50, 50000) + lognormal(8, 1, 50000)' %
+        (r,
+         d,
+         T),
+        va='center',
+        ha='center',
+        fontsize=12)
 
     pylab.subplot(4, 1, 1)
     x = arange(0, m, 0.1)
@@ -147,7 +183,7 @@ if __name__ == '__main__':
     d[d < 0] = 0
     pylab.hist(d, 1250)
     locs, labs = pylab.xticks()
-    #pylab.xticks([])
+    # pylab.xticks([])
     pylab.yticks([])
     pylab.ylabel('Data after transform')
     pylab.subplot(4, 1, 4)
@@ -157,11 +193,10 @@ if __name__ == '__main__':
     l_min = tmp[0]
     l_max = tmp[1]
     clogicle.logicle_scale(T, w, m, 0, d)
-    #d[d<0]=0
+    # d[d<0]=0
     pylab.hist(1e5 / l_max * d, 1250)
     pylab.yticks([])
-    #pylab.ylim((0,600))
+    # pylab.ylim((0,600))
     pylab.ylabel('Data after transform')
     # pylab.savefig('logicle.png')
     pylab.show()
-

@@ -14,7 +14,9 @@ from fcm.core.subsample import BiasSubsample
 #from fcm.io.export_to_fcs import export_fcs
 from subsample import DropChannel, AddChannel
 
+
 class FCMdata(object):
+
     """
     Object representing flow cytometry data
     FCMdata.pnts : a numpy array of data points
@@ -40,7 +42,7 @@ class FCMdata(object):
         self.tree = Tree(pnts, channels)
         #self.pnts = pnts
         #self.channels = channels
-        #TODO add some default intelegence for determining scatters if None
+        # TODO add some default intelegence for determining scatters if None
         self.scatters = scatters
         self.markers = []
         if self.scatters is not None:
@@ -51,7 +53,7 @@ class FCMdata(object):
                     pass
                 else:
                     self.markers.append(chan)
-        if notes == None:
+        if notes is None:
             notes = Annotation()
         self.notes = notes
 
@@ -61,39 +63,40 @@ class FCMdata(object):
     def __repr__(self):
         return self.name
 
-    def _lookup_item(self,item):
+    def _lookup_item(self, item):
         if isinstance(item, tuple):
 
-            item = list(item) # convert to be mutable.
+            item = list(item)  # convert to be mutable.
             if isinstance(item[1], basestring):
 
                 item[1] = self.name_to_index(item[1])
             elif isinstance(item[1], tuple) or isinstance(item[1], list):
 
-                item[1] = list(item[1])# convert to be mutable.
+                item[1] = list(item[1])  # convert to be mutable.
                 for i, j in enumerate(item[1]):
                     if isinstance(j, basestring):
                         item[1][i] = self.name_to_index(j)
             item = tuple(item)
         return item
-    
+
     def __getitem__(self, item):
         """return FCMdata points"""
         item = self._lookup_item(item)
-        
+
         return self.tree.view()[item]
 
-    def __setitem__(self,key,value):
+    def __setitem__(self, key, value):
         item = self._lookup_item(key)
         self.tree.view()[item] = value
+
     @property
     def channels(self):
         return [i[1] for i in self.current_node.channels]
-    
+
     @property
     def short_names(self):
         return [i[0] for i in self.current_node.channels]
-    
+
     @property
     def long_names(self):
         rslt = []
@@ -103,31 +106,35 @@ class FCMdata(object):
             else:
                 rslt.append('::'.join(i))
         return rslt
-    
+
     def __len__(self):
         return self.current_node.view().__len__()
-    
+
     def __getattr__(self, name):
-            if name in dir(self.current_node.view()):
-                #return Node.__getattribute__(self.current_node,'view')().__getattribute__(name)
-                return self.current_node.view().__getattribute__(name)
-            else:
-                raise AttributeError("'%s' has no attribue '%s'" % (str(self.__class__), name))
+        if name in dir(self.current_node.view()):
+                # return
+                # Node.__getattribute__(self.current_node,'view')().__getattribute__(name)
+            return self.current_node.view().__getattribute__(name)
+        else:
+            raise AttributeError(
+                "'%s' has no attribue '%s'" %
+                (str(
+                    self.__class__),
+                    name))
 
     def __getstate__(self):
-#        tmp = {}
-#        tmp['name'] = self.name
-#        tmp['tree'] = self.tree
-#        tmp['markers'] = self.markers
-#        tmp['scatters'] = self.scatters
-#        tmp['notes'] = self.notes
-#        return tmp
+        #        tmp = {}
+        #        tmp['name'] = self.name
+        #        tmp['tree'] = self.tree
+        #        tmp['markers'] = self.markers
+        #        tmp['scatters'] = self.scatters
+        #        tmp['notes'] = self.notes
+        #        return tmp
         return self.__dict__
 
     def __setstate__(self, dict):
         for i in dict.keys():
             self.__dict__[i] = dict[i]
-
 
     def name_to_index(self, channels):
         """Return the channel indexes for the named channels"""
@@ -145,14 +152,13 @@ class FCMdata(object):
 
             except ValueError:
                 for j in range(1, int(self.notes.text['par']) + 1):
-                        if channels == self.notes.text['p%dn' % j]:
-                            return self.channels.index(self.notes.text['p%ds' % j])
+                    if channels == self.notes.text['p%dn' % j]:
+                        return self.channels.index(self.notes.text['p%ds' % j])
                 raise ValueError('%s is not in list' % channels)
-
 
         idx = []
         for i in channels:
-#            try:
+            #            try:
             if i in self.channels:
                 idx.append(self.channels.index(i))
             elif i in self.short_names:
@@ -224,12 +230,32 @@ class FCMdata(object):
         tmp.tree = deepcopy(self.tree)
         return tmp
 
-    def logicle(self, channels=None, T=262144, m=4.5, r=None, w=0.5, a=0, scale_max=1e5, scale_min=0, rquant=None):
+    def logicle(
+            self,
+            channels=None,
+            T=262144,
+            m=4.5,
+            r=None,
+            w=0.5,
+            a=0,
+            scale_max=1e5,
+            scale_min=0,
+            rquant=None):
         """return logicle transformed channels"""
 
         if channels is None:
             channels = self.markers
-        return _logicle(self, channels, T, m, r, scale_max, scale_min, w, a, rquant)
+        return _logicle(
+            self,
+            channels,
+            T,
+            m,
+            r,
+            scale_max,
+            scale_min,
+            w,
+            a,
+            rquant)
 
     def hyperlog(self, channels, b, d, r, order=2, intervals=1000.0):
         """return hyperlog transformed channels"""
@@ -317,7 +343,11 @@ class FCMdata(object):
         export out current view to a fcs file
         '''
         from fcm.io import export_fcs
-        export_fcs(file_name, self.view(), self.current_node.channels, self.notes.text)
+        export_fcs(
+            file_name,
+            self.view(),
+            self.current_node.channels,
+            self.notes.text)
 
     def extract_channels(self, channels, keep=False):
         '''
@@ -329,17 +359,18 @@ class FCMdata(object):
             if isinstance(j, str):
                 channels[i] = self.name_to_index(j)
         if keep:
-            channels = [ i  for i in range(len(self.channels)) if i not in channels]
+            channels = [
+                i for i in range(len(self.channels)) if i not in channels]
         d = DropChannel(channels)
         d.drop(self)
         return self
 
     def add_channel(self, name, channel=None, short_name=None):
         if channel is None:
-            channel = zeros((self.shape[0],1))
-        
+            channel = zeros((self.shape[0], 1))
+
         print channel.shape
-        
+
         node = AddChannel(channel, name, short_name)
         node.add(self)
         return self

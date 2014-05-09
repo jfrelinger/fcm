@@ -10,29 +10,29 @@ from fcm.core import CompensationError
 from fcm.core import load_compensate_matrix, compensate, gen_spill_matrix
 from fcm.io import FCSreader, loadFCS, loadMultipleFCS, FlowjoWorkspace, load_flowjo_xml, export_fcs
 from fcm.core import Subsample, SubsampleFactory, DropChannel, RandomSubsample, AnomalySubsample, BiasSubsample
-from fcm.core  import logicle, hyperlog
+from fcm.core import logicle, hyperlog
 
 __all__ = [
-            #Objects
-            'FCMdata',
-            'FCMcollection',
-            'PolyGate',
-            'QuadGate',
-            'IntervalGate',
-            'ThresholdGate',
-            'FCSreader',
-            'Annotation',
-            'FlowjoWorkspace',
-            #Exceptions
-            'BadFCMPointDataTypeError',
-            'UnimplementedFcsDataMode',
-            'CompensationError',
-            #functions
-            'generate_f_score_gate',
-            'logicle',
-            'hyperlog',
-            'loadFCS',
-            'loadMultipleFCS',
-            'load_compensate_matrix',
-            'load_flowjo_xml',
-            ]
+    # Objects
+    'FCMdata',
+    'FCMcollection',
+    'PolyGate',
+    'QuadGate',
+    'IntervalGate',
+    'ThresholdGate',
+    'FCSreader',
+    'Annotation',
+    'FlowjoWorkspace',
+    # Exceptions
+    'BadFCMPointDataTypeError',
+    'UnimplementedFcsDataMode',
+    'CompensationError',
+    # functions
+    'generate_f_score_gate',
+    'logicle',
+    'hyperlog',
+    'loadFCS',
+    'loadMultipleFCS',
+    'load_compensate_matrix',
+    'load_flowjo_xml',
+]

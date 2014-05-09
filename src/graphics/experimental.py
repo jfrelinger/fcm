@@ -3,6 +3,7 @@ from enthought.mayavi import mlab
 from util import trilinear_interpolate
 import numpy
 
+
 def surface(fcm, idx0, idx1):
     """Plots a surface plot for 2D data."""
     x = fcm[:, idx0]
@@ -18,6 +19,7 @@ def surface(fcm, idx0, idx1):
     mlab.xlabel(fcm.channels[idx0])
     mlab.ylabel(fcm.channels[idx1])
     mlab.zlabel('Density')
+
 
 def spin(fcm, idx0, idx1, idx2):
     """Plots 3D data as points in space."""
@@ -40,7 +42,7 @@ def spin(fcm, idx0, idx1, idx2):
 #     yint = yint.astype('i')
 #     zint = zint.astype('i')
 
-#     # not interpolated - kiv write trilinear_interpolate function
+# not interpolated - kiv write trilinear_interpolate function
 #     h, edges = numpy.histogramdd(fcm[:,[idx0, idx1, idx2]], bins=bins)
 #     v = h[xint, yint, zint]
 

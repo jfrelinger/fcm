@@ -8,9 +8,11 @@ distfunc = {'mean': mean_distance,
 
 
 class AlignMixture(object):
+
     """
     find alignment map between two mixture models
     """
+
     def __init__(self, mx, model='kldiv'):
         self.mx = mx
         self.dtype = distfunc[model]
@@ -20,15 +22,15 @@ class AlignMixture(object):
         generate cost matrix between reference set and my
         """
         return self.dtype(self.mx, my, *args, **kwargs)
-    
-    def align(self, my, max_cost = None, min_unused=None, *args, **kwargs):
+
+    def align(self, my, max_cost=None, min_unused=None, *args, **kwargs):
         """
         generate alignment map for my and convert to an ordered mixture model
         """
         cost = self.get_cost(my, *args, **kwargs)
         if max_cost is not None:
             munk = max_cost_munkres(cost, max_cost)
-        else:            
+        else:
             munk = munkres(cost)
         translate = {}
         if min_unused is None:
@@ -38,6 +40,6 @@ class AlignMixture(object):
                 translate[i] = np.arange(cost.shape[0])[j].squeeze()
             else:
                 translate[i] = min_unused
-                min_unused +=1
+                min_unused += 1
 
         return my.reorder(translate)

@@ -49,17 +49,17 @@ def classification_distance(ref, test, test_data=None, ndraw=100000, **kwargs):
 
     t_x = test.classify(test_data, **kwargs)
     r_x = ref.classify(test_data, **kwargs)
-    
+
     cost = np.zeros((len(test), len(ref)), dtype=np.int, order='C')
-    tot = np.bincount(r_x)+1
-    #for i,j in enumerate(tot):
+    tot = np.bincount(r_x) + 1
+    # for i,j in enumerate(tot):
     #    print 'tot', i,j
-    for i,j in enumerate(tot):
-        cost[:,i]= j
+    for i, j in enumerate(tot):
+        cost[:, i] = j
     _get_cost(t_x, r_x, cost)
     cost = cost.astype(np.double)
-    for i,j in enumerate(tot):
-        cost[:,i] = cost[:,i]/j
+    for i, j in enumerate(tot):
+        cost[:, i] = cost[:, i] / j
     return cost.T.copy()
 
 
@@ -73,12 +73,12 @@ def kldiv_distance(ref, test, use_means=None, ndraws=100000, **kwargs):
     else:
         xs = [ref.get_submodel(j) for j in range(len(ref))]
         ys = [test.get_submodel(j) for j in range(len(test))]
-        
-    cost = np.zeros((len(xs),len(ys)), order='C')
-    for i,j in enumerate(xs):
-        for k,l in enumerate(ys):
-            cost[i,k] = kldiv(j,l, **kwargs)
-            
+
+    cost = np.zeros((len(xs), len(ys)), order='C')
+    for i, j in enumerate(xs):
+        for k, l in enumerate(ys):
+            cost[i, k] = kldiv(j, l, **kwargs)
+
     return cost
 
 if __name__ == '__main__':
@@ -87,8 +87,8 @@ if __name__ == '__main__':
     cluster3 = stats.DPCluster(.25, np.array([0, 0]), np.eye(2))
     cluster4 = stats.DPCluster(.25, np.array([4, 0]), np.eye(2))
     cluster5 = stats.DPCluster(.5, np.array([0, 4]), np.eye(2))
-    A = stats.DPMixture([cluster1, cluster2]).get_submodel([0,1])
-    B = stats.DPMixture([cluster3, cluster4, cluster5]).get_submodel([0,1,2])
+    A = stats.DPMixture([cluster1, cluster2]).get_submodel([0, 1])
+    B = stats.DPMixture([cluster3, cluster4, cluster5]).get_submodel([0, 1, 2])
     from munkres import munkres
     print 'Ref has means', A.mus, 'with weights', A.pis
     print 'Test has means', B.mus, 'with weights', B.pis

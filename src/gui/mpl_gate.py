@@ -5,12 +5,15 @@ from fcm import PolyGate as g
 from matplotlib.nxutils import points_inside_poly
 import time
 
+
 class DraggableVertex(object):
+
     """
     Draggable vertex of gating polygon.
     """
 
     lock = None  # only one can be animated at a time
+
     def __init__(self, circle, parent):
         self.parent = parent
         self.circle = circle
@@ -30,10 +33,13 @@ class DraggableVertex(object):
 
     def on_press(self, event):
         'on button press we will see if the mouse is over us and store some data'
-        if event.inaxes != self.circle.axes: return
-        if DraggableVertex.lock is not None: return
+        if event.inaxes != self.circle.axes:
+            return
+        if DraggableVertex.lock is not None:
+            return
         contains, unused = self.circle.contains(event)
-        if not contains: return
+        if not contains:
+            return
         # print 'event contains', self.circle.center
         x0, y0 = self.circle.center
         self.press = x0, y0, event.xdata, event.ydata
@@ -44,7 +50,8 @@ class DraggableVertex(object):
         'on motion we will move the circle if the mouse is over us'
         if DraggableVertex.lock is not self:
             return
-        if event.inaxes != self.circle.axes: return
+        if event.inaxes != self.circle.axes:
+            return
         x0, y0, xpress, ypress = self.press
         dx = event.xdata - xpress
         dy = event.ydata - ypress
@@ -65,7 +72,9 @@ class DraggableVertex(object):
         self.canvas.mpl_disconnect(self.cid_release)
         self.canvas.mpl_disconnect(self.cid_motion)
 
+
 class Gate(object):
+
     """Gate class implements gating using Matplotlib animation and events.
 
     Right click to add vertex.
@@ -144,7 +153,7 @@ class Gate(object):
 
         if self.poly:
             if (event.button == 1 and
-                points_inside_poly(xypoints, xy)):
+                    points_inside_poly(xypoints, xy)):
                 if (time.time() - self.t < self.double_click_t):
                     self.zoom_to_gate(event)
                 self.t = time.time()
@@ -161,11 +170,12 @@ class Gate(object):
         # get rid of old points
         del self.ax.collections[0]
         plt.close()
-        
+
     def disconnect(self):
         'disconnect all the stored connection ids'
         self.canvas.mpl_disconnect(self.cid_press)
         self.canvas.mpl_disconnect(self.cid_draw)
+
 
 def poly_gate(fcm, idxs):
     fig = plt.figure()

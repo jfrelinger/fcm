@@ -19,13 +19,19 @@ from kmeans import KMeans
 
 
 class DPMixtureModel(object):
+
     '''
     Fits a DP Mixture model to a fcm dataset.
 
     '''
 
-
-    def __init__(self, nclusts, niter=1000, burnin=100, last=None, type='mcmc'):
+    def __init__(
+            self,
+            nclusts,
+            niter=1000,
+            burnin=100,
+            last=None,
+            type='mcmc'):
         '''
         DPMixtureModel(nclusts, niter=1000, burnin= 100, last= None)
         nclusts = number of clusters to fit
@@ -35,12 +41,10 @@ class DPMixtureModel(object):
 
         '''
 
-
         self.nclusts = nclusts
         self.niter = niter
         self.burnin = burnin
         self.last = last
-
 
         self.gamma0 = 10
         self.m0 = None
@@ -76,8 +80,8 @@ class DPMixtureModel(object):
             n = 1
             d = mu.shape[0]
         if n > self.nclusts:
-            raise ValueError('number of proposed Mus grater then number of clusters')
-
+            raise ValueError(
+                'number of proposed Mus grater then number of clusters')
 
         self.prior_mu = mu
         self.mu_d = d
@@ -106,9 +110,9 @@ class DPMixtureModel(object):
         if sigma.shape[1] != sigma.shape[2]:
             raise ValueError("Sigmas must be square matricies")
 
-
         if n > self.nclusts:
-            raise ValueError('number of proposed Sigmass grater then number of clusters')
+            raise ValueError(
+                'number of proposed Sigmass grater then number of clusters')
 
         self._load_sigma = True
         self.prior_sigma = sigma
@@ -121,12 +125,12 @@ class DPMixtureModel(object):
 
         elif n < self.nclusts:
             self._prior_sigma = zeros((self.nclusts, self.d, self.d))
-            self._prior_sigma[0:n, :, :] = (self.prior_sigma.copy()) / outer(self.s, self.s)
+            self._prior_sigma[0:n, :,:] = (self.prior_sigma.copy()) / outer(self.s, self.s)
             for i in range(n, self.nclusts):
-                self._prior_sigma[i, :, :] = eye(self.d)
+                self._prior_sigma[i, :,:] = eye(self.d)
         else:
-            self._prior_sigma = (self.prior_sigma.copy()) / outer(self.s, self.s)
-
+            self._prior_sigma = (
+                self.prior_sigma.copy()) / outer(self.s, self.s)
 
     def load_pi(self, pi):
         tmp = array(pi)
@@ -134,7 +138,8 @@ class DPMixtureModel(object):
             raise ValueError("Shape of pi is wrong")
         n = tmp.shape[0]
         if n > self.nclusts:
-            raise ValueError('number of proposed Pis grater then number of clusters')
+            raise ValueError(
+                'number of proposed Pis grater then number of clusters')
 
         if sum(tmp) > 1:
             raise ValueError('Proposed Pis sum to more then 1')
@@ -146,7 +151,6 @@ class DPMixtureModel(object):
                 self._prior_pi[i] = left
         else:
             self._prior_pi = tmp
-
 
         self._load_pi = True
 
@@ -160,7 +164,8 @@ class DPMixtureModel(object):
             self.prior_pi = self._ref.pis
         else:
             self.prior_mu = zeros((self.nclusts, pnts.shape[1]))
-            self.prior_sigma = zeros((self.nclusts, pnts.shape[1], pnts.shape[1]))
+            self.prior_sigma = zeros(
+                (self.nclusts, pnts.shape[1], pnts.shape[1]))
             for i in range(self.nclusts):
                 try:
                     self.prior_mu[i] = mean(pnts[self._ref == i], 0)
@@ -176,13 +181,14 @@ class DPMixtureModel(object):
             #     self.prior_sigma[i,:,:] = cov(pnts[self._ref==i],rowvar=0)
 
             tot = float(pnts.shape[0])
-            self.prior_pi = array([pnts[self._ref == i].shape[0] / tot for i in range(self.nclusts)])
+            self.prior_pi = array(
+                [pnts[self._ref == i].shape[0] / tot for i in range(self.nclusts)])
 
     def fit(self, fcmdata, verbose=False, normed=False):
         if isinstance(fcmdata, FCMcollection):
-            return [self._fit(fcmdata[i], verbose, normed) for i in fcmdata ]
+            return [self._fit(fcmdata[i], verbose, normed) for i in fcmdata]
         elif isinstance(fcmdata, list) or isinstance(fcmdata, tuple):
-            return [self._fit(i, verbose, normed) for i in fcmdata ]
+            return [self._fit(i, verbose, normed) for i in fcmdata]
         else:
             return self._fit(fcmdata, verbose, normed)
 
@@ -200,7 +206,7 @@ class DPMixtureModel(object):
             self.m = pnts.mean(0)
             self.s = pnts.std(0)
             # incase any of the std's are zero
-            self.s[self.s==0] = 1
+            self.s[self.s == 0] = 1
             self.data = (pnts - self.m) / self.s
 
         if len(self.data.shape) == 1:
@@ -225,52 +231,78 @@ class DPMixtureModel(object):
             from datetime import datetime
             seed(datetime.now().microsecond)
 
-        #TODO move hyperparameter settings here
+        # TODO move hyperparameter settings here
         if self.type.lower() == 'bem':
-            self.cdp = BEM_DPNormalMixture(self.data, ncomp=self.nclusts,
-                                           gamma0=self.gamma0, m0=self.m0,
-                                           nu0=self.nu0, Phi0=self.Phi0,
-                                           e0=self.e0, f0=self.f0,
-                                           mu0=self._prior_mu, Sigma0=self._prior_sigma,
-                                           weights0=self._prior_pi, alpha0=self.alpha0,
-                                           gpu=self.device, parallel=self.parallel, verbose=verbose)
+            self.cdp = BEM_DPNormalMixture(
+                self.data,
+                ncomp=self.nclusts,
+                gamma0=self.gamma0,
+                m0=self.m0,
+                nu0=self.nu0,
+                Phi0=self.Phi0,
+                e0=self.e0,
+                f0=self.f0,
+                mu0=self._prior_mu,
+                Sigma0=self._prior_sigma,
+                weights0=self._prior_pi,
+                alpha0=self.alpha0,
+                gpu=self.device,
+                parallel=self.parallel,
+                verbose=verbose)
             self.cdp.optimize(self.niter)
         else:
-            self.cdp = DPNormalMixture(self.data, ncomp=self.nclusts,
-                                           gamma0=self.gamma0, m0=self.m0,
-                                           nu0=self.nu0, Phi0=self.Phi0,
-                                           e0=self.e0, f0=self.f0,
-                                           mu0=self._prior_mu, Sigma0=self._prior_sigma,
-                                           weights0=self._prior_pi, alpha0=self.alpha0,
-                                           gpu=self.device, parallel=self.parallel, verbose=verbose)
-            self.cdp.sample(niter=self.niter, nburn=self.burnin, thin=1, ident=self.ident)
+            self.cdp = DPNormalMixture(
+                self.data,
+                ncomp=self.nclusts,
+                gamma0=self.gamma0,
+                m0=self.m0,
+                nu0=self.nu0,
+                Phi0=self.Phi0,
+                e0=self.e0,
+                f0=self.f0,
+                mu0=self._prior_mu,
+                Sigma0=self._prior_sigma,
+                weights0=self._prior_pi,
+                alpha0=self.alpha0,
+                gpu=self.device,
+                parallel=self.parallel,
+                verbose=verbose)
+            self.cdp.sample(
+                niter=self.niter,
+                nburn=self.burnin,
+                thin=1,
+                ident=self.ident)
 
         if self.last is None:
             self.last = self.niter
 
-        self._run = True #we've fit the mixture model
-
-
+        self._run = True  # we've fit the mixture model
 
         return self.get_results()
 
     def step(self, verbose=False):
         raise Exception("With the new CDP stepping is not supported")
 
-
-
     def get_results(self):
         """
         get the results of the fitted mixture model
         """
 
-
-
         if self._run:
             if self.type.lower() == 'bem':
                 rslts = []
                 for j in range(self.nclusts):
-                    tmp = DPCluster(self.cdp.weights[j], (self.cdp.mu[j] * self.s) + self.m, self.cdp.Sigma[j] * outer(self.s, self.s), self.cdp.mu[j], self.cdp.Sigma[j])
+                    tmp = DPCluster(
+                        self.cdp.weights[j],
+                        (self.cdp.mu[j] *
+                         self.s) +
+                        self.m,
+                        self.cdp.Sigma[j] *
+                        outer(
+                            self.s,
+                            self.s),
+                        self.cdp.mu[j],
+                        self.cdp.Sigma[j])
                     rslts.append(tmp)
                 tmp = DPMixture(rslts, self.m, self.s)
             else:
@@ -278,12 +310,25 @@ class DPMixtureModel(object):
                 rslts = []
                 for i in range(self.last):
                     for j in range(self.nclusts):
-                        tmp = DPCluster(self.cdp.weights[-(i + 1), j], (self.cdp.mu[-(i + 1), j] * self.s) + self.m, self.cdp.Sigma[-(i + 1), j] * outer(self.s, self.s), self.cdp.mu[-(i + 1), j], self.cdp.Sigma[-(i + 1), j])
+                        tmp = DPCluster(self.cdp.weights[-
+                                                         (i +
+                                                          1), j], (self.cdp.mu[-
+                                                                               (i +
+                                                                                1), j] *
+                                                                   self.s) +
+                                        self.m, self.cdp.Sigma[-
+                                                               (i +
+                                                                1), j] *
+                                        outer(self.s, self.s), self.cdp.mu[-
+                                                                           (i +
+                                                                            1), j], self.cdp.Sigma[-
+                                                                                                   (i +
+                                                                                                    1), j])
                         rslts.append(tmp)
                 tmp = DPMixture(rslts, self.last, self.m, self.s, self.ident)
             return tmp
         else:
-            return None # TODO raise exception
+            return None  # TODO raise exception
 
     def get_class(self):
         """
@@ -293,9 +338,11 @@ class DPMixtureModel(object):
         if self._run:
             return self.cdp.getK(self.n)
         else:
-            return None # TODO raise exception
+            return None  # TODO raise exception
+
 
 class HDPMixtureModel(DPMixtureModel):
+
     '''
     HDPMixtureModel(nclusts, niter=1000, burnin= 100, last= None)
     nclusts = number of clusters to fit
@@ -304,11 +351,12 @@ class HDPMixtureModel(DPMixtureModel):
     last = number of mcmc itterations to draw samples from. if None last = niter
 
     '''
+
     def __init__(self, *args, **kwargs):
         super(HDPMixtureModel, self).__init__(*args, **kwargs)
         self.g0 = 0.1
         self.h0 = 0.1
-        
+
     def fit(self, datasets, verbose=False, tune_interval=100):
         if isinstance(datasets, FCMcollection):
             datasets = datasets.to_list()
@@ -325,9 +373,6 @@ class HDPMixtureModel(DPMixtureModel):
                 raise RuntimeError("Datasets shape do not match")
             standardized.append(((i - self.m) / self.s))
 
-
-
-
         if self.prior_mu is not None:
             self._load_mu_at_fit()
         if self.prior_sigma is not None:
@@ -338,20 +383,32 @@ class HDPMixtureModel(DPMixtureModel):
         else:
             from datetime import datetime
             seed(datetime.now().microsecond)
-        self.hdp = HDPNormalMixture(standardized, ncomp=self.nclusts,
-                                           gamma0=self.gamma0, m0=self.m0,
-                                           nu0=self.nu0, Phi0=self.Phi0,
-                                           e0=self.e0, f0=self.f0, g0=self.g0, h0=self.h0,
-                                           mu0=self._prior_mu, Sigma0=self._prior_sigma,
-                                           weights0=self._prior_pi, alpha0=self.alpha0,
-                                           gpu=self.device, parallel=self.parallel, verbose=verbose)
-        self.hdp.sample(niter=self.niter, nburn=self.burnin, thin=1, ident=self.ident, tune_interval=tune_interval)
+        self.hdp = HDPNormalMixture(
+            standardized,
+            ncomp=self.nclusts,
+            gamma0=self.gamma0,
+            m0=self.m0,
+            nu0=self.nu0,
+            Phi0=self.Phi0,
+            e0=self.e0,
+            f0=self.f0,
+            g0=self.g0,
+            h0=self.h0,
+            mu0=self._prior_mu,
+            Sigma0=self._prior_sigma,
+            weights0=self._prior_pi,
+            alpha0=self.alpha0,
+            gpu=self.device,
+            parallel=self.parallel,
+            verbose=verbose)
+        self.hdp.sample(
+            niter=self.niter,
+            nburn=self.burnin,
+            thin=1,
+            ident=self.ident,
+            tune_interval=tune_interval)
 
-
-
-        self._run = True #we've fit the mixture model
-
-
+        self._run = True  # we've fit the mixture model
 
         return self.get_results()
 
@@ -364,29 +421,46 @@ class HDPMixtureModel(DPMixtureModel):
             self.last = self.niter
 
         if self._run:
-#            #print self.mus
-#            allresults = []
-#            for k in range(self.ndatasets):
-#                rslts = []
-#                for i in range(self.last):
-#                    for j in range(self.nclusts):
-#                        tmp = DPCluster(self.hdp.weights[-(i + 1), k, j], (self.hdp.mu[-(i + 1), j] * self.s) + self.m, self.hdp.Sigma[-(i + 1), j] * outer(self.s, self.s))
-#                        tmp.nmu = self.hdp.mu[-(i + 1), j]
-#                        tmp.nsigma = self.hdp.Sigma[-(i + 1), j]
-#                        rslts.append(tmp)
-#                allresults.append(DPMixture(rslts, self.last, self.m, self.s, self.ident))
-#            return allresults
+            # print self.mus
+            #            allresults = []
+            #            for k in range(self.ndatasets):
+            #                rslts = []
+            #                for i in range(self.last):
+            #                    for j in range(self.nclusts):
+            #                        tmp = DPCluster(self.hdp.weights[-(i + 1), k, j], (self.hdp.mu[-(i + 1), j] * self.s) + self.m, self.hdp.Sigma[-(i + 1), j] * outer(self.s, self.s))
+            #                        tmp.nmu = self.hdp.mu[-(i + 1), j]
+            #                        tmp.nsigma = self.hdp.Sigma[-(i + 1), j]
+            #                        rslts.append(tmp)
+            #                allresults.append(DPMixture(rslts, self.last, self.m, self.s, self.ident))
+            #            return allresults
             #pis = self.hdp.weights[-self.last:].T.reshape(self.ndatasets,self.last*self.nclusts).copy()
-            pis = array([ self.hdp.weights[-self.last:,k,:].flatten() for k in range(self.ndatasets)])
-            mus = (self.hdp.mu[-self.last:].reshape(self.nclusts*self.last,self.d)*self.s+self.m)
-            sigmas = (self.hdp.Sigma[-self.last:].reshape(self.nclusts*self.last,self.d,self.d)*outer(self.s,self.s))
-            return HDPMixture(pis, mus, sigmas, self.last, self.m, self.s, self.ident)
+            pis = array([ self.hdp.weights[-self.last:, k, :].flatten() for k in range(self.ndatasets)])
+            mus = (self.hdp.mu[-
+                               self.last:].reshape(self.nclusts *
+                                                   self.last, self.d) *
+                   self.s +
+                   self.m)
+            sigmas = (self.hdp.Sigma[-
+                                     self.last:].reshape(self.nclusts *
+                                                         self.last, self.d, self.d) *
+                      outer(self.s, self.s))
+            return HDPMixture(
+                pis,
+                mus,
+                sigmas,
+                self.last,
+                self.m,
+                self.s,
+                self.ident)
+
 
 class KMeansModel(object):
+
     '''
     KmeansModel(data, k, niter=20, tol=1e-5)
     kmeans clustering model
     '''
+
     def __init__(self, k, niter=20, tol=1e-5):
 
         self.k = k
@@ -395,16 +469,19 @@ class KMeansModel(object):
 
     def fit(self, fcmdata):
         if isinstance(fcmdata, FCMcollection):
-            return [self._fit(fcmdata[i]) for i in fcmdata ]
+            return [self._fit(fcmdata[i]) for i in fcmdata]
         elif isinstance(fcmdata, list) or isinstance(fcmdata, tuple):
-            return [self._fit(i) for i in fcmdata ]
+            return [self._fit(i) for i in fcmdata]
         else:
             return self._fit(fcmdata)
 
     def _fit(self, data):
-        self.r = vq.kmeans(data.view(), self.k, iter=self.niter, thresh=self.tol)
+        self.r = vq.kmeans(
+            data.view(),
+            self.k,
+            iter=self.niter,
+            thresh=self.tol)
         return self.get_results()
-
 
     def get_results(self):
         return KMeans(self.r[0])
