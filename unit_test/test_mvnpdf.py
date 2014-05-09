@@ -37,7 +37,6 @@ class mvnpdfTestCase(unittest.TestCase):
             sigma = eye(1) * a
             p = pdf(x,loc= mu, scale= sqrt(sigma)[0])
             m = mvnormpdf(x, mu, sigma)
-            print p, m, p - m
             self.assertAlmostEqual(p, m, delta=1e-6, msg='pmvnormpdf and mvnormpdf differ in result, %0.8e != %0.8e, [%0.8e], (%d): %s, %s, %s ' % (p, m, p - m, i, str(x), str(mu), str(sigma).replace('\n', ',')))
 
     def testMultiplePointSingleComponent_1d(self):
@@ -70,6 +69,7 @@ class mvnpdfTestCase(unittest.TestCase):
             mu = array([uniform(-4, 4), uniform(-4, 4)])
             a = uniform(0, 4)
             sigma = eye(2) + a
+
             self.assertAlmostEqual(float(pmvnormpdf(x, mu, sigma)[0][0]),
                     float(mvnormpdf(x, mu, sigma)[0]), 6,
                     'pmvnormpdf and mvnormpdf differ in result, %f != %f, (%d): %s, %s, %s ' % (float(pmvnormpdf(x, mu, sigma)[0][0]), float(mvnormpdf(x, mu, sigma)[0]), i, str(x), str(mu), str(sigma).replace('\n', ',')))

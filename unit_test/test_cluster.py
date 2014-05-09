@@ -100,7 +100,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
                 
                 diffs[i] = np.min(np.abs(r.mus-gen_mean[i]),0)
                 #print i, gen_mean[i], diffs[i], np.vdot(diffs[i],diffs[i])
-                assert( np.vdot(diffs[i],diffs[i]) < 1)
+                assert( np.vdot(diffs[i],diffs[i]) < 2)
 
         fcm1 = FCMdata('test_fcm1', data1, ['fsc','ssc'], [0,1])
         fcm2 = FCMdata('test_fcm2', data2, ['fsc','ssc'], [0,1])

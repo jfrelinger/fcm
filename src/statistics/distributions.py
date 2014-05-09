@@ -33,9 +33,9 @@ from dpmix.utils import mvn_weighted_logged
 
 def _mvnpdf(x, mu, va, n=1, logged=False, use_gpu=True, **kwargs):
     if len(x.shape) == 1:
-            x = x.reshape((1, x.shape))
+            x = x.reshape((1, x.shape[0]))
     if len(mu.shape) == 1:
-        mu = mu.reshape((1, mu.shape))
+        mu = mu.reshape((1, mu.shape[0]))
     if len(va.shape) == 2:
         va = va.reshape(1, va.shape[0], va.shape[1])
 
