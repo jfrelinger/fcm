@@ -18,11 +18,11 @@ class Dp_mixtureTestCase(unittest.TestCase):
         self.sig = eye(3)
         self.mu2 = array([5, 5, 5])
 
-        self.clust1 = DPCluster(.5/3, self.mu1, self.sig)
-        self.clust2 = DPCluster(.5/3, self.mu2, self.sig)
+        self.clust1 = DPCluster(.5 / 3, self.mu1, self.sig)
+        self.clust2 = DPCluster(.5 / 3, self.mu2, self.sig)
         self.clusters = [self.clust1, self.clust2, self.clust1, self.clust2,
                          self.clust1, self.clust2]
-        self.mix = DPMixture(self.clusters,niter=3,identified=True)
+        self.mix = DPMixture(self.clusters, niter=3, identified=True)
 
 
     def tearDown(self):
@@ -55,16 +55,16 @@ class Dp_mixtureTestCase(unittest.TestCase):
 #                                { 0: [0], 1: [1]},
 #                                [self.mu1, self.mu2])
         pnt = array([self.mu1, self.mu2])
-        
+
         assert modal.classify(array([self.mu1, self.mu2, self.mu1, self.mu2, self.mu1, self.mu2])).tolist() == [1, 0, 1, 0, 1, 0], 'classify not working'
-        #TODO do actual lookup.
-        #assert self.mix.classify(self.mu1) == modal.classify(self.mu1), 'derived modal mixture is wrong'
-        #assert self.mix.classify(pnt)[0] == modal.classify(pnt)[0], 'derived modal mixture is wrong'
-        #assert self.mix.classify(pnt)[1] == modal.classify(pnt)[1], 'derived modal mixture is wrong'
-        
+        # TODO do actual lookup.
+        # assert self.mix.classify(self.mu1) == modal.classify(self.mu1), 'derived modal mixture is wrong'
+        # assert self.mix.classify(pnt)[0] == modal.classify(pnt)[0], 'derived modal mixture is wrong'
+        # assert self.mix.classify(pnt)[1] == modal.classify(pnt)[1], 'derived modal mixture is wrong'
+
         modal = self.mix.make_modal(delta=9)
         assert modal.classify(array([self.mu1, self.mu2, self.mu1, self.mu2, self.mu1, self.mu2])).tolist() == [0, 0, 0, 0, 0, 0], 'classify not working'
-        
+
 
     def testAverage(self):
         clst1 = DPCluster(0.5, self.mu1, self.sig)
@@ -124,7 +124,7 @@ class Dp_mixtureTestCase(unittest.TestCase):
     def testarith(self):
         adder = 3
         array_adder = array([1, 2, 3])
-        mat_adder = 2*eye(3)
+        mat_adder = 2 * eye(3)
 
         # add
         b = self.mix + adder
@@ -185,7 +185,7 @@ class Dp_mixtureTestCase(unittest.TestCase):
         self.assertIsInstance(d, DPMixture, 'array multiplicaton return wrong type')
         assert_array_equal(d.mus[0], dot(self.mix.mus[0], mat_adder),
                      'array multiplication returned wrong value')
-        
+
 
         # rmul
         b = adder * self.mix
@@ -197,13 +197,13 @@ class Dp_mixtureTestCase(unittest.TestCase):
         self.assertIsInstance(c, DPMixture, 'array multiplication return wrong type')
         assert_array_equal(c.mus[0], dot(array_adder, self.mix.mus[0]),
                      'array multiplication returned wrong value')
-        
+
         d = mat_adder * self.mix
         self.assertIsInstance(d, DPMixture, 'array multiplicaton return wrong type')
         assert_array_equal(d.mus[0], dot(mat_adder, self.mix.mus[0]),
                      'array multiplication returned wrong value')
-        
-        assert_array_equal(d.sigmas[0], dot(mat_adder,dot(self.mix.sigmas[0], mat_adder)),
+
+        assert_array_equal(d.sigmas[0], dot(mat_adder, dot(self.mix.sigmas[0], mat_adder)),
                            'array multiplcation failed')
 
     def testgetitem(self):
@@ -211,37 +211,37 @@ class Dp_mixtureTestCase(unittest.TestCase):
         self.mix[0] = self.clust2
         assert_equal(self.mu2, self.mix[0].mu, 'getitem failed')
         self.mix[0] = self.clust1
-        
+
     def testgetiteration(self):
-        self.assertIsInstance(self.mix.get_iteration(2), DPMixture, 
+        self.assertIsInstance(self.mix.get_iteration(2), DPMixture,
                               'get_iteration failed')
-        self.assertEqual(len(self.mix.get_iteration(2).clusters), 2, 
+        self.assertEqual(len(self.mix.get_iteration(2).clusters), 2,
                          'get_iteration return wrong number of clusters')
-        self.assertIsInstance(self.mix.get_iteration([0,2]), DPMixture, 
+        self.assertIsInstance(self.mix.get_iteration([0, 2]), DPMixture,
                               'get_iteration failed')
-        self.assertEqual(len(self.mix.get_iteration([0,2]).clusters), 4, 
+        self.assertEqual(len(self.mix.get_iteration([0, 2]).clusters), 4,
                          'get_iteration return wrong number of clusters')
-        
+
     def testEnumerateClusters(self):
-        for i,j in self.mix.enumerate_clusters():
+        for i, j in self.mix.enumerate_clusters():
             self.assertIsInstance(i, int)
             self.assertIs(j, self.mix[i], 'fialed to return the right cluster when enumerating')
-    
+
     def testEnumeratePis(self):
-        for i,j in self.mix.enumerate_pis():
+        for i, j in self.mix.enumerate_pis():
             self.assertIsInstance(i, int)
             self.assertIs(j, self.mix[i].pi, 'fialed to return the right pi when enumerating')
-    
+
     def testEnumerateMus(self):
-        for i,j in self.mix.enumerate_mus():
+        for i, j in self.mix.enumerate_mus():
             self.assertIsInstance(i, int)
             self.assertIs(j, self.mix[i].mu, 'fialed to return the right mean when enumerating')
-            
+
     def testEnumerateSigmas(self):
-        for i,j in self.mix.enumerate_sigmas():
+        for i, j in self.mix.enumerate_sigmas():
             self.assertIsInstance(i, int)
             self.assertIs(j, self.mix[i].sigma, 'fialed to return the right covariance when enumerating')
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
 

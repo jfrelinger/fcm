@@ -3,7 +3,7 @@
 from warnings import warn
 from fcm import FCMdata
 from fcm import Annotation
-#from fcm.core.transforms import _logicle, _log_transform, quantile
+# from fcm.core.transforms import _logicle, _log_transform, quantile
 from fcm.core.compensate import get_spill
 from fcm import UnimplementedFcsDataMode
 
@@ -26,15 +26,15 @@ class FCSreader(object):
     """
 
     def __init__(self, filename, transform=None, sidx=None, spill=None):
-        #self.filename = filename
+        # self.filename = filename
         # if type(filename) == str:
         #    self.filename = filename
         #    self._fh = open(filename, 'rb')
         # else: # we should have gotten a filehandle then
         #    self.filename = filename.name
         #    self._fh = filename
-        #self._fh = cStringIO.StringIO(open(filename, 'rb').read())
-        #self.filename = filename
+        # self._fh = cStringIO.StringIO(open(filename, 'rb').read())
+        # self.filename = filename
 
         if isinstance(filename, basestring):
             try:
@@ -425,7 +425,7 @@ class FCSreader(object):
         """Parse out ascii encoded data from fcs file"""
 
         num_items = (stop - start + 1) / calcsize(dtype)
-        #tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
+        # tmp = unpack('%s%d%s' % (order, num_items, dtype), self.read_bytes(offset, start, stop))
         try:
             fmt = numpy.dtype('%s%d%s' % (order, num_items, dtype))
             tmp = numpy.memmap(
@@ -451,19 +451,24 @@ def parse_pairs(text):
     if delim != text[-1]:
         warn("text in segment does not start and end with delimiter")
 
-    if delim == r'|':
-        delim = '\|'
-    elif delim == r'\a'[0]:  # test for delimiter being \
-        delim = '\\\\'  # regex will require it to be \\
+    # no longer needed as we're not using regex
+    # if delim == r'|':
+    #    delim = '\|'
+    # elif delim == r'\a'[0]:  # test for delimiter being \
+    #    delim = '\\\\'  # regex will require it to be \\
 
-    tmp = text[1:-1].replace('$', '')
+    tmp = text[1:-1]
     # match the delimited character unless it's doubled
-    regex = re.compile('(?<=[^%s])%s(?!%s)' % (delim, delim, delim))
-    tmp = regex.split(tmp)
-    return dict(zip([x.lower().replace(delim +
-                                       delim, delim) for x in tmp[::2]], [x.replace(delim +
-                                                                                    delim, delim) for x in tmp[1::2]]))
-
+    # regex = re.compile('(?<=[^%s])%s(?!%s)' % (delim, delim, delim))
+    # tmp = regex.split(tmp)
+    # return dict(zip([x.lower().replace(delim +
+    #                                   delim, delim) for x in tmp[::2]], [x.replace(delim +
+    #                                                                                delim, delim) for x in tmp[1::2]]))
+    sp = tmp.split(delim)
+    rslts = {}
+    for i in range(len(sp) / 2):
+        rslts[sp[(i * 2)].lower().replace('$', '')] = sp[((i * 2) + 1)]
+    return rslts
 
 def fmt_integer(b):
     """return binary format of an integer"""

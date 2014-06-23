@@ -55,11 +55,11 @@ class OrderedDp_mixtureTestCase(unittest.TestCase):
 #                                { 0: [0], 1: [1]},
 #                                [self.mu1, self.mu2])
         pnt = array([self.mu1, self.mu2])
-        
+
         assert modal.classify(array([self.mu1, self.mu2, self.mu1, self.mu2, self.mu1, self.mu2])).tolist() == [ 1, 0, 1, 0, 1, 0], 'classify not working'
-        #assert self.mix.classify(self.mu1) == self.lookup[modal.classify(self.mu1)], 'derived modal mixture is wrong'
-        #assert self.mix.classify(pnt)[0] == self.lookup[modal.classify(pnt)[0]], 'derived modal mixture is wrong'
-        #assert self.mix.classify(pnt)[1] == self.lookup[modal.classify(pnt)[1]], 'derived modal mixture is wrong'
+        # assert self.mix.classify(self.mu1) == self.lookup[modal.classify(self.mu1)], 'derived modal mixture is wrong'
+        # assert self.mix.classify(pnt)[0] == self.lookup[modal.classify(pnt)[0]], 'derived modal mixture is wrong'
+        # assert self.mix.classify(pnt)[1] == self.lookup[modal.classify(pnt)[1]], 'derived modal mixture is wrong'
 
         modal = self.mix.make_modal(delta=9)
         assert modal.classify(array([self.mu1, self.mu2, self.mu1, self.mu2, self.mu1, self.mu2])).tolist() == [0, 0, 0, 0, 0, 0], 'classify not working'

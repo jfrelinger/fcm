@@ -8,7 +8,7 @@ from scipy.misc import logsumexp
 
 try:
     from gpustats import mvnpdf_multi
-    #from gpustats.util import threadSafeInit
+    # from gpustats.util import threadSafeInit
     from dpmix.utils import select_gpu
     has_gpu = True
 except ImportError:
@@ -146,7 +146,7 @@ def compmixnormpdf(x, prop, mu, Sigma, **kwargs):
     else:
         tmp = _wmvnpdf(x, prop, mu, Sigma, n * c, **kwargs)
         tmp = reshape(tmp, (n, c))
-        #tmp = sum(tmp,1)
+        # tmp = sum(tmp,1)
         if n == 1:
             tmp = tmp[0]
     return tmp

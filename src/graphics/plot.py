@@ -21,7 +21,8 @@ def hist(fcms, index, savefile=None, display=True, **kwargs):
         b = (b[:-1] + b[1:]) / 2.0
         unused_x = pylab.linspace(min(y), max(y), 100)
         pylab.plot(b, h, label=fcm.name)
-        pylab.legend()
+    pylab.legend()
+    pylab.xlabel(fcms[0].channels[index])
 
     if display:
         pylab.show()

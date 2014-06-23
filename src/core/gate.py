@@ -1,5 +1,6 @@
 import numpy
 from tree import GatingNode
+from matplotlib.path import Path
 
 
 class Filter(object):
@@ -286,7 +287,7 @@ def points_in_poly(vs, ps):
     vs = numpy.array((k, 2))
     ps = numpy.array((n, 2))
     """
-
+    
     # optimization to check only events within bounding box
     # for polygonal gate - useful if gating region is small
     # area_ratio_threshold = 0.5
@@ -310,21 +311,22 @@ def points_in_poly(vs, ps):
 
 if __name__ == '__main__':
     vertices = numpy.array([[5, 5], [10, 5], [10, 10], [5, 10]], 'd')
-    #vertices = numpy.array([[0,0],[10,10],[0,10]], 'd')
+    # vertices = numpy.array([[0,0],[10,10],[0,10]], 'd')
     points = numpy.random.uniform(0, 10, (1000000, 2))
-    #points = numpy.array([[5,7],[10,6]])
+    # points = numpy.array([[5,7],[10,6]])
     import time
     start = time.clock()
     inside = points_in_poly(vertices, points)
+    print inside
     print "Time elapsed: ", time.clock() - start
     print numpy.sum(inside)
     import pylab
     pylab.scatter(
         points[
-            ~inside, 0], points[
-            ~inside, 1], s=10, edgecolor='none', c='b')
+            ~ inside, 0], points[
+            ~ inside, 1], s=1, edgecolor='none', c='b')
     pylab.scatter(
         points[
             inside, 0], points[
-            inside, 1], s=10, edgecolor='none', c='r')
+            inside, 1], s=1, edgecolor='none', c='r')
     pylab.show()
