@@ -207,9 +207,20 @@ def load_flowjo_xml(fh):
             for i, chan in enumerate(mat.iter('Channel')):
                 chans.append(chan.attrib['name'])
                 for j, sub in enumerate(chan.iter('ChannelValue')):
-                    comp[i, j] = float(sub.attrib['value'])
-            comps[mat.attrib['name']] = (chans, comp)
-            psdict[mat.attrib['name']] = (prefix, suffix)
+                    if 'value' in sub.attrib:
+                        comp[i, j] = float(sub.attrib['value'])
+                    elif 'spillValue' in sub.attrib:
+                        comp[i, j] = float(sub.attrib['spillValue'])
+                    else:
+                        raise KeyError('unable to find a compensation value')
+            if 'name' in mat.attrib:
+                comps[mat.attrib['name']] = (chans, comp)
+                psdict[mat.attrib['name']] = (prefix, suffix)
+            elif 'matrixName' in mat.attrib:
+                comps[mat.attrib['matrixName']] = (chans, comp)
+                psdict[mat.attrib['matrixName']] = (prefix, suffix)
+            else:
+                raise KeyError('unable to find compensation matrix name')
 
     for node in root.iter('Sample'):
         # pull out comp matrix
@@ -278,22 +289,43 @@ def find_pops(node, prefix=None, suffix=None):
     pops = {}
     for i in node:
         if i.tag == 'Population':
-            pops[i.attrib['name']] = build_pops(i, prefix, suffix)
+            if 'name' in i.attrib:
+                nname = 'name'
+            elif 'nodeName' in i.attrib:
+                nname = 'nodeName'
+            else:
+                raise KeyError('can not find node name')
+            
+            pops[i.attrib[nname]] = build_pops(i, prefix, suffix)
     return pops
 
 
 def build_pops(node, prefix=None, suffix=None, name_prefix=None):
-    if isinstance(name_prefix, str):
-        name = name_prefix + "::" + node.attrib['name']
+    if 'name' in node.attrib:
+        nname = 'name'
+    elif 'nodeName' in node.attrib:
+        nname = 'nodeName'
     else:
-        name = node.attrib['name']
+        raise KeyError('can not find node name')
+    
+    if isinstance(name_prefix, str):
+        name = name_prefix + "::" + node.attrib[nname]
+    else:
+        name = node.attrib[nname]
 
     children = {}
     for i in node:
         if i.tag == 'Population':
             tmp = build_pops(i, prefix, suffix, name_prefix=name)
             if tmp is not None:
-                children[i.attrib['name']] = tmp
+                if 'name' in i.attrib:
+                    nname = 'name'
+                elif 'nodeName' in i.attrib:
+                    nname = 'nodeName'
+                else:
+                    print i.attrib
+                    raise KeyError('can not find node name')
+                children[i.attrib[nname]] = tmp
 
         elif i.tag == 'PolygonGate':
             for j in i:

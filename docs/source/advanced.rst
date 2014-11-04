@@ -20,12 +20,12 @@ Histogram using :py:func:`graphics.hist`
    
    In [4]: xs =[fcm.loadFCS(x) for x in glob('B6901GFJ-08_*.fcs')]
    
-   In [5]: graph.hist(xs,3, display=True)
+   In [5]: graph.hist(xs,"SSC-A", display=True)
    
 .. figure:: hist.png
    :align: center
    :height: 400px
-   :alt: histogram of channel 3 of three fcs files
+   :alt: histogram of channel Side Scatter channel of three fcs files
    :figclass: align-center
 
 Pseudo-color plots using :py:func:`fcm.graphics.heatmap`
