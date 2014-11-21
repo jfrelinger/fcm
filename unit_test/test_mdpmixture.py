@@ -45,6 +45,7 @@ class ModalDp_clusterTestCase(unittest.TestCase):
         
     def testmixprob(self):
         pnt = array([1,1,1])
+        print self.mix.cmap
         assert self.mix.prob(pnt)[0] == (self.clst1.prob(pnt)+self.clst2.prob(pnt)), 'mixture generates different prob then compoent 1'
         assert self.mix.prob(pnt)[1] == self.clst3.prob(pnt), 'mixture generates different prob then compoent 2'
     

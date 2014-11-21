@@ -691,10 +691,11 @@ class ModalDPMixture(DPMixture):
             for j in self.cmap.keys():
                 if logged:
                     rslt[:, j] = logsumexp([probs[:, i]
-                                            for i in self.cmap[j]], 0)
+                                            for i in list(self.cmap[j])], 0)
                 else:
-                    rslt[:, j] = sum([probs[:, i] for i in self.cmap[j]], 0)
-        except ValueError:
+                    rslt[:, j] = sum([probs[:, list(i)] for i in self.cmap[j]], 0)
+        except ValueError, e:
+            print ">>>", e
             # single point
             rslt = zeros((len(self.cmap.keys())))
             for j in self.cmap.keys():
@@ -703,7 +704,7 @@ class ModalDPMixture(DPMixture):
                         [self.clusters[i].prob(x, logged=logged) for i in self.cmap[j]])
                 else:
                     rslt[j] = sum([self.clusters[i].prob(x)
-                                   for i in self.cmap[j]])
+                                   for i in list(self.cmap[j])])
 
         return rslt
 

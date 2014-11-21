@@ -116,7 +116,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
 
                 diffs[i] = np.min(np.abs(r.mus - gen_mean[i]), 0)
                 # print i, gen_mean[i], diffs[i], np.vdot(diffs[i],diffs[i])
-                assert(np.vdot(diffs[i], diffs[i]) < 2)
+                assert(np.vdot(diffs[i], diffs[i]) < 4)
 
     def testBEMFitting(self):
         print 'starting BEM'

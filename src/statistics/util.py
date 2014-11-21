@@ -50,7 +50,13 @@ def nodes(collection):
 
 def find_components(g):
     """Find connected components in graph g"""
-    return np.unique(frozenset([nodes(bfs(g, i)) for i in range(len(g))]))
+    z = []
+    for i in range(len(g)):
+        j = nodes(bfs(g, i))
+        if j not in z:
+            z.append(j)
+    return [list(i) for i in z]
+    #return np.unique([nodes(bfs(g, i)) for i in range(len(g))])
 
 
 def matrix_to_graph(m):
@@ -103,15 +109,18 @@ def modesearch(
         xs[key[0], :] = cur_mode
 
     dm = pdist(xs, scale=scale, w=w) < delta  # , w=np.array([1,1,1,1]))
-    # print 'm', m
     cs = find_components(matrix_to_graph(dm))
     cs = sorted(cs, key=len, reverse=True)
-
+    
+    cs = [list(j) for j in cs]
     rslt = {}
     modes = {}
+
     for i, j in enumerate(cs):
+
         modes[i] = np.mean(np.vstack([xs[k, :] for k in j]), 0)
-        rslt[i] = tuple(j)
+        # modes[i] = np.mean(np.vstack([xs[list(k), :] for k in j]), 0)
+        rslt[i] = tuple(list(j))
 
     return modes, rslt
 
