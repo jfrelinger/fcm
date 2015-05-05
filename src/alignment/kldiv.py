@@ -45,7 +45,7 @@ def KLdivDiff(p_mean, p_sig, q_mean, q_sig, a, b):
     mdiff = p_mean - np.dot(a, q_mean) - b
 
     rf = (
-        -1 * asig) + \
+ -1 * asig) + \
         np.outer(mdiff, q_mean) + \
         np.dot(np.dot(p_sig + (np.outer(mdiff, mdiff)), asai), asig)
     return np.hstack(

@@ -125,9 +125,9 @@ class DPMixtureModel(object):
 
         elif n < self.nclusts:
             self._prior_sigma = zeros((self.nclusts, self.d, self.d))
-            self._prior_sigma[0:n, :,:] = (self.prior_sigma.copy()) / outer(self.s, self.s)
+            self._prior_sigma[0:n, :, :] = (self.prior_sigma.copy()) / outer(self.s, self.s)
             for i in range(n, self.nclusts):
-                self._prior_sigma[i, :,:] = eye(self.d)
+                self._prior_sigma[i, :, :] = eye(self.d)
         else:
             self._prior_sigma = (
                 self.prior_sigma.copy()) / outer(self.s, self.s)
@@ -306,7 +306,7 @@ class DPMixtureModel(object):
                     rslts.append(tmp)
                 tmp = DPMixture(rslts, self.m, self.s)
             else:
-                #pi = self.cdp.weights[-self.last] / sum(self.cdp.weight[-self.last])
+                # pi = self.cdp.weights[-self.last] / sum(self.cdp.weight[-self.last])
                 rslts = []
                 for i in range(self.last):
                     for j in range(self.nclusts):
@@ -433,7 +433,7 @@ class HDPMixtureModel(DPMixtureModel):
             #                        rslts.append(tmp)
             #                allresults.append(DPMixture(rslts, self.last, self.m, self.s, self.ident))
             #            return allresults
-            #pis = self.hdp.weights[-self.last:].T.reshape(self.ndatasets,self.last*self.nclusts).copy()
+            # pis = self.hdp.weights[-self.last:].T.reshape(self.ndatasets,self.last*self.nclusts).copy()
             pis = array([ self.hdp.weights[-self.last:, k, :].flatten() for k in range(self.ndatasets)])
             mus = (self.hdp.mu[-
                                self.last:].reshape(self.nclusts *
