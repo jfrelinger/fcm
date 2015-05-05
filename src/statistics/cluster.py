@@ -184,15 +184,15 @@ class DPMixtureModel(object):
             self.prior_pi = array(
                 [pnts[self._ref == i].shape[0] / tot for i in range(self.nclusts)])
 
-    def fit(self, fcmdata, verbose=False, normed=False):
+    def fit(self, fcmdata, verbose=False, normed=False, callback=None):
         if isinstance(fcmdata, FCMcollection):
-            return [self._fit(fcmdata[i], verbose, normed) for i in fcmdata]
+            return [self._fit(fcmdata[i], verbose, normed, callback) for i in fcmdata]
         elif isinstance(fcmdata, list) or isinstance(fcmdata, tuple):
-            return [self._fit(i, verbose, normed) for i in fcmdata]
+            return [self._fit(i, verbose, normed, callback) for i in fcmdata]
         else:
-            return self._fit(fcmdata, verbose, normed)
+            return self._fit(fcmdata, verbose, normed, callback)
 
-    def _fit(self, fcmdata, verbose=False, normed=False):
+    def _fit(self, fcmdata, verbose=False, normed=False, callback=None):
         """
         fit the mixture model to the data
         use get_results() to get the fitted model
@@ -266,7 +266,7 @@ class DPMixtureModel(object):
                 alpha0=self.alpha0,
                 gpu=self.device,
                 parallel=self.parallel,
-                verbose=verbose)
+                verbose=verbose, callback=callback)
             self.cdp.sample(
                 niter=self.niter,
                 nburn=self.burnin,
