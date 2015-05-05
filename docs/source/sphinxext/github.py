@@ -20,6 +20,7 @@ Authors
 from docutils import nodes, utils
 from docutils.parsers.rst.roles import set_classes
 
+
 def make_link_node(rawtext, app, type, slug, options):
     """Create a link to a github resource.
 
@@ -36,8 +37,9 @@ def make_link_node(rawtext, app, type, slug, options):
             raise AttributeError
         if not base.endswith('/'):
             base += '/'
-    except AttributeError, err:
-        raise ValueError('github_project_url configuration value is not set (%s)' % str(err))
+    except AttributeError as err:
+        raise ValueError(
+            'github_project_url configuration value is not set (%s)' % str(err))
 
     ref = base + type + '/' + slug + '/'
     set_classes(options)
@@ -47,6 +49,7 @@ def make_link_node(rawtext, app, type, slug, options):
     node = nodes.reference(rawtext, prefix + utils.unescape(slug), refuri=ref,
                            **options)
     return node
+
 
 def ghissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     """Link to a GitHub issue.
@@ -89,6 +92,7 @@ def ghissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     node = make_link_node(rawtext, app, category, str(issue_num), options)
     return [node], []
 
+
 def ghuser_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     """Link to a GitHub user.
 
@@ -110,7 +114,9 @@ def ghuser_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     node = nodes.reference(rawtext, text, refuri=ref, **options)
     return [node], []
 
-def ghcommit_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+
+def ghcommit_role(
+        name, rawtext, text, lineno, inliner, options={}, content=[]):
     """Link to a GitHub commit.
 
     Returns 2 part tuple containing list of nodes to insert into the
@@ -133,8 +139,9 @@ def ghcommit_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
             raise AttributeError
         if not base.endswith('/'):
             base += '/'
-    except AttributeError, err:
-        raise ValueError('github_project_url configuration value is not set (%s)' % str(err))
+    except AttributeError as err:
+        raise ValueError(
+            'github_project_url configuration value is not set (%s)' % str(err))
 
     ref = base + text
     node = nodes.reference(rawtext, text[:6], refuri=ref, **options)
@@ -143,7 +150,7 @@ def ghcommit_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
 
 def setup(app):
     """Install the plugin.
-    
+
     :param app: Sphinx application context.
     """
     app.info('Initializing GitHub plugin')

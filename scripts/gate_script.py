@@ -2,16 +2,16 @@ from io import loadFCS
 fcm = loadFCS('../sample_data/3FITC_4PE_004.fcs')
 fcm.channels
 fcm.shape
-subsample = fcm[::10,:]
+subsample = fcm[::10, :]
 subsample
 subsample.shape
 
 from gui import Gate
 from matplotlib import pyplot as plt
-gate = Gate(fcm, [2,3], ax)
+gate = Gate(fcm, [2, 3], ax)
 fig = plt.figure()
 ax = fig.add_subplot(111)
-gate = Gate(fcm, [2,3], ax)
+gate = Gate(fcm, [2, 3], ax)
 plt.show()
 
 fcm.view().shape

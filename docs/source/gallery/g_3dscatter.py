@@ -13,9 +13,9 @@ from matplotlib.colors import LinearSegmentedColormap
 if __name__ == '__main__':
 
     data = fcm.loadFCS('../data/basics/10072101.02')
-    cols = [2,3,4]
+    cols = [2, 3, 4]
 
-    x, y, z = data[:,cols[0]], data[:,cols[1]], data[:, cols[2]]
+    x, y, z = data[:, cols[0]], data[:, cols[1]], data[:, cols[2]]
     try:
         labels = np.load('labels_10072101_02.npy')
     except:
@@ -27,10 +27,11 @@ if __name__ == '__main__':
         labels = c.classify(data[:, cols])
         np.save('labels_10072101_02.npy', labels)
 
-    colors = LinearSegmentedColormap('colormap', cm.jet._segmentdata.copy(), np.max(labels))
+    colors = LinearSegmentedColormap(
+        'colormap', cm.jet._segmentdata.copy(), np.max(labels))
     cs = [colors(i) for i in labels]
-    
-    fig = plt.figure(figsize=(8,8))
+
+    fig = plt.figure(figsize=(8, 8))
     ax = fig.gca(projection='3d')
     scatter = ax.scatter(x, y, z, s=5, c=cs, edgecolors='none')
     ax.set_xlabel('CD3-FITC')
@@ -38,8 +39,7 @@ if __name__ == '__main__':
     ax.set_zlabel('CD45-PerCP')
     azim = 135
     elev = 25
-    ax.view_init(elev, azim) 
+    ax.view_init(elev, azim)
 
 plt.savefig('3d_scatter.png')
 plt.show()
-

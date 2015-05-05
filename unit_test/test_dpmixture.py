@@ -12,7 +12,6 @@ from numpy.testing.utils import assert_equal
 
 class Dp_mixtureTestCase(unittest.TestCase):
 
-
     def setUp(self):
         self.mu1 = array([0, 0, 0])
         self.sig = eye(3)
@@ -24,10 +23,8 @@ class Dp_mixtureTestCase(unittest.TestCase):
                          self.clust1, self.clust2]
         self.mix = DPMixture(self.clusters, niter=3, identified=True)
 
-
     def tearDown(self):
         pass
-
 
     def testprob(self):
         pnt = array([[1, 1, 1]])
@@ -37,16 +34,19 @@ class Dp_mixtureTestCase(unittest.TestCase):
             assert i.prob(pnt) <= 1, 'prob of clst %s is > 1' % i
             assert i.prob(pnt) >= 0, 'prob of clst %s is < 0' % i
 
-
     def testmixprob(self):
         pnt = array([1, 1, 1])
-        assert self.mix.prob(pnt)[0] == self.clust1.prob(pnt), 'mixture generates different prob then compoent 1'
-        assert self.mix.prob(pnt)[1] == self.clust2.prob(pnt), 'mixture generates different prob then compoent 2'
+        assert self.mix.prob(pnt)[0] == self.clust1.prob(
+            pnt), 'mixture generates different prob then compoent 1'
+        assert self.mix.prob(pnt)[1] == self.clust2.prob(
+            pnt), 'mixture generates different prob then compoent 2'
 
     def testclassify(self):
         pnt = array([self.mu1, self.mu2])
-        assert self.mix.classify(pnt)[0] == 0, 'classify classifys mu1 as belonging to something else'
-        assert self.mix.classify(pnt)[1] == 1, 'classify classifys m21 as belonging to something else'
+        assert self.mix.classify(
+            pnt)[0] == 0, 'classify classifys mu1 as belonging to something else'
+        assert self.mix.classify(
+            pnt)[1] == 1, 'classify classifys m21 as belonging to something else'
 
     def testMakeModal(self):
 
@@ -55,15 +55,16 @@ class Dp_mixtureTestCase(unittest.TestCase):
 #                                { 0: [0], 1: [1]},
 #                                [self.mu1, self.mu2])
         pnt = array([self.mu1, self.mu2])
-        assert modal.classify(array([self.mu1, self.mu2, self.mu1, self.mu2, self.mu1, self.mu2])).tolist() in [[1, 0, 1, 0, 1, 0],[0, 1, 0, 1, 0, 1]], 'classify not working'
+        assert modal.classify(array([self.mu1, self.mu2, self.mu1, self.mu2, self.mu1, self.mu2])).tolist(
+        ) in [[1, 0, 1, 0, 1, 0], [0, 1, 0, 1, 0, 1]], 'classify not working'
         # TODO do actual lookup.
         # assert self.mix.classify(self.mu1) == modal.classify(self.mu1), 'derived modal mixture is wrong'
         # assert self.mix.classify(pnt)[0] == modal.classify(pnt)[0], 'derived modal mixture is wrong'
         # assert self.mix.classify(pnt)[1] == modal.classify(pnt)[1], 'derived modal mixture is wrong'
 
         modal = self.mix.make_modal(delta=9)
-        assert modal.classify(array([self.mu1, self.mu2, self.mu1, self.mu2, self.mu1, self.mu2])).tolist() == [0, 0, 0, 0, 0, 0], 'classify not working'
-
+        assert modal.classify(array([self.mu1, self.mu2, self.mu1, self.mu2, self.mu1, self.mu2])).tolist(
+        ) == [0, 0, 0, 0, 0, 0], 'classify not working'
 
     def testAverage(self):
         clst1 = DPCluster(0.5, self.mu1, self.sig)
@@ -75,7 +76,8 @@ class Dp_mixtureTestCase(unittest.TestCase):
         clst6 = DPCluster(0.5, self.mu2, self.sig)
         clst8 = DPCluster(0.5, self.mu2, self.sig)
 
-        mix = DPMixture([clst1, clst2, clst3, clst4, clst5, clst6, clst7, clst8], niter=4)
+        mix = DPMixture(
+            [clst1, clst2, clst3, clst4, clst5, clst6, clst7, clst8], niter=4)
         avg = mix.average()
 
         assert len(avg.clusters) == 2
@@ -96,7 +98,8 @@ class Dp_mixtureTestCase(unittest.TestCase):
         clst6 = DPCluster(0.5, self.mu2 + 6, self.sig)
         clst8 = DPCluster(0.5, self.mu2 + 8, self.sig)
 
-        mix = DPMixture([clst1, clst2, clst3, clst4, clst5, clst6, clst7, clst8], niter=4)
+        mix = DPMixture(
+            [clst1, clst2, clst3, clst4, clst5, clst6, clst7, clst8], niter=4)
 
         new_r = mix.last()
         assert len(new_r.clusters) == 2
@@ -113,7 +116,7 @@ class Dp_mixtureTestCase(unittest.TestCase):
         try:
             new_r = mix.last(10)
         except ValueError:
-                pass
+            pass
 
     def testDraw(self):
         x = self.mix.draw(10)
@@ -127,80 +130,90 @@ class Dp_mixtureTestCase(unittest.TestCase):
 
         # add
         b = self.mix + adder
-        self.assertIsInstance(b, DPMixture, 'integer addition return wrong type')
+        self.assertIsInstance(
+            b, DPMixture, 'integer addition return wrong type')
         assert_equal(b.mus[0], self.mix.mus[0] + adder,
                      'integer addition returned wrong value')
 
         c = self.mix + array_adder
         self.assertIsInstance(c, DPMixture, 'array addition return wrong type')
         assert_array_equal(c.mus[0], self.mix.mus[0] + array_adder,
-                     'array addition returned wrong value')
-
+                           'array addition returned wrong value')
 
         # radd
         b = adder + self.mix
-        self.assertIsInstance(b, DPMixture, 'integer addition return wrong type')
+        self.assertIsInstance(
+            b, DPMixture, 'integer addition return wrong type')
         assert_array_equal(b.mus[0], adder + self.mix.mus[0],
-                     'integer addition returned wrong value')
+                           'integer addition returned wrong value')
 
         c = array_adder + self.mix
         self.assertIsInstance(c, DPMixture, 'array addition return wrong type')
         assert_array_equal(c.mus[0], array_adder + self.mix.mus[0],
-                     'array addition returned wrong value')
+                           'array addition returned wrong value')
 
         # sub
         b = self.mix - adder
-        self.assertIsInstance(b, DPMixture, 'integer subtraction return wrong type')
+        self.assertIsInstance(
+            b, DPMixture, 'integer subtraction return wrong type')
         assert_array_equal(b.mus[0], self.mix.mus[0] - adder,
-                     'integer subtraction returned wrong value')
+                           'integer subtraction returned wrong value')
 
         c = self.mix - array_adder
-        self.assertIsInstance(c, DPMixture, 'array subtraction return wrong type')
+        self.assertIsInstance(
+            c, DPMixture, 'array subtraction return wrong type')
         assert_array_equal(c.mus[0], self.mix.mus[0] - array_adder,
-                     'array subtraction returned wrong value')
+                           'array subtraction returned wrong value')
 
         # rsub
         b = adder - self.mix
-        self.assertIsInstance(b, DPMixture, 'integer subtraction return wrong type')
+        self.assertIsInstance(
+            b, DPMixture, 'integer subtraction return wrong type')
         assert_array_equal(b.mus[0], adder - self.mix.mus[0],
-                     'integer subtraction returned wrong value')
+                           'integer subtraction returned wrong value')
 
         c = array_adder - self.mix
-        self.assertIsInstance(c, DPMixture, 'array subtraction return wrong type')
+        self.assertIsInstance(
+            c, DPMixture, 'array subtraction return wrong type')
         assert_array_equal(c.mus[0], array_adder - self.mix.mus[0],
-                     'array subtraction returned wrong value')
+                           'array subtraction returned wrong value')
         # mul
         b = self.mix * adder
-        self.assertIsInstance(b, DPMixture, 'integer multiplication return wrong type')
+        self.assertIsInstance(
+            b, DPMixture, 'integer multiplication return wrong type')
         assert_array_equal(b.mus[0], self.mix.mus[0] * adder,
-                     'integer multiplication returned wrong value')
+                           'integer multiplication returned wrong value')
 
         c = self.mix * array_adder
-        self.assertIsInstance(c, DPMixture, 'array multiplicaton return wrong type')
+        self.assertIsInstance(
+            c, DPMixture, 'array multiplicaton return wrong type')
         assert_array_equal(c.mus[0], dot(self.mix.mus[0], array_adder),
-                     'array multiplication returned wrong value')
+                           'array multiplication returned wrong value')
 
         d = self.mix * mat_adder
-        self.assertIsInstance(d, DPMixture, 'array multiplicaton return wrong type')
+        self.assertIsInstance(
+            d, DPMixture, 'array multiplicaton return wrong type')
         assert_array_equal(d.mus[0], dot(self.mix.mus[0], mat_adder),
-                     'array multiplication returned wrong value')
-
+                           'array multiplication returned wrong value')
 
         # rmul
         b = adder * self.mix
-        self.assertIsInstance(b, DPMixture, 'integer multiplication return wrong type')
+        self.assertIsInstance(
+            b, DPMixture, 'integer multiplication return wrong type')
         assert_array_equal(b.mus[0], adder * self.mix.mus[0],
-                     'integer multiplication returned wrong value')
+                           'integer multiplication returned wrong value')
 
         c = array_adder * self.mix
-        self.assertIsInstance(c, DPMixture, 'array multiplication return wrong type')
+        self.assertIsInstance(
+            c, DPMixture, 'array multiplication return wrong type')
         assert_array_equal(c.mus[0], dot(array_adder, self.mix.mus[0]),
-                     'array multiplication returned wrong value')
+                           'array multiplication returned wrong value')
 
         d = mat_adder * self.mix
-        self.assertIsInstance(d, DPMixture, 'array multiplicaton return wrong type')
+        self.assertIsInstance(
+            d, DPMixture, 'array multiplicaton return wrong type')
         assert_array_equal(d.mus[0], dot(mat_adder, self.mix.mus[0]),
-                     'array multiplication returned wrong value')
+                           'array multiplication returned wrong value')
 
         assert_array_equal(d.sigmas[0], dot(mat_adder, dot(self.mix.sigmas[0], mat_adder)),
                            'array multiplcation failed')
@@ -224,23 +237,26 @@ class Dp_mixtureTestCase(unittest.TestCase):
     def testEnumerateClusters(self):
         for i, j in self.mix.enumerate_clusters():
             self.assertIsInstance(i, int)
-            self.assertIs(j, self.mix[i], 'fialed to return the right cluster when enumerating')
+            self.assertIs(
+                j, self.mix[i], 'fialed to return the right cluster when enumerating')
 
     def testEnumeratePis(self):
         for i, j in self.mix.enumerate_pis():
             self.assertIsInstance(i, int)
-            self.assertIs(j, self.mix[i].pi, 'fialed to return the right pi when enumerating')
+            self.assertIs(
+                j, self.mix[i].pi, 'fialed to return the right pi when enumerating')
 
     def testEnumerateMus(self):
         for i, j in self.mix.enumerate_mus():
             self.assertIsInstance(i, int)
-            self.assertIs(j, self.mix[i].mu, 'fialed to return the right mean when enumerating')
+            self.assertIs(
+                j, self.mix[i].mu, 'fialed to return the right mean when enumerating')
 
     def testEnumerateSigmas(self):
         for i, j in self.mix.enumerate_sigmas():
             self.assertIsInstance(i, int)
-            self.assertIs(j, self.mix[i].sigma, 'fialed to return the right covariance when enumerating')
+            self.assertIs(
+                j, self.mix[i].sigma, 'fialed to return the right covariance when enumerating')
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
-

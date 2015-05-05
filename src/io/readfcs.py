@@ -463,12 +463,13 @@ def parse_pairs(text):
     # tmp = regex.split(tmp)
     # return dict(zip([x.lower().replace(delim +
     #                                   delim, delim) for x in tmp[::2]], [x.replace(delim +
-    #                                                                                delim, delim) for x in tmp[1::2]]))
+    # delim, delim) for x in tmp[1::2]]))
     sp = tmp.split(delim)
     rslts = {}
     for i in range(len(sp) / 2):
         rslts[sp[(i * 2)].lower().replace('$', '')] = sp[((i * 2) + 1)]
     return rslts
+
 
 def fmt_integer(b):
     """return binary format of an integer"""

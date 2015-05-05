@@ -1,13 +1,13 @@
 import fcm
 import matplotlib.pyplot as plt
 
-#load FCS data
+# load FCS data
 data = fcm.loadFCS('3FITC_4PE_004.fcs')
 
-#define a gate
-gate1 = fcm.PolyGate([(400,100),(400,300),(600,300),(600,100)], (0,1))
+# define a gate
+gate1 = fcm.PolyGate([(400, 100), (400, 300), (600, 300), (600, 100)], (0, 1))
 
-#apply the gate
+# apply the gate
 gate1.gate(data)
 
 # outputs:
@@ -23,12 +23,12 @@ data.tree.rename_node(current_node.name, 'events')
 #    events
 print data.tree.pprint()
 
-#return to the transformed node and plot
+# return to the transformed node and plot
 data.tree.visit('root')
-plt.figure(figsize=(4,4))
-plt.scatter(data[:,0],data[:,1], s=1, edgecolors='none', c='grey')
+plt.figure(figsize=(4, 4))
+plt.scatter(data[:, 0], data[:, 1], s=1, edgecolors='none', c='grey')
 
-#and visit the subset of interest to plot
+# and visit the subset of interest to plot
 data.tree.visit(current_node)
-plt.scatter(data[:,0],data[:,1], s=1, edgecolors='none', c='blue')
+plt.scatter(data[:, 0], data[:, 1], s=1, edgecolors='none', c='blue')
 plt.show()

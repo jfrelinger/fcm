@@ -23,5 +23,5 @@ if __name__ == '__main__':
 #     pylab.scatter(xs[:,4], xs[:,5], s=1)
 #     pylab.subplot(2,2,4)
 #     pylab.scatter(xs[:,6], xs[:,7], s=1)
-    
+
 #     pylab.savefig('coulter.png')

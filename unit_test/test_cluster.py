@@ -12,21 +12,21 @@ from time import time
 from fcm import FCMdata, FCMcollection
 
 gen_mean = {
-    0 : [0, 5],
-    1 : [-5, 0],
-    2 : [5, 0]
+    0: [0, 5],
+    1: [-5, 0],
+    2: [5, 0]
 }
 
 gen_sd = {
-    0 : [0.5, 0.5],
-    1 : [.5, 1],
-    2 : [1, .25]
+    0: [0.5, 0.5],
+    1: [.5, 1],
+    2: [1, .25]
 }
 
 gen_corr = {
-    0 : 0.5,
-    1 :-0.5,
-    2 : 0
+    0: 0.5,
+    1: -0.5,
+    2: 0
 }
 
 group_weights = [0.4, 0.3, 0.3]
@@ -51,6 +51,7 @@ group_weights = [0.4, 0.3, 0.3]
 #
 # group_weights = [0.6, 0.3, 0.1]
 
+
 def fit_one(args):
     x, name = args
     print "fitting", name, "of size", x.shape
@@ -59,7 +60,9 @@ def fit_one(args):
     print 'done fitting', name
     return r
 
+
 class DPMixtureModel_TestCase(unittest.TestCase):
+
     def generate_data(self, n=1e4, k=2, ncomps=3, seed=1):
 
         npr.seed(seed)
@@ -88,7 +91,6 @@ class DPMixtureModel_TestCase(unittest.TestCase):
     def testListFitting(self):
         true1, data1 = self.generate_data()
         true2, data2 = self.generate_data()
-
 
         model = DPMixtureModel(3, 2000, 100, 1, type='BEM')
         rs = model.fit([data1, data2])
@@ -141,6 +143,7 @@ class DPMixtureModel_TestCase(unittest.TestCase):
             assert(np.vdot(diffs[i], diffs[i]) < 1)
         print 'BEM fitting took %0.3f' % (end)
 #
+
     def testMCMCFitting(self):
         print "starting mcmc"
         true, data = self.generate_data()
@@ -187,7 +190,8 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         for i in gen_mean:
             # diffs[i] = np.min(np.abs(r.mus-gen_mean[i]),0)
             diffs[i] = np.abs(r.mus[i] - gen_mean[i])
-            # print i, gen_mean[i],r.mus[i], diffs[i], np.vdot(diffs[i],diffs[i])
+            # print i, gen_mean[i],r.mus[i], diffs[i],
+            # np.vdot(diffs[i],diffs[i])
             assert(np.vdot(diffs[i], diffs[i]) < 1)
         # print diffs
         print 'MCMC fitting took %0.3f' % (end)
@@ -202,7 +206,8 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         for i in gen_mean:
             # diffs[i] = np.min(np.abs(r.mus-gen_mean[i]),0)
             diffs[i] = np.abs(r.mus[i] - gen_mean[i])
-            # print i, gen_mean[i],r.mus[i], diffs[i], np.vdot(diffs[i],diffs[i])
+            # print i, gen_mean[i],r.mus[i], diffs[i],
+            # np.vdot(diffs[i],diffs[i])
             assert(np.vdot(diffs[i], diffs[i]) < 1)
         # print diffs
 
@@ -213,7 +218,6 @@ class DPMixtureModel_TestCase(unittest.TestCase):
         self.k = 16
         self.niter = 10
         self.model = DPMixtureModel(self.k, self.niter, 0, 1)
-
 
     def testModel(self):
         r = self.model.fit(self.pnts, verbose=False)

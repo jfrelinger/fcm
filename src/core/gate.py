@@ -287,7 +287,7 @@ def points_in_poly(vs, ps):
     vs = numpy.array((k, 2))
     ps = numpy.array((n, 2))
     """
-    
+
     # optimization to check only events within bounding box
     # for polygonal gate - useful if gating region is small
     # area_ratio_threshold = 0.5

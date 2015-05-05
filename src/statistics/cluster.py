@@ -95,7 +95,8 @@ class DPMixtureModel(object):
         elif n < self.nclusts:
             self._prior_mu = zeros((self.nclusts, self.d))
             self._prior_mu[0:n, :] = (self.prior_mu.copy() - self.m) / self.s
-            self._prior_mu[n:, :] = mvn(zeros((self.d,)), eye(self.d), self.nclusts - n)
+            self._prior_mu[n:, :] = mvn(
+                zeros((self.d,)), eye(self.d), self.nclusts - n)
         else:
             self._prior_mu = (self.prior_mu.copy() - self.m) / self.s
 
@@ -125,7 +126,8 @@ class DPMixtureModel(object):
 
         elif n < self.nclusts:
             self._prior_sigma = zeros((self.nclusts, self.d, self.d))
-            self._prior_sigma[0:n, :, :] = (self.prior_sigma.copy()) / outer(self.s, self.s)
+            self._prior_sigma[0:n, :, :] = (
+                self.prior_sigma.copy()) / outer(self.s, self.s)
             for i in range(n, self.nclusts):
                 self._prior_sigma[i, :, :] = eye(self.d)
         else:
@@ -186,7 +188,8 @@ class DPMixtureModel(object):
 
     def fit(self, fcmdata, verbose=False, normed=False, callback=None):
         if isinstance(fcmdata, FCMcollection):
-            return [self._fit(fcmdata[i], verbose, normed, callback) for i in fcmdata]
+            return [self._fit(fcmdata[i], verbose, normed, callback)
+                    for i in fcmdata]
         elif isinstance(fcmdata, list) or isinstance(fcmdata, tuple):
             return [self._fit(i, verbose, normed, callback) for i in fcmdata]
         else:
@@ -434,7 +437,8 @@ class HDPMixtureModel(DPMixtureModel):
             #                allresults.append(DPMixture(rslts, self.last, self.m, self.s, self.ident))
             #            return allresults
             # pis = self.hdp.weights[-self.last:].T.reshape(self.ndatasets,self.last*self.nclusts).copy()
-            pis = array([ self.hdp.weights[-self.last:, k, :].flatten() for k in range(self.ndatasets)])
+            pis = array([self.hdp.weights[-self.last:, k, :].flatten()
+                         for k in range(self.ndatasets)])
             mus = (self.hdp.mu[-
                                self.last:].reshape(self.nclusts *
                                                    self.last, self.d) *

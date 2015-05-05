@@ -693,8 +693,9 @@ class ModalDPMixture(DPMixture):
                     rslt[:, j] = logsumexp([probs[:, i]
                                             for i in list(self.cmap[j])], 0)
                 else:
-                    rslt[:, j] = sum([probs[:, list(i)] for i in self.cmap[j]], 0)
-        except ValueError, e:
+                    rslt[:, j] = sum([probs[:, list(i)]
+                                      for i in self.cmap[j]], 0)
+        except ValueError as e:
             print ">>>", e
             # single point
             rslt = zeros((len(self.cmap.keys())))

@@ -16,23 +16,26 @@ It will:
 
 """
 
-import os, re, pydoc
+import os
+import re
+import pydoc
 from docscrape_sphinx import get_doc_object, SphinxDocString
 import inspect
+
 
 def mangle_docstrings(app, what, name, obj, options, lines,
                       reference_offset=[0]):
     if what == 'module':
         # Strip top title
         title_re = re.compile(r'^\s*[#*=]{4,}\n[a-z0-9 -]+\n[#*=]{4,}\s*',
-                              re.I|re.S)
+                              re.I | re.S)
         lines[:] = title_re.sub('', "\n".join(lines)).split("\n")
     else:
         doc = get_doc_object(obj, what, "\n".join(lines))
         lines[:] = str(doc).split("\n")
 
     if app.config.numpydoc_edit_link and hasattr(obj, '__name__') and \
-           obj.__name__:
+            obj.__name__:
         if hasattr(obj, '__module__'):
             v = dict(full_name="%s.%s" % (obj.__module__, obj.__name__))
         else:
@@ -65,20 +68,24 @@ def mangle_docstrings(app, what, name, obj, options, lines,
 
     reference_offset[0] += len(references)
 
+
 def mangle_signature(app, what, name, obj, options, sig, retann):
     # Do not try to inspect classes that don't define `__init__`
     if (inspect.isclass(obj) and
         (not hasattr(obj, '__init__') or
-        'initializes x; see ' in pydoc.getdoc(obj.__init__))):
+         'initializes x; see ' in pydoc.getdoc(obj.__init__))):
         return '', ''
 
-    if not (callable(obj) or hasattr(obj, '__argspec_is_invalid_')): return
-    if not hasattr(obj, '__doc__'): return
+    if not (callable(obj) or hasattr(obj, '__argspec_is_invalid_')):
+        return
+    if not hasattr(obj, '__doc__'):
+        return
 
     doc = SphinxDocString(pydoc.getdoc(obj))
     if doc['Signature']:
         sig = re.sub("^[^(]*", "", doc['Signature'])
         return sig, ''
+
 
 def initialize(app):
     try:
@@ -86,10 +93,11 @@ def initialize(app):
     except:
         monkeypatch_sphinx_ext_autodoc()
 
+
 def setup(app, get_doc_object_=get_doc_object):
     global get_doc_object
     get_doc_object = get_doc_object_
-    
+
     app.connect('autodoc-process-docstring', mangle_docstrings)
     app.connect('builder-inited', initialize)
     app.add_config_value('numpydoc_edit_link', None, True)
@@ -97,6 +105,7 @@ def setup(app, get_doc_object_=get_doc_object):
 #------------------------------------------------------------------------------
 # Monkeypatch sphinx.ext.autodoc to accept argspecless autodocs (Sphinx < 0.5)
 #------------------------------------------------------------------------------
+
 
 def monkeypatch_sphinx_ext_autodoc():
     global _original_format_signature
@@ -108,6 +117,7 @@ def monkeypatch_sphinx_ext_autodoc():
     print "[numpydoc] Monkeypatching sphinx.ext.autodoc ..."
     _original_format_signature = sphinx.ext.autodoc.format_signature
     sphinx.ext.autodoc.format_signature = our_format_signature
+
 
 def our_format_signature(what, obj):
     r = mangle_signature(None, what, None, obj, None, None, None)

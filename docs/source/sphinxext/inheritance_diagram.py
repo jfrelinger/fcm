@@ -42,26 +42,31 @@ from docutils.nodes import Body, Element
 from docutils.parsers.rst import directives
 from sphinx.roles import xfileref_role
 
+
 def my_import(name):
     """Module importer - taken from the python documentation.
 
     This function allows importing names with dots in them."""
-    
+
     mod = __import__(name)
     components = name.split('.')
     for comp in components[1:]:
         mod = getattr(mod, comp)
     return mod
 
+
 class DotException(Exception):
     pass
 
+
 class InheritanceGraph(object):
+
     """
     Given a list of classes, determines the set of classes that
     they inherit from all the way to the root "object", and then
     is able to generate a graphviz dot graph from them.
     """
+
     def __init__(self, class_names, show_builtins=False):
         """
         *class_names* is a list of child classes to show bases from.
@@ -101,7 +106,7 @@ class InheritanceGraph(object):
             # second call will force the equivalent of 'import a.b' to happen
             # after the top-level import above.
             my_import(fullname)
-            
+
         except ImportError:
             raise ValueError(
                 "Could not import class or module '%s' specified for inheritance diagram" % name)
@@ -178,21 +183,22 @@ class InheritanceGraph(object):
     default_graph_options = {
         "rankdir": "LR",
         "size": '"8.0, 12.0"'
-        }
+    }
     default_node_options = {
         "shape": "box",
         "fontsize": 10,
         "height": 0.25,
         "fontname": "Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans",
         "style": '"setlinewidth(0.5)"'
-        }
+    }
     default_edge_options = {
         "arrowsize": 0.5,
         "style": '"setlinewidth(0.5)"'
-        }
+    }
 
     def _format_node_options(self, options):
         return ','.join(["%s=%s" % x for x in options.items()])
+
     def _format_graph_options(self, options):
         return ''.join(["%s=%s;\n" % x for x in options.items()])
 
@@ -268,7 +274,8 @@ class InheritanceGraph(object):
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                    close_fds=True)
         except OSError:
-            raise DotException("Could not execute 'dot'.  Are you sure you have 'graphviz' installed?")
+            raise DotException(
+                "Could not execute 'dot'.  Are you sure you have 'graphviz' installed?")
         except ValueError:
             raise DotException("'dot' called with invalid arguments")
         except:
@@ -283,12 +290,15 @@ class InheritanceGraph(object):
             raise DotException("'dot' returned the errorcode %d" % returncode)
         return result
 
+
 class inheritance_diagram(Body, Element):
+
     """
     A docutils node to use as a placeholder for the inheritance
     diagram.
     """
     pass
+
 
 def inheritance_diagram_directive(name, arguments, options, content, lineno,
                                   content_offset, block_text, state,
@@ -319,8 +329,10 @@ def inheritance_diagram_directive(name, arguments, options, content, lineno,
     node['content'] = " ".join(class_names)
     return [node]
 
+
 def get_graph_hash(node):
     return md5(node['content'] + str(node['parts'])).hexdigest()[-10:]
+
 
 def html_output_graph(self, node):
     """
@@ -354,6 +366,7 @@ def html_output_graph(self, node):
     return ('<img src="%s/%s.png" usemap="#%s" class="inheritance"/>%s' %
             (path, name, name, image_map))
 
+
 def latex_output_graph(self, node):
     """
     Output the graph for LaTeX.  This will insert a PDF.
@@ -363,7 +376,8 @@ def latex_output_graph(self, node):
 
     graph_hash = get_graph_hash(node)
     name = "inheritance%s" % graph_hash
-    dest_path = os.path.abspath(os.path.join(setup.app.builder.outdir, '_images'))
+    dest_path = os.path.abspath(
+        os.path.join(setup.app.builder.outdir, '_images'))
     if not os.path.exists(dest_path):
         os.makedirs(dest_path)
     pdf_path = os.path.abspath(os.path.join(dest_path, name + ".pdf"))
@@ -372,15 +386,17 @@ def latex_output_graph(self, node):
                   name, parts, graph_options={'size': '"6.0,6.0"'})
     return '\n\\includegraphics{%s}\n\n' % pdf_path
 
+
 def visit_inheritance_diagram(inner_func):
     """
     This is just a wrapper around html/latex_output_graph to make it
     easier to handle errors and insert warnings.
     """
+
     def visitor(self, node):
         try:
             content = inner_func(self, node)
-        except DotException, e:
+        except DotException as e:
             # Insert the exception as a warning in the document
             warning = self.document.reporter.warning(str(e), line=node.line)
             warning.parent = node
@@ -391,8 +407,10 @@ def visit_inheritance_diagram(inner_func):
             node.children = []
     return visitor
 
+
 def do_nothing(self, node):
     pass
+
 
 def setup(app):
     setup.app = app
@@ -404,4 +422,4 @@ def setup(app):
         html=(visit_inheritance_diagram(html_output_graph), do_nothing))
     app.add_directive(
         'inheritance-diagram', inheritance_diagram_directive,
-        False, (1, 100, 0), parts = directives.nonnegative_int)
+        False, (1, 100, 0), parts=directives.nonnegative_int)

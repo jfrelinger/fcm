@@ -9,11 +9,14 @@ from fcm import PolyGate
 from fcm.core import SubsampleFactory
 from numpy import array
 
+
 class SubsampleTestCase(unittest.TestCase):
+
     def setUp(self):
-        self.pnts = array([[0,1,2],[3,4,5]])
-        self.fcm = FCMdata('test_fcm', self.pnts, ['fsc','ssc','cd3'], [0,1])
-        self.samp = SubsampleFactory[:,1]
+        self.pnts = array([[0, 1, 2], [3, 4, 5]])
+        self.fcm = FCMdata(
+            'test_fcm', self.pnts, ['fsc', 'ssc', 'cd3'], [0, 1])
+        self.samp = SubsampleFactory[:, 1]
 
     def testSubSample(self):
         self.samp.subsample(self.fcm)
@@ -23,7 +26,7 @@ class SubsampleTestCase(unittest.TestCase):
         self.fcm.subsample(self.samp)
         assert self.fcm[0] == 1, 'subsample via fcm failed'
         assert self.fcm[1] == 4, 'subsample via fcm failed'
-        
+
     def testChainSubSample(self):
         self.fcm.visit('root')
         sam2 = SubsampleFactory[0]

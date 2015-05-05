@@ -295,7 +295,7 @@ def find_pops(node, prefix=None, suffix=None):
                 nname = 'nodeName'
             else:
                 raise KeyError('can not find node name')
-            
+
             pops[i.attrib[nname]] = build_pops(i, prefix, suffix)
     return pops
 
@@ -307,7 +307,7 @@ def build_pops(node, prefix=None, suffix=None, name_prefix=None):
         nname = 'nodeName'
     else:
         raise KeyError('can not find node name')
-    
+
     if isinstance(name_prefix, str):
         name = name_prefix + "::" + node.attrib[nname]
     else:
