@@ -91,9 +91,9 @@ def trilinear_interpolate(x, y, z, bins=None):
 
 
 def color_map(nclusts):
-    '''
+    """
     return a list of rgb values spaced over the color wheel.
-    '''
+    """
     return [floatRgb(i, 0, nclusts + 1) for i in range(nclusts + 1)]
 
 

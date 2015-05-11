@@ -1,6 +1,6 @@
-'''
+"""
 Objects and methods for doing statistical modeling of flow cytometry data
-'''
+"""
 
 from fcm.statistics.dime import Dime
 from fcm.statistics.dp_cluster import DPCluster, DPMixture, OrderedDPMixture

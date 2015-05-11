@@ -1,8 +1,8 @@
-'''
+"""
 Created on Feb 11, 2012
 
 @author: Jacob Frelinger
-'''
+"""
 
 import xml.etree.cElementTree as xml
 import numpy
@@ -16,9 +16,9 @@ FlatGate = namedtuple('FlatGate', ['gate', 'parent'])
 
 class PopulationNode(object):
 
-    '''
+    """
     node for gates in xml tree
-    '''
+    """
 
     def __init__(self, name, gate, subpops=None):
         self.name = name
@@ -53,9 +53,9 @@ class PopulationNode(object):
             self.subpops[i].apply_gates(file)
 
     def logicle(self, T=262144, m=4.5, r=None, w=0.5, scale_max=1e5):
-        '''
+        """
         convert gate cordinates to logicle scale from linear scale
-        '''
+        """
         x_chan, y_chan = self.gate.chan
         xs = numpy.array([i[0] for i in self.gate.vert])
         ys = numpy.array([i[1] for i in self.gate.vert])
@@ -70,10 +70,9 @@ class PopulationNode(object):
 
 
 class xmlfcsfile(object):
-
-    '''
+    """
     container object for fcs file defined in a flowjo xml file
-    '''
+    """
 
     def __init__(self, name, comp=None, pops=None):
         self.name = name
@@ -123,25 +122,25 @@ class xmlfcsfile(object):
             self.pops[i].apply_gates(file)
 
     def logicle(self, T=262144, m=4.5, r=None, w=0.5, scale_max=1e5):
-        '''
+        """
         convert gate cordinates to logicle scale from linear scale
-        '''
+        """
         for i in self.pops:
             self.pops[i].logicle(T, m, r, w, scale_max)
 
 
 class FlowjoWorkspace(object):
 
-    '''
+    """
     Object representing the files, gates, and compensation matricies from a
     flowjo xml worksapce
-    '''
+    """
 
     def __init__(self, tubes, comp=None):
-        '''
+        """
         gates - dictionary of gates keyed by filename,
         comp - dictionary of defined compensation channels and matricies, keyed by name defaults to none
-        '''
+        """
 
         self.tubes = tubes
         self.comp = comp
@@ -173,17 +172,17 @@ class FlowjoWorkspace(object):
         return j
 
     def logicle(self, T=262144, m=4.5, r=None, w=0.5, scale_max=1e5):
-        '''
+        """
         convert gate cordinates for all tubes into logicle scale from linear scale
-        '''
+        """
         for i in self.tubes:
             self.tubes[i].logicle(T, m, r, w, scale_max)
 
 
 def load_flowjo_xml(fh):
-    '''
+    """
     create a FlowjoWorkspace object from a xml file
-    '''
+    """
     if isinstance(fh, str):
         fh = open(fh, 'r')
 

@@ -1,5 +1,5 @@
 """
-A python object representing flow cytomoetry data
+A python object representing flow cytometry data
 """
 from __future__ import division
 from numpy import median, log, zeros
@@ -37,12 +37,9 @@ class FCMdata(object):
 
         """
         self.name = name
-#        if type(pnts) != type(array([])):
-#            raise BadFCMPointDataTypeError(pnts, "pnts isn't a numpy.array")
         self.tree = Tree(pnts, channels)
-        #self.pnts = pnts
-        #self.channels = channels
-        # TODO add some default intelegence for determining scatters if None
+
+        #TODO add some default intelligence for determining scatters if None
         self.scatters = scatters
         self.markers = []
         if self.scatters is not None:
@@ -123,13 +120,6 @@ class FCMdata(object):
                     name))
 
     def __getstate__(self):
-        #        tmp = {}
-        #        tmp['name'] = self.name
-        #        tmp['tree'] = self.tree
-        #        tmp['markers'] = self.markers
-        #        tmp['scatters'] = self.scatters
-        #        tmp['notes'] = self.notes
-        #        return tmp
         return self.__dict__
 
     def __setstate__(self, dict):
@@ -167,16 +157,6 @@ class FCMdata(object):
                 idx.append(self.long_names.index(i))
             else:
                 raise ValueError('%s is not in list' % channels)
-#            except ValueError:
-#                try:
-#                    for j in range(1, int(self.notes.text['par']) + 1):
-#                        if i == self.notes.text['p%dn' % j]:
-#                            if self.channels[j-1] == self.notes.text['p%ds' % j]:
-#                                idx.append(j-1)
-#                            else:
-#                                idx.append(self.channels.index(self.notes.text['p%ds' % j]))
-#                except ValueError:
-#                    raise ValueError('%s is not in list' % i)
         if idx:
             return idx
         else:
@@ -291,7 +271,7 @@ class FCMdata(object):
             return r.subsample(self, *args, **kwargs)
 
     def compensate(self, sidx=None, spill=None):
-        '''Compensate the fcm data'''
+        """Compensate the fcm data"""
 
         compensate(self, S=spill, markers=sidx)
         return self
@@ -339,9 +319,9 @@ class FCMdata(object):
         return boundary_dict
 
     def export(self, file_name):
-        '''
+        """
         export out current view to a fcs file
-        '''
+        """
         from fcm.io import export_fcs
         export_fcs(
             file_name,
@@ -350,9 +330,9 @@ class FCMdata(object):
             self.notes.text)
 
     def extract_channels(self, channels, keep=False):
-        '''
+        """
         create a view without the specified channels or with if keep==True
-        '''
+        """
         if isinstance(channels, basestring) or isinstance(channels, int):
             channels = [channels]
         for i, j in enumerate(channels):

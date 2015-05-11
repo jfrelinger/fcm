@@ -78,9 +78,9 @@ class TransformNode(Node):
 
 class CompensationNode(TransformNode):
 
-    '''
+    """
     Compensated Data Node
-    '''
+    """
 
     def __init__(self, name, parent, data, sidx, spill):
         self.name = name
@@ -134,9 +134,9 @@ class DropChannelNode(Node):
 
 class AddChannelNode(DropChannelNode):
 
-    '''
+    """
     Node of data adding a channel
-    '''
+    """
 
     def __init__(self, name, parent, data, channels):
         self.name = name
@@ -185,7 +185,7 @@ class GatingNode(Node):
 
 class Tree(object):
 
-    '''Tree of data for FCMdata object.'''
+    """Tree of data for FCMdata object."""
 
     def __init__(self, pnts, channels):
         self.nodes = {}
@@ -194,17 +194,17 @@ class Tree(object):
         self.current = self.root
 
     def parent(self):
-        '''return the parent of a node'''
+        """return the parent of a node"""
         return self.current.parent
 
     def children(self, node=None):
-        '''return the children of a node'''
+        """return the children of a node"""
         if node is None:
             node = self.current
         return [i for i in self.nodes.values() if i.parent == node]
 
     def visit(self, name):
-        '''visit a node in the tree'''
+        """visit a node in the tree"""
         if isinstance(name, basestring):
             self.current = self.nodes[name]
         # in this case we assume we're a node type.
@@ -214,7 +214,7 @@ class Tree(object):
             raise KeyError("No such Node %s" % str(name))
 
     def get(self, name=None):
-        '''return the current node object'''
+        """return the current node object"""
         if name is None:
             return self.current
         else:
@@ -224,11 +224,11 @@ class Tree(object):
                 raise KeyError('No node named %s' % name)
 
     def view(self):
-        '''Return a view of the current data'''
+        """Return a view of the current data"""
         return self.current.view()
 
     def add_child(self, name, node):
-        '''Add a node to the tree at the currently selected node'''
+        """Add a node to the tree at the currently selected node"""
         if name == '':
             prefix = node.prefix
             pat = re.compile(prefix + "(\d+)")

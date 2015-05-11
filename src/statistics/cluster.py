@@ -1,9 +1,8 @@
-'''
+"""
 Created on Oct 30, 2009
 
-@author: jolly
-'''
-
+@author: Jacob Frelinger 
+"""
 
 from numpy import zeros, outer, sum, eye, array, mean, cov, vstack, std, ones
 from numpy.random import multivariate_normal as mvn
@@ -20,10 +19,10 @@ from kmeans import KMeans
 
 class DPMixtureModel(object):
 
-    '''
+    """
     Fits a DP Mixture model to a fcm dataset.
 
-    '''
+    """
 
     def __init__(
             self,
@@ -32,14 +31,14 @@ class DPMixtureModel(object):
             burnin=100,
             last=None,
             type='mcmc'):
-        '''
+        """
         DPMixtureModel(nclusts, niter=1000, burnin= 100, last= None)
         nclusts = number of clusters to fit
         niter = number of mcmc itterations to sample
         burning = number of mcmc burnin itterations
         last = number of mcmc itterations to draw samples from, if None last = niter
 
-        '''
+        """
 
         self.nclusts = nclusts
         self.niter = niter
@@ -175,12 +174,6 @@ class DPMixtureModel(object):
                 except:
                     self.prior_mu[i] = zeros(pnts.shape[1])
                     self.prior_sigma[i] = eye(pnts.shape[1])
-
-            # self.prior_mu = array([mean(pnts[self._ref==i],0) for i in range(self.nclusts)])
-
-            # self.prior_sigma = zeros((self.nclusts, pnts.shape[1], pnts.shape[1]))
-            # for i in range(self.nclusts):
-            #     self.prior_sigma[i,:,:] = cov(pnts[self._ref==i],rowvar=0)
 
             tot = float(pnts.shape[0])
             self.prior_pi = array(
@@ -346,14 +339,14 @@ class DPMixtureModel(object):
 
 class HDPMixtureModel(DPMixtureModel):
 
-    '''
+    """
     HDPMixtureModel(nclusts, niter=1000, burnin= 100, last= None)
     nclusts = number of clusters to fit
     niter = number of mcmc itterations
     burning = number of mcmc burnin itterations
     last = number of mcmc itterations to draw samples from. if None last = niter
 
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         super(HDPMixtureModel, self).__init__(*args, **kwargs)
@@ -424,19 +417,6 @@ class HDPMixtureModel(DPMixtureModel):
             self.last = self.niter
 
         if self._run:
-            # print self.mus
-            #            allresults = []
-            #            for k in range(self.ndatasets):
-            #                rslts = []
-            #                for i in range(self.last):
-            #                    for j in range(self.nclusts):
-            #                        tmp = DPCluster(self.hdp.weights[-(i + 1), k, j], (self.hdp.mu[-(i + 1), j] * self.s) + self.m, self.hdp.Sigma[-(i + 1), j] * outer(self.s, self.s))
-            #                        tmp.nmu = self.hdp.mu[-(i + 1), j]
-            #                        tmp.nsigma = self.hdp.Sigma[-(i + 1), j]
-            #                        rslts.append(tmp)
-            #                allresults.append(DPMixture(rslts, self.last, self.m, self.s, self.ident))
-            #            return allresults
-            # pis = self.hdp.weights[-self.last:].T.reshape(self.ndatasets,self.last*self.nclusts).copy()
             pis = array([self.hdp.weights[-self.last:, k, :].flatten()
                          for k in range(self.ndatasets)])
             mus = (self.hdp.mu[-
@@ -460,10 +440,10 @@ class HDPMixtureModel(DPMixtureModel):
 
 class KMeansModel(object):
 
-    '''
+    """
     KmeansModel(data, k, niter=20, tol=1e-5)
     kmeans clustering model
-    '''
+    """
 
     def __init__(self, k, niter=20, tol=1e-5):
 

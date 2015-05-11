@@ -1,6 +1,6 @@
-'''
+"""
 Core objects and methods for working with flow cytometry data
-'''
+"""
 
 from fcm.core.fcmdata import FCMdata
 from fcm.core.fcmcollection import FCMcollection

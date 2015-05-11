@@ -4,9 +4,9 @@ from modelresult import ModelResult
 
 class KMeans(ModelResult):
 
-    '''
+    """
     K means model
-    '''
+    """
 
     def __init__(self, centroids):
         self.cent = centroids

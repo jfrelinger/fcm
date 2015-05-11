@@ -1,8 +1,8 @@
-'''
+"""
 Created on Aug 27, 2009
 
-@author: jolly
-'''
+@author: Jacob Frelinger
+"""
 from fcm.core.tree import SubsampleNode, DropChannelNode, AddChannelNode
 import fcm
 from fcm.statistics import mixnormpdf
@@ -12,14 +12,14 @@ import numpy.random as npr
 
 class Subsample(object):
 
-    '''
+    """
     Takes a slice object and performs subsampling on the fcm object.
-    '''
+    """
 
     def __init__(self, slicing):
-        '''
+        """
         slicing = tuple of slices
-        '''
+        """
         self.samp = slicing
 
     def subsample(self, fcs):
@@ -31,9 +31,9 @@ class Subsample(object):
 
 class _SubsampleFactory(object):
 
-    '''
+    """
     factory generator of subsample objects
-    '''
+    """
 
     def __init__(self):
         pass
@@ -46,14 +46,14 @@ SubsampleFactory = _SubsampleFactory()
 
 class RandomSubsample(Subsample):
 
-    '''
+    """
     randomly subsample events
-    '''
+    """
 
     def __init__(self, n):
-        '''
+        """
         n = number of events to sample
-        '''
+        """
         self.n = n
 
     def subsample(self, fcs):
@@ -161,7 +161,7 @@ class AddChannel(object):
             self.sname = sname
 
     def add(self, fcs):
-        '''add channel to specified fcmdata object'''
+        """add channel to specified fcmdata object"""
         channels = fcs.get_cur_node().channels[:]
         channels.append((self.name, self.sname))
         pnts = np.hstack([fcs[:], self.events])

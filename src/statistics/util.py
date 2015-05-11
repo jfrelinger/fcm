@@ -1,10 +1,9 @@
-'''
+"""
 Created on Nov 5, 2009
 
 @author: Jacob Frelinger
-'''
-#from scipy.optimize import fmin
-#from np import around, array, log10
+"""
+
 from __future__ import division
 from numpy.linalg import solve, inv
 from collections import deque
@@ -74,7 +73,6 @@ def pdist(x, w=None, scale=False):
     distance for efficiency rather than weighting of distances."""
     n, p = x.shape
     if w is not None:
-        #w = w / np.sum(w.astype(np.float))
         w = np.sqrt(w)
         print w
         print x
@@ -119,7 +117,6 @@ def modesearch(
     for i, j in enumerate(cs):
 
         modes[i] = np.mean(np.vstack([xs[k, :] for k in j]), 0)
-        # modes[i] = np.mean(np.vstack([xs[list(k), :] for k in j]), 0)
         rslt[i] = tuple(list(j))
 
     return modes, rslt

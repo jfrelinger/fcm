@@ -1,6 +1,6 @@
-'''
+"""
 Graphical quadrant gating
-'''
+"""
 import matplotlib.pyplot as plt
 import time
 from fcm import QuadGate

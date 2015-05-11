@@ -1,8 +1,8 @@
-'''
+"""
 Created on Feb 24, 2012
 
 @author: Jacob Frelinger
-'''
+"""
 
 
 def text_size(dict, delim):
@@ -14,9 +14,9 @@ def text_size(dict, delim):
 
 
 def export_fcs(name, pnts, channels, extra=None):
-    '''
+    """
     write a set of points and corresponding channels out as a fcs file given by name
-    '''
+    """
     # magic fcs defined positions
     header_text_start = (10, 17)
     header_text_end = (18, 25)
